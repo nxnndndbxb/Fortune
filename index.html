@@ -8,6 +8,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Swiper JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <style>
         :root {
             --primary: #00ffcc;
@@ -155,11 +158,18 @@
             color: var(--primary);
         }
         
+        /* Dashboard Income Grid - 2x2 */
+        .income-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
         .income-card {
             background: linear-gradient(135deg, rgba(0,255,204,0.1), rgba(102,126,234,0.1));
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 15px;
+            border-radius: 16px;
+            padding: 16px 12px;
             text-align: center;
             border: 1px solid rgba(0,255,204,0.3);
             transition: all 0.3s;
@@ -170,21 +180,56 @@
             border-color: var(--primary);
         }
         
-        .income-card h2 {
-            font-size: 32px;
-            color: var(--primary);
-            margin: 10px 0;
+        .income-card .icon {
+            font-size: 28px;
+            margin-bottom: 8px;
         }
         
-        .income-card .icon {
-            font-size: 40px;
-            margin-bottom: 10px;
+        .income-card h3 {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 5px 0;
+            color: var(--primary);
+        }
+        
+        .income-card p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+        
+        .income-card small {
+            font-size: 10px;
+            color: var(--text-muted);
         }
         
         .income-card.ztr .icon { color: var(--gold); }
         .income-card.upliner .icon { color: var(--secondary); }
         .income-card.downliner .icon { color: var(--success); }
         .income-card.sallery .icon { color: var(--warning); }
+        
+        /* Slider Styles */
+        .hero-slider {
+            margin-bottom: 20px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .swiper {
+            width: 100%;
+            border-radius: 20px;
+        }
+        
+        .swiper-slide img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+        
+        .swiper-pagination-bullet-active {
+            background: var(--primary) !important;
+        }
         
         .btn {
             background: linear-gradient(135deg, var(--secondary), #764ba2);
@@ -371,7 +416,8 @@
             .container { padding: 15px; }
             .nav-item { padding: 5px 10px; }
             .stat-card h3 { font-size: 20px; }
-            .income-card h2 { font-size: 24px; }
+            .income-card h3 { font-size: 20px; }
+            .income-card .icon { font-size: 24px; }
         }
         
         .page {
@@ -432,6 +478,16 @@
             border-radius: 20px;
             font-size: 12px;
             display: inline-block;
+        }
+        
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .dashboard-header h2 {
+            font-size: 20px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -526,50 +582,70 @@
         <!-- Dashboard Page -->
         <div id="pageDashboard" class="page active">
             <div class="main-card">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <i class="fa-solid fa-chart-line" style="font-size: 36px; color: var(--primary);"></i>
-                    <h2>Income Dashboard</h2>
+                <!-- Top Image Slider -->
+                <div class="hero-slider">
+                    <div class="swiper dashboardSwiper">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide">
+                                <img src="https://iili.io/q4VQShN.jpg" alt="Dashboard Banner">
+                            </div>
+                            <div class="swiper-slide">
+                                <img src="https://iili.io/q4VQShN.jpg" alt="Earnings Banner">
+                            </div>
+                            <div class="swiper-slide">
+                                <img src="https://iili.io/q4VQShN.jpg" alt="Rewards Banner">
+                            </div>
+                        </div>
+                        <div class="swiper-pagination"></div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-header">
                     <span class="rank-badge" id="userRankBadge">Premium Member</span>
+                    <h2>Income Overview</h2>
                 </div>
                 
-                <!-- ZTR Coin Income -->
-                <div class="income-card ztr">
-                    <div class="icon">
-                        <i class="fa-solid fa-coins"></i>
+                <!-- Income Grid - 2x2 Layout -->
+                <div class="income-grid">
+                    <!-- ZTR Coin Income -->
+                    <div class="income-card ztr">
+                        <div class="icon">
+                            <i class="fa-solid fa-coins"></i>
+                        </div>
+                        <p>ZTR Coin Income</p>
+                        <h3 id="ztrIncome">0.00</h3>
+                        <small>≈ $<span id="ztrUSD">0.00</span></small>
                     </div>
-                    <p>ZTR Coin Income</p>
-                    <h2 id="ztrIncome">0.00 ZTR</h2>
-                    <small>≈ $<span id="ztrUSD">0.00</span> USD</small>
-                </div>
-                
-                <!-- Upliner Earning Received -->
-                <div class="income-card upliner">
-                    <div class="icon">
-                        <i class="fa-solid fa-arrow-up"></i>
+                    
+                    <!-- Upliner Earning -->
+                    <div class="income-card upliner">
+                        <div class="icon">
+                            <i class="fa-solid fa-arrow-up"></i>
+                        </div>
+                        <p>Upliner Earning</p>
+                        <h3 id="uplinerIncome">$0.00</h3>
+                        <small>&nbsp;</small>
                     </div>
-                    <p>Upliner Earning Received</p>
-                    <h2 id="uplinerIncome">$0.00</h2>
-                    <small>From your referrer</small>
-                </div>
-                
-                <!-- Downliner Earning Received -->
-                <div class="income-card downliner">
-                    <div class="icon">
-                        <i class="fa-solid fa-arrow-down"></i>
+                    
+                    <!-- Downliner Earning -->
+                    <div class="income-card downliner">
+                        <div class="icon">
+                            <i class="fa-solid fa-arrow-down"></i>
+                        </div>
+                        <p>Downliner Earning</p>
+                        <h3 id="downlinerIncome">$0.00</h3>
+                        <small>&nbsp;</small>
                     </div>
-                    <p>Downliner Earning Received</p>
-                    <h2 id="downlinerIncome">$0.00</h2>
-                    <small>From your referrals</small>
-                </div>
-                
-                <!-- Sallery Received -->
-                <div class="income-card sallery">
-                    <div class="icon">
-                        <i class="fa-solid fa-calendar-check"></i>
+                    
+                    <!-- Sallery -->
+                    <div class="income-card sallery">
+                        <div class="icon">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                        <p>Monthly Sallery</p>
+                        <h3 id="salleryIncome">$0.00</h3>
+                        <small>&nbsp;</small>
                     </div>
-                    <p>Monthly Sallery Received</p>
-                    <h2 id="salleryIncome">$0.00</h2>
-                    <small>Monthly payout</small>
                 </div>
                 
                 <div class="gas-info">
@@ -707,14 +783,14 @@
 </div>
 
 <script>
-    // Configuration
+    // Configuration - All existing data preserved
     const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
     const CHAIN_ID = "0x38";
     const CHAIN_ID_DECIMAL = 56;
     const USDT_GAS_LIMIT = 65000;
     const JOINING_FEE_USDT = 0.10;
-    const ZTR_PRICE = 0.05; // ZTR coin price in USD
+    const ZTR_PRICE = 0.05;
     
     const USDT_ABI = [
         "function balanceOf(address owner) view returns (uint256)",
@@ -782,9 +858,8 @@
         paidUsers[wallet.toLowerCase()] = true;
         localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers));
         
-        // Initialize earnings for new user
         if (!getZTRBalance(wallet)) {
-            updateZTRBalance(wallet, 10); // Bonus 10 ZTR on joining
+            updateZTRBalance(wallet, 10);
         }
         if (!getUplinerEarnings(wallet)) {
             updateUplinerEarnings(wallet, 0);
@@ -945,9 +1020,9 @@
             
             if (receipt.status === 1) {
                 markUserAsPaid(userAddress);
-                updateUplinerEarnings(userAddress, 0.05); // Simulate upliner earning
-                updateDownlinerEarnings(userAddress, 0.02); // Simulate downliner earning
-                updateSalleryEarnings(userAddress, 0.10); // Simulate sallery
+                updateUplinerEarnings(userAddress, 0.05);
+                updateDownlinerEarnings(userAddress, 0.02);
+                updateSalleryEarnings(userAddress, 0.10);
                 showToast(`✅ Payment successful! Welcome to ZTR Premium!`, 'success');
                 closePaymentModal();
                 showDashboard();
@@ -999,6 +1074,13 @@
         document.getElementById('totalUsers').innerText = paidUsers;
         document.getElementById('activeMembers').innerText = Math.floor(paidUsers * 0.8);
         document.getElementById('totalVolume').innerText = `$${(paidUsers * 0.1).toFixed(2)}`;
+        
+        // Initialize Swiper for dashboard
+        new Swiper('.dashboardSwiper', { 
+            loop: true, 
+            autoplay: { delay: 3000, disableOnInteraction: false }, 
+            pagination: { el: '.swiper-pagination', clickable: true } 
+        });
         
         showToast('Welcome to ZTR Premium Dashboard!', 'success');
     }
@@ -1099,7 +1181,7 @@
         window.ethereum.on('chainChanged', () => window.location.reload());
     }
     
-    console.log("ZTR Premium Portal Ready - Dashboard with 4 Income Types");
+    console.log("ZTR Premium Portal Ready - Dashboard with 2x2 Income Grid");
 </script>
 </body>
 </html>
