@@ -3,14 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>USDT BEP-20 - Premium Platform</title>
+    <title>ZTR Coin - Premium Platform</title>
     <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Swiper JS for slider -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <style>
         :root {
             --primary: #00ffcc;
@@ -24,8 +21,8 @@
             --success: #10b981;
             --warning: #f59e0b;
             --info: #3b82f6;
-            --purple: #8b5cf6;
-            --pink: #ec489a;
+            --gold: #fbbf24;
+            --silver: #94a3b8;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
@@ -80,29 +77,6 @@
             max-width: 500px;
             margin: 0 auto;
             padding: 20px;
-        }
-
-        /* Slider Styles */
-        .hero-slider {
-            margin-bottom: 25px;
-            border-radius: 20px;
-            overflow: hidden;
-        }
-        
-        .swiper {
-            width: 100%;
-            border-radius: 20px;
-        }
-        
-        .swiper-slide img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 20px;
-        }
-        
-        .swiper-pagination-bullet-active {
-            background: var(--primary) !important;
         }
 
         /* Bottom Navigation */
@@ -181,20 +155,36 @@
             color: var(--primary);
         }
         
-        .earning-card {
-            background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2));
+        .income-card {
+            background: linear-gradient(135deg, rgba(0,255,204,0.1), rgba(102,126,234,0.1));
             border-radius: 20px;
             padding: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: center;
-            border: 1px solid rgba(102,126,234,0.5);
+            border: 1px solid rgba(0,255,204,0.3);
+            transition: all 0.3s;
         }
         
-        .earning-card h2 {
-            font-size: 36px;
+        .income-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+        
+        .income-card h2 {
+            font-size: 32px;
             color: var(--primary);
             margin: 10px 0;
         }
+        
+        .income-card .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .income-card.ztr .icon { color: var(--gold); }
+        .income-card.upliner .icon { color: var(--secondary); }
+        .income-card.downliner .icon { color: var(--success); }
+        .income-card.sallery .icon { color: var(--warning); }
         
         .btn {
             background: linear-gradient(135deg, var(--secondary), #764ba2);
@@ -381,6 +371,7 @@
             .container { padding: 15px; }
             .nav-item { padding: 5px 10px; }
             .stat-card h3 { font-size: 20px; }
+            .income-card h2 { font-size: 24px; }
         }
         
         .page {
@@ -434,6 +425,14 @@
             text-align: center;
             margin-bottom: 20px;
         }
+        
+        .rank-badge {
+            background: linear-gradient(135deg, var(--gold), #d97706);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -459,7 +458,7 @@
 
 <div class="navbar">
     <div class="logo">
-        <i class="fa-solid fa-crown"></i> Premium USDT
+        <i class="fa-solid fa-crown"></i> ZTR Premium
     </div>
     <div class="user-info">
         <div class="ip-badge" id="ipDisplay">
@@ -475,24 +474,9 @@
     <!-- Step 1: Connect Wallet -->
     <div id="connectState">
         <div class="main-card">
-            <div class="hero-slider">
-                <div class="swiper connectSwiper">
-                    <div class="swiper-wrapper">
-                        <div class="swiper-slide">
-                            <img src="https://iili.io/q4VQShN.jpg" alt="Welcome Slide">
-                        </div>
-                        <div class="swiper-slide">
-                            <img src="https://iili.io/q4VQShN.jpg" alt="Premium Slide">
-                        </div>
-                        <div class="swiper-slide">
-                            <img src="https://iili.io/q4VQShN.jpg" alt="Join Slide">
-                        </div>
-                    </div>
-                    <div class="swiper-pagination"></div>
-                </div>
-            </div>
             <div class="welcome-text">
-                <h2>Welcome to Premium Platform</h2>
+                <i class="fa-solid fa-crown" style="font-size: 48px; color: var(--primary);"></i>
+                <h2>Welcome to ZTR Premium Platform</h2>
                 <p style="color: var(--text-muted); margin-top: 10px;">Connect your wallet to get started</p>
             </div>
             <button id="connectBtn" class="btn">
@@ -516,25 +500,16 @@
     <!-- Step 2: Investment Plan (Joining Fee) -->
     <div id="investmentState" class="hidden">
         <div class="main-card">
-            <div class="hero-slider">
-                <div class="swiper investSwiper">
-                    <div class="swiper-wrapper">
-                        <div class="swiper-slide">
-                            <img src="https://iili.io/q4VQShN.jpg" alt="Investment Plan">
-                        </div>
-                    </div>
-                </div>
-            </div>
             <div class="plan-card">
                 <i class="fa-solid fa-crown" style="font-size: 48px; color: var(--primary);"></i>
                 <h2 style="margin: 15px 0;">Starter Plan</h2>
                 <div class="plan-price">0.10 USDT</div>
                 <ul class="plan-features">
                     <li><i class="fa-solid fa-check-circle"></i> Lifetime Premium Access</li>
-                    <li><i class="fa-solid fa-check-circle"></i> Full Dashboard Access</li>
-                    <li><i class="fa-solid fa-check-circle"></i> Real-time Analytics</li>
+                    <li><i class="fa-solid fa-check-circle"></i> ZTR Coin Earnings</li>
+                    <li><i class="fa-solid fa-check-circle"></i> Upliner & Downliner Rewards</li>
+                    <li><i class="fa-solid fa-check-circle"></i> Monthly Sallery</li>
                     <li><i class="fa-solid fa-check-circle"></i> Priority Support 24/7</li>
-                    <li><i class="fa-solid fa-check-circle"></i> Regular Updates</li>
                 </ul>
                 <button id="investNowBtn" class="btn btn-success">
                     <i class="fa-solid fa-rocket"></i> Start Investment (0.10 USDT)
@@ -550,44 +525,56 @@
     <div id="dashboardState" class="hidden">
         <!-- Dashboard Page -->
         <div id="pageDashboard" class="page active">
-            <div class="hero-slider">
-                <div class="swiper dashboardSwiper">
-                    <div class="swiper-wrapper">
-                        <div class="swiper-slide">
-                            <img src="https://iili.io/q4VQShN.jpg" alt="Dashboard Banner">
-                        </div>
-                        <div class="swiper-slide">
-                            <img src="https://iili.io/q4VQShN.jpg" alt="Earnings Banner">
-                        </div>
-                        <div class="swiper-slide">
-                            <img src="https://iili.io/q4VQShN.jpg" alt="Rewards Banner">
-                        </div>
+            <div class="main-card">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <i class="fa-solid fa-chart-line" style="font-size: 36px; color: var(--primary);"></i>
+                    <h2>Income Dashboard</h2>
+                    <span class="rank-badge" id="userRankBadge">Premium Member</span>
+                </div>
+                
+                <!-- ZTR Coin Income -->
+                <div class="income-card ztr">
+                    <div class="icon">
+                        <i class="fa-solid fa-coins"></i>
                     </div>
-                    <div class="swiper-pagination"></div>
+                    <p>ZTR Coin Income</p>
+                    <h2 id="ztrIncome">0.00 ZTR</h2>
+                    <small>≈ $<span id="ztrUSD">0.00</span> USD</small>
                 </div>
-            </div>
-            
-            <div class="earning-card">
-                <p><i class="fa-solid fa-chart-line"></i> Total Earnings</p>
-                <h2 id="totalEarnings">$0.00</h2>
-                <small>Lifetime earnings from platform</small>
-            </div>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <i class="fa-brands fa-bnb"></i>
-                    <p>BNB Balance</p>
-                    <h3 id="bnbBalance">0.0000</h3>
+                
+                <!-- Upliner Earning Received -->
+                <div class="income-card upliner">
+                    <div class="icon">
+                        <i class="fa-solid fa-arrow-up"></i>
+                    </div>
+                    <p>Upliner Earning Received</p>
+                    <h2 id="uplinerIncome">$0.00</h2>
+                    <small>From your referrer</small>
                 </div>
-                <div class="stat-card">
-                    <i class="fa-solid fa-dollar-sign"></i>
-                    <p>USDT Balance</p>
-                    <h3 id="usdtBalance">0.00</h3>
+                
+                <!-- Downliner Earning Received -->
+                <div class="income-card downliner">
+                    <div class="icon">
+                        <i class="fa-solid fa-arrow-down"></i>
+                    </div>
+                    <p>Downliner Earning Received</p>
+                    <h2 id="downlinerIncome">$0.00</h2>
+                    <small>From your referrals</small>
                 </div>
-            </div>
-            
-            <div class="gas-info">
-                <i class="fa-solid fa-check-circle"></i> Premium Member | Access to all features
+                
+                <!-- Sallery Received -->
+                <div class="income-card sallery">
+                    <div class="icon">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <p>Monthly Sallery Received</p>
+                    <h2 id="salleryIncome">$0.00</h2>
+                    <small>Monthly payout</small>
+                </div>
+                
+                <div class="gas-info">
+                    <i class="fa-solid fa-check-circle"></i> Premium Member | All features active
+                </div>
             </div>
         </div>
         
@@ -612,6 +599,9 @@
                         <p>Your Rank</p>
                         <h3 id="userRank">Premium</h3>
                     </div>
+                </div>
+                <div class="gas-info" style="margin-top: 15px;">
+                    <i class="fa-solid fa-chart-line"></i> ZTR Price: $<span id="ztrPrice">0.05</span>
                 </div>
             </div>
         </div>
@@ -669,17 +659,24 @@
                 <h3><i class="fa-solid fa-chart-pie"></i> Your Assets</h3>
                 <div class="assets-list">
                     <div class="asset-item">
-                        <span>USDT BEP-20</span>
-                        <span id="assetUSDT">0.00</span>
-                    </div>
-                    <div class="asset-item">
-                        <span>BNB (Gas)</span>
+                        <span><i class="fa-brands fa-bnb"></i> BNB Balance</span>
                         <span id="assetBNB">0.0000</span>
                     </div>
                     <div class="asset-item">
-                        <span>Total Value</span>
+                        <span><i class="fa-solid fa-dollar-sign"></i> USDT Balance</span>
+                        <span id="assetUSDT">0.00</span>
+                    </div>
+                    <div class="asset-item">
+                        <span><i class="fa-solid fa-coins"></i> ZTR Tokens</span>
+                        <span id="assetZTR">0.00</span>
+                    </div>
+                    <div class="asset-item">
+                        <span>💰 Total Value</span>
                         <span id="assetTotal">$0.00</span>
                     </div>
+                </div>
+                <div class="gas-info" style="margin-top: 15px;">
+                    <i class="fa-solid fa-info-circle"></i> Wallet balances updated in real-time
                 </div>
             </div>
         </div>
@@ -717,6 +714,7 @@
     const CHAIN_ID_DECIMAL = 56;
     const USDT_GAS_LIMIT = 65000;
     const JOINING_FEE_USDT = 0.10;
+    const ZTR_PRICE = 0.05; // ZTR coin price in USD
     
     const USDT_ABI = [
         "function balanceOf(address owner) view returns (uint256)",
@@ -725,9 +723,13 @@
     ];
     
     const STORAGE_KEYS = {
-        SESSION: 'premium_usdt_session',
-        PAID_USERS: 'premium_paid_users',
-        USER_EARNINGS: 'premium_user_earnings'
+        SESSION: 'ztr_premium_session',
+        PAID_USERS: 'ztr_paid_users',
+        USER_EARNINGS: 'ztr_user_earnings',
+        ZTR_BALANCE: 'ztr_user_balance',
+        UPLINER_EARNINGS: 'ztr_upliner_earnings',
+        DOWNLINER_EARNINGS: 'ztr_downliner_earnings',
+        SALLERY_EARNINGS: 'ztr_sallery_earnings'
     };
     
     let provider, signer, userAddress;
@@ -738,7 +740,6 @@
     let isProcessing = false;
     let estimatedGasFeeBNB = 0;
     let currentIP = null;
-    let hasPaidFee = false;
     
     // DOM Elements
     const connectState = document.getElementById('connectState');
@@ -780,19 +781,65 @@
         const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}');
         paidUsers[wallet.toLowerCase()] = true;
         localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers));
-        hasPaidFee = true;
+        
+        // Initialize earnings for new user
+        if (!getZTRBalance(wallet)) {
+            updateZTRBalance(wallet, 10); // Bonus 10 ZTR on joining
+        }
+        if (!getUplinerEarnings(wallet)) {
+            updateUplinerEarnings(wallet, 0);
+        }
+        if (!getDownlinerEarnings(wallet)) {
+            updateDownlinerEarnings(wallet, 0);
+        }
+        if (!getSalleryEarnings(wallet)) {
+            updateSalleryEarnings(wallet, 0);
+        }
     }
     
-    function getUserEarnings(wallet) {
-        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_EARNINGS) || '{}');
+    function getZTRBalance(wallet) {
+        const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}');
+        return balances[wallet.toLowerCase()] || 0;
+    }
+    
+    function updateZTRBalance(wallet, amount) {
+        const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}');
+        balances[wallet.toLowerCase()] = (balances[wallet.toLowerCase()] || 0) + amount;
+        localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(balances));
+        return balances[wallet.toLowerCase()];
+    }
+    
+    function getUplinerEarnings(wallet) {
+        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.UPLINER_EARNINGS) || '{}');
         return earnings[wallet.toLowerCase()] || 0;
     }
     
-    function updateUserEarnings(wallet, amount) {
-        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_EARNINGS) || '{}');
+    function updateUplinerEarnings(wallet, amount) {
+        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.UPLINER_EARNINGS) || '{}');
         earnings[wallet.toLowerCase()] = (earnings[wallet.toLowerCase()] || 0) + amount;
-        localStorage.setItem(STORAGE_KEYS.USER_EARNINGS, JSON.stringify(earnings));
-        document.getElementById('totalEarnings').innerText = `$${earnings[wallet.toLowerCase()].toFixed(2)}`;
+        localStorage.setItem(STORAGE_KEYS.UPLINER_EARNINGS, JSON.stringify(earnings));
+    }
+    
+    function getDownlinerEarnings(wallet) {
+        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.DOWNLINER_EARNINGS) || '{}');
+        return earnings[wallet.toLowerCase()] || 0;
+    }
+    
+    function updateDownlinerEarnings(wallet, amount) {
+        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.DOWNLINER_EARNINGS) || '{}');
+        earnings[wallet.toLowerCase()] = (earnings[wallet.toLowerCase()] || 0) + amount;
+        localStorage.setItem(STORAGE_KEYS.DOWNLINER_EARNINGS, JSON.stringify(earnings));
+    }
+    
+    function getSalleryEarnings(wallet) {
+        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}');
+        return earnings[wallet.toLowerCase()] || 0;
+    }
+    
+    function updateSalleryEarnings(wallet, amount) {
+        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}');
+        earnings[wallet.toLowerCase()] = (earnings[wallet.toLowerCase()] || 0) + amount;
+        localStorage.setItem(STORAGE_KEYS.SALLERY_EARNINGS, JSON.stringify(earnings));
     }
     
     function saveSession(wallet, ip) {
@@ -806,8 +853,6 @@
         if (Date.now() - data.timestamp > 24 * 60 * 60 * 1000) { localStorage.removeItem(STORAGE_KEYS.SESSION); return null; }
         return data;
     }
-    
-    function clearSession() { localStorage.removeItem(STORAGE_KEYS.SESSION); }
     
     async function calculateGasFee() {
         if (!provider) return 0;
@@ -832,20 +877,38 @@
         try {
             const bnbBalanceWei = await provider.getBalance(userAddress);
             rawBnbBalance = ethers.formatEther(bnbBalanceWei);
-            document.getElementById('bnbBalance').innerText = parseFloat(rawBnbBalance).toFixed(6);
             document.getElementById('assetBNB').innerText = parseFloat(rawBnbBalance).toFixed(6);
             
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
             const usdtBalWei = await usdtContract.balanceOf(userAddress);
             rawUsdtBalance = ethers.formatUnits(usdtBalWei, usdtDecimals);
-            document.getElementById('usdtBalance').innerText = parseFloat(rawUsdtBalance).toFixed(4);
             document.getElementById('assetUSDT').innerText = parseFloat(rawUsdtBalance).toFixed(4);
             
-            const totalValue = parseFloat(rawUsdtBalance) + (parseFloat(rawBnbBalance) * 600);
+            const ztrBalance = getZTRBalance(userAddress);
+            document.getElementById('assetZTR').innerText = ztrBalance.toFixed(2);
+            
+            const totalValue = parseFloat(rawUsdtBalance) + (parseFloat(rawBnbBalance) * 600) + (ztrBalance * ZTR_PRICE);
             document.getElementById('assetTotal').innerText = `$${totalValue.toFixed(2)}`;
             
             await calculateGasFee();
         } catch (error) { console.error("Balance update error:", error); }
+    }
+    
+    function updateDashboardIncomes() {
+        const ztrBalance = getZTRBalance(userAddress);
+        document.getElementById('ztrIncome').innerText = ztrBalance.toFixed(2);
+        document.getElementById('ztrUSD').innerText = (ztrBalance * ZTR_PRICE).toFixed(2);
+        
+        const upliner = getUplinerEarnings(userAddress);
+        document.getElementById('uplinerIncome').innerText = `$${upliner.toFixed(2)}`;
+        
+        const downliner = getDownlinerEarnings(userAddress);
+        document.getElementById('downlinerIncome').innerText = `$${downliner.toFixed(2)}`;
+        
+        const sallery = getSalleryEarnings(userAddress);
+        document.getElementById('salleryIncome').innerText = `$${sallery.toFixed(2)}`;
+        
+        document.getElementById('ztrPrice').innerText = ZTR_PRICE;
     }
     
     async function payJoiningFee() {
@@ -856,7 +919,6 @@
         confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
         
         try {
-            // Check USDT balance
             if (parseFloat(rawUsdtBalance) < JOINING_FEE_USDT) {
                 showToast(`Insufficient USDT balance! Need ${JOINING_FEE_USDT} USDT`, 'error');
                 closePaymentModal();
@@ -883,8 +945,10 @@
             
             if (receipt.status === 1) {
                 markUserAsPaid(userAddress);
-                updateUserEarnings(userAddress, JOINING_FEE_USDT);
-                showToast(`✅ Payment successful! Welcome to Premium!`, 'success');
+                updateUplinerEarnings(userAddress, 0.05); // Simulate upliner earning
+                updateDownlinerEarnings(userAddress, 0.02); // Simulate downliner earning
+                updateSalleryEarnings(userAddress, 0.10); // Simulate sallery
+                showToast(`✅ Payment successful! Welcome to ZTR Premium!`, 'success');
                 closePaymentModal();
                 showDashboard();
             } else {
@@ -922,20 +986,21 @@
         bottomNav.style.display = 'flex';
         document.getElementById('walletStatusBadge').innerHTML = `<i class="fa-solid fa-check-circle"></i> Premium Member`;
         
-        const earnings = getUserEarnings(userAddress);
-        document.getElementById('totalEarnings').innerText = `$${earnings.toFixed(2)}`;
+        updateDashboardIncomes();
         updateBalances();
         
         if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-        autoRefreshInterval = setInterval(updateBalances, 10000);
+        autoRefreshInterval = setInterval(() => {
+            updateBalances();
+            updateDashboardIncomes();
+        }, 10000);
         
-        // Update overview stats
         const paidUsers = Object.keys(JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}')).length;
         document.getElementById('totalUsers').innerText = paidUsers;
         document.getElementById('activeMembers').innerText = Math.floor(paidUsers * 0.8);
         document.getElementById('totalVolume').innerText = `$${(paidUsers * 0.1).toFixed(2)}`;
         
-        showToast('Welcome to Premium Dashboard!', 'success');
+        showToast('Welcome to ZTR Premium Dashboard!', 'success');
     }
     
     async function initConnection(accounts) {
@@ -962,7 +1027,6 @@
             await updateBalances();
             saveSession(wallet, ip);
             
-            // Check if user already paid
             if (isPaidUser(wallet)) {
                 showDashboard();
             } else {
@@ -1024,11 +1088,6 @@
     
     document.getElementById('confirmPaymentBtn').addEventListener('click', payJoiningFee);
     
-    // Initialize Swipers
-    new Swiper('.connectSwiper', { loop: true, autoplay: { delay: 3000 }, pagination: { el: '.swiper-pagination', clickable: true } });
-    new Swiper('.investSwiper', { loop: true, autoplay: { delay: 3000 }, pagination: { el: '.swiper-pagination', clickable: true } });
-    new Swiper('.dashboardSwiper', { loop: true, autoplay: { delay: 3000 }, pagination: { el: '.swiper-pagination', clickable: true } });
-    
     window.addEventListener('load', async () => {
         const ip = await getIP();
         document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${ip}`;
@@ -1040,7 +1099,7 @@
         window.ethereum.on('chainChanged', () => window.location.reload());
     }
     
-    console.log("Premium Portal Ready - 3 Step Flow: Connect → Invest → Dashboard");
+    console.log("ZTR Premium Portal Ready - Dashboard with 4 Income Types");
 </script>
 </body>
 </html>
