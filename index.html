@@ -2,465 +2,235 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>InvestHub Pro | Instant Auto-Investment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Web3 Platform</title>
+    <!-- Ethers.js for Web3 interaction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     
-    <!-- Google Fonts + Font Awesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Ethers.js CDN (v6) -->
-    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --bg-gradient-start: #0a0c15;
-            --bg-gradient-end: #121826;
-            --card-bg: rgba(22, 28, 38, 0.95);
-            --neon-cyan: #06b6d4;
-            --neon-green: #10b981;
-            --neon-purple: #8b5cf6;
-            --success: #10b981;
-            --error: #ef4444;
-            --text-light: #f1f5f9;
-            --text-dim: #94a3b8;
-            --border-glow: rgba(6, 182, 212, 0.25);
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --text: #f8fafc;
         }
-
-        body { font-family: 'Outfit', sans-serif; background: radial-gradient(ellipse at 30% 40%, var(--bg-gradient-start), var(--bg-gradient-end)); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1.2rem; color: var(--text-light); overflow-x: hidden; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: var(--panel);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 { margin-top: 0; font-size: 1.5rem; }
+        .hidden { display: none !important; }
         
-        .bg-glow-1 { position: fixed; width: 500px; height: 500px; background: var(--neon-cyan); filter: blur(140px); opacity: 0.15; top: -150px; right: -150px; border-radius: 50%; z-index: -1; pointer-events: none;}
-        .bg-glow-2 { position: fixed; width: 600px; height: 600px; background: var(--neon-purple); filter: blur(150px); opacity: 0.12; bottom: -200px; left: -150px; border-radius: 50%; z-index: -1; pointer-events: none;}
-
-        .main-card { max-width: 500px; width: 100%; background: var(--card-bg); border-radius: 2rem; border: 1px solid var(--border-glow); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6); position: relative; z-index: 10; overflow: hidden;}
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+        }
+        button:hover { background-color: #4f46e5; }
         
-        .header { padding: 2rem 2rem 1.5rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .logo { font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #fff, var(--neon-cyan), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-flex; align-items: center; gap: 12px; }
-        .subtitle { color: var(--text-dim); font-size: 0.85rem; margin-top: 8px; font-weight: 500;}
-
-        /* Exact matching with screenshot */
-        .wallet-card { background: #131823; margin: 1.5rem; padding: 1.2rem 1.5rem; border-radius: 1.5rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);}
-        .wallet-info { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 1.1rem; letter-spacing: 0.5px;}
-        
-        .status-led { width: 14px; height: 14px; border-radius: 50%; background: var(--error); transition: all 0.3s; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);}
-        .status-led.active { background: var(--success); box-shadow: 0 0 15px var(--success); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-        #walletDisplay { transition: all 0.3s; }
-        .wallet-connected-text { color: var(--neon-green) !important; font-family: monospace; font-size: 1.15rem; letter-spacing: 1px;}
-
-        .investment-box { padding: 0 1.5rem 1.5rem; text-align: center; }
-        .amount-card { background: linear-gradient(145deg, rgba(6, 182, 212, 0.08), rgba(139, 92, 246, 0.08)); border-radius: 1.5rem; padding: 2rem; margin-bottom: 1.5rem; border: 1px solid rgba(6, 182, 212, 0.15); }
-        .amount-label { font-size: 0.8rem; color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase; font-weight: 600;}
-        .amount-value { font-size: 5rem; font-weight: 800; color: var(--neon-cyan); line-height: 1; margin: 0.8rem 0; text-shadow: 0 0 20px rgba(6, 182, 212, 0.3);}
-        .amount-value small { font-size: 1.5rem; color: var(--text-dim); font-weight: 600;}
-
-        .btn { width: 100%; padding: 1.2rem; border-radius: 1.2rem; font-weight: 700; font-size: 1.1rem; border: none; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 12px; font-family: 'Outfit', sans-serif; }
-        .btn-primary { background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple)); color: white; box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4); }
-        .btn-primary:active { transform: scale(0.98); }
-        .btn-success { background: linear-gradient(135deg, var(--neon-green), #059669); color: white; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;}
-
-        .log-area { background: #131823; margin: 0 1.5rem 1.5rem; padding: 1rem; border-radius: 1rem; font-size: 0.9rem; color: var(--text-dim); text-align: center; font-weight: 500; border: 1px solid rgba(255,255,255,0.05);}
-        .log-error { color: #fca5a5; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
-        .log-success { color: #86efac; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); }
-
-        /* Dashboard View */
-        .dashboard-view { display: none; }
-        .success-badge { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); border-radius: 1.5rem; padding: 1.5rem; text-align: center; margin-bottom: 1.5rem; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
-        .stat-item { background: #131823; padding: 1.2rem; border-radius: 1.2rem; text-align: center; border: 1px solid rgba(255,255,255,0.05);}
-        .stat-number { font-size: 1.8rem; font-weight: 800; color: var(--neon-cyan); margin-bottom: 5px;}
-        
-        .spinner-icon { animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* Advanced Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; pointer-events: none; transition: all 0.3s ease; }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .wallet-modal { background: #11141d; border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 2rem; width: 90%; max-width: 400px; padding: 1.8rem; transform: translateY(40px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 25px 50px rgba(0,0,0,0.8); }
-        .modal-overlay.active .wallet-modal { transform: translateY(0) scale(1); }
-        
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-        .modal-title { font-size: 1.3rem; font-weight: 700; color: #fff; }
-        .close-modal { background: rgba(255,255,255,0.1); border: none; color: #fff; width: 35px; height: 35px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center;}
-        .close-modal:hover { background: var(--error); }
-        
-        .wallet-options { display: flex; flex-direction: column; gap: 12px; }
-        .wallet-btn { background: #1a1f2e; border: 1px solid rgba(255,255,255,0.05); padding: 1.2rem; border-radius: 1.2rem; display: flex; justify-content: space-between; align-items: center; color: white; font-size: 1.1rem; cursor: pointer; transition: all 0.2s; }
-        .wallet-btn:hover, .wallet-btn:active { background: #23293b; border-color: var(--neon-cyan); transform: translateX(5px);}
-        .wallet-btn span { display: flex; align-items: center; gap: 15px; font-weight: 600; }
-        .wallet-icon { width: 35px; height: 35px; border-radius: 10px; }
+        .data-box {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            word-break: break-all;
+        }
+        .label { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
+        .value { font-size: 1.2rem; font-weight: bold; margin-top: 5px; }
+        .status { margin-top: 15px; font-size: 0.9rem; color: #34d399; }
     </style>
 </head>
 <body>
-<div class="bg-glow-1"></div>
-<div class="bg-glow-2"></div>
 
-<!-- WALLET CONNECT MODAL -->
-<div class="modal-overlay" id="walletModalOverlay">
-    <div class="wallet-modal">
-        <div class="modal-header">
-            <div class="modal-title">Connect Wallet</div>
-            <button class="close-modal" id="closeModalBtn"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="wallet-options" id="walletOptions">
-            <button class="wallet-btn" onclick="initiateConnection('trustwallet')">
-                <span>
-                    <img src="https://api.iconify.design/token-branded:trust-wallet.svg" class="wallet-icon" alt="Trust Wallet">
-                    Trust Wallet
-                </span>
-                <i class="fas fa-chevron-right" style="color:var(--text-dim); font-size:1rem;"></i>
-            </button>
-            <button class="wallet-btn" onclick="initiateConnection('metamask')">
-                <span>
-                    <img src="https://api.iconify.design/logos:metamask-icon.svg" class="wallet-icon" alt="MetaMask">
-                    MetaMask
-                </span>
-                <i class="fas fa-chevron-right" style="color:var(--text-dim); font-size:1rem;"></i>
-            </button>
-        </div>
-    </div>
-</div>
-
-<div class="main-card">
-    <!-- Initial / Invest View -->
-    <div id="initialView">
-        <div class="header">
-            <div class="logo"><i class="fas fa-chart-simple"></i> InvestHub Pro</div>
-            <div class="subtitle">Auto-Investment | 0.1 USDT = Lifetime Access</div>
-        </div>
-
-        <div class="wallet-card">
-            <div class="wallet-info">
-                <div class="status-led" id="statusLed"></div>
-                <span id="walletDisplay">Not Connected</span>
-            </div>
-            <i class="fas fa-wallet" style="color: var(--neon-cyan); font-size: 1.4rem;"></i>
-        </div>
-
-        <div class="investment-box">
-            <div class="amount-card">
-                <div class="amount-label">INVESTMENT AMOUNT</div>
-                <div class="amount-value">0.10 <small>USDT</small></div>
-                <div style="font-size: 0.8rem; color: var(--text-dim); margin-top:8px;">⚡ BEP20 Network • Binance Smart Chain</div>
-            </div>
-
-            <button class="btn btn-primary" id="connectWalletBtn">
-                <i class="fas fa-plug"></i> Connect Wallet
-            </button>
-
-            <button class="btn btn-success" id="investNowBtn" style="display: none;">
-                <i class="fas fa-rocket"></i> Invest 0.1 USDT
-                <i class="fas fa-spinner spinner-icon" id="investLoader" style="display: none;"></i>
-            </button>
-        </div>
-
-        <div class="log-area" id="logMessage">
-            ✨ Click "Connect Wallet" to start your investment
-        </div>
+    <div class="container" id="login-section">
+        <h1>Welcome to Web3</h1>
+        <p>Connect your wallet to access the secure platform.</p>
+        <button id="connect-btn">Connect Wallet</button>
+        <div id="connection-error" style="color: #ef4444; margin-top: 10px; font-size: 0.9rem;"></div>
     </div>
 
-    <!-- Dashboard View -->
-    <div id="dashboardView" class="dashboard-view">
-        <div class="header">
-            <div class="logo"><i class="fas fa-crown"></i> Member Dashboard</div>
-            <div class="subtitle">Lifetime Investment Active</div>
+    <div class="container hidden" id="dashboard-section">
+        <h1>Dashboard</h1>
+        
+        <div class="data-box">
+            <div class="label">Wallet Address</div>
+            <div class="value" id="wallet-address">Loading...</div>
         </div>
 
-        <div class="investment-box" style="padding-top: 1.5rem;">
-            <div class="success-badge">
-                <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--success); margin-bottom: 10px;"></i>
-                <h2>Successfully Invested!</h2>
-                <p style="font-size: 0.9rem; color: var(--text-dim); margin-top: 5px;">Your account is now fully active.</p>
-            </div>
-
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-number" id="dashBalance">0.00</div>
-                    <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase;">Your USDT</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="dashInvested">0.10</div>
-                    <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase;">Invested</div>
-                </div>
-            </div>
-
-            <div class="wallet-card" style="margin: 0 0 1.5rem 0;">
-                <div class="wallet-info">
-                    <i class="fas fa-user-shield" style="color: var(--success);"></i>
-                    <span id="dashWalletAddr" class="wallet-connected-text" style="font-size: 1.1rem;"></span>
-                </div>
-            </div>
-
-            <button class="btn" id="refreshDashboardBtn" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: white;">
-                <i class="fas fa-sync-alt"></i> Refresh Blockchain Data
-            </button>
+        <div class="data-box">
+            <div class="label">Balance</div>
+            <div class="value" id="wallet-balance">0 ETH</div>
         </div>
+
+        <!-- Safe, User-Initiated Transaction Button -->
+        <button id="transact-btn">Send Test Transaction (0.0001 ETH)</button>
+        <button id="disconnect-btn" style="background-color: #ef4444;">Disconnect</button>
+        
+        <div id="status-message" class="status"></div>
     </div>
-</div>
 
-<script>
-    // ==========================================
-    // 1. ADVANCED SECURE CONFIGURATION
-    // ==========================================
-    let db;
-    try {
+    <!-- Firebase SDK (Modular Approach) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        // IMPORTANT: Replace with your actual config securely, and configure Firebase Security Rules!
         const firebaseConfig = {
-            apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
-            databaseURL: "https://fortune-2cb70-default-rtdb.asia-southeast1.firebasedatabase.app/"
+            apiKey: "YOUR_API_KEY", // Do not hardcode this in production without security rules
+            databaseURL: "https://fortune-2cb70-default-rtdb.asia-southeast1.firebasedatabase.app/",
         };
-        firebase.initializeApp(firebaseConfig);
-        db = firebase.database();
-    } catch (e) {
-        console.error("Database connection silent mode.");
-    }
 
-    const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; 
-    const BSC_CHAIN = "0x38"; 
-    const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7599b5A3D6";
-    const ABI = ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)", "function transfer(address, uint256) returns (bool)"];
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-    let userAddress = null;
-    let usdtContract = null;
+        // UI Elements
+        const loginSection = document.getElementById('login-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const connectBtn = document.getElementById('connect-btn');
+        const disconnectBtn = document.getElementById('disconnect-btn');
+        const transactBtn = document.getElementById('transact-btn');
+        const addressEl = document.getElementById('wallet-address');
+        const balanceEl = document.getElementById('wallet-balance');
+        const statusEl = document.getElementById('status-message');
+        const errorEl = document.getElementById('connection-error');
 
-    // DOM Elements
-    const logMsg = document.getElementById('logMessage');
-    const connectBtn = document.getElementById('connectWalletBtn');
-    const investBtn = document.getElementById('investNowBtn');
-    const walletDisplay = document.getElementById('walletDisplay');
-    const statusLed = document.getElementById('statusLed');
-    const modal = document.getElementById('walletModalOverlay');
+        let userAddress = null;
 
-    function showLog(msg, type = 'info') {
-        logMsg.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-triangle' : type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i> ${msg}`;
-        logMsg.className = `log-area ${type === 'error' ? 'log-error' : type === 'success' ? 'log-success' : ''}`;
-    }
-
-    function formatWallet(addr) {
-        return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
-    }
-
-    // Modal Control
-    connectBtn.addEventListener('click', () => modal.classList.add('active'));
-    document.getElementById('closeModalBtn').addEventListener('click', () => modal.classList.remove('active'));
-
-    // ==========================================
-    // 2. INTELLIGENT CONNECTION & DEEP LINKING
-    // ==========================================
-    async function initiateConnection(walletType) {
-        try {
-            // Check if user is in a normal mobile browser (No Web3 Injected)
-            if (typeof window.ethereum === 'undefined') {
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                
-                if (isMobile) {
-                    // SECURE DEEP LINKING - Opens App Directly
-                    let dAppUrl = encodeURIComponent(window.location.href);
-                    let rawUrl = window.location.host + window.location.pathname;
-                    
-                    if (walletType === 'trustwallet') {
-                        window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=${dAppUrl}`;
-                    } else if (walletType === 'metamask') {
-                        window.location.href = `https://metamask.app.link/dapp/${rawUrl}`;
-                    }
-                    return; // Stop execution here, let app open
-                } else {
-                    showLog("Please install MetaMask extension on your browser.", "error");
-                    modal.classList.remove('active');
-                    return;
-                }
-            }
-
-            // If Web3 IS Available (User is inside TrustWallet/MetaMask App)
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            if (!accounts || accounts.length === 0) throw new Error("Connection denied.");
-
-            userAddress = accounts[0];
-            
-            // 🔥 PERSISTENT SESSION SAVE 🔥
-            localStorage.setItem('savedWallet', userAddress);
-
-            processSuccessfulConnection();
-
-        } catch (error) {
-            showLog("Connection request cancelled by user.", "error");
-            modal.classList.remove('active');
-        }
-    }
-
-    // ==========================================
-    // 3. PERSISTENT AUTO-LOGIN (ON REFRESH)
-    // ==========================================
-    window.addEventListener("load", async () => {
-        const savedAddress = localStorage.getItem('savedWallet');
-        
-        // If wallet address is saved, automatically make UI green
-        if (savedAddress) {
-            userAddress = savedAddress;
-            processSuccessfulConnection(true); // true = silent background load
-        }
-    });
-
-    // Function to handle UI updates after getting wallet address
-    async function processSuccessfulConnection(isSilent = false) {
-        modal.classList.remove('active');
-        
-        // UPDATE UI TO CONNECTED (Match Screenshot Design)
-        walletDisplay.innerText = formatWallet(userAddress);
-        walletDisplay.classList.add('wallet-connected-text');
-        statusLed.classList.add('active'); 
-        connectBtn.style.display = "none";
-        investBtn.style.display = "flex";
-
-        if (!isSilent) showLog("Wallet connected! Checking status...", "success");
-
-        // ONLY IF in Web3 browser, verify network & contract
-        if (typeof window.ethereum !== 'undefined') {
-            await setupBlockchain();
-        } else {
-            // If they saved session but opened normal browser again
-            showLog("Please open this page inside your Crypto Wallet app to invest.", "error");
-            investBtn.disabled = true;
-        }
-    }
-
-    // ==========================================
-    // 4. BLOCKCHAIN SETUP & BSC VERIFICATION
-    // ==========================================
-    async function setupBlockchain() {
-        try {
-            // Force Binance Smart Chain
-            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-            if (chainId !== BSC_CHAIN) {
+        // Check if wallet is already connected on page load (Persistence)
+        window.addEventListener('load', async () => {
+            if (window.ethereum) {
                 try {
-                    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: BSC_CHAIN }] });
-                } catch (e) {
-                    await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{ chainId: BSC_CHAIN, chainName: "BNB Smart Chain", rpcUrls: ["https://bsc-dataseed.binance.org/"], nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 } }]
-                    });
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        handleLogin(accounts[0]);
+                    }
+                } catch (error) {
+                    console.error("Error checking connection:", error);
                 }
             }
-
-            // Setup Ethers
-            const provider = new ethers.BrowserProvider(window.ethereum);
-            const signer = await provider.getSigner();
-            usdtContract = new ethers.Contract(USDT_CONTRACT, ABI, signer);
-
-            // Verify Firebase for Past Users
-            if (db) {
-                const snapshot = await db.ref(`invested_users/${userAddress.toLowerCase()}`).once('value');
-                if (snapshot.exists() && snapshot.val().invested === true) {
-                    showLog("Account Active! Welcome back.", "success");
-                    setTimeout(openDashboard, 1000);
-                    return;
-                }
-            }
-            
-            showLog("Ready! Click Invest to complete activation.", "info");
-            investBtn.disabled = false;
-
-        } catch (error) {
-            showLog("Network verification failed. Please refresh.", "error");
-            investBtn.disabled = true;
-        }
-    }
-
-    // ==========================================
-    // 5. BULLETPROOF INVESTMENT LOGIC
-    // ==========================================
-    investBtn.addEventListener('click', async () => {
-        try {
-            investBtn.disabled = true;
-            document.getElementById('investLoader').style.display = "inline-block";
-            showLog("Verifying your USDT balance...", "info");
-            
-            const amountWei = ethers.parseUnits("0.1", 18);
-            
-            const balance = await usdtContract.balanceOf(userAddress);
-            if (balance < amountWei) {
-                throw new Error("Insufficient USDT! Please load minimum 0.1 USDT.");
-            }
-
-            showLog("Please confirm the transaction in your wallet...", "info");
-            
-            // Transaction Process
-            const tx = await usdtContract.transfer(ADMIN_WALLET, amountWei);
-            showLog("Processing securely on Blockchain...", "info");
-            
-            const receipt = await tx.wait();
-            
-            if (receipt.status === 1) {
-                // Save to Firebase Database
-                if (db) {
-                    await db.ref(`invested_users/${userAddress.toLowerCase()}`).set({
-                        wallet: userAddress, invested: true, amount: "0.1", time: Date.now(), hash: receipt.hash
-                    });
-                }
-                showLog("Investment Successful!", "success");
-                setTimeout(openDashboard, 1000);
-            } else {
-                throw new Error("Blockchain rejected the transaction.");
-            }
-
-        } catch (error) {
-            let errMsg = "Transaction Failed.";
-            if (error.code === 4001 || error.message.includes('rejected')) errMsg = "Transaction cancelled by you.";
-            else if (error.message) errMsg = error.message;
-
-            showLog(errMsg, "error");
-            investBtn.disabled = false;
-            document.getElementById('investLoader').style.display = "none";
-        }
-    });
-
-    // ==========================================
-    // 6. DASHBOARD MANAGER
-    // ==========================================
-    async function openDashboard() {
-        document.getElementById('initialView').style.display = "none";
-        document.getElementById('dashboardView').style.display = "block";
-        document.getElementById('dashWalletAddr').innerText = formatWallet(userAddress);
-        updateDashboardBalance();
-    }
-    
-    async function updateDashboardBalance() {
-        if (!usdtContract) return;
-        try {
-            const balWei = await usdtContract.balanceOf(userAddress);
-            document.getElementById('dashBalance').innerText = Number(ethers.formatUnits(balWei, 18)).toFixed(4);
-        } catch (e) {
-            console.log("Balance fetch error silent");
-        }
-    }
-
-    document.getElementById('refreshDashboardBtn').addEventListener('click', async function() {
-        this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner spinner-icon"></i> Syncing...';
-        await updateDashboardBalance();
-        setTimeout(() => {
-            this.disabled = false;
-            this.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Blockchain Data';
-        }, 1500);
-    });
-
-    // Handle account change or disconnection
-    if (window.ethereum) {
-        window.ethereum.on('accountsChanged', (accounts) => {
-            if(accounts.length === 0) {
-                localStorage.removeItem('savedWallet'); // Auto-Disconnect fix
-            }
-            window.location.reload(); 
         });
-        window.ethereum.on('chainChanged', () => window.location.reload());
-    }
 
-</script>
+        // Connect Wallet Function
+        connectBtn.addEventListener('click', async () => {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    handleLogin(accounts[0]);
+                } catch (error) {
+                    errorEl.innerText = "User rejected connection or error occurred.";
+                }
+            } else {
+                errorEl.innerText = "Please install MetaMask or a Web3 wallet.";
+            }
+        });
+
+        // Handle UI changes and fetch data after login
+        async function handleLogin(address) {
+            userAddress = address;
+            loginSection.classList.add('hidden');
+            dashboardSection.classList.remove('hidden');
+            
+            // Format address for display
+            addressEl.innerText = `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+            
+            await updateBalance();
+            saveUserToFirebase(address);
+
+            // Listen for account changes
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    handleLogout();
+                } else {
+                    handleLogin(accounts[0]);
+                }
+            });
+        }
+
+        // Fetch Balance
+        async function updateBalance() {
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const balance = await provider.getBalance(userAddress);
+                const balanceInEth = ethers.formatEther(balance);
+                balanceEl.innerText = `${parseFloat(balanceInEth).toFixed(4)} ETH`;
+            } catch (error) {
+                console.error("Failed to fetch balance", error);
+            }
+        }
+
+        // Save Data to Firebase
+        function saveUserToFirebase(address) {
+            const userRef = ref(database, 'users/' + address);
+            set(userRef, {
+                lastLogin: new Date().toISOString(),
+                status: "active"
+            }).then(() => {
+                statusEl.innerText = "Data synced with Firebase securely.";
+            }).catch((error) => {
+                console.error("Firebase error:", error);
+                statusEl.innerText = "Failed to sync with database.";
+                statusEl.style.color = "#ef4444";
+            });
+        }
+
+        // Safe, Manual Transaction Example
+        transactBtn.addEventListener('click', async () => {
+            try {
+                statusEl.innerText = "Waiting for user to sign transaction...";
+                statusEl.style.color = "#f59e0b";
+                
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                
+                // Creates a safe transaction that requires user approval
+                const tx = await signer.sendTransaction({
+                    to: userAddress, // Sending to oneself as a harmless test
+                    value: ethers.parseEther("0.0001") 
+                });
+                
+                statusEl.innerText = `Transaction sent! Hash: ${tx.hash.substring(0,10)}...`;
+                statusEl.style.color = "#34d399";
+                
+                await tx.wait(); // Wait for confirmation
+                await updateBalance(); // Refresh balance
+            } catch (error) {
+                statusEl.innerText = "Transaction cancelled or failed.";
+                statusEl.style.color = "#ef4444";
+            }
+        });
+
+        // Disconnect UI (Note: You cannot technically force disconnect a Web3 wallet via frontend code)
+        function handleLogout() {
+            userAddress = null;
+            loginSection.classList.remove('hidden');
+            dashboardSection.classList.add('hidden');
+            errorEl.innerText = "";
+            statusEl.innerText = "";
+        }
+
+        disconnectBtn.addEventListener('click', handleLogout);
+    </script>
 </body>
 </html>
