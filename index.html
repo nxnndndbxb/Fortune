@@ -3,155 +3,408 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Web3 Portal</title>
-    <!-- Include Ethers.js via CDN -->
+    <title>Advanced Web3 USDT Portal</title>
+    <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #00ffcc;
+            --secondary: #667eea;
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
+            background: radial-gradient(circle at 50% 0%, #1e293b, var(--bg-color));
+            color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            min-height: 100vh;
+            padding: 20px;
         }
+
         .container {
-            background: white;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
             padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-            width: 350px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 480px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        h1 { color: #333; font-size: 24px; }
+
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        .network-badge {
+            background: rgba(245, 175, 25, 0.2);
+            color: #f5af19;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .network-badge.active { color: var(--primary); background: rgba(0, 255, 204, 0.1); }
+
+        h1 { font-size: 28px; margin-bottom: 5px; text-align: center; }
+        .subtitle { color: var(--text-muted); text-align: center; font-size: 14px; margin-bottom: 30px; }
+
         .btn {
-            background-color: #4CAF50;
+            background: linear-gradient(135deg, var(--secondary), #764ba2);
             color: white;
             border: none;
-            padding: 12px 24px;
-            margin-top: 20px;
-            border-radius: 6px;
+            padding: 16px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 16px;
-            transition: background 0.3s;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
-        .btn:hover { background-color: #45a049; }
-        .hidden { display: none; }
-        .info {
-            margin-top: 20px;
-            text-align: left;
-            background: #f9f9f9;
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .hidden { display: none !important; }
+
+        /* Dashboard Styles */
+        .profile-card {
+            background: rgba(0,0,0,0.2);
             padding: 15px;
-            border-radius: 6px;
-            word-break: break-all;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+
+        .address-box { font-family: monospace; color: var(--primary); cursor: pointer; }
+        .disconnect-btn { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+
+        .balances { display: flex; gap: 15px; margin-bottom: 25px; }
+        .balance-box {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .balance-box h3 { font-size: 24px; margin: 5px 0; font-weight: 700; }
+        .balance-box p { color: var(--text-muted); font-size: 12px; }
+
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group input {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 18px;
+            outline: none;
+        }
+        .input-group input:focus { border-color: var(--primary); }
+        .max-btn {
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            background: rgba(0, 255, 204, 0.2); color: var(--primary);
+            border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold;
+        }
+
+        .history-box { margin-top: 20px; font-size: 12px; }
+        .history-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .history-item a { color: var(--primary); text-decoration: none; }
+
+        /* Toast Notifications */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; }
+        .toast {
+            background: white; color: black; padding: 15px 25px; border-radius: 12px;
+            margin-bottom: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex; align-items: center; gap: 10px; font-weight: 500;
+            animation: slideInRight 0.3s ease forwards;
+        }
+        .toast.error { border-left: 5px solid #ef4444; }
+        .toast.success { border-left: 5px solid #10b981; }
+        .toast.info { border-left: 5px solid #3b82f6; }
+
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Web3 Portal</h1>
-    
-    <!-- Connect Button -->
-    <button id="connectBtn" class="btn">Connect Wallet</button>
+<div id="toast-container"></div>
 
-    <!-- User Dashboard (Hidden by default) -->
-    <div id="dashboard" class="hidden">
-        <div class="info">
-            <p><strong>Status:</strong> Connected 🔐</p>
-            <p><strong>Address:</strong> <span id="walletAddress">Loading...</span></p>
-            <p><strong>Balance:</strong> <span id="walletBalance">Loading...</span> ETH</p>
+<div class="container">
+    <div class="header-top">
+        <div class="network-badge" id="networkBadge">
+            <i class="fa-solid fa-circle-dot"></i> BSC Network
         </div>
-        <button id="actionBtn" class="btn" style="background-color: #007bff;">Initiate Transaction</button>
+    </div>
+    
+    <h1><i class="fa-brands fa-ethereum"></i> USDT Web3 Portal</h1>
+    <div class="subtitle">Securely transfer BEP-20 tokens</div>
+
+    <!-- Connect State -->
+    <div id="connectState">
+        <button id="connectBtn" class="btn">
+            <i class="fa-solid fa-wallet"></i> Connect Wallet
+        </button>
+    </div>
+
+    <!-- Dashboard State -->
+    <div id="dashboardState" class="hidden">
+        
+        <div class="profile-card">
+            <div>
+                <small style="color: var(--text-muted)">Connected Address</small>
+                <div class="address-box" id="walletAddress" onclick="copyAddress()" title="Click to copy">0x...</div>
+            </div>
+            <button class="disconnect-btn" onclick="disconnectWallet()">
+                <i class="fa-solid fa-power-off"></i> Disconnect
+            </button>
+        </div>
+
+        <div class="balances">
+            <div class="balance-box">
+                <p>BNB Balance</p>
+                <h3 id="bnbBalance">0.00</h3>
+            </div>
+            <div class="balance-box">
+                <p>USDT Balance</p>
+                <h3 id="usdtBalance">0.00</h3>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <input type="number" id="amountInput" placeholder="Enter USDT Amount" min="0">
+            <button class="max-btn" onclick="setMaxAmount()">MAX</button>
+        </div>
+
+        <button id="sendBtn" class="btn" style="margin-bottom: 10px;">
+            <i class="fa-solid fa-paper-plane"></i> Send to Admin
+        </button>
+
+        <div class="history-box" id="txHistory" class="hidden">
+            <h4 style="margin-bottom: 10px; color: var(--text-muted);">Recent Transactions</h4>
+            <div id="historyList"></div>
+        </div>
     </div>
 </div>
 
 <script>
-    let provider;
-    let signer;
+    // ==========================================
+    // ⚙️ SYSTEM CONFIGURATION (EDIT THIS!)
+    // ==========================================
+    const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7599e6c8a2"; // 🔴 Yahan apna Address likhein!
+    const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; // BSC USDT Contract
+    const CHAIN_ID = 56n; // BSC Mainnet
+    
+    const USDT_ABI = [
+        "function balanceOf(address owner) view returns (uint256)",
+        "function transfer(address to, uint256 amount) returns (bool)"
+    ];
 
+    // Variables
+    let provider, signer, userAddress;
+    let autoRefreshInterval;
+    let rawUsdtBalance = "0";
+
+    // DOM Elements
+    const connectState = document.getElementById('connectState');
+    const dashboardState = document.getElementById('dashboardState');
     const connectBtn = document.getElementById('connectBtn');
-    const dashboard = document.getElementById('dashboard');
-    const walletAddressEl = document.getElementById('walletAddress');
-    const walletBalanceEl = document.getElementById('walletBalance');
-    const actionBtn = document.getElementById('actionBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const amountInput = document.getElementById('amountInput');
 
-    // Check if wallet is already connected on page load
-    window.onload = async () => {
-        if (typeof window.ethereum !== 'undefined') {
-            provider = new ethers.BrowserProvider(window.ethereum);
-            const accounts = await provider.listAccounts();
-            if (accounts.length > 0) {
-                // Wallet is already connected, load dashboard
-                handleConnection(accounts[0]);
-            }
-        } else {
-            connectBtn.innerText = "Please Install MetaMask";
-            connectBtn.disabled = true;
-        }
-    };
-
-    // Connect Wallet Function
-    connectBtn.addEventListener('click', async () => {
-        try {
-            if (!window.ethereum) throw new Error("No crypto wallet found. Please install it.");
-            
-            // Request account access
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            handleConnection(accounts[0]);
-        } catch (err) {
-            console.error(err.message);
-            alert("Connection failed or rejected by user.");
-        }
-    });
-
-    // Handle UI updates after connection
-    async function handleConnection(account) {
-        connectBtn.classList.add('hidden');
-        dashboard.classList.remove('hidden');
+    // ==========================================
+    // 🎨 UI & TOAST NOTIFICATIONS
+    // ==========================================
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
         
-        signer = await provider.getSigner();
-        const address = await signer.getAddress();
-        
-        // Format address for display
-        walletAddressEl.innerText = `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+        let icon = 'fa-circle-info';
+        if(type === 'success') icon = 'fa-check-circle';
+        if(type === 'error') icon = 'fa-circle-xmark';
 
-        // Get and format balance
-        const balanceWei = await provider.getBalance(address);
-        const balanceEth = ethers.formatEther(balanceWei);
-        walletBalanceEl.innerText = parseFloat(balanceEth).toFixed(4);
+        toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
     }
 
-    // Example of prompting a user for a secure transaction
-    actionBtn.addEventListener('click', async () => {
+    function copyAddress() {
+        navigator.clipboard.writeText(userAddress);
+        showToast('Address copied to clipboard!', 'success');
+    }
+
+    function setMaxAmount() {
+        amountInput.value = rawUsdtBalance;
+    }
+
+    // ==========================================
+    // 🔗 WALLET CONNECTION & BALANCES
+    // ==========================================
+    async function initConnection(account) {
+        userAddress = account;
+        signer = await provider.getSigner();
+        
+        // Check Network
+        const network = await provider.getNetwork();
+        if (network.chainId !== CHAIN_ID) {
+            showToast('Switching to BSC Mainnet...', 'info');
+            await switchToBSC();
+            return;
+        }
+
+        // Update UI
+        document.getElementById('networkBadge').classList.add('active');
+        connectState.classList.add('hidden');
+        dashboardState.classList.remove('hidden');
+        
+        document.getElementById('walletAddress').innerText = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+        
+        await updateBalances();
+        
+        // Auto Refresh Balance every 10 seconds
+        if(autoRefreshInterval) clearInterval(autoRefreshInterval);
+        autoRefreshInterval = setInterval(updateBalances, 10000);
+        
+        showToast('Wallet Connected!', 'success');
+    }
+
+    async function switchToBSC() {
         try {
-            alert("In a standard Web3 system, transferring funds requires the user to manually sign the transaction via their wallet provider.");
-            
-            // Example transaction structure (Requires User Approval via MetaMask)
-            /*
-            const tx = await signer.sendTransaction({
-                to: "0xRecipientAddressHere",
-                value: ethers.parseEther("0.01")
-            });
-            console.log("Transaction Hash:", tx.hash);
-            */
+            await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x38' }] });
         } catch (error) {
-            console.error("Transaction failed or rejected:", error);
+            if (error.code === 4902) {
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                        chainId: '0x38', chainName: 'Binance Smart Chain',
+                        nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+                        rpcUrls: ['https://bsc-dataseed.binance.org/'],
+                        blockExplorerUrls: ['https://bscscan.com/']
+                    }]
+                });
+            }
+        }
+    }
+
+    async function updateBalances() {
+        if (!userAddress) return;
+        try {
+            const bnbBal = await provider.getBalance(userAddress);
+            document.getElementById('bnbBalance').innerText = parseFloat(ethers.formatEther(bnbBal)).toFixed(4);
+
+            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
+            const usdtBal = await usdtContract.balanceOf(userAddress);
+            rawUsdtBalance = ethers.formatEther(usdtBal);
+            document.getElementById('usdtBalance').innerText = parseFloat(rawUsdtBalance).toFixed(2);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function disconnectWallet() {
+        userAddress = null; signer = null;
+        if(autoRefreshInterval) clearInterval(autoRefreshInterval);
+        dashboardState.classList.add('hidden');
+        connectState.classList.remove('hidden');
+        document.getElementById('networkBadge').classList.remove('active');
+        showToast('Wallet Disconnected', 'info');
+    }
+
+    // ==========================================
+    // 💸 TRANSACTION LOGIC
+    // ==========================================
+    sendBtn.addEventListener('click', async () => {
+        const amount = amountInput.value;
+        if (!amount || amount <= 0) return showToast('Enter a valid amount!', 'error');
+        if (parseFloat(amount) > parseFloat(rawUsdtBalance)) return showToast('Insufficient USDT Balance!', 'error');
+
+        try {
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Processing...`;
+
+            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
+            const amountInWei = ethers.parseEther(amount.toString());
+
+            showToast('Confirm transaction in your wallet...', 'info');
+
+            const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei);
+            showToast('Transaction sent! Waiting for confirmation...', 'info');
+
+            const receipt = await tx.wait();
+            
+            if (receipt.status === 1) {
+                showToast(`Successfully sent ${amount} USDT!`, 'success');
+                amountInput.value = '';
+                updateBalances();
+                
+                // Add to history
+                const historyList = document.getElementById('historyList');
+                historyList.innerHTML += `
+                    <div class="history-item">
+                        <span>Sent ${amount} USDT</span>
+                        <a href="https://bscscan.com/tx/${tx.hash}" target="_blank">View <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    </div>
+                `;
+            }
+
+        } catch (error) {
+            console.error(error);
+            if (error.code === 'ACTION_REJECTED') showToast('Transaction cancelled by user.', 'error');
+            else if (error.message.includes('insufficient funds')) showToast('Not enough BNB for gas fees!', 'error');
+            else showToast('Transaction failed.', 'error');
+        } finally {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Send to Admin`;
         }
     });
 
-    // Listen for account changes (e.g., user switches accounts in MetaMask)
+    // ==========================================
+    // 🖱️ EVENT LISTENERS
+    // ==========================================
+    connectBtn.addEventListener('click', async () => {
+        if (!window.ethereum) return showToast("MetaMask/Trust Wallet not found!", "error");
+        try {
+            provider = new ethers.BrowserProvider(window.ethereum);
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            await initConnection(accounts[0]);
+        } catch (err) {
+            showToast(err.message, "error");
+        }
+    });
+
     if (window.ethereum) {
         window.ethereum.on('accountsChanged', (accounts) => {
-            if (accounts.length > 0) {
-                handleConnection(accounts[0]);
-            } else {
-                // User disconnected
-                connectBtn.classList.remove('hidden');
-                dashboard.classList.add('hidden');
-            }
+            if (accounts.length > 0) initConnection(accounts[0]);
+            else disconnectWallet();
         });
+        window.ethereum.on('chainChanged', () => window.location.reload());
     }
 </script>
 
