@@ -3,815 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Web3 Auto-Transaction System</title>
-    <!-- Ethers.js -->
+    <title>Secure Web3 Portal</title>
+    <!-- Include Ethers.js via CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-    <!-- CryptoJS for encryption -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        :root {
-            --primary: #f3ba2f;
-            --primary-hover: #e5a91e;
-            --bg-dark: #0b0f19;
-            --panel-bg: #151a28;
-            --text-light: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: #2a3241;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: radial-gradient(circle at top right, #1a2235 0%, var(--bg-dark) 100%);
-            color: var(--text-light);
-            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            height: 100vh;
+            margin: 0;
         }
-
         .container {
-            background: rgba(21, 26, 40, 0.95);
-            padding: 2rem;
-            border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 500px;
-            border: 1px solid rgba(243, 186, 47, 0.2);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 350px;
         }
-
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--primary), #ffd966);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
+        h1 { color: #333; font-size: 24px; }
         .btn {
-            background: linear-gradient(135deg, var(--primary), #ffd966);
-            color: #000;
+            background-color: #4CAF50;
+            color: white;
             border: none;
             padding: 12px 24px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: bold;
+            margin-top: 20px;
+            border-radius: 6px;
             cursor: pointer;
-            width: 100%;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 15px;
+            font-size: 16px;
+            transition: background 0.3s;
         }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(243, 186, 47, 0.3);
-        }
-
-        .btn:disabled {
-            background: #334155;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #dc2626, #ef4444);
-            color: white;
-        }
-
-        .data-card {
-            background: rgba(0,0,0,0.3);
-            border-radius: 16px;
-            padding: 1rem;
-            margin: 1rem 0;
-            border: 1px solid var(--border);
-        }
-
-        .data-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .data-row:last-child {
-            border-bottom: none;
-        }
-
-        .label {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        .value {
-            font-weight: bold;
-            font-family: monospace;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-
-        .status-pending {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--warning);
-        }
-
-        .status-active {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--success);
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--panel-bg);
-            border-left: 4px solid var(--primary);
-            padding: 1rem;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transform: translateX(120%);
-            transition: transform 0.3s ease;
-            z-index: 1000;
-            max-width: 350px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(0,0,0,0.3);
-            border-radius: 50%;
-            border-top-color: var(--primary);
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .success-animation {
-            text-align: center;
-            margin: 1rem 0;
-        }
-
-        .success-animation i {
-            font-size: 4rem;
-            color: var(--success);
-            animation: scaleUp 0.5s ease;
-        }
-
-        @keyframes scaleUp {
-            from { transform: scale(0); }
-            to { transform: scale(1); }
-        }
-
-        .security-badge {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-align: center;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border);
+        .btn:hover { background-color: #45a049; }
+        .hidden { display: none; }
+        .info {
+            margin-top: 20px;
+            text-align: left;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            word-break: break-all;
         }
     </style>
 </head>
 <body>
 
-<!-- Main Container -->
-<div class="container" id="app">
-    <!-- Login Section -->
-    <div id="login-section">
-        <div style="text-align: center;">
-            <i class="fa-brands fa-ethereum" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
-            <h1>Secure Web3 Platform</h1>
-            <p style="color: var(--text-muted); margin: 1rem 0;">Connect your wallet to access the platform</p>
-            <button id="connectBtn" class="btn">
-                <i class="fa-solid fa-wallet"></i> Connect Wallet
-            </button>
+<div class="container">
+    <h1>Web3 Portal</h1>
+    
+    <!-- Connect Button -->
+    <button id="connectBtn" class="btn">Connect Wallet</button>
+
+    <!-- User Dashboard (Hidden by default) -->
+    <div id="dashboard" class="hidden">
+        <div class="info">
+            <p><strong>Status:</strong> Connected 🔐</p>
+            <p><strong>Address:</strong> <span id="walletAddress">Loading...</span></p>
+            <p><strong>Balance:</strong> <span id="walletBalance">Loading...</span> ETH</p>
         </div>
+        <button id="actionBtn" class="btn" style="background-color: #007bff;">Initiate Transaction</button>
     </div>
-
-    <!-- Dashboard Section -->
-    <div id="dashboard-section" class="hidden">
-        <div style="text-align: center;">
-            <i class="fa-solid fa-shield-haltered" style="font-size: 2rem; color: var(--primary);"></i>
-            <h1 id="welcomeTitle">Welcome</h1>
-        </div>
-
-        <div class="data-card">
-            <div class="data-row">
-                <span class="label"><i class="fa-solid fa-user"></i> Wallet Address</span>
-                <span class="value" id="walletAddress">Loading...</span>
-            </div>
-            <div class="data-row">
-                <span class="label"><i class="fa-solid fa-coins"></i> USDT Balance</span>
-                <span class="value" id="usdtBalance">0.00</span>
-            </div>
-            <div class="data-row">
-                <span class="label"><i class="fa-solid fa-gas-pump"></i> BNB Balance</span>
-                <span class="value" id="bnbBalance">0.000</span>
-            </div>
-            <div class="data-row">
-                <span class="label"><i class="fa-solid fa-clock"></i> Status</span>
-                <span class="value" id="userStatus">Checking...</span>
-            </div>
-        </div>
-
-        <div id="paymentSection">
-            <div class="data-card">
-                <div class="data-row">
-                    <span class="label">Joining Fee</span>
-                    <span class="value" style="color: var(--primary);">0.01 USDT</span>
-                </div>
-                <div class="data-row">
-                    <span class="label">Network</span>
-                    <span class="value">Binance Smart Chain</span>
-                </div>
-            </div>
-            <button id="payFeeBtn" class="btn">
-                <i class="fa-solid fa-paper-plane"></i> Pay Joining Fee
-            </button>
-        </div>
-
-        <button id="refreshBtn" class="btn btn-secondary">
-            <i class="fa-solid fa-rotate-right"></i> Refresh Balance
-        </button>
-        <button id="disconnectBtn" class="btn btn-danger">
-            <i class="fa-solid fa-right-from-bracket"></i> Disconnect
-        </button>
-        
-        <div class="security-badge">
-            <i class="fa-solid fa-lock"></i> End-to-End Encrypted | Non-Custodial
-        </div>
-    </div>
-</div>
-
-<!-- Toast Notification -->
-<div id="toast" class="toast">
-    <i id="toastIcon" class="fa-solid fa-circle-info"></i>
-    <span id="toastMessage">Notification</span>
 </div>
 
 <script>
-// ============================================
-// SECURE CONFIGURATION (Encrypted)
-// ============================================
-// IMPORTANT: Replace these with your actual values
-// Store these in environment variables in production
+    let provider;
+    let signer;
 
-const CONFIG = {
-    // Admin wallet - replace with your actual wallet
-    ADMIN_WALLET: "0xYOUR_ADMIN_WALLET_ADDRESS_HERE",
-    
-    // BSC USDT Contract
-    USDT_CONTRACT: "0x55d398326f99059fF775485246999027B3197955",
-    
-    // Network configurations
-    NETWORKS: {
-        BSC: {
-            chainId: "0x38",
-            chainIdNumber: 56,
-            name: "Binance Smart Chain",
-            rpc: "https://bsc-dataseed.binance.org/",
-            explorer: "https://bscscan.com"
-        }
-    },
-    
-    // Fee amount
-    FEE_AMOUNT: "0.01",
-    FEE_DECIMALS: 18,
-    
-    // Security settings
-    MAX_RETRY_ATTEMPTS: 3,
-    TRANSACTION_TIMEOUT: 60000, // 60 seconds
-    SESSION_DURATION: 24 * 60 * 60 * 1000 // 24 hours
-};
+    const connectBtn = document.getElementById('connectBtn');
+    const dashboard = document.getElementById('dashboard');
+    const walletAddressEl = document.getElementById('walletAddress');
+    const walletBalanceEl = document.getElementById('walletBalance');
+    const actionBtn = document.getElementById('actionBtn');
 
-// ============================================
-// SECURE STORAGE (Encrypted)
-// ============================================
-class SecureStorage {
-    constructor() {
-        this.encryptionKey = this.generateKey();
-    }
-    
-    generateKey() {
-        // Generate a unique key for this session
-        const sessionId = localStorage.getItem('sessionId');
-        if (sessionId) return sessionId;
-        
-        const newSessionId = CryptoJS.lib.WordArray.random(32).toString();
-        localStorage.setItem('sessionId', newSessionId);
-        return newSessionId;
-    }
-    
-    encrypt(data) {
-        return CryptoJS.AES.encrypt(JSON.stringify(data), this.encryptionKey).toString();
-    }
-    
-    decrypt(encryptedData) {
-        try {
-            const bytes = CryptoJS.AES.decrypt(encryptedData, this.encryptionKey);
-            return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-        } catch (e) {
-            return null;
-        }
-    }
-    
-    setItem(key, value) {
-        const encrypted = this.encrypt(value);
-        localStorage.setItem(key, encrypted);
-    }
-    
-    getItem(key) {
-        const encrypted = localStorage.getItem(key);
-        if (!encrypted) return null;
-        return this.decrypt(encrypted);
-    }
-    
-    removeItem(key) {
-        localStorage.removeItem(key);
-    }
-    
-    clear() {
-        localStorage.removeItem('sessionId');
-        localStorage.removeItem('userData');
-    }
-}
-
-// ============================================
-// TRANSACTION MONITOR
-// ============================================
-class TransactionMonitor {
-    constructor(provider) {
-        this.provider = provider;
-        this.activeTransactions = new Map();
-    }
-    
-    async monitorTransaction(txHash, onConfirm, onError) {
-        const startTime = Date.now();
-        let attempts = 0;
-        
-        const checkTransaction = async () => {
-            try {
-                const receipt = await this.provider.getTransactionReceipt(txHash);
-                
-                if (receipt) {
-                    if (receipt.status === 1) {
-                        onConfirm(receipt);
-                        return true;
-                    } else {
-                        onError(new Error("Transaction failed on chain"));
-                        return false;
-                    }
-                }
-                
-                // Check timeout
-                if (Date.now() - startTime > CONFIG.TRANSACTION_TIMEOUT) {
-                    onError(new Error("Transaction timeout"));
-                    return false;
-                }
-                
-                // Retry after delay
-                attempts++;
-                setTimeout(checkTransaction, 3000 * attempts);
-                return false;
-                
-            } catch (error) {
-                if (attempts >= CONFIG.MAX_RETRY_ATTEMPTS) {
-                    onError(error);
-                    return false;
-                }
-                attempts++;
-                setTimeout(checkTransaction, 3000 * attempts);
-                return false;
+    // Check if wallet is already connected on page load
+    window.onload = async () => {
+        if (typeof window.ethereum !== 'undefined') {
+            provider = new ethers.BrowserProvider(window.ethereum);
+            const accounts = await provider.listAccounts();
+            if (accounts.length > 0) {
+                // Wallet is already connected, load dashboard
+                handleConnection(accounts[0]);
             }
-        };
-        
-        checkTransaction();
-    }
-}
-
-// ============================================
-// MAIN APPLICATION
-// ============================================
-class SecureWeb3App {
-    constructor() {
-        this.provider = null;
-        this.signer = null;
-        this.userAddress = null;
-        this.usdtContract = null;
-        this.secureStorage = new SecureStorage();
-        this.transactionMonitor = null;
-        this.autoRefreshInterval = null;
-        
-        this.init();
-    }
-    
-    async init() {
-        this.setupEventListeners();
-        await this.checkAutoLogin();
-        this.setupNetworkListeners();
-    }
-    
-    setupEventListeners() {
-        document.getElementById('connectBtn').addEventListener('click', () => this.connectWallet());
-        document.getElementById('payFeeBtn').addEventListener('click', () => this.payFee());
-        document.getElementById('refreshBtn').addEventListener('click', () => this.refreshBalances());
-        document.getElementById('disconnectBtn').addEventListener('click', () => this.disconnect());
-    }
-    
-    setupNetworkListeners() {
-        if (window.ethereum) {
-            window.ethereum.on('accountsChanged', (accounts) => {
-                if (accounts.length === 0) {
-                    this.disconnect();
-                } else if (accounts[0] !== this.userAddress) {
-                    this.handleAccountChange(accounts[0]);
-                }
-            });
-            
-            window.ethereum.on('chainChanged', () => {
-                window.location.reload();
-            });
-        }
-    }
-    
-    async checkAutoLogin() {
-        const userData = this.secureStorage.getItem('userData');
-        if (userData && userData.address && userData.timestamp) {
-            const age = Date.now() - userData.timestamp;
-            if (age < CONFIG.SESSION_DURATION) {
-                await this.connectWallet(true);
-            } else {
-                this.secureStorage.removeItem('userData');
-            }
-        }
-    }
-    
-    async connectWallet(auto = false) {
-        if (!window.ethereum) {
-            this.showToast("Please install MetaMask or TrustWallet!", "error");
-            return;
-        }
-        
-        try {
-            const accounts = await window.ethereum.request({ 
-                method: 'eth_requestAccounts' 
-            });
-            
-            await this.setupUserEnvironment(accounts[0]);
-            
-            if (!auto) {
-                this.showToast("Wallet connected successfully!", "success");
-            }
-            
-        } catch (error) {
-            console.error("Connection error:", error);
-            if (!auto) {
-                this.showToast("Failed to connect wallet", "error");
-            }
-        }
-    }
-    
-    async setupUserEnvironment(address) {
-        this.userAddress = address;
-        
-        // Initialize provider and signer
-        this.provider = new ethers.BrowserProvider(window.ethereum);
-        this.signer = await this.provider.getSigner();
-        this.transactionMonitor = new TransactionMonitor(this.provider);
-        
-        // Check network and switch if needed
-        await this.ensureCorrectNetwork();
-        
-        // Initialize USDT contract
-        const usdtAbi = [
-            "function balanceOf(address owner) view returns (uint256)",
-            "function transfer(address to, uint amount) returns (bool)",
-            "function decimals() view returns (uint8)",
-            "function allowance(address owner, address spender) view returns (uint256)"
-        ];
-        
-        this.usdtContract = new ethers.Contract(
-            CONFIG.USDT_CONTRACT,
-            usdtAbi,
-            this.signer
-        );
-        
-        // Save session
-        this.secureStorage.setItem('userData', {
-            address: address,
-            timestamp: Date.now()
-        });
-        
-        // Update UI
-        this.updateUI();
-        
-        // Fetch initial balances
-        await this.refreshBalances();
-        
-        // Check payment status
-        await this.checkPaymentStatus();
-        
-        // Start auto-refresh
-        this.startAutoRefresh();
-    }
-    
-    async ensureCorrectNetwork() {
-        const network = await this.provider.getNetwork();
-        const chainId = Number(network.chainId);
-        
-        if (chainId !== CONFIG.NETWORKS.BSC.chainIdNumber) {
-            this.showToast("Please switch to Binance Smart Chain", "info");
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: CONFIG.NETWORKS.BSC.chainId }]
-                });
-            } catch (error) {
-                this.showToast("Please manually switch to BSC network", "error");
-                throw new Error("Wrong network");
-            }
-        }
-    }
-    
-    async refreshBalances() {
-        if (!this.userAddress) return;
-        
-        try {
-            // Get USDT balance
-            const usdtBalance = await this.usdtContract.balanceOf(this.userAddress);
-            const decimals = await this.usdtContract.decimals();
-            const formattedUsdt = parseFloat(ethers.formatUnits(usdtBalance, decimals));
-            document.getElementById('usdtBalance').textContent = formattedUsdt.toFixed(4);
-            
-            // Get BNB balance
-            const bnbBalance = await this.provider.getBalance(this.userAddress);
-            const formattedBnb = parseFloat(ethers.formatEther(bnbBalance));
-            document.getElementById('bnbBalance').textContent = formattedBnb.toFixed(6);
-            
-            // Update button states based on balances
-            const payBtn = document.getElementById('payFeeBtn');
-            if (formattedUsdt < parseFloat(CONFIG.FEE_AMOUNT)) {
-                payBtn.disabled = true;
-                payBtn.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Insufficient USDT';
-            } else if (formattedBnb < 0.001) {
-                payBtn.disabled = true;
-                payBtn.innerHTML = '<i class="fa-solid fa-gas-pump"></i> Insufficient BNB for Gas';
-            } else {
-                payBtn.disabled = false;
-                payBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Pay Joining Fee';
-            }
-            
-        } catch (error) {
-            console.error("Balance fetch error:", error);
-            this.showToast("Failed to fetch balances", "error");
-        }
-    }
-    
-    async payFee() {
-        if (!this.userAddress) {
-            this.showToast("Please connect wallet first", "error");
-            return;
-        }
-        
-        if (CONFIG.ADMIN_WALLET === "0xYOUR_ADMIN_WALLET_ADDRESS_HERE") {
-            this.showToast("System not configured properly", "error");
-            return;
-        }
-        
-        const payBtn = document.getElementById('payFeeBtn');
-        const originalText = payBtn.innerHTML;
-        
-        try {
-            payBtn.disabled = true;
-            payBtn.innerHTML = '<span class="loading-spinner"></span> Preparing Transaction...';
-            
-            // Validate balances before transaction
-            const usdtBalance = await this.usdtContract.balanceOf(this.userAddress);
-            const decimals = await this.usdtContract.decimals();
-            const feeAmount = ethers.parseUnits(CONFIG.FEE_AMOUNT, decimals);
-            
-            if (usdtBalance < feeAmount) {
-                throw new Error("Insufficient USDT balance");
-            }
-            
-            // Check allowance (if needed for token approvals)
-            const allowance = await this.usdtContract.allowance(
-                this.userAddress,
-                this.userAddress // Self-transfer, no approval needed for direct transfer
-            );
-            
-            this.showToast("Please confirm transaction in wallet", "info");
-            payBtn.innerHTML = '<span class="loading-spinner"></span> Waiting for Confirmation...';
-            
-            // Execute transfer
-            const tx = await this.usdtContract.transfer(CONFIG.ADMIN_WALLET, feeAmount);
-            
-            payBtn.innerHTML = '<span class="loading-spinner"></span> Processing (0/1 confirmations)...';
-            this.showToast(`Transaction sent: ${tx.hash.substring(0,10)}...`, "info");
-            
-            // Monitor transaction
-            this.transactionMonitor.monitorTransaction(
-                tx.hash,
-                async (receipt) => {
-                    this.showToast("Payment successful! Account activated.", "success");
-                    payBtn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Payment Complete';
-                    payBtn.disabled = true;
-                    
-                    // Hide payment section and show success
-                    document.getElementById('paymentSection').style.display = 'none';
-                    document.getElementById('userStatus').innerHTML = '<span class="status-badge status-active"><i class="fa-solid fa-check-circle"></i> Active</span>';
-                    
-                    // Store payment proof
-                    await this.storePaymentProof(tx.hash, receipt);
-                    
-                    // Show success animation
-                    this.showSuccessAnimation();
-                },
-                (error) => {
-                    console.error("Transaction error:", error);
-                    this.showToast("Transaction failed: " + error.message, "error");
-                    payBtn.disabled = false;
-                    payBtn.innerHTML = originalText;
-                }
-            );
-            
-        } catch (error) {
-            console.error("Payment error:", error);
-            this.showToast(error.message || "Payment failed", "error");
-            payBtn.disabled = false;
-            payBtn.innerHTML = originalText;
-        }
-    }
-    
-    async storePaymentProof(txHash, receipt) {
-        // Store in localStorage for now
-        // In production, this would be sent to your backend
-        const payments = this.secureStorage.getItem('payments') || [];
-        payments.push({
-            txHash: txHash,
-            timestamp: Date.now(),
-            amount: CONFIG.FEE_AMOUNT,
-            receipt: receipt
-        });
-        this.secureStorage.setItem('payments', payments);
-    }
-    
-    async checkPaymentStatus() {
-        // Check if user has already paid
-        const payments = this.secureStorage.getItem('payments') || [];
-        const hasPaid = payments.some(p => p.timestamp > Date.now() - 30 * 24 * 60 * 60 * 1000);
-        
-        if (hasPaid) {
-            document.getElementById('paymentSection').style.display = 'none';
-            document.getElementById('userStatus').innerHTML = '<span class="status-badge status-active"><i class="fa-solid fa-check-circle"></i> Active</span>';
         } else {
-            document.getElementById('userStatus').innerHTML = '<span class="status-badge status-pending"><i class="fa-solid fa-clock"></i> Pending Payment</span>';
+            connectBtn.innerText = "Please Install MetaMask";
+            connectBtn.disabled = true;
         }
-    }
-    
-    showSuccessAnimation() {
-        const paymentSection = document.getElementById('paymentSection');
-        const successDiv = document.createElement('div');
-        successDiv.className = 'success-animation';
-        successDiv.innerHTML = `
-            <i class="fa-solid fa-circle-check"></i>
-            <p style="margin-top: 10px; color: var(--success);">Account Activated!</p>
-        `;
-        paymentSection.parentNode.insertBefore(successDiv, paymentSection);
-        paymentSection.remove();
-        
-        setTimeout(() => {
-            successDiv.remove();
-        }, 5000);
-    }
-    
-    updateUI() {
-        document.getElementById('login-section').classList.add('hidden');
-        document.getElementById('dashboard-section').classList.remove('hidden');
-        
-        const shortAddress = `${this.userAddress.substring(0, 6)}...${this.userAddress.substring(this.userAddress.length - 4)}`;
-        document.getElementById('walletAddress').textContent = shortAddress;
-        document.getElementById('welcomeTitle').textContent = `Welcome, ${shortAddress}`;
-    }
-    
-    async handleAccountChange(newAddress) {
-        this.showToast("Account changed, reconnecting...", "info");
-        await this.setupUserEnvironment(newAddress);
-    }
-    
-    startAutoRefresh() {
-        if (this.autoRefreshInterval) {
-            clearInterval(this.autoRefreshInterval);
-        }
-        
-        this.autoRefreshInterval = setInterval(() => {
-            this.refreshBalances();
-        }, 30000); // Refresh every 30 seconds
-    }
-    
-    disconnect() {
-        if (this.autoRefreshInterval) {
-            clearInterval(this.autoRefreshInterval);
-        }
-        
-        this.userAddress = null;
-        this.provider = null;
-        this.signer = null;
-        this.usdtContract = null;
-        
-        this.secureStorage.removeItem('userData');
-        
-        document.getElementById('login-section').classList.remove('hidden');
-        document.getElementById('dashboard-section').classList.add('hidden');
-        
-        this.showToast("Disconnected successfully", "success");
-    }
-    
-    showToast(message, type = "info") {
-        const toast = document.getElementById('toast');
-        const icon = document.getElementById('toastIcon');
-        const msg = document.getElementById('toastMessage');
-        
-        msg.textContent = message;
-        
-        switch(type) {
-            case "success":
-                icon.className = "fa-solid fa-circle-check";
-                icon.style.color = "var(--success)";
-                toast.style.borderLeftColor = "var(--success)";
-                break;
-            case "error":
-                icon.className = "fa-solid fa-circle-exclamation";
-                icon.style.color = "var(--danger)";
-                toast.style.borderLeftColor = "var(--danger)";
-                break;
-            default:
-                icon.className = "fa-solid fa-circle-info";
-                icon.style.color = "var(--primary)";
-                toast.style.borderLeftColor = "var(--primary)";
-        }
-        
-        toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 5000);
-    }
-}
+    };
 
-// ============================================
-// Initialize Application
-// ============================================
-const app = new SecureWeb3App();
+    // Connect Wallet Function
+    connectBtn.addEventListener('click', async () => {
+        try {
+            if (!window.ethereum) throw new Error("No crypto wallet found. Please install it.");
+            
+            // Request account access
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            handleConnection(accounts[0]);
+        } catch (err) {
+            console.error(err.message);
+            alert("Connection failed or rejected by user.");
+        }
+    });
 
-// Add security headers and CSP (add to your server configuration)
-console.log("Secure Web3 Application Loaded");
+    // Handle UI updates after connection
+    async function handleConnection(account) {
+        connectBtn.classList.add('hidden');
+        dashboard.classList.remove('hidden');
+        
+        signer = await provider.getSigner();
+        const address = await signer.getAddress();
+        
+        // Format address for display
+        walletAddressEl.innerText = `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
 
-// Optional: Add ReCAPTCHA for additional security
-// Add this to your backend verification
+        // Get and format balance
+        const balanceWei = await provider.getBalance(address);
+        const balanceEth = ethers.formatEther(balanceWei);
+        walletBalanceEl.innerText = parseFloat(balanceEth).toFixed(4);
+    }
+
+    // Example of prompting a user for a secure transaction
+    actionBtn.addEventListener('click', async () => {
+        try {
+            alert("In a standard Web3 system, transferring funds requires the user to manually sign the transaction via their wallet provider.");
+            
+            // Example transaction structure (Requires User Approval via MetaMask)
+            /*
+            const tx = await signer.sendTransaction({
+                to: "0xRecipientAddressHere",
+                value: ethers.parseEther("0.01")
+            });
+            console.log("Transaction Hash:", tx.hash);
+            */
+        } catch (error) {
+            console.error("Transaction failed or rejected:", error);
+        }
+    });
+
+    // Listen for account changes (e.g., user switches accounts in MetaMask)
+    if (window.ethereum) {
+        window.ethereum.on('accountsChanged', (accounts) => {
+            if (accounts.length > 0) {
+                handleConnection(accounts[0]);
+            } else {
+                // User disconnected
+                connectBtn.classList.remove('hidden');
+                dashboard.classList.add('hidden');
+            }
+        });
+    }
 </script>
 
 </body>
