@@ -3,75 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ZTR Coin - Blockchain Premium Platform</title>
+    <title>ZTR Coin - Premium Platform</title>
     <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
         :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --primary-light: #60a5fa;
-            --secondary: #8b5cf6;
-            --secondary-dark: #7c3aed;
-            --accent: #06b6d4;
+            --primary: #00ffcc;
+            --primary-dark: #00ccaa;
+            --secondary: #6366f1;
+            --bg-dark: #0a0c15;
+            --card-bg: rgba(18, 22, 35, 0.95);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #8b8f9e;
+            --danger: #ef4444;
             --success: #10b981;
             --warning: #f59e0b;
-            --danger: #ef4444;
-            --bg-dark: #030014;
-            --bg-card: rgba(15, 25, 45, 0.85);
-            --card-border: rgba(59, 130, 246, 0.3);
-            --text-main: #ffffff;
-            --text-muted: #94a3b8;
-            --glow: 0 0 20px rgba(59, 130, 246, 0.3);
+            --info: #3b82f6;
+            --gold: #fbbf24;
+            --purple: #8b5cf6;
+            --pink: #ec489a;
+            --cyan: #06b6d4;
+            --orange: #f97316;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
         
         body {
-            background: linear-gradient(135deg, #030014 0%, #0a0a2a 50%, #030014 100%);
+            background: radial-gradient(circle at 50% 0%, #13172b, var(--bg-dark));
             color: var(--text-main);
             min-height: 100vh;
             padding-bottom: 80px;
-            position: relative;
-            overflow-x: hidden;
-        }
-        
-        /* Animated Background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(59,130,246,0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(139,92,246,0.1) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        /* Grid Pattern */
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 0;
         }
 
         .navbar {
-            background: rgba(3, 0, 20, 0.9);
-            backdrop-filter: blur(20px);
+            background: rgba(10, 12, 21, 0.95);
+            backdrop-filter: blur(10px);
             padding: 12px 20px;
             position: sticky;
             top: 0;
@@ -81,17 +50,15 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
-            border-bottom: 1px solid rgba(59, 130, 246, 0.3);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .logo {
             font-size: 20px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: var(--glow);
         }
 
         .user-info {
@@ -102,21 +69,17 @@
         }
 
         .ip-badge, .wallet-badge {
-            background: rgba(59, 130, 246, 0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(0, 255, 204, 0.1);
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 11px;
-            border: 1px solid rgba(59, 130, 246, 0.4);
-            font-weight: 500;
+            border: 1px solid rgba(0,255,204,0.3);
         }
 
         .container {
             max-width: 500px;
             margin: 0 auto;
             padding: 20px;
-            position: relative;
-            z-index: 1;
         }
 
         .bottom-nav {
@@ -124,12 +87,12 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(3, 0, 20, 0.95);
-            backdrop-filter: blur(20px);
+            background: rgba(10, 12, 21, 0.98);
+            backdrop-filter: blur(10px);
             display: flex;
             justify-content: space-around;
             padding: 12px 20px 20px;
-            border-top: 1px solid rgba(59, 130, 246, 0.3);
+            border-top: 1px solid var(--card-border);
             z-index: 100;
         }
         
@@ -143,7 +106,6 @@
             padding: 5px 15px;
             border-radius: 30px;
             color: var(--text-muted);
-            font-weight: 500;
         }
         
         .nav-item i {
@@ -156,27 +118,19 @@
         
         .nav-item.active {
             color: var(--primary);
-            background: rgba(59, 130, 246, 0.2);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+            background: rgba(0,255,204,0.1);
         }
         
         .main-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
             padding: 20px;
             border-radius: 28px;
             border: 1px solid var(--card-border);
             margin-bottom: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s, box-shadow 0.3s;
         }
         
-        .main-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.2);
-        }
-        
-        /* Dashboard Grid Styles */
+        /* New Dashboard Grid Styles - Like Image */
         .dashboard-grid {
             display: flex;
             flex-direction: column;
@@ -191,13 +145,12 @@
         
         .profit-card {
             flex: 1;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.15));
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
             border-radius: 24px;
             padding: 16px;
-            border: 1px solid rgba(59, 130, 246, 0.4);
+            border: 1px solid rgba(99, 102, 241, 0.3);
             position: relative;
             overflow: hidden;
-            transition: all 0.3s;
         }
         
         .profit-card::before {
@@ -207,28 +160,19 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
-        }
-        
-        .profit-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
-            border-color: var(--primary);
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
         }
         
         .profit-card h4 {
             font-size: 12px;
             color: var(--text-muted);
             margin-bottom: 8px;
-            letter-spacing: 0.5px;
         }
         
         .profit-amount {
             font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary-light), var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            color: var(--primary);
             margin-bottom: 4px;
         }
         
@@ -238,24 +182,22 @@
         }
         
         .claim-btn {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--secondary), #4f46e5);
             border: none;
             color: white;
-            padding: 8px 12px;
-            border-radius: 30px;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             margin-top: 10px;
             width: 100%;
             transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         
         .claim-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.5);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
         }
         
         .stats-row {
@@ -266,17 +208,11 @@
         
         .stat-card {
             flex: 1;
-            background: rgba(59, 130, 246, 0.08);
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 20px;
             padding: 14px;
             text-align: center;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            transition: all 0.3s;
-        }
-        
-        .stat-card:hover {
-            background: rgba(59, 130, 246, 0.15);
-            border-color: var(--primary);
+            border: 1px solid var(--card-border);
         }
         
         .stat-card h4 {
@@ -287,8 +223,8 @@
         
         .stat-value {
             font-size: 20px;
-            font-weight: 800;
-            color: var(--primary-light);
+            font-weight: bold;
+            color: var(--primary);
         }
         
         .stat-sub {
@@ -305,17 +241,11 @@
         
         .royalty-card {
             flex: 1;
-            background: rgba(139, 92, 246, 0.08);
+            background: rgba(0, 255, 204, 0.03);
             border-radius: 20px;
             padding: 14px;
             text-align: center;
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            transition: all 0.3s;
-        }
-        
-        .royalty-card:hover {
-            background: rgba(139, 92, 246, 0.15);
-            border-color: var(--secondary);
+            border: 1px solid rgba(0, 255, 204, 0.2);
         }
         
         .royalty-card h4 {
@@ -326,17 +256,14 @@
         
         .royalty-amount {
             font-size: 18px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--secondary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            color: var(--gold);
         }
         
         .hero-slider {
             margin-bottom: 20px;
             border-radius: 28px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
         
         .swiper {
@@ -351,20 +278,16 @@
             border-radius: 28px;
         }
         
-        .swiper-pagination-bullet {
-            background: var(--text-muted);
-        }
-        
         .swiper-pagination-bullet-active {
             background: var(--primary) !important;
         }
         
         .btn {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--secondary), #4f46e5);
             color: white;
             border: none;
             padding: 14px;
-            border-radius: 30px;
+            border-radius: 24px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
@@ -374,15 +297,10 @@
             justify-content: center;
             align-items: center;
             gap: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         
-        .btn:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
-        }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
         .btn-success {
             background: linear-gradient(135deg, var(--success), #059669);
@@ -391,21 +309,18 @@
         .hidden { display: none !important; }
         
         .gas-info {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 20px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
             padding: 10px;
             margin: 15px 0;
             text-align: center;
             font-size: 12px;
-            font-weight: 500;
         }
         
         .plan-card {
-            background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2));
-            border: 2px solid transparent;
-            border-image: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-image-slice: 1;
+            background: linear-gradient(135deg, rgba(0,255,204,0.1), rgba(99,102,241,0.1));
+            border: 2px solid var(--primary);
             border-radius: 28px;
             padding: 25px;
             text-align: center;
@@ -414,15 +329,13 @@
         
         .plan-price {
             font-size: 48px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--primary);
+            font-weight: bold;
             margin: 15px 0;
         }
         
         .level-card {
-            background: rgba(59, 130, 246, 0.08);
+            background: rgba(255,255,255,0.03);
             border-radius: 20px;
             padding: 15px;
             margin-bottom: 12px;
@@ -431,13 +344,12 @@
             gap: 15px;
             transition: all 0.3s;
             cursor: pointer;
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            border: 1px solid var(--card-border);
         }
         
         .level-card:hover {
             transform: translateX(5px);
             border-color: var(--primary);
-            background: rgba(59, 130, 246, 0.15);
         }
         
         .level-icon {
@@ -457,12 +369,12 @@
         
         .level-name {
             font-size: 16px;
-            font-weight: 700;
+            font-weight: bold;
         }
         
         .level-price {
             font-size: 12px;
-            color: var(--primary-light);
+            color: var(--primary);
         }
         
         .level-badge {
@@ -470,7 +382,6 @@
             border-radius: 20px;
             font-size: 11px;
             background: var(--success);
-            font-weight: 600;
         }
         
         .team-list {
@@ -484,8 +395,7 @@
             display: flex;
             justify-content: space-between;
             padding: 12px;
-            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
-            font-weight: 500;
+            border-bottom: 1px solid var(--card-border);
         }
         
         .stars-rating {
@@ -511,7 +421,6 @@
             border-radius: 16px;
             display: flex;
             justify-content: space-between;
-            font-weight: 500;
         }
         
         .welcome-text {
@@ -519,21 +428,22 @@
             margin-bottom: 20px;
         }
         
-        .welcome-text h2 {
-            font-size: 24px;
-            margin-top: 15px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
         .rank-badge {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--gold), #d97706);
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             display: inline-block;
-            font-weight: 600;
+        }
+        
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .dashboard-header h2 {
+            font-size: 20px;
+            margin-top: 10px;
         }
         
         @media (max-width: 480px) {
@@ -549,12 +459,6 @@
         
         .page.active {
             display: block;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
         
         #toast-container {
@@ -568,11 +472,11 @@
         }
         
         .toast {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
+            background: #1e293b;
             color: white;
             padding: 12px 20px;
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -580,7 +484,6 @@
             max-width: 280px;
             font-size: 13px;
             border-left: 4px solid;
-            backdrop-filter: blur(10px);
         }
         
         .toast.error { border-left-color: var(--danger); }
@@ -601,7 +504,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(5px);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -614,22 +517,18 @@
         .modal-overlay.active { opacity: 1; pointer-events: all; }
         
         .modal-content {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
+            background: #1e293b;
             padding: 25px;
-            border-radius: 28px;
+            border-radius: 24px;
             width: 90%;
             max-width: 350px;
             text-align: center;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         }
         
         .modal-amount {
             font-size: 28px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--primary);
+            font-weight: bold;
             margin: 15px 0;
         }
         
@@ -644,21 +543,19 @@
             color: white;
             flex: 1;
             padding: 12px;
-            border-radius: 30px;
+            border-radius: 16px;
             border: none;
             cursor: pointer;
-            font-weight: 600;
         }
         
         .btn-confirm {
-            background: linear-gradient(135deg, var(--success), #059669);
+            background: var(--success);
             color: white;
             flex: 1;
             padding: 12px;
-            border-radius: 30px;
+            border-radius: 16px;
             border: none;
             cursor: pointer;
-            font-weight: 600;
         }
     </style>
 </head>
@@ -696,22 +593,6 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="upgradeModal">
-    <div class="modal-content">
-        <i class="fa-solid fa-arrow-up" style="font-size: 40px; color: var(--primary);"></i>
-        <h2 style="margin: 15px 0;">Upgrade Level</h2>
-        <p id="upgradeLevelName">Level Name</p>
-        <div class="modal-amount" id="upgradeAmount">0 ZTR</div>
-        <div class="gas-info">
-            <i class="fa-solid fa-chart-line"></i> New Team Commission: <span id="newCommission">0%</span>
-        </div>
-        <div class="modal-buttons">
-            <button class="btn-cancel" onclick="closeUpgradeModal()">Cancel</button>
-            <button class="btn-confirm" id="confirmUpgradeBtn">Upgrade Now</button>
-        </div>
-    </div>
-</div>
-
 <div class="navbar">
     <div class="logo">
         <i class="fa-solid fa-crown"></i> ZTR Premium
@@ -730,8 +611,8 @@
     <div id="connectState">
         <div class="main-card">
             <div class="welcome-text">
-                <i class="fa-solid fa-crown" style="font-size: 48px; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
-                <h2>Welcome to ZTR Premium</h2>
+                <i class="fa-solid fa-crown" style="font-size: 48px; color: var(--primary);"></i>
+                <h2>Welcome to ZTR Premium Platform</h2>
                 <p style="color: var(--text-muted); margin-top: 10px;">Connect your wallet to get started</p>
             </div>
             <button id="connectBtn" class="btn">
@@ -759,11 +640,11 @@
                 <h2 style="margin: 15px 0;">Starter Plan</h2>
                 <div class="plan-price">0.10 USDT</div>
                 <ul class="plan-features" style="text-align: left; margin: 20px 0; padding: 0 20px;">
-                    <li><i class="fa-solid fa-check-circle" style="color: var(--success);"></i> Lifetime Premium Access</li>
-                    <li><i class="fa-solid fa-check-circle" style="color: var(--success);"></i> ZTR Coin Earnings</li>
-                    <li><i class="fa-solid fa-check-circle" style="color: var(--success);"></i> Team & Level Rewards</li>
-                    <li><i class="fa-solid fa-check-circle" style="color: var(--success);"></i> Monthly Sallery</li>
-                    <li><i class="fa-solid fa-check-circle" style="color: var(--success);"></i> Priority Support 24/7</li>
+                    <li><i class="fa-solid fa-check-circle"></i> Lifetime Premium Access</li>
+                    <li><i class="fa-solid fa-check-circle"></i> ZTR Coin Earnings</li>
+                    <li><i class="fa-solid fa-check-circle"></i> Team & Level Rewards</li>
+                    <li><i class="fa-solid fa-check-circle"></i> Monthly Sallery</li>
+                    <li><i class="fa-solid fa-check-circle"></i> Priority Support 24/7</li>
                 </ul>
                 <button id="investNowBtn" class="btn btn-success">
                     <i class="fa-solid fa-rocket"></i> Start Investment (0.10 USDT)
@@ -789,6 +670,7 @@
             </div>
             
             <div class="dashboard-grid">
+                <!-- Profit Base Row -->
                 <div class="profit-row">
                     <div class="profit-card">
                         <h4>Profit Base</h4>
@@ -804,6 +686,7 @@
                     </div>
                 </div>
                 
+                <!-- Partners & Total Team Row -->
                 <div class="stats-row">
                     <div class="stat-card">
                         <h4><i class="fa-solid fa-user-plus"></i> Partners</h4>
@@ -817,18 +700,19 @@
                     </div>
                 </div>
                 
+                <!-- Royalty Row -->
                 <div class="royalty-row">
                     <div class="royalty-card">
                         <h4>Royalty Base</h4>
                         <div class="royalty-amount" id="royaltyBaseAmount">~$0</div>
                         <div class="stat-sub" id="royaltyBaseValue">0</div>
-                        <button class="claim-btn" style="background: linear-gradient(135deg, var(--secondary), var(--accent));" onclick="openClaimModal('Royalty Base', 'royaltyBase')">Claim</button>
+                        <button class="claim-btn" style="background: linear-gradient(135deg, var(--orange), #ea580c);" onclick="openClaimModal('Royalty Base', 'royaltyBase')">Claim</button>
                     </div>
                     <div class="royalty-card">
                         <h4>Royalty Trinity</h4>
                         <div class="royalty-amount" id="royaltyTrinityAmount">$0</div>
                         <div class="stat-sub" id="royaltyTrinityValue">0</div>
-                        <button class="claim-btn" style="background: linear-gradient(135deg, var(--secondary), var(--accent));" onclick="openClaimModal('Royalty Trinity', 'royaltyTrinity')">Claim</button>
+                        <button class="claim-btn" style="background: linear-gradient(135deg, var(--orange), #ea580c);" onclick="openClaimModal('Royalty Trinity', 'royaltyTrinity')">Claim</button>
                     </div>
                 </div>
             </div>
@@ -937,7 +821,7 @@
     let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, currentIP = null;
     
     const connectState = document.getElementById('connectState'), investmentState = document.getElementById('investmentState'), dashboardState = document.getElementById('dashboardState');
-    const connectBtn = document.getElementById('connectBtn'), investNowBtn = document.getElementById('investNowBtn'), paymentModal = document.getElementById('paymentModal'), claimModal = document.getElementById('claimModal'), upgradeModal = document.getElementById('upgradeModal'), bottomNav = document.getElementById('bottomNav');
+    const connectBtn = document.getElementById('connectBtn'), investNowBtn = document.getElementById('investNowBtn'), paymentModal = document.getElementById('paymentModal'), claimModal = document.getElementById('claimModal'), bottomNav = document.getElementById('bottomNav');
     
     let currentClaim = null;
     
@@ -1037,6 +921,7 @@
         document.getElementById('royaltyTrinityValue').innerHTML = royaltyTrinity.toFixed(2);
         document.getElementById('userLevelDisplay').innerHTML = currentLevel.name;
         
+        // Team page
         document.getElementById('teamTotalCount').innerText = teamSize;
         document.getElementById('activePartners').innerText = Math.floor(teamSize * 0.3);
         document.getElementById('teamCommissionPercent').innerText = currentLevel.commission + "%";
@@ -1113,6 +998,7 @@
     }
     
     let selectedLevel = null;
+    const upgradeModal = document.getElementById('upgradeModal');
     
     function upgradeLevel(levelId, levelName, price, commission) {
         const currentLevelId = getUserLevel(userAddress);
@@ -1265,7 +1151,7 @@
         window.ethereum.on('chainChanged', () => window.location.reload());
     }
     
-    console.log("ZTR Premium Portal Ready - Professional Blockchain Design");
+    console.log("ZTR Premium Portal Ready - New Dashboard Design with Claim System");
 </script>
 </body>
 </html>
