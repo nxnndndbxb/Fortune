@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Web3 USDT Portal</title>
+    <title>Advanced Secure Web3 USDT Portal</title>
     <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
@@ -16,6 +16,8 @@
             --card-bg: rgba(30, 41, 59, 0.7);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
@@ -39,6 +41,8 @@
             width: 100%;
             max-width: 480px;
             border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            z-index: 1;
         }
 
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -94,7 +98,7 @@
         }
 
         .address-box { font-family: monospace; color: var(--primary); cursor: pointer; }
-        .disconnect-btn { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        .disconnect-btn { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
 
         .balances { display: flex; gap: 15px; margin-bottom: 25px; }
         .balance-box {
@@ -138,19 +142,61 @@
             display: flex; align-items: center; gap: 10px; font-weight: 500;
             animation: slideInRight 0.3s ease forwards;
         }
-        .toast.error { border-left: 5px solid #ef4444; }
-        .toast.success { border-left: 5px solid #10b981; }
+        .toast.error { border-left: 5px solid var(--danger); }
+        .toast.success { border-left: 5px solid var(--success); }
         .toast.info { border-left: 5px solid #3b82f6; }
 
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Custom Permission Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 100; opacity: 0; pointer-events: none; transition: 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-content {
+            background: #1e293b; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px;
+            text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            transform: translateY(-20px); transition: 0.3s;
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-icon { font-size: 40px; color: #f5af19; margin-bottom: 15px; }
+        .modal-title { font-size: 20px; margin-bottom: 10px; color: white; }
+        .modal-text { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
+        .modal-amount { font-size: 28px; color: var(--primary); font-weight: bold; margin-bottom: 20px; }
+        .modal-buttons { display: flex; gap: 10px; }
+        .btn-cancel { background: rgba(255,255,255,0.1); color: white; flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; }
+        .btn-confirm { background: var(--success); color: white; flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-cancel:hover { background: rgba(255,255,255,0.2); }
+        .btn-confirm:hover { background: #059669; }
+
     </style>
 </head>
 <body>
 
 <div id="toast-container"></div>
+
+<!-- Custom Permission Modal -->
+<div class="modal-overlay" id="permissionModal">
+    <div class="modal-content">
+        <i class="fa-solid fa-shield-halved modal-icon"></i>
+        <h2 class="modal-title">Transaction Permission</h2>
+        <p class="modal-text">You are about to securely transfer USDT to the Admin address. Do you approve this transaction?</p>
+        <div class="modal-amount" id="modalAmountDisplay">0.00 USDT</div>
+        <p style="font-size: 11px; color: #94a3b8; margin-bottom: 20px; word-break: break-all;">
+            To: <span id="modalAdminAddress" style="color: var(--primary);"></span>
+        </p>
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeModal()">Reject</button>
+            <button class="btn-confirm" id="confirmTxBtn"><i class="fa-solid fa-check"></i> Approve</button>
+        </div>
+    </div>
+</div>
 
 <div class="container">
     <div class="header-top">
@@ -160,7 +206,7 @@
     </div>
     
     <h1><i class="fa-brands fa-ethereum"></i> USDT Web3 Portal</h1>
-    <div class="subtitle">Securely transfer BEP-20 tokens</div>
+    <div class="subtitle">Securely transfer BEP-20 tokens via Smart Contract</div>
 
     <!-- Connect State -->
     <div id="connectState">
@@ -226,6 +272,7 @@
     let provider, signer, userAddress;
     let autoRefreshInterval;
     let rawUsdtBalance = "0";
+    let pendingAmount = "0";
 
     // DOM Elements
     const connectState = document.getElementById('connectState');
@@ -233,6 +280,10 @@
     const connectBtn = document.getElementById('connectBtn');
     const sendBtn = document.getElementById('sendBtn');
     const amountInput = document.getElementById('amountInput');
+    const permissionModal = document.getElementById('permissionModal');
+
+    // Display Admin Address in Modal
+    document.getElementById('modalAdminAddress').innerText = ADMIN_WALLET;
 
     // ==========================================
     // 🎨 UI & TOAST NOTIFICATIONS
@@ -264,6 +315,12 @@
         amountInput.value = rawUsdtBalance;
     }
 
+    // Modal Functions
+    function closeModal() {
+        permissionModal.classList.remove('active');
+        showToast('Transaction cancelled by user.', 'error');
+    }
+
     // ==========================================
     // 🔗 WALLET CONNECTION & BALANCES
     // ==========================================
@@ -271,7 +328,6 @@
         userAddress = account;
         signer = await provider.getSigner();
         
-        // Check Network
         const network = await provider.getNetwork();
         if (network.chainId !== CHAIN_ID) {
             showToast('Switching to BSC Mainnet...', 'info');
@@ -279,7 +335,6 @@
             return;
         }
 
-        // Update UI
         document.getElementById('networkBadge').classList.add('active');
         connectState.classList.add('hidden');
         dashboardState.classList.remove('hidden');
@@ -288,7 +343,6 @@
         
         await updateBalances();
         
-        // Auto Refresh Balance every 10 seconds
         if(autoRefreshInterval) clearInterval(autoRefreshInterval);
         autoRefreshInterval = setInterval(updateBalances, 10000);
         
@@ -338,37 +392,50 @@
     }
 
     // ==========================================
-    // 💸 TRANSACTION LOGIC
+    // 💸 TRANSACTION LOGIC (WITH PERMISSION MODAL)
     // ==========================================
-    sendBtn.addEventListener('click', async () => {
-        const amount = amountInput.value;
-        if (!amount || amount <= 0) return showToast('Enter a valid amount!', 'error');
-        if (parseFloat(amount) > parseFloat(rawUsdtBalance)) return showToast('Insufficient USDT Balance!', 'error');
+    
+    // Step 1: User clicks send, we check balance and show permission modal
+    sendBtn.addEventListener('click', () => {
+        pendingAmount = amountInput.value;
+        if (!pendingAmount || pendingAmount <= 0) return showToast('Enter a valid amount!', 'error');
+        if (parseFloat(pendingAmount) > parseFloat(rawUsdtBalance)) return showToast('Insufficient USDT Balance!', 'error');
 
+        // Show Permission Modal
+        document.getElementById('modalAmountDisplay').innerText = `${pendingAmount} USDT`;
+        permissionModal.classList.add('active');
+    });
+
+    // Step 2: User clicks "Approve" inside the modal -> triggers MetaMask Secure Signing
+    document.getElementById('confirmTxBtn').addEventListener('click', async () => {
+        permissionModal.classList.remove('active'); // Hide modal
+        
         try {
             sendBtn.disabled = true;
-            sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Processing...`;
+            sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Processing Payment...`;
 
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-            const amountInWei = ethers.parseEther(amount.toString());
+            const amountInWei = ethers.parseEther(pendingAmount.toString());
 
-            showToast('Confirm transaction in your wallet...', 'info');
+            // This triggers the official secure Wallet Popup (MetaMask/Trust Wallet)
+            showToast('Please sign the transaction in your Wallet securely...', 'info');
 
             const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei);
-            showToast('Transaction sent! Waiting for confirmation...', 'info');
+            showToast('Transaction sent! Waiting for blockchain confirmation...', 'info');
 
             const receipt = await tx.wait();
             
             if (receipt.status === 1) {
-                showToast(`Successfully sent ${amount} USDT!`, 'success');
+                showToast(`✅ Payment Successful! ${pendingAmount} USDT sent!`, 'success');
                 amountInput.value = '';
                 updateBalances();
                 
-                // Add to history
+                // Unhide history box and add record
+                document.getElementById('txHistory').classList.remove('hidden');
                 const historyList = document.getElementById('historyList');
                 historyList.innerHTML += `
                     <div class="history-item">
-                        <span>Sent ${amount} USDT</span>
+                        <span>Sent ${pendingAmount} USDT</span>
                         <a href="https://bscscan.com/tx/${tx.hash}" target="_blank">View <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                     </div>
                 `;
@@ -376,9 +443,13 @@
 
         } catch (error) {
             console.error(error);
-            if (error.code === 'ACTION_REJECTED') showToast('Transaction cancelled by user.', 'error');
-            else if (error.message.includes('insufficient funds')) showToast('Not enough BNB for gas fees!', 'error');
-            else showToast('Transaction failed.', 'error');
+            if (error.code === 'ACTION_REJECTED') {
+                showToast('Transaction rejected by user in Wallet.', 'error');
+            } else if (error.message.includes('insufficient funds')) {
+                showToast('Not enough BNB for gas fees!', 'error');
+            } else {
+                showToast('Transaction failed.', 'error');
+            }
         } finally {
             sendBtn.disabled = false;
             sendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Send to Admin`;
