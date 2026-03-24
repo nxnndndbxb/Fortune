@@ -25,14 +25,6 @@
             --warning: #f59e0b;
             --info: #3b82f6;
             --gold: #fbbf24;
-            --silver: #94a3b8;
-            --level1: #10b981;
-            --level2: #3b82f6;
-            --level3: #8b5cf6;
-            --level4: #ec489a;
-            --level5: #f59e0b;
-            --level6: #ef4444;
-            --level7: #06b6d4;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
@@ -248,6 +240,17 @@
             background: linear-gradient(135deg, var(--success), #059669);
         }
         
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: var(--bg-color);
+        }
+        
         .hidden { display: none !important; }
         
         .gas-info {
@@ -319,11 +322,6 @@
             color: var(--primary);
         }
         
-        .level-price span {
-            font-size: 14px;
-            font-weight: bold;
-        }
-        
         .level-badge {
             padding: 4px 12px;
             border-radius: 20px;
@@ -361,6 +359,162 @@
             margin: 0 5px;
         }
         
+        /* Enhanced Assets Page Styles */
+        .profile-header {
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid var(--primary);
+        }
+        
+        .profile-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0,255,204,0.3);
+        }
+        
+        .profile-avatar i {
+            font-size: 48px;
+            color: white;
+        }
+        
+        .user-id {
+            background: rgba(0,255,204,0.2);
+            padding: 8px 16px;
+            border-radius: 30px;
+            display: inline-block;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .user-id span {
+            color: var(--primary);
+            font-size: 18px;
+        }
+        
+        .wallet-address-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .wallet-address-card p {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+        
+        .wallet-address-card .address {
+            font-family: monospace;
+            color: var(--primary);
+            font-size: 12px;
+            word-break: break-all;
+            cursor: pointer;
+        }
+        
+        .balance-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+        
+        .balance-stat {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 16px;
+            text-align: center;
+        }
+        
+        .balance-stat i {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        .balance-stat h4 {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .balance-stat p {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+        
+        .edit-profile-btn {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 12px;
+            margin-top: 15px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .edit-profile-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .profile-details {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .avatar-options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        
+        .avatar-option {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(0,255,204,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .avatar-option:hover, .avatar-option.selected {
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+        
+        .avatar-option i {
+            font-size: 32px;
+        }
+        
         .assets-list {
             display: flex;
             flex-direction: column;
@@ -393,28 +547,18 @@
             margin-bottom: 15px;
         }
         
-        .dashboard-header h2 {
-            font-size: 20px;
-            margin-top: 10px;
-        }
-        
         .team-count {
             font-size: 28px;
             font-weight: bold;
             color: var(--primary);
         }
         
-        .level-name-display {
-            font-size: 14px;
-            color: var(--gold);
-            margin-top: 5px;
-        }
-        
         @media (max-width: 480px) {
             .container { padding: 15px; }
             .nav-item { padding: 5px 10px; }
             .income-card h3 { font-size: 20px; }
-            .level-icon { width: 40px; height: 40px; font-size: 18px; }
+            .balance-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .balance-stat h4 { font-size: 16px; }
         }
         
         .page {
@@ -535,7 +679,6 @@
         <div class="gas-info">
             <i class="fa-solid fa-gas-pump"></i> Network Fee: ~0.0003 BNB
         </div>
-        <p style="font-size: 11px; color: var(--text-muted);">One-time payment for lifetime access</p>
         <div class="modal-buttons">
             <button class="btn-cancel" onclick="closePaymentModal()">Cancel</button>
             <button class="btn-confirm" id="confirmPaymentBtn">Pay Now</button>
@@ -552,10 +695,29 @@
         <div class="gas-info">
             <i class="fa-solid fa-chart-line"></i> New Team Commission: <span id="newCommission">0%</span>
         </div>
-        <p style="font-size: 11px; color: var(--text-muted);">Upgrade to increase your earnings</p>
         <div class="modal-buttons">
             <button class="btn-cancel" onclick="closeUpgradeModal()">Cancel</button>
             <button class="btn-confirm" id="confirmUpgradeBtn">Upgrade Now</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editProfileModal">
+    <div class="modal-content">
+        <i class="fa-solid fa-user-edit" style="font-size: 40px; color: var(--primary);"></i>
+        <h2 style="margin: 15px 0;">Edit Profile</h2>
+        <div class="avatar-options" id="avatarOptions">
+            <div class="avatar-option" data-avatar="fa-user-circle"><i class="fa-solid fa-user-circle"></i></div>
+            <div class="avatar-option" data-avatar="fa-user-astronaut"><i class="fa-solid fa-user-astronaut"></i></div>
+            <div class="avatar-option" data-avatar="fa-user-ninja"><i class="fa-solid fa-user-ninja"></i></div>
+            <div class="avatar-option" data-avatar="fa-crown"><i class="fa-solid fa-crown"></i></div>
+            <div class="avatar-option" data-avatar="fa-rocket"><i class="fa-solid fa-rocket"></i></div>
+            <div class="avatar-option" data-avatar="fa-dragon"><i class="fa-solid fa-dragon"></i></div>
+        </div>
+        <input type="text" id="profileNameInput" placeholder="Enter your name" style="width: 100%; padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.1); border: none; color: white; margin: 15px 0;">
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeEditProfileModal()">Cancel</button>
+            <button class="btn-confirm" id="saveProfileBtn">Save Changes</button>
         </div>
     </div>
 </div>
@@ -725,12 +887,68 @@
         
         <div id="pageAssets" class="page">
             <div class="main-card">
-                <h3><i class="fa-solid fa-chart-pie"></i> Your Assets</h3>
-                <div class="assets-list">
-                    <div class="asset-item"><span><i class="fa-brands fa-bnb"></i> BNB Balance</span><span id="assetBNB">0.0000</span></div>
-                    <div class="asset-item"><span><i class="fa-solid fa-dollar-sign"></i> USDT Balance</span><span id="assetUSDT">0.00</span></div>
-                    <div class="asset-item"><span><i class="fa-solid fa-coins"></i> ZTR Tokens</span><span id="assetZTR">0.00</span></div>
-                    <div class="asset-item"><span>💰 Total Value</span><span id="assetTotal">$0.00</span></div>
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatar" onclick="openEditProfile()">
+                        <i class="fa-solid fa-user-circle" id="avatarIcon"></i>
+                    </div>
+                    <div class="user-id">
+                        <i class="fa-solid fa-id-card"></i> User ID: <span id="userId">ZTR-1000</span>
+                    </div>
+                </div>
+                
+                <!-- Wallet Address -->
+                <div class="wallet-address-card">
+                    <p><i class="fa-solid fa-wallet"></i> Connected Wallet</p>
+                    <div class="address" id="walletAddressDisplay" onclick="copyWalletAddress()">0x...</div>
+                </div>
+                
+                <!-- Balance Stats -->
+                <div class="balance-stats">
+                    <div class="balance-stat">
+                        <i class="fa-brands fa-bnb"></i>
+                        <h4 id="statBNB">0.0000</h4>
+                        <p>BNB</p>
+                    </div>
+                    <div class="balance-stat">
+                        <i class="fa-solid fa-dollar-sign"></i>
+                        <h4 id="statUSDT">0.00</h4>
+                        <p>USDT</p>
+                    </div>
+                    <div class="balance-stat">
+                        <i class="fa-solid fa-coins"></i>
+                        <h4 id="statZTR">0.00</h4>
+                        <p>ZTR</p>
+                    </div>
+                </div>
+                
+                <!-- Edit Profile Button -->
+                <div class="edit-profile-btn" onclick="openEditProfile()">
+                    <i class="fa-solid fa-user-edit"></i> Edit Profile
+                </div>
+                
+                <!-- Profile Details -->
+                <div class="profile-details">
+                    <div class="detail-row">
+                        <span><i class="fa-solid fa-user"></i> Name:</span>
+                        <span id="profileName">Premium User</span>
+                    </div>
+                    <div class="detail-row">
+                        <span><i class="fa-solid fa-calendar"></i> Joined:</span>
+                        <span id="joinDate">Loading...</span>
+                    </div>
+                    <div class="detail-row">
+                        <span><i class="fa-solid fa-chart-line"></i> Total Earnings:</span>
+                        <span id="totalEarningsStat">$0.00</span>
+                    </div>
+                    <div class="detail-row">
+                        <span><i class="fa-solid fa-chart-simple"></i> Current Level:</span>
+                        <span id="userLevelStat">Start Level</span>
+                    </div>
+                </div>
+                
+                <div class="gas-info" style="margin-top: 15px;">
+                    <i class="fa-solid fa-info-circle"></i> Wallet balances updated in real-time
                 </div>
             </div>
         </div>
@@ -746,6 +964,7 @@
 </div>
 
 <script>
+    // Configuration
     const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
     const CHAIN_ID = "0x38";
@@ -768,13 +987,13 @@
     const STORAGE_KEYS = {
         SESSION: 'ztr_premium_session', PAID_USERS: 'ztr_paid_users', ZTR_BALANCE: 'ztr_user_balance',
         USER_LEVEL: 'ztr_user_level', TEAM_SIZE: 'ztr_team_size', SALLERY_EARNINGS: 'ztr_sallery_earnings',
-        TEAM_COMMISSION: 'ztr_team_commission'
+        TEAM_COMMISSION: 'ztr_team_commission', USER_PROFILES: 'ztr_user_profiles', USER_IDS: 'ztr_user_ids'
     };
     
     let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, currentIP = null;
     
     const connectState = document.getElementById('connectState'), investmentState = document.getElementById('investmentState'), dashboardState = document.getElementById('dashboardState');
-    const connectBtn = document.getElementById('connectBtn'), investNowBtn = document.getElementById('investNowBtn'), paymentModal = document.getElementById('paymentModal'), upgradeModal = document.getElementById('upgradeModal'), bottomNav = document.getElementById('bottomNav');
+    const connectBtn = document.getElementById('connectBtn'), investNowBtn = document.getElementById('investNowBtn'), paymentModal = document.getElementById('paymentModal'), upgradeModal = document.getElementById('upgradeModal'), editProfileModal = document.getElementById('editProfileModal'), bottomNav = document.getElementById('bottomNav');
     
     function showToast(message, type = 'info') {
         const container = document.getElementById('toast-container');
@@ -791,8 +1010,128 @@
         catch { let ip = localStorage.getItem('fallback_ip'); if (!ip) { ip = 'local_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('fallback_ip', ip); } return ip; }
     }
     
+    // User Profile Management
+    function getNextUserId() {
+        let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
+        let nextId = 1000;
+        for (let key in userIds) {
+            if (userIds[key] >= nextId) nextId = userIds[key] + 1;
+        }
+        return nextId;
+    }
+    
+    function getUserProfile(wallet) {
+        const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+        return profiles[wallet.toLowerCase()] || null;
+    }
+    
+    function createUserProfile(wallet) {
+        const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
+        let userId = userIds[wallet.toLowerCase()];
+        if (!userId) {
+            userId = getNextUserId();
+            userIds[wallet.toLowerCase()] = userId;
+            localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
+        }
+        
+        const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+        if (!profiles[wallet.toLowerCase()]) {
+            profiles[wallet.toLowerCase()] = {
+                name: `User ${userId}`,
+                avatar: 'fa-user-circle',
+                joinDate: new Date().toLocaleDateString(),
+                userId: userId
+            };
+            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
+        }
+        return profiles[wallet.toLowerCase()];
+    }
+    
+    function updateUserProfile(wallet, name, avatar) {
+        const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+        if (profiles[wallet.toLowerCase()]) {
+            profiles[wallet.toLowerCase()].name = name;
+            profiles[wallet.toLowerCase()].avatar = avatar;
+            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
+        }
+    }
+    
+    function updateAssetsPage() {
+        if (!userAddress) return;
+        const profile = getUserProfile(userAddress) || createUserProfile(userAddress);
+        document.getElementById('userId').innerText = `ZTR-${profile.userId}`;
+        document.getElementById('profileName').innerText = profile.name;
+        document.getElementById('joinDate').innerText = profile.joinDate;
+        document.getElementById('avatarIcon').className = `fa-solid ${profile.avatar}`;
+        
+        const ztrBalance = getZTRBalance(userAddress);
+        const currentLevel = getCurrentLevelInfo(userAddress);
+        const totalEarnings = ztrBalance;
+        
+        document.getElementById('totalEarningsStat').innerText = `$${totalEarnings.toFixed(2)}`;
+        document.getElementById('userLevelStat').innerText = currentLevel.name;
+        document.getElementById('statBNB').innerText = parseFloat(rawBnbBalance).toFixed(4);
+        document.getElementById('statUSDT').innerText = parseFloat(rawUsdtBalance).toFixed(2);
+        document.getElementById('statZTR').innerText = ztrBalance.toFixed(2);
+        
+        const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+        document.getElementById('walletAddressDisplay').innerHTML = shortAddress;
+        document.getElementById('walletAddressDisplay').setAttribute('data-full', userAddress);
+    }
+    
+    function copyWalletAddress() {
+        if (userAddress) {
+            navigator.clipboard.writeText(userAddress);
+            showToast('Wallet address copied!', 'success');
+        }
+    }
+    
+    function openEditProfile() {
+        const profile = getUserProfile(userAddress);
+        document.getElementById('profileNameInput').value = profile.name;
+        document.querySelectorAll('.avatar-option').forEach(opt => {
+            opt.classList.remove('selected');
+            if (opt.dataset.avatar === profile.avatar) opt.classList.add('selected');
+        });
+        editProfileModal.classList.add('active');
+    }
+    
+    function closeEditProfileModal() { editProfileModal.classList.remove('active'); }
+    
+    function saveProfileChanges() {
+        const newName = document.getElementById('profileNameInput').value;
+        const selectedAvatar = document.querySelector('.avatar-option.selected')?.dataset.avatar || 'fa-user-circle';
+        if (newName.trim()) {
+            updateUserProfile(userAddress, newName.trim(), selectedAvatar);
+            showToast('Profile updated successfully!', 'success');
+            closeEditProfileModal();
+            updateAssetsPage();
+        } else {
+            showToast('Please enter a valid name', 'error');
+        }
+    }
+    
+    // Avatar selection
+    document.querySelectorAll('.avatar-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+        });
+    });
+    
+    document.getElementById('saveProfileBtn')?.addEventListener('click', saveProfileChanges);
+    
     function isPaidUser(wallet) { const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); return paidUsers[wallet.toLowerCase()] === true; }
-    function markUserAsPaid(wallet) { const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); paidUsers[wallet.toLowerCase()] = true; localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10); if (!getUserLevel(wallet)) setUserLevel(wallet, 0); if (!getTeamSize(wallet)) setTeamSize(wallet, 0); if (!getSalleryEarnings(wallet)) setSalleryEarnings(wallet, 0); }
+    function markUserAsPaid(wallet) { 
+        const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
+        paidUsers[wallet.toLowerCase()] = true; 
+        localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
+        createUserProfile(wallet);
+        if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10); 
+        if (!getUserLevel(wallet)) setUserLevel(wallet, 0); 
+        if (!getTeamSize(wallet)) setTeamSize(wallet, 0); 
+        if (!getSalleryEarnings(wallet)) setSalleryEarnings(wallet, 5); 
+    }
     
     function getZTRBalance(wallet) { const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); return balances[wallet.toLowerCase()] || 0; }
     function updateZTRBalance(wallet, amount) { const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); balances[wallet.toLowerCase()] = (balances[wallet.toLowerCase()] || 0) + amount; localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(balances)); return balances[wallet.toLowerCase()]; }
@@ -802,7 +1141,6 @@
     
     function getTeamSize(wallet) { const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); return teams[wallet.toLowerCase()] || 0; }
     function setTeamSize(wallet, size) { const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); teams[wallet.toLowerCase()] = size; localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teams)); }
-    function updateTeamSize(wallet, increment) { setTeamSize(wallet, getTeamSize(wallet) + increment); }
     
     function getSalleryEarnings(wallet) { const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); return earnings[wallet.toLowerCase()] || 0; }
     function setSalleryEarnings(wallet, amount) { const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); earnings[wallet.toLowerCase()] = amount; localStorage.setItem(STORAGE_KEYS.SALLERY_EARNINGS, JSON.stringify(earnings)); }
@@ -822,15 +1160,10 @@
         try {
             const bnbBalanceWei = await provider.getBalance(userAddress);
             rawBnbBalance = ethers.formatEther(bnbBalanceWei);
-            document.getElementById('assetBNB').innerText = parseFloat(rawBnbBalance).toFixed(6);
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
             const usdtBalWei = await usdtContract.balanceOf(userAddress);
             rawUsdtBalance = ethers.formatUnits(usdtBalWei, usdtDecimals);
-            document.getElementById('assetUSDT').innerText = parseFloat(rawUsdtBalance).toFixed(4);
-            const ztrBalance = getZTRBalance(userAddress);
-            document.getElementById('assetZTR').innerText = ztrBalance.toFixed(2);
-            const totalValue = parseFloat(rawUsdtBalance) + (parseFloat(rawBnbBalance) * 600) + ztrBalance;
-            document.getElementById('assetTotal').innerText = `$${totalValue.toFixed(2)}`;
+            updateAssetsPage();
         } catch (error) { console.error("Balance update error:", error); }
     }
     
@@ -915,6 +1248,7 @@
             closeUpgradeModal();
             updateDashboard();
             renderLevels();
+            updateAssetsPage();
         } catch (error) {
             console.error("Upgrade error:", error);
             showToast('Upgrade failed!', 'error');
@@ -944,7 +1278,6 @@
             
             if (receipt.status === 1) {
                 markUserAsPaid(userAddress);
-                setSalleryEarnings(userAddress, 5);
                 showToast(`✅ Payment successful! Welcome to ZTR Premium!`, 'success');
                 closePaymentModal();
                 showDashboard();
@@ -962,9 +1295,9 @@
     function showDashboard() {
         connectState.classList.add('hidden'); investmentState.classList.add('hidden'); dashboardState.classList.remove('hidden'); bottomNav.style.display = 'flex';
         document.getElementById('walletStatusBadge').innerHTML = `<i class="fa-solid fa-check-circle"></i> Premium Member`;
-        updateDashboard(); updateBalances(); renderLevels();
+        updateDashboard(); updateBalances(); renderLevels(); updateAssetsPage();
         if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-        autoRefreshInterval = setInterval(() => { updateBalances(); updateDashboard(); }, 10000);
+        autoRefreshInterval = setInterval(() => { updateBalances(); updateDashboard(); updateAssetsPage(); }, 10000);
         new Swiper('.dashboardSwiper', { loop: true, autoplay: { delay: 3000, disableOnInteraction: false }, pagination: { el: '.swiper-pagination', clickable: true } });
         showToast('Welcome to ZTR Premium Dashboard!', 'success');
     }
@@ -1012,6 +1345,7 @@
             document.getElementById(`page${pageId.charAt(0).toUpperCase() + pageId.slice(1)}`).classList.add('active');
             if (pageId === 'level') renderLevels();
             if (pageId === 'team') updateDashboard();
+            if (pageId === 'assets') updateAssetsPage();
         });
     });
     
@@ -1033,7 +1367,7 @@
         window.ethereum.on('chainChanged', () => window.location.reload());
     }
     
-    console.log("ZTR Premium Portal Ready - New Income System: Profit, Team, Sallery, Level | 1 ZTR = 1 USD");
+    console.log("ZTR Premium Portal Ready - Enhanced Assets Page with User Profile System");
 </script>
 </body>
 </html>
