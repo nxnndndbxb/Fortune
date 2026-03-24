@@ -26,6 +26,8 @@
             --info: #3b82f6;
             --gold: #fbbf24;
             --silver: #94a3b8;
+            --purple: #8b5cf6;
+            --pink: #ec489a;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
@@ -203,10 +205,10 @@
             color: var(--text-muted);
         }
         
-        .income-card.ztr .icon { color: var(--gold); }
-        .income-card.upliner .icon { color: var(--secondary); }
-        .income-card.downliner .icon { color: var(--success); }
+        .income-card.profit .icon { color: var(--gold); }
+        .income-card.team .icon { color: var(--secondary); }
         .income-card.sallery .icon { color: var(--warning); }
+        .income-card.level .icon { color: var(--purple); }
         
         /* Slider Styles */
         .hero-slider {
@@ -229,6 +231,112 @@
         
         .swiper-pagination-bullet-active {
             background: var(--primary) !important;
+        }
+        
+        /* Level Cards */
+        .level-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .level-card {
+            background: linear-gradient(135deg, rgba(0,255,204,0.1), rgba(102,126,234,0.1));
+            border-radius: 16px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid rgba(0,255,204,0.3);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .level-card:hover {
+            transform: translateX(5px);
+            border-color: var(--primary);
+        }
+        
+        .level-card.completed {
+            border-color: var(--success);
+            background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(0,255,204,0.05));
+        }
+        
+        .level-card.current {
+            border-color: var(--gold);
+            box-shadow: 0 0 15px rgba(251,191,36,0.3);
+        }
+        
+        .level-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        
+        .level-icon i {
+            color: var(--gold);
+        }
+        
+        .level-info {
+            flex: 1;
+        }
+        
+        .level-name {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .level-requirement {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .level-ztr {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .level-badge {
+            background: rgba(0,255,204,0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .level-badge.completed {
+            background: rgba(16,185,129,0.2);
+            color: var(--success);
+        }
+        
+        .level-badge.current {
+            background: rgba(251,191,36,0.2);
+            color: var(--gold);
+        }
+        
+        .level-progress {
+            margin-top: 8px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .level-progress-bar {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: width 0.3s;
         }
         
         .btn {
@@ -418,6 +526,8 @@
             .stat-card h3 { font-size: 20px; }
             .income-card h3 { font-size: 20px; }
             .income-card .icon { font-size: 24px; }
+            .level-icon { width: 45px; height: 45px; font-size: 22px; }
+            .level-ztr { font-size: 16px; }
         }
         
         .page {
@@ -488,6 +598,14 @@
         .dashboard-header h2 {
             font-size: 20px;
             margin-top: 10px;
+        }
+        
+        .current-level-badge {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 8px;
+            background: rgba(0,255,204,0.1);
+            border-radius: 20px;
         }
     </style>
 </head>
@@ -562,8 +680,8 @@
                 <div class="plan-price">0.10 USDT</div>
                 <ul class="plan-features">
                     <li><i class="fa-solid fa-check-circle"></i> Lifetime Premium Access</li>
-                    <li><i class="fa-solid fa-check-circle"></i> ZTR Coin Earnings</li>
-                    <li><i class="fa-solid fa-check-circle"></i> Upliner & Downliner Rewards</li>
+                    <li><i class="fa-solid fa-check-circle"></i> ZTR Coin Earnings (1 ZTR = $1)</li>
+                    <li><i class="fa-solid fa-check-circle"></i> Team & Level Rewards</li>
                     <li><i class="fa-solid fa-check-circle"></i> Monthly Sallery</li>
                     <li><i class="fa-solid fa-check-circle"></i> Priority Support 24/7</li>
                 </ul>
@@ -602,39 +720,29 @@
                 
                 <div class="dashboard-header">
                     <span class="rank-badge" id="userRankBadge">Premium Member</span>
-                    <h2>Income Overview</h2>
+                    <h2>Income Dashboard</h2>
                 </div>
                 
-                <!-- Income Grid - 2x2 Layout -->
+                <!-- Income Grid - 2x2 Layout (All in ZTR Coins) -->
                 <div class="income-grid">
-                    <!-- ZTR Coin Income -->
-                    <div class="income-card ztr">
+                    <!-- Profit -->
+                    <div class="income-card profit">
                         <div class="icon">
-                            <i class="fa-solid fa-coins"></i>
+                            <i class="fa-solid fa-chart-line"></i>
                         </div>
-                        <p>ZTR Coin Income</p>
-                        <h3 id="ztrIncome">0.00</h3>
-                        <small>≈ $<span id="ztrUSD">0.00</span></small>
+                        <p>Profit</p>
+                        <h3 id="profitIncome">0 ZTR</h3>
+                        <small>≈ $<span id="profitUSD">0</span></small>
                     </div>
                     
-                    <!-- Upliner Earning -->
-                    <div class="income-card upliner">
+                    <!-- Team -->
+                    <div class="income-card team">
                         <div class="icon">
-                            <i class="fa-solid fa-arrow-up"></i>
+                            <i class="fa-solid fa-users"></i>
                         </div>
-                        <p>Upliner Earning</p>
-                        <h3 id="uplinerIncome">$0.00</h3>
-                        <small>&nbsp;</small>
-                    </div>
-                    
-                    <!-- Downliner Earning -->
-                    <div class="income-card downliner">
-                        <div class="icon">
-                            <i class="fa-solid fa-arrow-down"></i>
-                        </div>
-                        <p>Downliner Earning</p>
-                        <h3 id="downlinerIncome">$0.00</h3>
-                        <small>&nbsp;</small>
+                        <p>Team</p>
+                        <h3 id="teamIncome">0 ZTR</h3>
+                        <small>≈ $<span id="teamUSD">0</span></small>
                     </div>
                     
                     <!-- Sallery -->
@@ -642,42 +750,44 @@
                         <div class="icon">
                             <i class="fa-solid fa-calendar-check"></i>
                         </div>
-                        <p>Monthly Sallery</p>
-                        <h3 id="salleryIncome">$0.00</h3>
-                        <small>&nbsp;</small>
+                        <p>Sallery</p>
+                        <h3 id="salleryIncome">0 ZTR</h3>
+                        <small>≈ $<span id="salleryUSD">0</span></small>
+                    </div>
+                    
+                    <!-- Level -->
+                    <div class="income-card level">
+                        <div class="icon">
+                            <i class="fa-solid fa-chart-simple"></i>
+                        </div>
+                        <p>Level Bonus</p>
+                        <h3 id="levelIncome">0 ZTR</h3>
+                        <small>≈ $<span id="levelUSD">0</span></small>
                     </div>
                 </div>
                 
                 <div class="gas-info">
-                    <i class="fa-solid fa-check-circle"></i> Premium Member | All features active
+                    <i class="fa-solid fa-check-circle"></i> 1 ZTR = $1 USD | Premium Member Active
                 </div>
             </div>
         </div>
         
-        <!-- Overview Page -->
-        <div id="pageOverview" class="page">
+        <!-- Level Page (formerly Overview) -->
+        <div id="pageLevel" class="page">
             <div class="main-card">
-                <h3><i class="fa-solid fa-chart-simple"></i> Platform Overview</h3>
-                <div class="stats-grid" style="margin-top: 20px;">
-                    <div class="stat-card">
-                        <p>Total Users</p>
-                        <h3 id="totalUsers">0</h3>
-                    </div>
-                    <div class="stat-card">
-                        <p>Active Members</p>
-                        <h3 id="activeMembers">0</h3>
-                    </div>
-                    <div class="stat-card">
-                        <p>Total Volume</p>
-                        <h3 id="totalVolume">$0</h3>
-                    </div>
-                    <div class="stat-card">
-                        <p>Your Rank</p>
-                        <h3 id="userRank">Premium</h3>
+                <div class="dashboard-header">
+                    <h3><i class="fa-solid fa-chart-simple"></i> Your Level System</h3>
+                    <div class="current-level-badge" id="currentLevelDisplay">
+                        Current Level: <strong id="currentLevel">Level 0</strong>
                     </div>
                 </div>
+                
+                <div class="level-container" id="levelContainer">
+                    <!-- Levels will be populated by JavaScript -->
+                </div>
+                
                 <div class="gas-info" style="margin-top: 15px;">
-                    <i class="fa-solid fa-chart-line"></i> ZTR Price: $<span id="ztrPrice">0.05</span>
+                    <i class="fa-solid fa-chart-line"></i> Reach higher levels to unlock more rewards
                 </div>
             </div>
         </div>
@@ -764,9 +874,9 @@
         <i class="fa-solid fa-chart-line"></i>
         <span>Dashboard</span>
     </div>
-    <div class="nav-item" data-page="overview">
-        <i class="fa-solid fa-chart-pie"></i>
-        <span>Overview</span>
+    <div class="nav-item" data-page="level">
+        <i class="fa-solid fa-chart-simple"></i>
+        <span>Level</span>
     </div>
     <div class="nav-item" data-page="stars">
         <i class="fa-solid fa-star"></i>
@@ -777,20 +887,31 @@
         <span>Team</span>
     </div>
     <div class="nav-item" data-page="assets">
-        <i class="fa-solid fa-chart-simple"></i>
+        <i class="fa-solid fa-chart-pie"></i>
         <span>Assets</span>
     </div>
 </div>
 
 <script>
-    // Configuration - All existing data preserved
+    // Configuration
     const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
     const CHAIN_ID = "0x38";
     const CHAIN_ID_DECIMAL = 56;
     const USDT_GAS_LIMIT = 65000;
     const JOINING_FEE_USDT = 0.10;
-    const ZTR_PRICE = 0.05;
+    const ZTR_TO_USD = 1; // 1 ZTR = $1
+    
+    // Level requirements in ZTR
+    const LEVELS = [
+        { name: "Bronze", requirement: 5, icon: "fa-medal", color: "#cd7f32", bg: "rgba(205,127,50,0.1)" },
+        { name: "Silver", requirement: 15, icon: "fa-medal", color: "#c0c0c0", bg: "rgba(192,192,192,0.1)" },
+        { name: "Gold", requirement: 35, icon: "fa-medal", color: "#ffd700", bg: "rgba(255,215,0,0.1)" },
+        { name: "Platinum", requirement: 45, icon: "fa-gem", color: "#e5e4e2", bg: "rgba(229,228,226,0.1)" },
+        { name: "Diamond", requirement: 65, icon: "fa-gem", color: "#b9f2ff", bg: "rgba(185,242,255,0.1)" },
+        { name: "Master", requirement: 80, icon: "fa-crown", color: "#ff6b6b", bg: "rgba(255,107,107,0.1)" },
+        { name: "Legend", requirement: 100, icon: "fa-crown", color: "#ffd700", bg: "rgba(255,215,0,0.2)" }
+    ];
     
     const USDT_ABI = [
         "function balanceOf(address owner) view returns (uint256)",
@@ -801,11 +922,11 @@
     const STORAGE_KEYS = {
         SESSION: 'ztr_premium_session',
         PAID_USERS: 'ztr_paid_users',
-        USER_EARNINGS: 'ztr_user_earnings',
         ZTR_BALANCE: 'ztr_user_balance',
-        UPLINER_EARNINGS: 'ztr_upliner_earnings',
-        DOWNLINER_EARNINGS: 'ztr_downliner_earnings',
-        SALLERY_EARNINGS: 'ztr_sallery_earnings'
+        PROFIT_EARNINGS: 'ztr_profit_earnings',
+        TEAM_EARNINGS: 'ztr_team_earnings',
+        SALLERY_EARNINGS: 'ztr_sallery_earnings',
+        LEVEL_EARNINGS: 'ztr_level_earnings'
     };
     
     let provider, signer, userAddress;
@@ -861,14 +982,17 @@
         if (!getZTRBalance(wallet)) {
             updateZTRBalance(wallet, 10);
         }
-        if (!getUplinerEarnings(wallet)) {
-            updateUplinerEarnings(wallet, 0);
+        if (!getProfitEarnings(wallet)) {
+            updateProfitEarnings(wallet, 0);
         }
-        if (!getDownlinerEarnings(wallet)) {
-            updateDownlinerEarnings(wallet, 0);
+        if (!getTeamEarnings(wallet)) {
+            updateTeamEarnings(wallet, 0);
         }
         if (!getSalleryEarnings(wallet)) {
             updateSalleryEarnings(wallet, 0);
+        }
+        if (!getLevelEarnings(wallet)) {
+            updateLevelEarnings(wallet, 0);
         }
     }
     
@@ -884,26 +1008,26 @@
         return balances[wallet.toLowerCase()];
     }
     
-    function getUplinerEarnings(wallet) {
-        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.UPLINER_EARNINGS) || '{}');
+    function getProfitEarnings(wallet) {
+        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFIT_EARNINGS) || '{}');
         return earnings[wallet.toLowerCase()] || 0;
     }
     
-    function updateUplinerEarnings(wallet, amount) {
-        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.UPLINER_EARNINGS) || '{}');
+    function updateProfitEarnings(wallet, amount) {
+        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFIT_EARNINGS) || '{}');
         earnings[wallet.toLowerCase()] = (earnings[wallet.toLowerCase()] || 0) + amount;
-        localStorage.setItem(STORAGE_KEYS.UPLINER_EARNINGS, JSON.stringify(earnings));
+        localStorage.setItem(STORAGE_KEYS.PROFIT_EARNINGS, JSON.stringify(earnings));
     }
     
-    function getDownlinerEarnings(wallet) {
-        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.DOWNLINER_EARNINGS) || '{}');
+    function getTeamEarnings(wallet) {
+        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_EARNINGS) || '{}');
         return earnings[wallet.toLowerCase()] || 0;
     }
     
-    function updateDownlinerEarnings(wallet, amount) {
-        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.DOWNLINER_EARNINGS) || '{}');
+    function updateTeamEarnings(wallet, amount) {
+        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_EARNINGS) || '{}');
         earnings[wallet.toLowerCase()] = (earnings[wallet.toLowerCase()] || 0) + amount;
-        localStorage.setItem(STORAGE_KEYS.DOWNLINER_EARNINGS, JSON.stringify(earnings));
+        localStorage.setItem(STORAGE_KEYS.TEAM_EARNINGS, JSON.stringify(earnings));
     }
     
     function getSalleryEarnings(wallet) {
@@ -915,6 +1039,17 @@
         const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}');
         earnings[wallet.toLowerCase()] = (earnings[wallet.toLowerCase()] || 0) + amount;
         localStorage.setItem(STORAGE_KEYS.SALLERY_EARNINGS, JSON.stringify(earnings));
+    }
+    
+    function getLevelEarnings(wallet) {
+        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEVEL_EARNINGS) || '{}');
+        return earnings[wallet.toLowerCase()] || 0;
+    }
+    
+    function updateLevelEarnings(wallet, amount) {
+        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEVEL_EARNINGS) || '{}');
+        earnings[wallet.toLowerCase()] = (earnings[wallet.toLowerCase()] || 0) + amount;
+        localStorage.setItem(STORAGE_KEYS.LEVEL_EARNINGS, JSON.stringify(earnings));
     }
     
     function saveSession(wallet, ip) {
@@ -962,28 +1097,83 @@
             const ztrBalance = getZTRBalance(userAddress);
             document.getElementById('assetZTR').innerText = ztrBalance.toFixed(2);
             
-            const totalValue = parseFloat(rawUsdtBalance) + (parseFloat(rawBnbBalance) * 600) + (ztrBalance * ZTR_PRICE);
+            const totalValue = parseFloat(rawUsdtBalance) + (parseFloat(rawBnbBalance) * 600) + (ztrBalance * ZTR_TO_USD);
             document.getElementById('assetTotal').innerText = `$${totalValue.toFixed(2)}`;
             
             await calculateGasFee();
         } catch (error) { console.error("Balance update error:", error); }
     }
     
+    function getCurrentLevel(ztrBalance) {
+        let currentLevel = 0;
+        for (let i = 0; i < LEVELS.length; i++) {
+            if (ztrBalance >= LEVELS[i].requirement) {
+                currentLevel = i + 1;
+            } else {
+                break;
+            }
+        }
+        return currentLevel;
+    }
+    
+    function renderLevels() {
+        const ztrBalance = getZTRBalance(userAddress);
+        const currentLevel = getCurrentLevel(ztrBalance);
+        const container = document.getElementById('levelContainer');
+        
+        if (!container) return;
+        
+        container.innerHTML = LEVELS.map((level, index) => {
+            const levelNum = index + 1;
+            const isCompleted = ztrBalance >= level.requirement;
+            const isCurrent = !isCompleted && (index === 0 || ztrBalance >= LEVELS[index-1]?.requirement);
+            const progressPercent = Math.min(100, (ztrBalance / level.requirement) * 100);
+            
+            return `
+                <div class="level-card ${isCompleted ? 'completed' : ''} ${isCurrent && !isCompleted ? 'current' : ''}">
+                    <div class="level-icon" style="background: ${level.bg}">
+                        <i class="fa-solid ${level.icon}" style="color: ${level.color}"></i>
+                    </div>
+                    <div class="level-info">
+                        <div class="level-name" style="color: ${level.color}">${level.name} Level ${levelNum}</div>
+                        <div class="level-requirement">Requirement: ${level.requirement} ZTR</div>
+                        <div class="level-progress">
+                            <div class="level-progress-bar" style="width: ${progressPercent}%"></div>
+                        </div>
+                    </div>
+                    <div class="level-ztr">${level.requirement} ZTR</div>
+                    <div class="level-badge ${isCompleted ? 'completed' : (isCurrent ? 'current' : '')}">
+                        ${isCompleted ? '<i class="fa-solid fa-check"></i> Completed' : (isCurrent ? 'In Progress' : 'Locked')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        document.getElementById('currentLevel').innerText = `${currentLevel > 0 ? LEVELS[currentLevel-1].name : 'Starter'} Level ${currentLevel}`;
+    }
+    
     function updateDashboardIncomes() {
         const ztrBalance = getZTRBalance(userAddress);
-        document.getElementById('ztrIncome').innerText = ztrBalance.toFixed(2);
-        document.getElementById('ztrUSD').innerText = (ztrBalance * ZTR_PRICE).toFixed(2);
         
-        const upliner = getUplinerEarnings(userAddress);
-        document.getElementById('uplinerIncome').innerText = `$${upliner.toFixed(2)}`;
+        // Calculate simulated earnings in ZTR
+        const profitZTR = Math.floor(ztrBalance * 0.15);
+        const teamZTR = Math.floor(ztrBalance * 0.25);
+        const salleryZTR = Math.floor(ztrBalance * 0.10);
+        const levelZTR = Math.floor(ztrBalance * 0.20);
         
-        const downliner = getDownlinerEarnings(userAddress);
-        document.getElementById('downlinerIncome').innerText = `$${downliner.toFixed(2)}`;
+        document.getElementById('profitIncome').innerText = `${profitZTR} ZTR`;
+        document.getElementById('profitUSD').innerText = profitZTR;
         
-        const sallery = getSalleryEarnings(userAddress);
-        document.getElementById('salleryIncome').innerText = `$${sallery.toFixed(2)}`;
+        document.getElementById('teamIncome').innerText = `${teamZTR} ZTR`;
+        document.getElementById('teamUSD').innerText = teamZTR;
         
-        document.getElementById('ztrPrice').innerText = ZTR_PRICE;
+        document.getElementById('salleryIncome').innerText = `${salleryZTR} ZTR`;
+        document.getElementById('salleryUSD').innerText = salleryZTR;
+        
+        document.getElementById('levelIncome').innerText = `${levelZTR} ZTR`;
+        document.getElementById('levelUSD').innerText = levelZTR;
+        
+        renderLevels();
     }
     
     async function payJoiningFee() {
@@ -1020,9 +1210,10 @@
             
             if (receipt.status === 1) {
                 markUserAsPaid(userAddress);
-                updateUplinerEarnings(userAddress, 0.05);
-                updateDownlinerEarnings(userAddress, 0.02);
-                updateSalleryEarnings(userAddress, 0.10);
+                updateProfitEarnings(userAddress, 5);
+                updateTeamEarnings(userAddress, 3);
+                updateSalleryEarnings(userAddress, 2);
+                updateLevelEarnings(userAddress, 4);
                 showToast(`✅ Payment successful! Welcome to ZTR Premium!`, 'success');
                 closePaymentModal();
                 showDashboard();
@@ -1142,6 +1333,9 @@
             const pageId = item.dataset.page;
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
             document.getElementById(`page${pageId.charAt(0).toUpperCase() + pageId.slice(1)}`).classList.add('active');
+            if (pageId === 'level') {
+                renderLevels();
+            }
         });
     });
     
@@ -1181,7 +1375,7 @@
         window.ethereum.on('chainChanged', () => window.location.reload());
     }
     
-    console.log("ZTR Premium Portal Ready - Dashboard with 2x2 Income Grid");
+    console.log("ZTR Premium Portal Ready - All earnings in ZTR (1 ZTR = $1)");
 </script>
 </body>
 </html>
