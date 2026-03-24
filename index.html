@@ -216,6 +216,15 @@
             color: var(--primary);
         }
         
+        .admin-address {
+            background: rgba(255,255,255,0.05);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+        
         @media (max-width: 480px) {
             .container { padding: 20px; }
             .balances { flex-direction: column; }
@@ -261,6 +270,10 @@
         <button id="connectBtn" class="btn">
             <i class="fa-solid fa-wallet"></i> Connect Wallet
         </button>
+        <div class="admin-address">
+            <i class="fa-solid fa-building"></i> Admin Wallet:<br>
+            <strong style="color: var(--primary);">0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399</strong>
+        </div>
         <div class="gas-info" style="margin-top: 15px;">
             <i class="fa-solid fa-info-circle"></i> Standard BSC Gas Fee: <strong>~0.0003 BNB</strong><br>
             <small>(Same as Trust Wallet USDT transfer)</small>
@@ -297,6 +310,11 @@
         <div class="gas-info" id="gasEstimateDisplay">
             <i class="fa-solid fa-gas-pump"></i> Estimated Gas: <span id="gasFeeValue">Calculating...</span> BNB
         </div>
+        
+        <div class="admin-address" style="text-align: center;">
+            <i class="fa-solid fa-arrow-right"></i> Sending to:<br>
+            <strong style="color: var(--primary); font-size: 12px;">0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399</strong>
+        </div>
 
         <button id="sendBtn" class="btn">
             <i class="fa-solid fa-paper-plane"></i> Send to Admin
@@ -319,8 +337,8 @@
     // ==========================================
     // ⚙️ BSC NETWORK CONFIGURATION
     // ==========================================
-    // Admin wallet address (checksummed format)
-    const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7599e6c8a2";
+    // UPDATED Admin wallet address
+    const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
     const CHAIN_ID = "0x38"; // BSC Mainnet
     const CHAIN_ID_DECIMAL = 56;
@@ -410,7 +428,7 @@
             
             // Standard gas limit for USDT transfer on BSC
             const gasLimit = STANDARD_GAS_LIMIT;
-            const gasCostWei = gasLimit * gasPrice;
+            const gasCostWei = BigInt(gasLimit) * gasPrice;
             const gasCostBNB = parseFloat(ethers.formatEther(gasCostWei));
             
             estimatedGasFeeBNB = gasCostBNB;
@@ -685,7 +703,7 @@
                     const actualGasPrice = receipt.gasPrice;
                     const actualGasBNB = parseFloat(ethers.formatEther(actualGasUsed * actualGasPrice));
                     
-                    showToast(`✅ Successfully sent ${pendingAmount} USDT! (Gas: ${actualGasBNB.toFixed(6)} BNB)`, 'success');
+                    showToast(`✅ Successfully sent ${pendingAmount} USDT to Admin! (Gas: ${actualGasBNB.toFixed(6)} BNB)`, 'success');
                     amountInput.value = '';
                     
                     setTimeout(async () => {
@@ -763,7 +781,7 @@
         });
     }
     
-    console.log("Application ready - Standard BSC Gas Fees Applied");
+    console.log("Application ready - Admin Wallet: 0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399");
 </script>
 
 </body>
