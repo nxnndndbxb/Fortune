@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>USDT Web3 Portal - BSC Network</title>
+    <title>USDT BEP-20 Transfer Portal</title>
     <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
@@ -61,6 +61,7 @@
         }
 
         .network-badge.active { color: var(--primary); background: rgba(0, 255, 204, 0.1); }
+        .network-badge.bsc { background: rgba(240, 185, 11, 0.2); color: #f0b90b; }
 
         h1 { font-size: 28px; margin-bottom: 5px; text-align: center; }
         .subtitle { color: var(--text-muted); text-align: center; font-size: 14px; margin-bottom: 30px; }
@@ -225,6 +226,15 @@
             margin-top: 10px;
         }
         
+        .token-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+        
         @media (max-width: 480px) {
             .container { padding: 20px; }
             .balances { flex-direction: column; }
@@ -237,9 +247,9 @@
 
 <div class="modal-overlay" id="permissionModal">
     <div class="modal-content">
-        <i class="fa-solid fa-gas-pump modal-icon"></i>
-        <h2 class="modal-title">Confirm Transaction</h2>
-        <p class="modal-text">Please confirm sending USDT to Admin</p>
+        <i class="fa-solid fa-dollar-sign modal-icon"></i>
+        <h2 class="modal-title">Confirm USDT BEP-20 Transfer</h2>
+        <p class="modal-text">Please confirm sending USDT (BEP-20) to Admin</p>
         <div class="modal-amount" id="modalAmountDisplay">0.00 USDT</div>
         <div class="gas-info">
             <i class="fa-solid fa-gas-pump"></i> Estimated Gas Fee<br>
@@ -247,36 +257,39 @@
             <small style="color: var(--text-muted);">(Standard BSC Network Fee)</small>
         </div>
         <p style="font-size: 11px; color: #94a3b8; margin-bottom: 20px; word-break: break-all;">
+            <i class="fa-brands fa-bnb"></i> Token: USDT (BEP-20)<br>
             To: <span id="modalAdminAddress" style="color: var(--primary);"></span>
         </p>
         <div class="modal-buttons">
             <button class="btn-cancel" onclick="closeModal()"><i class="fa-solid fa-times"></i> Reject</button>
-            <button class="btn-confirm" id="confirmTxBtn"><i class="fa-solid fa-check"></i> Approve</button>
+            <button class="btn-confirm" id="confirmTxBtn"><i class="fa-solid fa-check"></i> Approve Transfer</button>
         </div>
     </div>
 </div>
 
 <div class="container">
     <div class="header-top">
-        <div class="network-badge" id="networkBadge">
-            <i class="fa-solid fa-circle-dot"></i> BSC Network
+        <div class="network-badge bsc" id="networkBadge">
+            <i class="fa-brands fa-bnb"></i> BSC Mainnet
         </div>
     </div>
     
-    <h1><i class="fa-solid fa-coins"></i> USDT Web3 Portal</h1>
-    <div class="subtitle">Securely transfer BEP-20 tokens</div>
+    <h1><i class="fa-solid fa-coins"></i> USDT BEP-20 Portal</h1>
+    <div class="subtitle">Transfer USDT (BEP-20) tokens securely</div>
 
     <div id="connectState">
         <button id="connectBtn" class="btn">
             <i class="fa-solid fa-wallet"></i> Connect Wallet
         </button>
         <div class="admin-address">
-            <i class="fa-solid fa-building"></i> Admin Wallet:<br>
+            <i class="fa-solid fa-building"></i> Admin Wallet (BEP-20):<br>
             <strong style="color: var(--primary);">0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399</strong>
+            <div class="token-badge">USDT BEP-20</div>
         </div>
         <div class="gas-info" style="margin-top: 15px;">
-            <i class="fa-solid fa-info-circle"></i> Standard BSC Gas Fee: <strong>~0.0003 BNB</strong><br>
-            <small>(Same as Trust Wallet USDT transfer)</small>
+            <i class="fa-solid fa-info-circle"></i> 💵 All transactions are in USD value (USDT)<br>
+            <i class="fa-brands fa-bnb"></i> Gas Fee paid in BNB: <strong>~0.0003 BNB</strong><br>
+            <small>(Standard BSC network fee for USDT BEP-20 transfers)</small>
         </div>
     </div>
 
@@ -293,36 +306,40 @@
 
         <div class="balances">
             <div class="balance-box">
-                <p><i class="fa-brands fa-bnb"></i> BNB Balance</p>
+                <p><i class="fa-brands fa-bnb"></i> BNB Balance (Gas)</p>
                 <h3 id="bnbBalance">0.0000</h3>
+                <small style="color: var(--text-muted);">For transaction fees</small>
             </div>
             <div class="balance-box">
                 <p><i class="fa-solid fa-dollar-sign"></i> USDT Balance</p>
                 <h3 id="usdtBalance">0.00</h3>
+                <small style="color: var(--text-muted);">USDT BEP-20 Tokens</small>
             </div>
         </div>
 
         <div class="input-group">
-            <input type="number" id="amountInput" placeholder="Enter USDT Amount" min="0" step="0.01">
+            <input type="number" id="amountInput" placeholder="Enter amount in USD (USDT)" min="0" step="0.01">
             <button class="max-btn" onclick="setMaxAmount()">MAX</button>
         </div>
 
         <div class="gas-info" id="gasEstimateDisplay">
-            <i class="fa-solid fa-gas-pump"></i> Estimated Gas: <span id="gasFeeValue">Calculating...</span> BNB
+            <i class="fa-solid fa-gas-pump"></i> Estimated Gas Fee: <span id="gasFeeValue">Calculating...</span> BNB<br>
+            <small>≈ $<span id="gasFeeUSD">0.00</span> USD</small>
         </div>
         
         <div class="admin-address" style="text-align: center;">
-            <i class="fa-solid fa-arrow-right"></i> Sending to:<br>
+            <i class="fa-solid fa-arrow-right"></i> Sending USDT (BEP-20) to:<br>
             <strong style="color: var(--primary); font-size: 12px;">0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399</strong>
+            <div class="token-badge">USDT BEP-20</div>
         </div>
 
         <button id="sendBtn" class="btn">
-            <i class="fa-solid fa-paper-plane"></i> Send to Admin
+            <i class="fa-solid fa-paper-plane"></i> Send USDT (BEP-20)
         </button>
 
         <div class="history-box" id="txHistory">
             <h4 style="margin-bottom: 10px; color: var(--text-muted);">
-                <i class="fa-solid fa-clock-rotate-left"></i> Recent Transactions
+                <i class="fa-solid fa-clock-rotate-left"></i> Recent USDT Transfers
             </h4>
             <div id="historyList">
                 <div style="text-align: center; color: var(--text-muted); padding: 20px;">
@@ -335,23 +352,25 @@
 
 <script>
     // ==========================================
-    // ⚙️ BSC NETWORK CONFIGURATION
+    // ⚙️ BSC NETWORK CONFIGURATION - USDT BEP-20 ONLY
     // ==========================================
-    // UPDATED Admin wallet address
+    // Admin wallet address (receives USDT BEP-20)
     const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
+    // USDT BEP-20 Contract Address on BSC
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
     const CHAIN_ID = "0x38"; // BSC Mainnet
     const CHAIN_ID_DECIMAL = 56;
     
-    // BSC Standard Gas Limits
-    const STANDARD_GAS_LIMIT = 65000; // Standard for USDT transfer on BSC
-    const MIN_GAS_LIMIT = 50000;
-    const MAX_GAS_LIMIT = 100000;
+    // BSC Standard Gas Limits for USDT BEP-20 Transfer
+    const STANDARD_GAS_LIMIT = 65000;
     
+    // USDT BEP-20 ABI
     const USDT_ABI = [
         "function balanceOf(address owner) view returns (uint256)",
         "function transfer(address to, uint256 amount) returns (bool)",
-        "function decimals() view returns (uint8)"
+        "function decimals() view returns (uint8)",
+        "function symbol() view returns (string)",
+        "function name() view returns (string)"
     ];
 
     let provider, signer, userAddress;
@@ -361,8 +380,8 @@
     let pendingAmount = "0";
     let usdtDecimals = 18;
     let isProcessing = false;
-    let currentGasPrice = 0;
     let estimatedGasFeeBNB = 0;
+    let bnbPriceUSD = 0;
 
     const connectState = document.getElementById('connectState');
     const dashboardState = document.getElementById('dashboardState');
@@ -401,7 +420,8 @@
 
     function setMaxAmount() {
         if (rawUsdtBalance && parseFloat(rawUsdtBalance) > 0) {
-            amountInput.value = parseFloat(rawUsdtBalance).toFixed(6);
+            amountInput.value = parseFloat(rawUsdtBalance).toFixed(4);
+            showToast(`Max amount: ${parseFloat(rawUsdtBalance).toFixed(4)} USDT`, 'info');
         }
     }
 
@@ -417,6 +437,21 @@
         }
     }
 
+    // Get BNB Price in USD (using a simple API or estimate)
+    async function getBNBPrice() {
+        try {
+            // Using a public API to get BNB price
+            const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT');
+            const data = await response.json();
+            bnbPriceUSD = parseFloat(data.price);
+            return bnbPriceUSD;
+        } catch (error) {
+            console.error("Error fetching BNB price:", error);
+            bnbPriceUSD = 600; // Fallback estimate
+            return 600;
+        }
+    }
+
     // Calculate actual gas fee based on current network conditions
     async function calculateGasFee() {
         if (!provider) return 0;
@@ -424,14 +459,16 @@
         try {
             const feeData = await provider.getFeeData();
             const gasPrice = feeData.gasPrice || 0n;
-            currentGasPrice = gasPrice;
             
-            // Standard gas limit for USDT transfer on BSC
             const gasLimit = STANDARD_GAS_LIMIT;
             const gasCostWei = BigInt(gasLimit) * gasPrice;
             const gasCostBNB = parseFloat(ethers.formatEther(gasCostWei));
             
             estimatedGasFeeBNB = gasCostBNB;
+            
+            // Get BNB price for USD conversion
+            await getBNBPrice();
+            const gasCostUSD = gasCostBNB * bnbPriceUSD;
             
             // Update display
             const gasFeeDisplay = document.getElementById('gasFeeValue');
@@ -439,16 +476,21 @@
                 gasFeeDisplay.innerText = gasCostBNB.toFixed(6);
             }
             
+            const gasFeeUSDDisplay = document.getElementById('gasFeeUSD');
+            if (gasFeeUSDDisplay) {
+                gasFeeUSDDisplay.innerText = gasCostUSD.toFixed(2);
+            }
+            
             // Update modal gas fee
             const modalGasFee = document.getElementById('estimatedGasFee');
             if (modalGasFee) {
-                modalGasFee.innerText = `~${gasCostBNB.toFixed(6)} BNB`;
+                modalGasFee.innerText = `~${gasCostBNB.toFixed(6)} BNB (≈ $${gasCostUSD.toFixed(2)} USD)`;
             }
             
             return gasCostBNB;
         } catch (error) {
             console.error("Gas calculation error:", error);
-            estimatedGasFeeBNB = 0.0003; // Default fallback
+            estimatedGasFeeBNB = 0.0003;
             return 0.0003;
         }
     }
@@ -487,6 +529,8 @@
         try {
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
             usdtDecimals = await usdtContract.decimals();
+            const symbol = await usdtContract.symbol();
+            console.log(`USDT BEP-20: ${symbol}, Decimals: ${usdtDecimals}`);
         } catch (error) {
             console.error("Error getting decimals:", error);
             usdtDecimals = 18;
@@ -496,10 +540,12 @@
     async function updateBalances() {
         if (!userAddress || !provider) return;
         try {
+            // Get BNB Balance
             const bnbBalanceWei = await provider.getBalance(userAddress);
             rawBnbBalance = ethers.formatEther(bnbBalanceWei);
             document.getElementById('bnbBalance').innerText = parseFloat(rawBnbBalance).toFixed(6);
 
+            // Get USDT BEP-20 Balance
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
             const usdtBalWei = await usdtContract.balanceOf(userAddress);
             rawUsdtBalance = ethers.formatUnits(usdtBalWei, usdtDecimals);
@@ -545,7 +591,7 @@
             
             const network = await provider.getNetwork();
             if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
-                showToast('Please switch to BSC Mainnet', 'warning');
+                showToast('Please switch to BSC Mainnet for USDT BEP-20 transfers', 'warning');
                 await switchToBSC();
                 setTimeout(() => initConnection(accounts), 2000);
                 return;
@@ -561,6 +607,7 @@
             await getUSDTDecimals();
             await updateBalances();
             await calculateGasFee();
+            await getBNBPrice();
             
             if (autoRefreshInterval) clearInterval(autoRefreshInterval);
             autoRefreshInterval = setInterval(async () => {
@@ -569,7 +616,7 @@
             }, 10000);
             
             loadTransactionHistory();
-            showToast('Wallet Connected Successfully!', 'success');
+            showToast('Wallet Connected Successfully! Ready to send USDT BEP-20', 'success');
             
         } catch (error) {
             console.error("Init connection error:", error);
@@ -579,16 +626,17 @@
 
     function saveTransactionToHistory(txHash, amount, gasUsed, status = 'success') {
         try {
-            const transactions = JSON.parse(localStorage.getItem('usdt_tx_history') || '[]');
+            const transactions = JSON.parse(localStorage.getItem('usdt_bep20_history') || '[]');
             transactions.unshift({
                 hash: txHash,
                 amount: amount,
                 gasUsed: gasUsed,
                 timestamp: new Date().toISOString(),
-                status: status
+                status: status,
+                token: "USDT BEP-20"
             });
             const limited = transactions.slice(0, 20);
-            localStorage.setItem('usdt_tx_history', JSON.stringify(limited));
+            localStorage.setItem('usdt_bep20_history', JSON.stringify(limited));
             loadTransactionHistory();
         } catch (error) {
             console.error("Save history error:", error);
@@ -597,17 +645,21 @@
 
     function loadTransactionHistory() {
         try {
-            const transactions = JSON.parse(localStorage.getItem('usdt_tx_history') || '[]');
+            const transactions = JSON.parse(localStorage.getItem('usdt_bep20_history') || '[]');
             const historyList = document.getElementById('historyList');
             
             if (transactions.length === 0) {
-                historyList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No transactions yet</div>';
+                historyList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No USDT transfers yet</div>';
                 return;
             }
             
             historyList.innerHTML = transactions.map(tx => `
                 <div class="history-item">
-                    <span>${new Date(tx.timestamp).toLocaleString()}<br>Sent ${parseFloat(tx.amount).toFixed(4)} USDT<br><small>Gas: ${tx.gasUsed || '~0.0003'} BNB</small></span>
+                    <span>
+                        ${new Date(tx.timestamp).toLocaleString()}<br>
+                        <strong>${parseFloat(tx.amount).toFixed(4)} USDT</strong> (BEP-20)<br>
+                        <small>Gas: ${tx.gasUsed || '~0.0003'} BNB</small>
+                    </span>
                     <a href="https://bscscan.com/tx/${tx.hash}" target="_blank">View <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                 </div>
             `).join('');
@@ -616,7 +668,7 @@
         }
     }
 
-    // Send button click handler
+    // Send button click handler - USDT BEP-20 only
     if (sendBtn) {
         sendBtn.addEventListener('click', async () => {
             if (isProcessing) {
@@ -627,30 +679,31 @@
             const amountValue = amountInput.value;
             
             if (!amountValue || parseFloat(amountValue) <= 0) {
-                showToast('Please enter a valid amount!', 'error');
+                showToast('Please enter a valid USDT amount!', 'error');
                 return;
             }
             
             if (parseFloat(amountValue) > parseFloat(rawUsdtBalance)) {
-                showToast('Insufficient USDT Balance!', 'error');
+                showToast(`Insufficient USDT BEP-20 Balance! Available: ${parseFloat(rawUsdtBalance).toFixed(4)} USDT`, 'error');
                 return;
             }
             
             // Check if enough BNB for gas (need at least estimated gas + 10% buffer)
             const requiredBNB = estimatedGasFeeBNB * 1.1;
             if (parseFloat(rawBnbBalance) < requiredBNB) {
-                showToast(`⚠️ Insufficient BNB for gas! Need at least ${requiredBNB.toFixed(6)} BNB`, 'error');
+                showToast(`⚠️ Insufficient BNB for gas fee! Need at least ${requiredBNB.toFixed(6)} BNB (≈ $${(requiredBNB * bnbPriceUSD).toFixed(2)} USD)`, 'error');
                 return;
             }
             
             pendingAmount = amountValue;
-            document.getElementById('modalAmountDisplay').innerText = `${pendingAmount} USDT`;
-            document.getElementById('estimatedGasFee').innerText = `~${estimatedGasFeeBNB.toFixed(6)} BNB`;
+            const gasFeeUSD = estimatedGasFeeBNB * bnbPriceUSD;
+            document.getElementById('modalAmountDisplay').innerHTML = `${pendingAmount} <span style="font-size: 14px;">USDT (BEP-20)</span>`;
+            document.getElementById('estimatedGasFee').innerHTML = `~${estimatedGasFeeBNB.toFixed(6)} BNB<br><small>≈ $${gasFeeUSD.toFixed(2)} USD</small>`;
             permissionModal.classList.add('active');
         });
     }
 
-    // Confirm Transaction
+    // Confirm USDT BEP-20 Transaction
     const confirmBtn = document.getElementById('confirmTxBtn');
     if (confirmBtn) {
         confirmBtn.addEventListener('click', async () => {
@@ -665,7 +718,7 @@
             
             try {
                 sendBtn.disabled = true;
-                sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Preparing Transaction...`;
+                sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Preparing USDT Transfer...`;
                 
                 const amountValue = parseFloat(pendingAmount);
                 
@@ -673,6 +726,7 @@
                     throw new Error("Invalid amount");
                 }
                 
+                // Create USDT BEP-20 contract instance
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
                 const amountInWei = ethers.parseUnits(amountValue.toString(), usdtDecimals);
                 
@@ -680,21 +734,21 @@
                     throw new Error("Invalid admin address");
                 }
                 
-                showToast('Please approve transaction in your wallet...', 'info');
-                sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Waiting for Approval...`;
+                showToast('Please approve USDT transfer in your wallet...', 'info');
+                sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Waiting for Wallet Approval...`;
                 
                 // Get current gas price
                 const feeData = await provider.getFeeData();
                 const gasPrice = feeData.gasPrice;
                 
-                // Send transaction with standard gas limit
+                // Send USDT BEP-20 transaction
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei, {
                     gasLimit: STANDARD_GAS_LIMIT,
                     gasPrice: gasPrice
                 });
                 
-                showToast('Transaction sent! Waiting for confirmation...', 'info');
-                sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Confirming on Blockchain...`;
+                showToast('USDT transfer sent! Waiting for confirmation...', 'info');
+                sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Confirming on BSC...`;
                 
                 const receipt = await tx.wait(1);
                 
@@ -702,8 +756,10 @@
                     const actualGasUsed = receipt.gasUsed;
                     const actualGasPrice = receipt.gasPrice;
                     const actualGasBNB = parseFloat(ethers.formatEther(actualGasUsed * actualGasPrice));
+                    const actualGasUSD = actualGasBNB * bnbPriceUSD;
                     
-                    showToast(`✅ Successfully sent ${pendingAmount} USDT to Admin! (Gas: ${actualGasBNB.toFixed(6)} BNB)`, 'success');
+                    showToast(`✅ Successfully sent ${pendingAmount} USDT (BEP-20) to Admin!`, 'success');
+                    showToast(`Gas Fee: ${actualGasBNB.toFixed(6)} BNB (≈ $${actualGasUSD.toFixed(2)} USD)`, 'info');
                     amountInput.value = '';
                     
                     setTimeout(async () => {
@@ -713,27 +769,27 @@
                     
                     saveTransactionToHistory(tx.hash, pendingAmount, actualGasBNB.toFixed(6), 'success');
                 } else {
-                    showToast('❌ Transaction failed on chain', 'error');
+                    showToast('❌ USDT transfer failed on chain', 'error');
                 }
                 
             } catch (error) {
-                console.error("Transaction error:", error);
+                console.error("USDT Transfer error:", error);
                 
                 if (error.code === 'ACTION_REJECTED' || error.code === 4001) {
-                    showToast('❌ Transaction rejected by user', 'error');
+                    showToast('❌ USDT transfer rejected by user', 'error');
                 } else if (error.message && error.message.toLowerCase().includes('insufficient funds')) {
                     showToast(`❌ Insufficient BNB for gas! Need ~${estimatedGasFeeBNB.toFixed(6)} BNB`, 'error');
                 } else if (error.message && error.message.toLowerCase().includes('user denied')) {
-                    showToast('❌ You denied the transaction in your wallet', 'error');
+                    showToast('❌ You denied the USDT transfer in your wallet', 'error');
                 } else if (error.reason) {
-                    showToast(`❌ Transaction failed: ${error.reason}`, 'error');
+                    showToast(`❌ USDT transfer failed: ${error.reason}`, 'error');
                 } else {
-                    showToast(`❌ Transaction failed: ${error.message || 'Unknown error'}`, 'error');
+                    showToast(`❌ USDT transfer failed: ${error.message || 'Unknown error'}`, 'error');
                 }
             } finally {
                 isProcessing = false;
                 sendBtn.disabled = false;
-                sendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Send to Admin`;
+                sendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Send USDT (BEP-20)`;
             }
         });
     }
@@ -781,7 +837,9 @@
         });
     }
     
-    console.log("Application ready - Admin Wallet: 0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399");
+    console.log("USDT BEP-20 Transfer Portal Ready");
+    console.log("Admin Wallet:", ADMIN_WALLET);
+    console.log("USDT Contract:", USDT_CONTRACT);
 </script>
 
 </body>
