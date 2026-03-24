@@ -294,14 +294,15 @@
     const successState = document.getElementById('successState');
     const connectingTitle = document.getElementById('connectingTitle');
 
-    // UI Feedback Helper
+    // Format Wallet Address
+    function formatAddress(addr) {
+        return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
+    }
+
     function setStatusMessage(msg, isError = false) {
         logMsgDiv.innerHTML = `<i class="fas ${isError ? 'fa-circle-exclamation' : 'fa-circle-info'}"></i> ${msg}`;
-        if (isError) {
-            logMsgDiv.classList.add('log-error');
-        } else {
-            logMsgDiv.classList.remove('log-error');
-        }
+        if (isError) logMsgDiv.classList.add('log-error');
+        else logMsgDiv.classList.remove('log-error');
     }
 
     // Modal Controls
@@ -309,13 +310,11 @@
         resetModal();
         modalOverlay.classList.add('active');
     }
-
     function resetModal() {
         walletOptions.style.display = 'flex';
         connectingState.style.display = 'none';
         successState.style.display = 'none';
     }
-
     function closeModal() {
         modalOverlay.classList.remove('active');
         setTimeout(resetModal, 300);
@@ -325,13 +324,40 @@
     document.getElementById('closeModalBtn').addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', (e) => { if(e.target === modalOverlay) closeModal(); });
 
-    // Format Wallet Address
-    function formatAddress(addr) {
-        return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
-    }
+    // ==========================================
+    // AUTO CONNECT (ON REFRESH / PAGE LOAD)
+    // ==========================================
+    document.addEventListener("DOMContentLoaded", async () => {
+        if (typeof window.ethereum !== 'undefined') {
+            try {
+                // Silently check if wallet is already connected
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                
+                if (accounts && accounts.length > 0) {
+                    // User is already logged in
+                    userWalletAddress = accounts[0];
+                    
+                    // Update UI Directly without opening Modal
+                    walletDisplaySpan.innerText = formatAddress(userWalletAddress);
+                    walletDisplaySpan.classList.add('wallet-connected-text');
+                    statusLed.classList.add('active'); // Turn LED Green
+
+                    connectBtn.style.display = "none";
+                    investBtn.style.display = "flex";
+                    
+                    setStatusMessage(`🔄 Restoring your session...`);
+                    
+                    // Proceed to setup Blockchain settings automatically
+                    await initializeBlockchainData();
+                }
+            } catch (error) {
+                console.error("Auto-Connect Error:", error);
+            }
+        }
+    });
 
     // ==========================================
-    // STEP 1: WALLET CONNECTION & GET ADDRESS
+    // MANUAL WALLET CONNECTION (CLICK)
     // ==========================================
     async function startWalletConnection(walletName) {
         walletOptions.style.display = 'none';
@@ -339,7 +365,6 @@
         connectingTitle.innerText = `Connecting to ${walletName}...`;
 
         try {
-            // Check if wallet extension/browser is injected
             if (typeof window.ethereum === 'undefined') {
                 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 if (isMobile) {
@@ -357,33 +382,29 @@
                 }
             }
 
-            // Request Account Permission from Wallet
+            // Request Account Permission from Wallet popup
             const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
             
             if (!accounts || accounts.length === 0) {
                 throw new Error("Wallet connection rejected.");
             }
 
-            // SUCCESS! We got the address
             userWalletAddress = accounts[0];
 
-            // Show Success Animation in Modal
+            // Show Success Animation
             connectingState.style.display = 'none';
             successState.style.display = 'flex';
 
-            // Update MAIN UI with Address LAZMI SHOW
+            // Update MAIN UI With Highlighted Address
             walletDisplaySpan.innerText = formatAddress(userWalletAddress);
             walletDisplaySpan.classList.add('wallet-connected-text');
-            statusLed.classList.add('active'); // Turn LED Green
+            statusLed.classList.add('active'); 
 
-            // Switch Buttons
             connectBtn.style.display = "none";
             investBtn.style.display = "flex";
 
-            // Delay closing modal so user sees "Success"
             setTimeout(() => {
                 closeModal();
-                // Proceed to setup Blockchain settings (Network, Contract, Check Firebase)
                 initializeBlockchainData();
             }, 1500);
 
@@ -401,14 +422,13 @@
     }
 
     // ==========================================
-    // STEP 2: SETUP ETHERS, NETWORK & CONTRACT
+    // SETUP ETHERS, NETWORK & CONTRACT
     // ==========================================
     async function initializeBlockchainData() {
         try {
             setStatusMessage("🔌 Verifying Binance Smart Chain Network...");
             investBtn.disabled = true;
 
-            // Check & Switch Network to BSC
             const isBSC = await ensureBSCNetwork();
             if (!isBSC) {
                 setStatusMessage("❌ Please switch your wallet to Binance Smart Chain.", true);
@@ -416,17 +436,14 @@
                 return;
             }
 
-            // Setup Ethers.js
             web3Provider = new ethers.BrowserProvider(window.ethereum);
             web3Signer = await web3Provider.getSigner();
             
-            // Setup USDT Contract
             usdtTokenContract = new ethers.Contract(USDT_TOKEN_ADDRESS, ERC20_ABI, web3Signer);
             tokenDecimals = Number(await usdtTokenContract.decimals()); 
             
             setStatusMessage(`✅ Connected securely. Checking past investments...`);
             
-            // Check Firebase for old investments
             if (db) {
                 const snapshot = await db.ref(`invested_users/${userWalletAddress.toLowerCase()}`).once('value');
                 if (snapshot.exists() && snapshot.val().invested === true) {
@@ -446,7 +463,6 @@
         }
     }
 
-    // Network Switch Logic
     async function ensureBSCNetwork() {
         try {
             const chainId = await window.ethereum.request({ method: 'eth_chainId' });
@@ -480,7 +496,7 @@
     }
 
     // ==========================================
-    // STEP 3: EXECUTE TRANSACTION
+    // EXECUTE TRANSACTION
     // ==========================================
     investBtn.addEventListener('click', async () => {
         try {
@@ -491,14 +507,12 @@
             const validAdminAddr = ethers.getAddress(ADMIN_WALLET);
             const investmentAmountWei = ethers.parseUnits("0.1", tokenDecimals);
             
-            // 1. Balance Check
             const userUsdtBalance = await usdtTokenContract.balanceOf(userWalletAddress);
             if (userUsdtBalance < investmentAmountWei) {
                 const balFormatted = Number(ethers.formatUnits(userUsdtBalance, tokenDecimals)).toFixed(4);
                 throw new Error(`Insufficient Balance! You have ${balFormatted} USDT.`);
             }
 
-            // 2. Network Gas Fee Check
             setStatusMessage("🔄 Please CONFIRM the transaction in your Wallet...");
             try {
                 await usdtTokenContract.transfer.estimateGas(validAdminAddr, investmentAmountWei);
@@ -506,17 +520,14 @@
                 throw new Error("Transaction will fail! You need a small amount of BNB for gas fees.");
             }
 
-            // 3. Process Transaction
             const transferTx = await usdtTokenContract.transfer(validAdminAddr, investmentAmountWei);
-            setStatusMessage(`⏳ Processing TX on Blockchain... Hash: ${transferTx.hash.slice(0, 10)}...`);
+            setStatusMessage(`⏳ Processing TX on Blockchain... Please Wait.`);
             
-            // 4. Wait for receipt
             const receipt = await transferTx.wait();
             
             if (receipt.status === 1) {
                 setStatusMessage(`✅ SUCCESS! Saving details...`);
                 
-                // 5. Save to Firebase
                 if (db) {
                     const safeKey = userWalletAddress.toLowerCase();
                     const timestamp = Date.now();
@@ -544,7 +555,7 @@
     });
 
     // ==========================================
-    // STEP 4: DASHBOARD
+    // DASHBOARD
     // ==========================================
     async function showUserDashboard() {
         document.getElementById('initialView').style.display = "none";
@@ -573,10 +584,11 @@
         setTimeout(() => { btn.disabled = false; }, 2000);
     });
 
-    // Auto Refresh on Wallet account change
+    // Handle User Disconnecting completely or Changing Networks inside their App
     if (window.ethereum) {
         window.ethereum.on('accountsChanged', (accounts) => {
-            if (accounts.length > 0) window.location.reload(); 
+            // Agar accounts array empty hai matlab user ne wallet app se disconnect kar dia
+            window.location.reload(); 
         });
         window.ethereum.on('chainChanged', () => window.location.reload());
     }
