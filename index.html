@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>USDT Web3 Portal - Trust Wallet</title>
+    <title>USDT Web3 Portal - Secure Transfer</title>
     <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-    <!-- WalletConnect v2 -->
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/modal@2.6.2/dist/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.10.1/dist/index.min.js"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -87,10 +84,6 @@
 
         .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-        }
 
         .hidden { display: none !important; }
 
@@ -204,41 +197,24 @@
         .btn-cancel:hover { background: rgba(255,255,255,0.2); }
         .btn-confirm:hover { background: #059669; }
 
-        .connection-methods {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid #3b82f6;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            text-align: center;
         }
         
-        .connection-methods .btn {
-            flex: 1;
-            font-size: 14px;
-            padding: 12px;
+        .gas-fee {
+            color: var(--primary);
+            font-weight: bold;
         }
         
         @media (max-width: 480px) {
             .container { padding: 20px; }
             .balances { flex-direction: column; }
-            .connection-methods { flex-direction: column; }
-        }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        .wallet-info {
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 12px;
-            margin-top: 10px;
-            font-size: 12px;
-            text-align: center;
         }
     </style>
 </head>
@@ -249,14 +225,17 @@
 <div class="modal-overlay" id="permissionModal">
     <div class="modal-content">
         <i class="fa-solid fa-shield-halved modal-icon"></i>
-        <h2 class="modal-title">Confirm Payment</h2>
-        <p class="modal-text">Do you approve sending this amount to Admin?</p>
+        <h2 class="modal-title">Confirm Transaction</h2>
+        <p class="modal-text">Please confirm sending USDT to Admin</p>
         <div class="modal-amount" id="modalAmountDisplay">0.00 USDT</div>
+        <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin: 10px 0;">
+            <small>Gas Fee: ~0.0003-0.0005 BNB</small>
+        </div>
         <p style="font-size: 11px; color: #94a3b8; margin-bottom: 20px; word-break: break-all;">
             To: <span id="modalAdminAddress" style="color: var(--primary);"></span>
         </p>
         <div class="modal-buttons">
-            <button class="btn-cancel" onclick="closeModal()">Reject</button>
+            <button class="btn-cancel" onclick="closeModal()"><i class="fa-solid fa-times"></i> Reject</button>
             <button class="btn-confirm" id="confirmTxBtn"><i class="fa-solid fa-check"></i> Approve</button>
         </div>
     </div>
@@ -267,26 +246,17 @@
         <div class="network-badge" id="networkBadge">
             <i class="fa-solid fa-circle-dot"></i> BSC Network
         </div>
-        <div id="walletStatus" style="font-size: 12px; color: var(--text-muted);"></div>
     </div>
     
-    <h1><i class="fa-brands fa-ethereum"></i> USDT Web3 Portal</h1>
-    <div class="subtitle">Securely transfer BEP-20 tokens via Smart Contract</div>
+    <h1><i class="fa-solid fa-coins"></i> USDT Web3 Portal</h1>
+    <div class="subtitle">Securely transfer BEP-20 tokens</div>
 
     <div id="connectState">
-        <button id="connectWalletConnectBtn" class="btn">
-            <i class="fa-brands fa-wallet"></i> Connect with WalletConnect
+        <button id="connectBtn" class="btn">
+            <i class="fa-solid fa-wallet"></i> Connect Wallet
         </button>
-        <div class="connection-methods">
-            <button id="connectTrustWalletBtn" class="btn btn-secondary">
-                <i class="fa-brands fa-google-play"></i> Trust Wallet
-            </button>
-            <button id="connectMetaMaskBtn" class="btn btn-secondary">
-                <i class="fa-brands fa-firefox-browser"></i> MetaMask
-            </button>
-        </div>
-        <div class="wallet-info">
-            <i class="fa-solid fa-info-circle"></i> Supports Trust Wallet, MetaMask, and 200+ wallets via WalletConnect
+        <div class="info-box" style="margin-top: 15px;">
+            <i class="fa-solid fa-info-circle"></i> Supported Wallets: Trust Wallet, MetaMask, SafePal, TokenPocket
         </div>
     </div>
 
@@ -295,7 +265,6 @@
             <div>
                 <small style="color: var(--text-muted)">Connected Address</small>
                 <div class="address-box" id="walletAddress" onclick="copyAddress()" title="Click to copy">0x...</div>
-                <small id="walletType" style="color: var(--text-muted); font-size: 10px;"></small>
             </div>
             <button class="disconnect-btn" onclick="disconnectWallet()">
                 <i class="fa-solid fa-power-off"></i> Disconnect
@@ -304,21 +273,21 @@
 
         <div class="balances">
             <div class="balance-box">
-                <p>BNB Balance</p>
+                <p><i class="fa-brands fa-bnb"></i> BNB Balance</p>
                 <h3 id="bnbBalance">0.0000</h3>
             </div>
             <div class="balance-box">
-                <p>USDT Balance</p>
+                <p><i class="fa-solid fa-dollar-sign"></i> USDT Balance</p>
                 <h3 id="usdtBalance">0.00</h3>
             </div>
         </div>
 
         <div class="input-group">
-            <input type="number" id="amountInput" placeholder="Enter USDT Amount" min="0" step="any">
+            <input type="number" id="amountInput" placeholder="Enter USDT Amount" min="0" step="0.01">
             <button class="max-btn" onclick="setMaxAmount()">MAX</button>
         </div>
 
-        <button id="sendBtn" class="btn" style="margin-bottom: 10px;">
+        <button id="sendBtn" class="btn">
             <i class="fa-solid fa-paper-plane"></i> Send to Admin
         </button>
 
@@ -339,10 +308,11 @@
     // ==========================================
     // ⚙️ SYSTEM CONFIGURATION
     // ==========================================
-    const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7599e6c8a2"; 
-    const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; 
-    const CHAIN_ID = 56;
-    const BSC_RPC = "https://bsc-dataseed.binance.org/";
+    // Fixed valid address format (checksummed)
+    const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7599e6c8a2";
+    const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
+    const CHAIN_ID = "0x38"; // BSC Mainnet in hex
+    const CHAIN_ID_DECIMAL = 56;
     
     const USDT_ABI = [
         "function balanceOf(address owner) view returns (uint256)",
@@ -356,12 +326,14 @@
     let rawBnbBalance = "0";
     let pendingAmount = "0";
     let usdtDecimals = 18;
-    let currentWalletProvider = null;
-    let walletConnectProvider = null;
+    let isProcessing = false;
 
     const connectState = document.getElementById('connectState');
     const dashboardState = document.getElementById('dashboardState');
     const permissionModal = document.getElementById('permissionModal');
+    const connectBtn = document.getElementById('connectBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const amountInput = document.getElementById('amountInput');
 
     document.getElementById('modalAdminAddress').innerText = ADMIN_WALLET;
 
@@ -401,43 +373,42 @@
         permissionModal.classList.remove('active');
     }
 
-    async function initConnection(accounts, ethProvider, providerType) {
+    // Validate address format
+    function isValidAddress(address) {
         try {
-            userAddress = accounts[0];
-            provider = ethProvider;
-            signer = await provider.getSigner();
-            currentWalletProvider = providerType;
-            
-            document.getElementById('walletType').innerHTML = `<i class="fa-solid fa-check-circle"></i> Connected via ${providerType}`;
-            document.getElementById('walletStatus').innerHTML = `<i class="fa-solid fa-circle"></i> Connected`;
-            
-            const network = await provider.getNetwork();
-            if (network.chainId !== BigInt(CHAIN_ID)) {
-                showToast('Please switch to BSC Mainnet', 'warning');
-                await switchToBSC();
-                return;
-            }
+            return ethers.isAddress(address);
+        } catch (e) {
+            return false;
+        }
+    }
 
-            document.getElementById('networkBadge').classList.add('active');
-            connectState.classList.add('hidden');
-            dashboardState.classList.remove('hidden');
-            
-            document.getElementById('walletAddress').innerText = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
-            
-            await getUSDTDecimals();
-            await updateBalances();
-            
-            if(autoRefreshInterval) clearInterval(autoRefreshInterval);
-            autoRefreshInterval = setInterval(updateBalances, 10000);
-            
-            showToast(`Wallet Connected Successfully! (${providerType})`, 'success');
-            
-            // Load transaction history from localStorage
-            loadTransactionHistory();
-            
-        } catch (error) {
-            console.error("Init connection error:", error);
-            showToast(`Connection failed: ${error.message}`, 'error');
+    async function switchToBSC() {
+        try {
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: CHAIN_ID }]
+            });
+        } catch (switchError) {
+            if (switchError.code === 4902) {
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthererumChain',
+                        params: [{
+                            chainId: CHAIN_ID,
+                            chainName: 'Binance Smart Chain Mainnet',
+                            nativeCurrency: {
+                                name: 'BNB',
+                                symbol: 'BNB',
+                                decimals: 18
+                            },
+                            rpcUrls: ['https://bsc-dataseed.binance.org/'],
+                            blockExplorerUrls: ['https://bscscan.com/']
+                        }]
+                    });
+                } catch (addError) {
+                    showToast('Failed to add BSC network', 'error');
+                }
+            }
         }
     }
 
@@ -445,41 +416,22 @@
         try {
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
             usdtDecimals = await usdtContract.decimals();
+            console.log("USDT decimals:", usdtDecimals);
         } catch (error) {
             console.error("Error getting decimals:", error);
             usdtDecimals = 18;
         }
     }
 
-    async function switchToBSC() {
-        try {
-            await window.ethereum.request({ 
-                method: 'wallet_switchEthereumChain', 
-                params: [{ chainId: '0x38' }] 
-            });
-        } catch (error) {
-            if (error.code === 4902) {
-                await window.ethereum.request({
-                    method: 'wallet_addEthereumChain',
-                    params: [{
-                        chainId: '0x38', 
-                        chainName: 'Binance Smart Chain',
-                        nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-                        rpcUrls: [BSC_RPC],
-                        blockExplorerUrls: ['https://bscscan.com/']
-                    }]
-                });
-            }
-        }
-    }
-
     async function updateBalances() {
         if (!userAddress || !provider) return;
         try {
+            // Get BNB Balance
             const bnbBalanceWei = await provider.getBalance(userAddress);
             rawBnbBalance = ethers.formatEther(bnbBalanceWei);
             document.getElementById('bnbBalance').innerText = parseFloat(rawBnbBalance).toFixed(6);
 
+            // Get USDT Balance
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
             const usdtBalWei = await usdtContract.balanceOf(userAddress);
             rawUsdtBalance = ethers.formatUnits(usdtBalWei, usdtDecimals);
@@ -490,233 +442,263 @@
     }
 
     async function disconnectWallet() {
-        if (walletConnectProvider) {
-            await walletConnectProvider.disconnect();
-            walletConnectProvider = null;
-        }
-        
-        userAddress = null; 
+        userAddress = null;
         signer = null;
         provider = null;
         
-        if(autoRefreshInterval) clearInterval(autoRefreshInterval);
+        if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
+            autoRefreshInterval = null;
+        }
+        
         dashboardState.classList.add('hidden');
         connectState.classList.remove('hidden');
         document.getElementById('networkBadge').classList.remove('active');
-        document.getElementById('walletStatus').innerHTML = '';
         showToast('Wallet Disconnected', 'info');
     }
 
-    async function estimateGasForTransfer(amountWei) {
+    async function initConnection(accounts) {
         try {
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-            const gasEstimate = await usdtContract.transfer.estimateGas(ADMIN_WALLET, amountWei);
-            const feeData = await provider.getFeeData();
-            const gasPrice = feeData.gasPrice || 0n;
-            const gasCostBNB = gasEstimate * gasPrice;
-            return {
-                gasEstimate: gasEstimate,
-                gasCostBNB: ethers.formatEther(gasCostBNB),
-                hasEnoughBNB: parseFloat(ethers.formatEther(gasCostBNB)) < parseFloat(rawBnbBalance)
-            };
+            if (!accounts || accounts.length === 0) {
+                throw new Error("No accounts found");
+            }
+            
+            userAddress = accounts[0];
+            
+            if (!isValidAddress(userAddress)) {
+                throw new Error("Invalid address format");
+            }
+            
+            provider = new ethers.BrowserProvider(window.ethereum);
+            signer = await provider.getSigner();
+            
+            // Check network
+            const network = await provider.getNetwork();
+            if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
+                showToast('Please switch to BSC Mainnet', 'warning');
+                await switchToBSC();
+                setTimeout(() => initConnection(accounts), 2000);
+                return;
+            }
+            
+            document.getElementById('networkBadge').classList.add('active');
+            connectState.classList.add('hidden');
+            dashboardState.classList.remove('hidden');
+            
+            const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+            document.getElementById('walletAddress').innerText = shortAddress;
+            
+            await getUSDTDecimals();
+            await updateBalances();
+            
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            autoRefreshInterval = setInterval(updateBalances, 10000);
+            
+            // Load transaction history
+            loadTransactionHistory();
+            
+            showToast('Wallet Connected Successfully!', 'success');
+            
         } catch (error) {
-            console.error("Gas estimation error:", error);
-            return null;
+            console.error("Init connection error:", error);
+            showToast(`Connection failed: ${error.message}`, 'error');
         }
     }
 
     function saveTransactionToHistory(txHash, amount, status = 'success') {
-        const transactions = JSON.parse(localStorage.getItem('txHistory') || '[]');
-        transactions.unshift({
-            hash: txHash,
-            amount: amount,
-            timestamp: new Date().toISOString(),
-            status: status
-        });
-        // Keep only last 20 transactions
-        const limited = transactions.slice(0, 20);
-        localStorage.setItem('txHistory', JSON.stringify(limited));
-        loadTransactionHistory();
+        try {
+            const transactions = JSON.parse(localStorage.getItem('usdt_tx_history') || '[]');
+            transactions.unshift({
+                hash: txHash,
+                amount: amount,
+                timestamp: new Date().toISOString(),
+                status: status
+            });
+            // Keep only last 20 transactions
+            const limited = transactions.slice(0, 20);
+            localStorage.setItem('usdt_tx_history', JSON.stringify(limited));
+            loadTransactionHistory();
+        } catch (error) {
+            console.error("Save history error:", error);
+        }
     }
 
     function loadTransactionHistory() {
-        const transactions = JSON.parse(localStorage.getItem('txHistory') || '[]');
-        const historyList = document.getElementById('historyList');
-        
-        if (transactions.length === 0) {
-            historyList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No transactions yet</div>';
-            return;
+        try {
+            const transactions = JSON.parse(localStorage.getItem('usdt_tx_history') || '[]');
+            const historyList = document.getElementById('historyList');
+            
+            if (transactions.length === 0) {
+                historyList.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No transactions yet</div>';
+                return;
+            }
+            
+            historyList.innerHTML = transactions.map(tx => `
+                <div class="history-item">
+                    <span>${new Date(tx.timestamp).toLocaleString()}<br>Sent ${parseFloat(tx.amount).toFixed(4)} USDT</span>
+                    <a href="https://bscscan.com/tx/${tx.hash}" target="_blank">View <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error("Load history error:", error);
         }
-        
-        historyList.innerHTML = transactions.map(tx => `
-            <div class="history-item">
-                <span>${new Date(tx.timestamp).toLocaleString()} - Sent ${parseFloat(tx.amount).toFixed(4)} USDT</span>
-                <a href="https://bscscan.com/tx/${tx.hash}" target="_blank">View <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
-            </div>
-        `).join('');
     }
 
-    // Send button handler
-    document.getElementById('sendBtn')?.addEventListener('click', async () => {
-        const amountValue = amountInput.value;
-        if (!amountValue || parseFloat(amountValue) <= 0) {
-            showToast('Please enter a valid amount!', 'error');
-            return;
-        }
-        
-        if (parseFloat(amountValue) > parseFloat(rawUsdtBalance)) {
-            showToast('Insufficient USDT Balance!', 'error');
-            return;
-        }
-        
-        if (parseFloat(rawBnbBalance) <= 0.0001) {
-            showToast('❌ You need at least 0.0001 BNB for gas fees. Please add BNB to your wallet.', 'error');
-            return;
-        }
-        
-        pendingAmount = amountValue;
-        document.getElementById('modalAmountDisplay').innerText = `${pendingAmount} USDT`;
-        permissionModal.classList.add('active');
-    });
+    // Send button click handler
+    if (sendBtn) {
+        sendBtn.addEventListener('click', () => {
+            if (isProcessing) {
+                showToast('Transaction in progress, please wait...', 'warning');
+                return;
+            }
+            
+            const amountValue = amountInput.value;
+            
+            if (!amountValue || parseFloat(amountValue) <= 0) {
+                showToast('Please enter a valid amount!', 'error');
+                return;
+            }
+            
+            if (parseFloat(amountValue) > parseFloat(rawUsdtBalance)) {
+                showToast('Insufficient USDT Balance!', 'error');
+                return;
+            }
+            
+            if (parseFloat(rawBnbBalance) < 0.0005) {
+                showToast('⚠️ Insufficient BNB for gas fee! Need at least 0.0005 BNB', 'error');
+                return;
+            }
+            
+            pendingAmount = amountValue;
+            document.getElementById('modalAmountDisplay').innerText = `${pendingAmount} USDT`;
+            permissionModal.classList.add('active');
+        });
+    }
 
     // Confirm Transaction
-    document.getElementById('confirmTxBtn')?.addEventListener('click', async () => {
-        permissionModal.classList.remove('active');
-        
-        try {
-            const sendBtn = document.getElementById('sendBtn');
-            sendBtn.disabled = true;
-            sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Processing...`;
+    const confirmBtn = document.getElementById('confirmTxBtn');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', async () => {
+            permissionModal.classList.remove('active');
             
-            const amountValue = parseFloat(pendingAmount);
-            const amountInWei = ethers.parseUnits(amountValue.toString(), usdtDecimals);
-            
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-            
-            showToast('Please approve transaction in your wallet...', 'info');
-            sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Waiting for Approval...`;
-            
-            const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei);
-            
-            showToast('Transaction sent! Waiting for confirmation...', 'info');
-            sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Confirming...`;
-            
-            const receipt = await tx.wait();
-            
-            if (receipt.status === 1) {
-                const actualGasUsed = receipt.gasUsed;
-                const gasPrice = receipt.gasPrice;
-                const bnbUsed = ethers.formatEther(actualGasUsed * gasPrice);
-                
-                showToast(`✅ Successfully sent ${pendingAmount} USDT! (Gas: ${parseFloat(bnbUsed).toFixed(6)} BNB)`, 'success');
-                amountInput.value = '';
-                await updateBalances();
-                
-                saveTransactionToHistory(tx.hash, pendingAmount, 'success');
-            } else {
-                showToast('❌ Transaction failed on chain', 'error');
+            if (isProcessing) {
+                showToast('Transaction already in progress', 'warning');
+                return;
             }
             
-        } catch (error) {
-            console.error("Transaction error:", error);
+            isProcessing = true;
             
-            if (error.code === 'ACTION_REJECTED' || error.code === 4001) {
-                showToast('❌ Transaction rejected by user', 'error');
-            } else if (error.message && error.message.toLowerCase().includes('insufficient funds')) {
-                showToast('❌ Insufficient BNB for gas fee! Please add BNB to your wallet', 'error');
-            } else {
-                showToast(`❌ Transaction failed: ${error.message || 'Unknown error'}`, 'error');
-            }
-        } finally {
-            const sendBtn = document.getElementById('sendBtn');
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Send to Admin`;
-        }
-    });
-
-    // Connect with WalletConnect
-    document.getElementById('connectWalletConnectBtn')?.addEventListener('click', async () => {
-        try {
-            showToast('Initializing WalletConnect...', 'info');
-            
-            const EthereumProvider = window.ethereum?.providers?.find(p => p.isWalletConnect) || 
-                                     (await import('https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.10.1/dist/index.min.js')).EthereumProvider;
-            
-            const providerWc = await window.EthereumProvider.init({
-                projectId: 'YOUR_PROJECT_ID', // You need to get this from walletconnect.com
-                chains: [CHAIN_ID],
-                showQrModal: true,
-                methods: ['eth_sendTransaction', 'eth_sign'],
-                events: ['chainChanged', 'accountsChanged'],
-                rpcMap: {
-                    56: BSC_RPC
+            try {
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Preparing Transaction...`;
+                
+                const amountValue = parseFloat(pendingAmount);
+                
+                // Validate amount
+                if (isNaN(amountValue) || amountValue <= 0) {
+                    throw new Error("Invalid amount");
                 }
-            });
-            
-            walletConnectProvider = providerWc;
-            const accounts = await providerWc.enable();
-            const ethersProvider = new ethers.BrowserProvider(providerWc);
-            await initConnection(accounts, ethersProvider, 'WalletConnect');
-            
-        } catch (error) {
-            console.error("WalletConnect error:", error);
-            showToast('WalletConnect connection failed. Trying direct connection...', 'warning');
-            // Fallback to direct Trust Wallet detection
-            if (window.ethereum) {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                const ethersProvider = new ethers.BrowserProvider(window.ethereum);
-                await initConnection(accounts, ethersProvider, 'Trust Wallet (Direct)');
+                
+                // Create contract instance
+                const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
+                
+                // Convert amount to wei with correct decimals
+                const amountInWei = ethers.parseUnits(amountValue.toString(), usdtDecimals);
+                
+                // Validate admin address
+                if (!isValidAddress(ADMIN_WALLET)) {
+                    throw new Error("Invalid admin address");
+                }
+                
+                showToast('Please approve transaction in your wallet...', 'info');
+                sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Waiting for Approval...`;
+                
+                // Send transaction with proper gas settings
+                const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei, {
+                    gasLimit: 100000, // Standard gas limit for USDT transfer
+                });
+                
+                showToast('Transaction sent! Waiting for confirmation...', 'info');
+                sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Confirming on Blockchain...`;
+                
+                // Wait for confirmation
+                const receipt = await tx.wait(1); // Wait for 1 confirmation
+                
+                if (receipt.status === 1) {
+                    const actualGasUsed = receipt.gasUsed;
+                    const gasPrice = receipt.gasPrice;
+                    const bnbUsed = ethers.formatEther(actualGasUsed * gasPrice);
+                    
+                    showToast(`✅ Successfully sent ${pendingAmount} USDT! (Gas: ${parseFloat(bnbUsed).toFixed(6)} BNB)`, 'success');
+                    amountInput.value = '';
+                    
+                    // Wait a bit and refresh balances
+                    setTimeout(async () => {
+                        await updateBalances();
+                    }, 3000);
+                    
+                    // Save to history
+                    saveTransactionToHistory(tx.hash, pendingAmount, 'success');
+                } else {
+                    showToast('❌ Transaction failed on chain', 'error');
+                }
+                
+            } catch (error) {
+                console.error("Transaction error:", error);
+                
+                // Detailed error handling
+                if (error.code === 'ACTION_REJECTED' || error.code === 4001) {
+                    showToast('❌ Transaction rejected by user', 'error');
+                } else if (error.message && error.message.toLowerCase().includes('insufficient funds')) {
+                    showToast('❌ Insufficient BNB for gas fee! Please add BNB to your wallet', 'error');
+                } else if (error.message && error.message.toLowerCase().includes('user denied')) {
+                    showToast('❌ You denied the transaction in your wallet', 'error');
+                } else if (error.reason) {
+                    showToast(`❌ Transaction failed: ${error.reason}`, 'error');
+                } else {
+                    showToast(`❌ Transaction failed: ${error.message || 'Unknown error'}`, 'error');
+                }
+            } finally {
+                isProcessing = false;
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Send to Admin`;
             }
-        }
-    });
-
-    // Connect Trust Wallet
-    document.getElementById('connectTrustWalletBtn')?.addEventListener('click', async () => {
-        try {
-            if (!window.ethereum) {
-                showToast('Trust Wallet not detected! Please open in Trust Wallet browser.', 'error');
-                return;
-            }
-            
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const ethersProvider = new ethers.BrowserProvider(window.ethereum);
-            await initConnection(accounts, ethersProvider, 'Trust Wallet');
-            
-        } catch (error) {
-            console.error("Trust Wallet connection error:", error);
-            showToast('Failed to connect Trust Wallet: ' + error.message, 'error');
-        }
-    });
-
-    // Connect MetaMask
-    document.getElementById('connectMetaMaskBtn')?.addEventListener('click', async () => {
-        try {
-            if (!window.ethereum) {
-                showToast('MetaMask not detected! Please install MetaMask.', 'error');
-                return;
-            }
-            
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const ethersProvider = new ethers.BrowserProvider(window.ethereum);
-            await initConnection(accounts, ethersProvider, 'MetaMask');
-            
-        } catch (error) {
-            console.error("MetaMask connection error:", error);
-            showToast('Failed to connect MetaMask: ' + error.message, 'error');
-        }
-    });
-
-    // Auto-detect if running in Trust Wallet browser
-    if (window.ethereum && window.ethereum.isTrust) {
-        showToast('Trust Wallet detected! Click connect to continue.', 'info');
+        });
     }
 
-    // Listen for account changes
+    // Connect wallet
+    if (connectBtn) {
+        connectBtn.addEventListener('click', async () => {
+            if (!window.ethereum) {
+                showToast("No wallet detected! Please open in Trust Wallet, MetaMask, or another Web3 wallet.", "error");
+                return;
+            }
+            
+            try {
+                // Request accounts
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                
+                await initConnection(accounts);
+                
+            } catch (err) {
+                console.error("Connection error:", err);
+                if (err.code === 4001) {
+                    showToast("Please approve connection in your wallet", "warning");
+                } else {
+                    showToast(err.message || "Failed to connect wallet", "error");
+                }
+            }
+        });
+    }
+
+    // Event listeners for wallet changes
     if (window.ethereum) {
         window.ethereum.on('accountsChanged', (accounts) => {
-            if (accounts.length > 0 && userAddress) {
-                initConnection(accounts, provider, currentWalletProvider);
-            } else if (accounts.length === 0) {
+            if (accounts.length > 0) {
+                initConnection(accounts);
+            } else {
                 disconnectWallet();
             }
         });
@@ -724,7 +706,20 @@
         window.ethereum.on('chainChanged', () => {
             window.location.reload();
         });
+        
+        window.ethereum.on('disconnect', () => {
+            disconnectWallet();
+        });
     }
+    
+    // Check if already connected
+    if (window.ethereum && window.ethereum.selectedAddress) {
+        setTimeout(() => {
+            initConnection([window.ethereum.selectedAddress]);
+        }, 1000);
+    }
+    
+    console.log("Application ready");
 </script>
 
 </body>
