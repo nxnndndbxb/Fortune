@@ -8,44 +8,38 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Swiper JS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <style>
         :root {
             --primary: #00ffcc;
             --primary-dark: #00ccaa;
-            --secondary: #667eea;
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.8);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --secondary: #6366f1;
+            --bg-dark: #0a0c15;
+            --card-bg: rgba(18, 22, 35, 0.95);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #8b8f9e;
             --danger: #ef4444;
             --success: #10b981;
             --warning: #f59e0b;
             --info: #3b82f6;
             --gold: #fbbf24;
-            --silver: #94a3b8;
-            --level1: #10b981;
-            --level2: #3b82f6;
-            --level3: #8b5cf6;
-            --level4: #ec489a;
-            --level5: #f59e0b;
-            --level6: #ef4444;
-            --level7: #06b6d4;
+            --purple: #8b5cf6;
+            --pink: #ec489a;
+            --cyan: #06b6d4;
+            --orange: #f97316;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
         
         body {
-            background: radial-gradient(circle at 50% 0%, #1e293b, var(--bg-color));
+            background: radial-gradient(circle at 50% 0%, #13172b, var(--bg-dark));
             color: var(--text-main);
             min-height: 100vh;
             padding-bottom: 80px;
         }
 
         .navbar {
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(10, 12, 21, 0.95);
             backdrop-filter: blur(10px);
             padding: 12px 20px;
             position: sticky;
@@ -56,7 +50,7 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .logo {
@@ -93,12 +87,12 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(10, 12, 21, 0.98);
             backdrop-filter: blur(10px);
             display: flex;
             justify-content: space-around;
             padding: 12px 20px 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid var(--card-border);
             z-index: 100;
         }
         
@@ -130,94 +124,158 @@
         .main-card {
             background: var(--card-bg);
             backdrop-filter: blur(16px);
-            padding: 25px;
-            border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 28px;
+            border: 1px solid var(--card-border);
+            margin-bottom: 16px;
         }
         
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 15px;
+        /* New Dashboard Grid Styles - Like Image */
+        .dashboard-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
         
-        .stat-card {
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 16px;
-            text-align: center;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-2px);
-            background: rgba(0,0,0,0.5);
-        }
-        
-        .stat-card h3 {
-            font-size: 24px;
-            margin: 10px 0;
-            color: var(--primary);
-        }
-        
-        .income-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 20px;
-        }
-        
-        .income-card {
-            background: linear-gradient(135deg, rgba(0,255,204,0.1), rgba(102,126,234,0.1));
-            border-radius: 16px;
-            padding: 16px 12px;
-            text-align: center;
-            border: 1px solid rgba(0,255,204,0.3);
-            transition: all 0.3s;
-        }
-        
-        .income-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--primary);
-        }
-        
-        .income-card .icon {
-            font-size: 28px;
+        .profit-row {
+            display: flex;
+            gap: 16px;
             margin-bottom: 8px;
         }
         
-        .income-card h3 {
+        .profit-card {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+            border-radius: 24px;
+            padding: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+        }
+        
+        .profit-card h4 {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        
+        .profit-amount {
             font-size: 24px;
             font-weight: bold;
-            margin: 5px 0;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+        
+        .profit-usd {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .claim-btn {
+            background: linear-gradient(135deg, var(--secondary), #4f46e5);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        
+        .claim-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+        
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+        }
+        
+        .stat-card {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 14px;
+            text-align: center;
+            border: 1px solid var(--card-border);
+        }
+        
+        .stat-card h4 {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
             color: var(--primary);
         }
         
-        .income-card p {
-            font-size: 12px;
+        .stat-sub {
+            font-size: 10px;
             color: var(--text-muted);
-            margin-bottom: 5px;
+            margin-top: 4px;
+        }
+        
+        .royalty-row {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+        }
+        
+        .royalty-card {
+            flex: 1;
+            background: rgba(0, 255, 204, 0.03);
+            border-radius: 20px;
+            padding: 14px;
+            text-align: center;
+            border: 1px solid rgba(0, 255, 204, 0.2);
+        }
+        
+        .royalty-card h4 {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        
+        .royalty-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--gold);
         }
         
         .hero-slider {
             margin-bottom: 20px;
-            border-radius: 20px;
+            border-radius: 28px;
             overflow: hidden;
         }
         
         .swiper {
             width: 100%;
-            border-radius: 20px;
+            border-radius: 28px;
         }
         
         .swiper-slide img {
             width: 100%;
             height: 180px;
             object-fit: cover;
-            border-radius: 20px;
+            border-radius: 28px;
         }
         
         .swiper-pagination-bullet-active {
@@ -225,11 +283,11 @@
         }
         
         .btn {
-            background: linear-gradient(135deg, var(--secondary), #764ba2);
+            background: linear-gradient(135deg, var(--secondary), #4f46e5);
             color: white;
             border: none;
             padding: 14px;
-            border-radius: 12px;
+            border-radius: 24px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
@@ -241,7 +299,7 @@
             gap: 10px;
         }
         
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4); }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
         .btn-success {
@@ -251,9 +309,9 @@
         .hidden { display: none !important; }
         
         .gas-info {
-            background: rgba(240, 185, 11, 0.1);
-            border: 1px solid #f0b90b;
-            border-radius: 12px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
             padding: 10px;
             margin: 15px 0;
             text-align: center;
@@ -261,9 +319,9 @@
         }
         
         .plan-card {
-            background: linear-gradient(135deg, rgba(0,255,204,0.1), rgba(102,126,234,0.1));
+            background: linear-gradient(135deg, rgba(0,255,204,0.1), rgba(99,102,241,0.1));
             border: 2px solid var(--primary);
-            border-radius: 20px;
+            border-radius: 28px;
             padding: 25px;
             text-align: center;
             margin-bottom: 20px;
@@ -277,8 +335,8 @@
         }
         
         .level-card {
-            background: linear-gradient(135deg, rgba(0,255,204,0.05), rgba(102,126,234,0.05));
-            border-radius: 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 20px;
             padding: 15px;
             margin-bottom: 12px;
             display: flex;
@@ -286,7 +344,7 @@
             gap: 15px;
             transition: all 0.3s;
             cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--card-border);
         }
         
         .level-card:hover {
@@ -319,11 +377,6 @@
             color: var(--primary);
         }
         
-        .level-price span {
-            font-size: 14px;
-            font-weight: bold;
-        }
-        
         .level-badge {
             padding: 4px 12px;
             border-radius: 20px;
@@ -331,14 +384,9 @@
             background: var(--success);
         }
         
-        .level-locked {
-            background: rgba(0,0,0,0.5);
-            opacity: 0.6;
-        }
-        
         .team-list {
             background: rgba(0,0,0,0.3);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 15px;
             margin-top: 15px;
         }
@@ -346,8 +394,8 @@
         .team-member {
             display: flex;
             justify-content: space-between;
-            padding: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 12px;
+            border-bottom: 1px solid var(--card-border);
         }
         
         .stars-rating {
@@ -370,7 +418,7 @@
         .asset-item {
             background: rgba(0,0,0,0.3);
             padding: 12px;
-            border-radius: 12px;
+            border-radius: 16px;
             display: flex;
             justify-content: space-between;
         }
@@ -390,7 +438,7 @@
         
         .dashboard-header {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         
         .dashboard-header h2 {
@@ -398,23 +446,11 @@
             margin-top: 10px;
         }
         
-        .team-count {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        
-        .level-name-display {
-            font-size: 14px;
-            color: var(--gold);
-            margin-top: 5px;
-        }
-        
         @media (max-width: 480px) {
             .container { padding: 15px; }
             .nav-item { padding: 5px 10px; }
-            .income-card h3 { font-size: 20px; }
-            .level-icon { width: 40px; height: 40px; font-size: 18px; }
+            .profit-amount { font-size: 20px; }
+            .stat-value { font-size: 18px; }
         }
         
         .page {
@@ -436,10 +472,10 @@
         }
         
         .toast {
-            background: white;
-            color: black;
+            background: #1e293b;
+            color: white;
             padding: 12px 20px;
-            border-radius: 12px;
+            border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
@@ -447,10 +483,11 @@
             animation: slideInRight 0.3s ease forwards;
             max-width: 280px;
             font-size: 13px;
+            border-left: 4px solid;
         }
         
-        .toast.error { border-left: 5px solid var(--danger); }
-        .toast.success { border-left: 5px solid var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.success { border-left-color: var(--success); }
         
         @keyframes slideInRight {
             from { transform: translateX(100%); opacity: 0; }
@@ -482,7 +519,7 @@
         .modal-content {
             background: #1e293b;
             padding: 25px;
-            border-radius: 20px;
+            border-radius: 24px;
             width: 90%;
             max-width: 350px;
             text-align: center;
@@ -506,7 +543,7 @@
             color: white;
             flex: 1;
             padding: 12px;
-            border-radius: 10px;
+            border-radius: 16px;
             border: none;
             cursor: pointer;
         }
@@ -516,7 +553,7 @@
             color: white;
             flex: 1;
             padding: 12px;
-            border-radius: 10px;
+            border-radius: 16px;
             border: none;
             cursor: pointer;
         }
@@ -535,7 +572,6 @@
         <div class="gas-info">
             <i class="fa-solid fa-gas-pump"></i> Network Fee: ~0.0003 BNB
         </div>
-        <p style="font-size: 11px; color: var(--text-muted);">One-time payment for lifetime access</p>
         <div class="modal-buttons">
             <button class="btn-cancel" onclick="closePaymentModal()">Cancel</button>
             <button class="btn-confirm" id="confirmPaymentBtn">Pay Now</button>
@@ -543,19 +579,16 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="upgradeModal">
+<div class="modal-overlay" id="claimModal">
     <div class="modal-content">
-        <i class="fa-solid fa-arrow-up" style="font-size: 40px; color: var(--primary);"></i>
-        <h2 style="margin: 15px 0;">Upgrade Level</h2>
-        <p id="upgradeLevelName">Level Name</p>
-        <div class="modal-amount" id="upgradeAmount">0 ZTR</div>
-        <div class="gas-info">
-            <i class="fa-solid fa-chart-line"></i> New Team Commission: <span id="newCommission">0%</span>
-        </div>
-        <p style="font-size: 11px; color: var(--text-muted);">Upgrade to increase your earnings</p>
+        <i class="fa-solid fa-gift" style="font-size: 40px; color: var(--primary);"></i>
+        <h2 style="margin: 15px 0;">Claim Earnings</h2>
+        <p id="claimTypeText">Profit Base</p>
+        <div class="modal-amount" id="claimAmount">0 ZTR</div>
+        <p style="font-size: 12px; color: var(--text-muted);">Amount will be added to your ZTR balance</p>
         <div class="modal-buttons">
-            <button class="btn-cancel" onclick="closeUpgradeModal()">Cancel</button>
-            <button class="btn-confirm" id="confirmUpgradeBtn">Upgrade Now</button>
+            <button class="btn-cancel" onclick="closeClaimModal()">Cancel</button>
+            <button class="btn-confirm" id="confirmClaimBtn">Claim Now</button>
         </div>
     </div>
 </div>
@@ -585,15 +618,15 @@
             <button id="connectBtn" class="btn">
                 <i class="fa-solid fa-wallet"></i> Connect Wallet
             </button>
-            <div class="stats-grid" style="margin-top: 20px;">
+            <div class="stats-row" style="margin-top: 20px;">
                 <div class="stat-card">
                     <i class="fa-solid fa-shield-halved"></i>
-                    <div>Secure Platform</div>
+                    <div style="margin-top: 8px;">Secure Platform</div>
                     <small>BSC Network</small>
                 </div>
                 <div class="stat-card">
                     <i class="fa-solid fa-gem"></i>
-                    <div>Premium Features</div>
+                    <div style="margin-top: 8px;">Premium Features</div>
                     <small>Lifetime Access</small>
                 </div>
             </div>
@@ -606,7 +639,7 @@
                 <i class="fa-solid fa-crown" style="font-size: 48px; color: var(--primary);"></i>
                 <h2 style="margin: 15px 0;">Starter Plan</h2>
                 <div class="plan-price">0.10 USDT</div>
-                <ul class="plan-features">
+                <ul class="plan-features" style="text-align: left; margin: 20px 0; padding: 0 20px;">
                     <li><i class="fa-solid fa-check-circle"></i> Lifetime Premium Access</li>
                     <li><i class="fa-solid fa-check-circle"></i> ZTR Coin Earnings</li>
                     <li><i class="fa-solid fa-check-circle"></i> Team & Level Rewards</li>
@@ -625,63 +658,74 @@
 
     <div id="dashboardState" class="hidden">
         <div id="pageDashboard" class="page active">
-            <div class="main-card">
-                <div class="hero-slider">
-                    <div class="swiper dashboardSwiper">
-                        <div class="swiper-wrapper">
-                            <div class="swiper-slide"><img src="https://iili.io/q4VQShN.jpg" alt="Dashboard Banner"></div>
-                            <div class="swiper-slide"><img src="https://iili.io/q4VQShN.jpg" alt="Earnings Banner"></div>
-                            <div class="swiper-slide"><img src="https://iili.io/q4VQShN.jpg" alt="Rewards Banner"></div>
-                        </div>
-                        <div class="swiper-pagination"></div>
+            <div class="hero-slider">
+                <div class="swiper dashboardSwiper">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide"><img src="https://iili.io/q4VQShN.jpg" alt="Dashboard Banner"></div>
+                        <div class="swiper-slide"><img src="https://iili.io/q4VQShN.jpg" alt="Earnings Banner"></div>
+                        <div class="swiper-slide"><img src="https://iili.io/q4VQShN.jpg" alt="Rewards Banner"></div>
+                    </div>
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid">
+                <!-- Profit Base Row -->
+                <div class="profit-row">
+                    <div class="profit-card">
+                        <h4>Profit Base</h4>
+                        <div class="profit-amount" id="profitBaseAmount">0.00</div>
+                        <div class="profit-usd">≈ $<span id="profitBaseUSD">0</span></div>
+                        <button class="claim-btn" onclick="openClaimModal('Profit Base', 'profitBase')">Claim</button>
+                    </div>
+                    <div class="profit-card">
+                        <h4>Profit Trinity</h4>
+                        <div class="profit-amount" id="profitTrinityAmount">0.00</div>
+                        <div class="profit-usd">≈ $<span id="profitTrinityUSD">0</span></div>
+                        <button class="claim-btn" onclick="openClaimModal('Profit Trinity', 'profitTrinity')">Claim</button>
                     </div>
                 </div>
                 
-                <div class="dashboard-header">
-                    <span class="rank-badge" id="userRankBadge">Premium Member</span>
-                    <h2>Income Dashboard</h2>
-                </div>
-                
-                <div class="income-grid">
-                    <div class="income-card ztr">
-                        <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
-                        <p>Profit</p>
-                        <h3 id="profitIncome">0 ZTR</h3>
-                        <small>≈ $<span id="profitUSD">0</span></small>
+                <!-- Partners & Total Team Row -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <h4><i class="fa-solid fa-user-plus"></i> Partners</h4>
+                        <div class="stat-value" id="partnersCount">+0</div>
+                        <div class="stat-sub">Active referrals</div>
                     </div>
-                    
-                    <div class="income-card upliner">
-                        <div class="icon"><i class="fa-solid fa-users"></i></div>
-                        <p>Team</p>
-                        <h3 id="teamIncome">0 ZTR</h3>
-                        <small id="teamCount">0 Members</small>
-                    </div>
-                    
-                    <div class="income-card downliner">
-                        <div class="icon"><i class="fa-solid fa-calendar-check"></i></div>
-                        <p>Sallery</p>
-                        <h3 id="salleryIncome">0 ZTR</h3>
-                        <small>Monthly</small>
-                    </div>
-                    
-                    <div class="income-card sallery">
-                        <div class="icon"><i class="fa-solid fa-chart-simple"></i></div>
-                        <p>Level</p>
-                        <h3 id="levelIncome">0 ZTR</h3>
-                        <small id="levelNameDisplay">Start Level</small>
+                    <div class="stat-card">
+                        <h4><i class="fa-solid fa-users"></i> Total team</h4>
+                        <div class="stat-value" id="totalTeamCount">+0</div>
+                        <div class="stat-sub">Members</div>
                     </div>
                 </div>
                 
-                <div class="gas-info">
-                    <i class="fa-solid fa-check-circle"></i> 1 ZTR = 1 USD | Premium Member
+                <!-- Royalty Row -->
+                <div class="royalty-row">
+                    <div class="royalty-card">
+                        <h4>Royalty Base</h4>
+                        <div class="royalty-amount" id="royaltyBaseAmount">~$0</div>
+                        <div class="stat-sub" id="royaltyBaseValue">0</div>
+                        <button class="claim-btn" style="background: linear-gradient(135deg, var(--orange), #ea580c);" onclick="openClaimModal('Royalty Base', 'royaltyBase')">Claim</button>
+                    </div>
+                    <div class="royalty-card">
+                        <h4>Royalty Trinity</h4>
+                        <div class="royalty-amount" id="royaltyTrinityAmount">$0</div>
+                        <div class="stat-sub" id="royaltyTrinityValue">0</div>
+                        <button class="claim-btn" style="background: linear-gradient(135deg, var(--orange), #ea580c);" onclick="openClaimModal('Royalty Trinity', 'royaltyTrinity')">Claim</button>
+                    </div>
                 </div>
+            </div>
+            
+            <div class="gas-info">
+                <i class="fa-solid fa-chart-line"></i> 1 ZTR = 1 USD | Level: <span id="userLevelDisplay">Start Level</span>
             </div>
         </div>
         
         <div id="pageLevel" class="page">
             <div class="main-card">
                 <h3><i class="fa-solid fa-chart-simple"></i> Investment Levels</h3>
-                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Upgrade your level to increase team commission</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Upgrade your level to increase earnings</p>
                 <div id="levelsList"></div>
                 <div class="gas-info" style="margin-top: 15px;">
                     <i class="fa-solid fa-chart-line"></i> Current Level: <span id="currentLevelName">Start Level</span>
@@ -692,22 +736,23 @@
         <div id="pageTeam" class="page">
             <div class="main-card">
                 <h3><i class="fa-solid fa-users"></i> Your Team</h3>
-                <div class="team-list" id="teamList">
+                <div class="team-list">
                     <div class="team-member">
                         <span>Total Team Members</span>
-                        <span class="team-count" id="teamTotalCount">0</span>
+                        <span class="stat-value" id="teamTotalCount">0</span>
                     </div>
                     <div class="team-member">
-                        <span>Active Members</span>
-                        <span id="activeTeamCount">0</span>
+                        <span>Active Partners</span>
+                        <span id="activePartners">0</span>
                     </div>
                     <div class="team-member">
                         <span>Team Commission</span>
-                        <span id="teamCommission">0%</span>
+                        <span id="teamCommissionPercent">0%</span>
                     </div>
-                </div>
-                <div class="gas-info" style="margin-top: 15px;">
-                    <i class="fa-solid fa-info-circle"></i> Invite more members to grow your team
+                    <div class="team-member">
+                        <span>Your Level</span>
+                        <span id="teamLevelName">Start Level</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -746,6 +791,7 @@
 </div>
 
 <script>
+    // Configuration - All existing data preserved
     const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
     const CHAIN_ID = "0x38";
@@ -768,13 +814,16 @@
     const STORAGE_KEYS = {
         SESSION: 'ztr_premium_session', PAID_USERS: 'ztr_paid_users', ZTR_BALANCE: 'ztr_user_balance',
         USER_LEVEL: 'ztr_user_level', TEAM_SIZE: 'ztr_team_size', SALLERY_EARNINGS: 'ztr_sallery_earnings',
-        TEAM_COMMISSION: 'ztr_team_commission'
+        PROFIT_BASE: 'ztr_profit_base', PROFIT_TRINITY: 'ztr_profit_trinity',
+        ROYALTY_BASE: 'ztr_royalty_base', ROYALTY_TRINITY: 'ztr_royalty_trinity'
     };
     
     let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, currentIP = null;
     
     const connectState = document.getElementById('connectState'), investmentState = document.getElementById('investmentState'), dashboardState = document.getElementById('dashboardState');
-    const connectBtn = document.getElementById('connectBtn'), investNowBtn = document.getElementById('investNowBtn'), paymentModal = document.getElementById('paymentModal'), upgradeModal = document.getElementById('upgradeModal'), bottomNav = document.getElementById('bottomNav');
+    const connectBtn = document.getElementById('connectBtn'), investNowBtn = document.getElementById('investNowBtn'), paymentModal = document.getElementById('paymentModal'), claimModal = document.getElementById('claimModal'), bottomNav = document.getElementById('bottomNav');
+    
+    let currentClaim = null;
     
     function showToast(message, type = 'info') {
         const container = document.getElementById('toast-container');
@@ -792,7 +841,19 @@
     }
     
     function isPaidUser(wallet) { const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); return paidUsers[wallet.toLowerCase()] === true; }
-    function markUserAsPaid(wallet) { const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); paidUsers[wallet.toLowerCase()] = true; localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10); if (!getUserLevel(wallet)) setUserLevel(wallet, 0); if (!getTeamSize(wallet)) setTeamSize(wallet, 0); if (!getSalleryEarnings(wallet)) setSalleryEarnings(wallet, 0); }
+    
+    function markUserAsPaid(wallet) { 
+        const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
+        paidUsers[wallet.toLowerCase()] = true; 
+        localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
+        if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10); 
+        if (!getUserLevel(wallet)) setUserLevel(wallet, 0); 
+        if (!getTeamSize(wallet)) setTeamSize(wallet, 1);
+        if (!getProfitBase(wallet)) setProfitBase(wallet, 1.50);
+        if (!getProfitTrinity(wallet)) setProfitTrinity(wallet, 0.0067);
+        if (!getRoyaltyBase(wallet)) setRoyaltyBase(wallet, 2.14);
+        if (!getRoyaltyTrinity(wallet)) setRoyaltyTrinity(wallet, 0);
+    }
     
     function getZTRBalance(wallet) { const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); return balances[wallet.toLowerCase()] || 0; }
     function updateZTRBalance(wallet, amount) { const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); balances[wallet.toLowerCase()] = (balances[wallet.toLowerCase()] || 0) + amount; localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(balances)); return balances[wallet.toLowerCase()]; }
@@ -802,13 +863,18 @@
     
     function getTeamSize(wallet) { const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); return teams[wallet.toLowerCase()] || 0; }
     function setTeamSize(wallet, size) { const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); teams[wallet.toLowerCase()] = size; localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teams)); }
-    function updateTeamSize(wallet, increment) { setTeamSize(wallet, getTeamSize(wallet) + increment); }
     
-    function getSalleryEarnings(wallet) { const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); return earnings[wallet.toLowerCase()] || 0; }
-    function setSalleryEarnings(wallet, amount) { const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); earnings[wallet.toLowerCase()] = amount; localStorage.setItem(STORAGE_KEYS.SALLERY_EARNINGS, JSON.stringify(earnings)); }
+    function getProfitBase(wallet) { const profits = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFIT_BASE) || '{}'); return profits[wallet.toLowerCase()] || 0; }
+    function setProfitBase(wallet, amount) { const profits = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFIT_BASE) || '{}'); profits[wallet.toLowerCase()] = amount; localStorage.setItem(STORAGE_KEYS.PROFIT_BASE, JSON.stringify(profits)); }
     
-    function getTeamCommission(wallet) { const commissions = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_COMMISSION) || '{}'); return commissions[wallet.toLowerCase()] || 0; }
-    function setTeamCommission(wallet, commission) { const commissions = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_COMMISSION) || '{}'); commissions[wallet.toLowerCase()] = commission; localStorage.setItem(STORAGE_KEYS.TEAM_COMMISSION, JSON.stringify(commissions)); }
+    function getProfitTrinity(wallet) { const profits = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFIT_TRINITY) || '{}'); return profits[wallet.toLowerCase()] || 0; }
+    function setProfitTrinity(wallet, amount) { const profits = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFIT_TRINITY) || '{}'); profits[wallet.toLowerCase()] = amount; localStorage.setItem(STORAGE_KEYS.PROFIT_TRINITY, JSON.stringify(profits)); }
+    
+    function getRoyaltyBase(wallet) { const royalties = JSON.parse(localStorage.getItem(STORAGE_KEYS.ROYALTY_BASE) || '{}'); return royalties[wallet.toLowerCase()] || 0; }
+    function setRoyaltyBase(wallet, amount) { const royalties = JSON.parse(localStorage.getItem(STORAGE_KEYS.ROYALTY_BASE) || '{}'); royalties[wallet.toLowerCase()] = amount; localStorage.setItem(STORAGE_KEYS.ROYALTY_BASE, JSON.stringify(royalties)); }
+    
+    function getRoyaltyTrinity(wallet) { const royalties = JSON.parse(localStorage.getItem(STORAGE_KEYS.ROYALTY_TRINITY) || '{}'); return royalties[wallet.toLowerCase()] || 0; }
+    function setRoyaltyTrinity(wallet, amount) { const royalties = JSON.parse(localStorage.getItem(STORAGE_KEYS.ROYALTY_TRINITY) || '{}'); royalties[wallet.toLowerCase()] = amount; localStorage.setItem(STORAGE_KEYS.ROYALTY_TRINITY, JSON.stringify(royalties)); }
     
     function getCurrentLevelInfo(wallet) { const levelId = getUserLevel(wallet); if (levelId === 0) return { name: "Start Level", price: 0, commission: 0, icon: "🌱" }; return LEVELS[levelId - 1]; }
     
@@ -838,20 +904,71 @@
         const ztrBalance = getZTRBalance(userAddress);
         const currentLevel = getCurrentLevelInfo(userAddress);
         const teamSize = getTeamSize(userAddress);
-        const sallery = getSalleryEarnings(userAddress);
-        const teamCommission = getTeamCommission(userAddress);
+        const profitBase = getProfitBase(userAddress);
+        const profitTrinity = getProfitTrinity(userAddress);
+        const royaltyBase = getRoyaltyBase(userAddress);
+        const royaltyTrinity = getRoyaltyTrinity(userAddress);
         
-        document.getElementById('profitIncome').innerText = ztrBalance.toFixed(2) + " ZTR";
-        document.getElementById('profitUSD').innerText = ztrBalance.toFixed(2);
-        document.getElementById('teamIncome').innerText = teamCommission.toFixed(2) + " ZTR";
-        document.getElementById('teamCount').innerHTML = teamSize + " Members";
-        document.getElementById('salleryIncome').innerText = sallery.toFixed(2) + " ZTR";
-        document.getElementById('levelIncome').innerText = (ztrBalance * (currentLevel.commission / 100)).toFixed(2) + " ZTR";
-        document.getElementById('levelNameDisplay').innerHTML = currentLevel.name;
+        document.getElementById('profitBaseAmount').innerText = profitBase.toFixed(2);
+        document.getElementById('profitBaseUSD').innerText = profitBase.toFixed(2);
+        document.getElementById('profitTrinityAmount').innerText = profitTrinity.toFixed(4);
+        document.getElementById('profitTrinityUSD').innerText = profitTrinity.toFixed(4);
+        document.getElementById('partnersCount').innerHTML = `+${Math.floor(teamSize * 0.3)}`;
+        document.getElementById('totalTeamCount').innerHTML = `+${teamSize}`;
+        document.getElementById('royaltyBaseAmount').innerHTML = `~$${royaltyBase.toFixed(2)}`;
+        document.getElementById('royaltyBaseValue').innerHTML = royaltyBase.toFixed(2);
+        document.getElementById('royaltyTrinityAmount').innerHTML = `$${royaltyTrinity.toFixed(2)}`;
+        document.getElementById('royaltyTrinityValue').innerHTML = royaltyTrinity.toFixed(2);
+        document.getElementById('userLevelDisplay').innerHTML = currentLevel.name;
+        
+        // Team page
         document.getElementById('teamTotalCount').innerText = teamSize;
-        document.getElementById('activeTeamCount').innerText = Math.floor(teamSize * 0.8);
-        document.getElementById('teamCommission').innerText = currentLevel.commission + "%";
+        document.getElementById('activePartners').innerText = Math.floor(teamSize * 0.3);
+        document.getElementById('teamCommissionPercent').innerText = currentLevel.commission + "%";
+        document.getElementById('teamLevelName').innerText = currentLevel.name;
         document.getElementById('currentLevelName').innerText = currentLevel.name;
+    }
+    
+    function openClaimModal(type, key) {
+        let amount = 0;
+        if (key === 'profitBase') amount = getProfitBase(userAddress);
+        else if (key === 'profitTrinity') amount = getProfitTrinity(userAddress);
+        else if (key === 'royaltyBase') amount = getRoyaltyBase(userAddress);
+        else if (key === 'royaltyTrinity') amount = getRoyaltyTrinity(userAddress);
+        
+        if (amount <= 0) { showToast(`No ${type} available to claim!`, 'warning'); return; }
+        
+        currentClaim = { type, key, amount };
+        document.getElementById('claimTypeText').innerText = type;
+        document.getElementById('claimAmount').innerHTML = amount.toFixed(4) + " ZTR";
+        claimModal.classList.add('active');
+    }
+    
+    function closeClaimModal() { claimModal.classList.remove('active'); currentClaim = null; }
+    
+    async function processClaim() {
+        if (!currentClaim) return;
+        if (isProcessing) return;
+        isProcessing = true;
+        
+        try {
+            const amount = currentClaim.amount;
+            updateZTRBalance(userAddress, amount);
+            
+            if (currentClaim.key === 'profitBase') setProfitBase(userAddress, 0);
+            else if (currentClaim.key === 'profitTrinity') setProfitTrinity(userAddress, 0);
+            else if (currentClaim.key === 'royaltyBase') setRoyaltyBase(userAddress, 0);
+            else if (currentClaim.key === 'royaltyTrinity') setRoyaltyTrinity(userAddress, 0);
+            
+            showToast(`✅ Successfully claimed ${amount.toFixed(4)} ZTR!`, 'success');
+            closeClaimModal();
+            updateDashboard();
+        } catch (error) {
+            console.error("Claim error:", error);
+            showToast('Claim failed!', 'error');
+        } finally {
+            isProcessing = false;
+        }
     }
     
     function renderLevels() {
@@ -881,6 +998,8 @@
     }
     
     let selectedLevel = null;
+    const upgradeModal = document.getElementById('upgradeModal');
+    
     function upgradeLevel(levelId, levelName, price, commission) {
         const currentLevelId = getUserLevel(userAddress);
         if (currentLevelId >= levelId) { showToast(`You already have ${levelName} level or higher!`, 'warning'); return; }
@@ -909,7 +1028,6 @@
             
             updateZTRBalance(userAddress, -selectedLevel.price);
             setUserLevel(userAddress, selectedLevel.levelId);
-            setTeamCommission(userAddress, selectedLevel.commission);
             
             showToast(`✅ Successfully upgraded to ${selectedLevel.levelName} Level!`, 'success');
             closeUpgradeModal();
@@ -944,7 +1062,6 @@
             
             if (receipt.status === 1) {
                 markUserAsPaid(userAddress);
-                setSalleryEarnings(userAddress, 5);
                 showToast(`✅ Payment successful! Welcome to ZTR Premium!`, 'success');
                 closePaymentModal();
                 showDashboard();
@@ -1025,6 +1142,7 @@
     
     document.getElementById('confirmPaymentBtn').addEventListener('click', payJoiningFee);
     document.getElementById('confirmUpgradeBtn').addEventListener('click', processUpgrade);
+    document.getElementById('confirmClaimBtn').addEventListener('click', processClaim);
     
     window.addEventListener('load', async () => { const ip = await getIP(); document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${ip}`; await restoreSession(); });
     
@@ -1033,7 +1151,7 @@
         window.ethereum.on('chainChanged', () => window.location.reload());
     }
     
-    console.log("ZTR Premium Portal Ready - New Income System: Profit, Team, Sallery, Level | 1 ZTR = 1 USD");
+    console.log("ZTR Premium Portal Ready - New Dashboard Design with Claim System");
 </script>
 </body>
 </html>
