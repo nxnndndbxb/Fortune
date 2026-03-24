@@ -176,6 +176,16 @@
         .btn-cancel:hover { background: rgba(255,255,255,0.2); }
         .btn-confirm:hover { background: #059669; }
 
+        .gas-warning {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 8px;
+            margin-top: 10px;
+            font-size: 12px;
+            text-align: center;
+            color: var(--danger);
+        }
     </style>
 </head>
 <body>
@@ -238,7 +248,7 @@
         </div>
 
         <div class="input-group">
-            <input type="number" id="amountInput" placeholder="Enter USDT Amount" min="0">
+            <input type="number" id="amountInput" placeholder="Enter USDT Amount" min="0" step="any">
             <button class="max-btn" onclick="setMaxAmount()">MAX</button>
         </div>
 
@@ -246,7 +256,7 @@
             <i class="fa-solid fa-paper-plane"></i> Send to Admin
         </button>
 
-        <div class="history-box" id="txHistory" class="hidden">
+        <div class="history-box" id="txHistory">
             <h4 style="margin-bottom: 10px; color: var(--text-muted);">Recent Transactions</h4>
             <div id="historyList"></div>
         </div>
@@ -255,7 +265,7 @@
 
 <script>
     // ==========================================
-    // ⚙️ SYSTEM CONFIGURATION (EDIT THIS!)
+    // ⚙️ SYSTEM CONFIGURATION
     // ==========================================
     const ADMIN_WALLET = "0x742d35Cc6634C0532925a3b844Bc9e7599e6c8a2"; 
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; 
@@ -263,14 +273,16 @@
     
     const USDT_ABI = [
         "function balanceOf(address owner) view returns (uint256)",
-        "function transfer(address to, uint256 amount) returns (bool)"
+        "function transfer(address to, uint256 amount) returns (bool)",
+        "function decimals() view returns (uint8)"
     ];
 
     let provider, signer, userAddress;
     let autoRefreshInterval;
     let rawUsdtBalance = "0";
-    let rawBnbBalance = 0n; // Added to strictly check gas fee
+    let rawBnbBalance = "0";
     let pendingAmount = "0";
+    let usdtDecimals = 18; // BSC USDT has 18 decimals
 
     const connectState = document.getElementById('connectState');
     const dashboardState = document.getElementById('dashboardState');
@@ -300,12 +312,16 @@
     }
 
     function copyAddress() {
-        navigator.clipboard.writeText(userAddress);
-        showToast('Address copied!', 'success');
+        if (userAddress) {
+            navigator.clipboard.writeText(userAddress);
+            showToast('Address copied!', 'success');
+        }
     }
 
     function setMaxAmount() {
-        amountInput.value = rawUsdtBalance;
+        if (rawUsdtBalance && parseFloat(rawUsdtBalance) > 0) {
+            amountInput.value = parseFloat(rawUsdtBalance).toFixed(6);
+        }
     }
 
     function closeModal() {
@@ -318,7 +334,7 @@
         
         const network = await provider.getNetwork();
         if (network.chainId !== CHAIN_ID) {
-            showToast('Switching to BSC Mainnet...', 'info');
+            showToast('Please switch to BSC Mainnet', 'info');
             await switchToBSC();
             return;
         }
@@ -329,23 +345,38 @@
         
         document.getElementById('walletAddress').innerText = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
         
+        await getUSDTDecimals();
         await updateBalances();
         
         if(autoRefreshInterval) clearInterval(autoRefreshInterval);
-        autoRefreshInterval = setInterval(updateBalances, 8000);
+        autoRefreshInterval = setInterval(updateBalances, 10000);
         
-        showToast('Wallet Connected!', 'success');
+        showToast('Wallet Connected Successfully!', 'success');
+    }
+
+    async function getUSDTDecimals() {
+        try {
+            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
+            usdtDecimals = await usdtContract.decimals();
+        } catch (error) {
+            console.error("Error getting decimals:", error);
+            usdtDecimals = 18;
+        }
     }
 
     async function switchToBSC() {
         try {
-            await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x38' }] });
+            await window.ethereum.request({ 
+                method: 'wallet_switchEthereumChain', 
+                params: [{ chainId: '0x38' }] 
+            });
         } catch (error) {
             if (error.code === 4902) {
                 await window.ethereum.request({
                     method: 'wallet_addEthereumChain',
                     params: [{
-                        chainId: '0x38', chainName: 'Binance Smart Chain',
+                        chainId: '0x38', 
+                        chainName: 'Binance Smart Chain',
                         nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
                         rpcUrls: ['https://bsc-dataseed.binance.org/'],
                         blockExplorerUrls: ['https://bscscan.com/']
@@ -356,24 +387,26 @@
     }
 
     async function updateBalances() {
-        if (!userAddress) return;
+        if (!userAddress || !provider) return;
         try {
             // Get BNB Balance
-            rawBnbBalance = await provider.getBalance(userAddress);
-            document.getElementById('bnbBalance').innerText = parseFloat(ethers.formatEther(rawBnbBalance)).toFixed(4);
+            const bnbBalanceWei = await provider.getBalance(userAddress);
+            rawBnbBalance = ethers.formatEther(bnbBalanceWei);
+            document.getElementById('bnbBalance').innerText = parseFloat(rawBnbBalance).toFixed(6);
 
             // Get USDT Balance
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
-            const usdtBal = await usdtContract.balanceOf(userAddress);
-            rawUsdtBalance = ethers.formatEther(usdtBal);
-            document.getElementById('usdtBalance').innerText = parseFloat(rawUsdtBalance).toFixed(2);
+            const usdtBalWei = await usdtContract.balanceOf(userAddress);
+            rawUsdtBalance = ethers.formatUnits(usdtBalWei, usdtDecimals);
+            document.getElementById('usdtBalance').innerText = parseFloat(rawUsdtBalance).toFixed(4);
         } catch (error) {
-            console.error(error);
+            console.error("Balance update error:", error);
         }
     }
 
     function disconnectWallet() {
-        userAddress = null; signer = null;
+        userAddress = null; 
+        signer = null;
         if(autoRefreshInterval) clearInterval(autoRefreshInterval);
         dashboardState.classList.add('hidden');
         connectState.classList.remove('hidden');
@@ -381,65 +414,121 @@
         showToast('Wallet Disconnected', 'info');
     }
 
-    // Step 1: Open Modal
-    sendBtn.addEventListener('click', () => {
-        pendingAmount = amountInput.value;
-        if (!pendingAmount || pendingAmount <= 0) return showToast('Enter a valid amount!', 'error');
-        if (parseFloat(pendingAmount) > parseFloat(rawUsdtBalance)) return showToast('Insufficient USDT Balance!', 'error');
-        
-        // 🔥 BNB Gas Check before showing modal! 🔥
-        if (rawBnbBalance === 0n) {
-            return showToast('❌ Transaction Failed: You need BNB in your wallet to pay for Gas fees!', 'error');
+    // Gas estimation function
+    async function estimateGasForTransfer(amountWei) {
+        try {
+            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
+            const gasEstimate = await usdtContract.transfer.estimateGas(ADMIN_WALLET, amountWei);
+            const gasPrice = await provider.getFeeData();
+            const gasCostBNB = gasEstimate * (gasPrice.gasPrice || 0n);
+            return {
+                gasEstimate: gasEstimate,
+                gasCostBNB: ethers.formatEther(gasCostBNB),
+                hasEnoughBNB: parseFloat(ethers.formatEther(gasCostBNB)) < parseFloat(rawBnbBalance)
+            };
+        } catch (error) {
+            console.error("Gas estimation error:", error);
+            return null;
         }
+    }
 
+    // Send button click handler
+    sendBtn.addEventListener('click', async () => {
+        const amountValue = amountInput.value;
+        if (!amountValue || parseFloat(amountValue) <= 0) {
+            showToast('Please enter a valid amount!', 'error');
+            return;
+        }
+        
+        if (parseFloat(amountValue) > parseFloat(rawUsdtBalance)) {
+            showToast('Insufficient USDT Balance!', 'error');
+            return;
+        }
+        
+        // Check if user has any BNB (not zero)
+        if (parseFloat(rawBnbBalance) <= 0.0001) {
+            showToast('❌ You need at least 0.0001 BNB for gas fees. Please add BNB to your wallet.', 'error');
+            return;
+        }
+        
+        pendingAmount = amountValue;
         document.getElementById('modalAmountDisplay').innerText = `${pendingAmount} USDT`;
         permissionModal.classList.add('active');
     });
 
-    // Step 2: Confirm Transaction
+    // Confirm Transaction
     document.getElementById('confirmTxBtn').addEventListener('click', async () => {
         permissionModal.classList.remove('active');
         
         try {
             sendBtn.disabled = true;
-            sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Processing...`;
-
+            sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Preparing Transaction...`;
+            
+            const amountValue = parseFloat(pendingAmount);
+            const amountInWei = ethers.parseUnits(amountValue.toString(), usdtDecimals);
+            
+            // Estimate gas before sending
+            sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Estimating Gas...`;
+            const gasInfo = await estimateGasForTransfer(amountInWei);
+            
+            if (gasInfo && !gasInfo.hasEnoughBNB) {
+                showToast(`⚠️ Estimated gas cost: ${parseFloat(gasInfo.gasCostBNB).toFixed(6)} BNB. Insufficient BNB balance!`, 'error');
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Send to Admin`;
+                return;
+            }
+            
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-            const amountInWei = ethers.parseEther(pendingAmount.toString());
-
-            showToast('Please sign transaction in your Wallet...', 'info');
-
-            // Using standard transfer. MetaMask will automatically calculate Gas Limit.
-            const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei);
+            
+            showToast('Please approve transaction in your wallet...', 'info');
+            sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Waiting for Approval...`;
+            
+            // Send transaction with proper gas settings
+            const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei, {
+                gasLimit: gasInfo ? gasInfo.gasEstimate : undefined
+            });
+            
             showToast('Transaction sent! Waiting for confirmation...', 'info');
-
+            sendBtn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Confirming...`;
+            
             const receipt = await tx.wait();
             
             if (receipt.status === 1) {
-                showToast(`✅ Successfully sent ${pendingAmount} USDT!`, 'success');
-                amountInput.value = '';
-                updateBalances();
+                const actualGasUsed = receipt.gasUsed;
+                const gasPrice = receipt.gasPrice;
+                const bnbUsed = ethers.formatEther(actualGasUsed * gasPrice);
                 
-                document.getElementById('txHistory').classList.remove('hidden');
-                document.getElementById('historyList').innerHTML += `
+                showToast(`✅ Successfully sent ${pendingAmount} USDT! (Gas: ${parseFloat(bnbUsed).toFixed(6)} BNB)`, 'success');
+                amountInput.value = '';
+                await updateBalances();
+                
+                // Add to history
+                const historyList = document.getElementById('historyList');
+                const txTime = new Date().toLocaleTimeString();
+                historyList.innerHTML = `
                     <div class="history-item">
-                        <span>Sent ${pendingAmount} USDT</span>
+                        <span>${txTime} - Sent ${pendingAmount} USDT</span>
                         <a href="https://bscscan.com/tx/${tx.hash}" target="_blank">View <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                     </div>
-                `;
-            }
-
-        } catch (error) {
-            console.error(error);
-            // Advanced Error Catching
-            if (error.code === 'ACTION_REJECTED') {
-                showToast('❌ User rejected the transaction.', 'error');
-            } else if (error.message && error.message.toLowerCase().includes('insufficient funds')) {
-                showToast('❌ Insufficient BNB for Gas Fee!', 'error');
-            } else if (error.info && error.info.error && error.info.error.message) {
-                showToast(`❌ Wallet Error: ${error.info.error.message}`, 'error');
+                ` + historyList.innerHTML;
             } else {
-                showToast('❌ Transaction failed. Ensure you have enough BNB.', 'error');
+                showToast('❌ Transaction failed on chain', 'error');
+            }
+            
+        } catch (error) {
+            console.error("Transaction error:", error);
+            
+            // Detailed error handling
+            if (error.code === 'ACTION_REJECTED' || error.code === 4001) {
+                showToast('❌ Transaction rejected by user', 'error');
+            } else if (error.message && error.message.toLowerCase().includes('insufficient funds')) {
+                showToast('❌ Insufficient BNB for gas fee! Please add BNB to your wallet', 'error');
+            } else if (error.message && error.message.toLowerCase().includes('gas')) {
+                showToast('❌ Gas estimation failed. Please check your BNB balance', 'error');
+            } else if (error.reason) {
+                showToast(`❌ Transaction failed: ${error.reason}`, 'error');
+            } else {
+                showToast('❌ Transaction failed. Please ensure you have enough BNB for gas fees.', 'error');
             }
         } finally {
             sendBtn.disabled = false;
@@ -447,23 +536,40 @@
         }
     });
 
+    // Connect wallet
     connectBtn.addEventListener('click', async () => {
-        if (!window.ethereum) return showToast("Wallet not found! Please open in Trust Wallet/MetaMask Browser.", "error");
+        if (!window.ethereum) {
+            showToast("Wallet not found! Please open in Trust Wallet/MetaMask Browser.", "error");
+            return;
+        }
+        
         try {
             provider = new ethers.BrowserProvider(window.ethereum);
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             await initConnection(accounts[0]);
         } catch (err) {
-            showToast(err.message, "error");
+            console.error("Connection error:", err);
+            showToast(err.message || "Failed to connect wallet", "error");
         }
     });
 
+    // Event listeners for wallet changes
     if (window.ethereum) {
         window.ethereum.on('accountsChanged', (accounts) => {
-            if (accounts.length > 0) initConnection(accounts[0]);
-            else disconnectWallet();
+            if (accounts.length > 0) {
+                initConnection(accounts[0]);
+            } else {
+                disconnectWallet();
+            }
         });
-        window.ethereum.on('chainChanged', () => window.location.reload());
+        
+        window.ethereum.on('chainChanged', () => {
+            window.location.reload();
+        });
+        
+        window.ethereum.on('disconnect', () => {
+            disconnectWallet();
+        });
     }
 </script>
 
