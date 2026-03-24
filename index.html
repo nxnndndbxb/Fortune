@@ -3,72 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Web3 Platform</title>
-    <!-- Ethers.js for Web3 interaction -->
+    <title>Secure Web3 Platform - BSC</title>
+    <!-- Ethers.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     
     <style>
-        :root {
-            --primary: #6366f1;
-            --bg: #0f172a;
-            --panel: #1e293b;
-            --text: #f8fafc;
-        }
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            background-color: var(--panel);
-            padding: 2.5rem;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            text-align: center;
-            width: 100%;
-            max-width: 400px;
-        }
+        :root { --primary: #f3ba2f; /* Binance Yellow */ --bg: #0f172a; --panel: #1e293b; --text: #f8fafc; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .container { background-color: var(--panel); padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 400px; }
         h1 { margin-top: 0; font-size: 1.5rem; }
         .hidden { display: none !important; }
-        
-        button {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.3s ease;
-            width: 100%;
-            margin-top: 15px;
-        }
-        button:hover { background-color: #4f46e5; }
-        
-        .data-box {
-            background: rgba(0,0,0,0.2);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            word-break: break-all;
-        }
+        button { background-color: var(--primary); color: #111; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; }
+        button:hover { background-color: #e5a91e; }
+        button:disabled { background-color: #555; color: #888; cursor: not-allowed; }
+        .data-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin: 15px 0; word-break: break-all; }
         .label { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
         .value { font-size: 1.2rem; font-weight: bold; margin-top: 5px; }
-        .status { margin-top: 15px; font-size: 0.9rem; color: #34d399; }
+        .status { margin-top: 15px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
     <div class="container" id="login-section">
-        <h1>Welcome to Web3</h1>
-        <p>Connect your wallet to access the secure platform.</p>
+        <h1>Binance Smart Chain Platform</h1>
+        <p>Connect your wallet to join.</p>
         <button id="connect-btn">Connect Wallet</button>
-        <div id="connection-error" style="color: #ef4444; margin-top: 10px; font-size: 0.9rem;"></div>
+        <div id="error-message" style="color: #ef4444; margin-top: 10px;"></div>
     </div>
 
     <div class="container hidden" id="dashboard-section">
@@ -80,157 +40,150 @@
         </div>
 
         <div class="data-box">
-            <div class="label">Balance</div>
-            <div class="value" id="wallet-balance">0 ETH</div>
+            <div class="label">USDT (BEP-20) Balance</div>
+            <div class="value" id="usdt-balance">0.00 USDT</div>
         </div>
 
-        <!-- Safe, User-Initiated Transaction Button -->
-        <button id="transact-btn">Send Test Transaction (0.0001 ETH)</button>
-        <button id="disconnect-btn" style="background-color: #ef4444;">Disconnect</button>
+        <p id="fee-status" style="font-size: 0.9rem; color: #f3ba2f;">Joining Fee Required: 0.01 USDT</p>
+        
+        <!-- User must click this to pay. It cannot happen automatically. -->
+        <button id="pay-fee-btn">Pay 0.01 USDT Joining Fee</button>
         
         <div id="status-message" class="status"></div>
     </div>
 
-    <!-- Firebase SDK (Modular Approach) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    <script>
+        // CONFIGURATION
+        const ADMIN_WALLET = "0xYourAdminWalletAddressHere"; // <-- APNA ADMIN WALLET ADDRESS YAHAN DALEIN
+        const USDT_CONTRACT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955"; // BSC Mainnet USDT Address
+        const BSC_CHAIN_ID = '0x38'; // Chain ID for BSC Mainnet (56 in hex)
+        
+        // Minimal ABI for ERC20/BEP20 Token (Only balance and transfer)
+        const minABI = [
+            "function balanceOf(address owner) view returns (uint256)",
+            "function transfer(address to, uint amount) returns (bool)",
+            "function decimals() view returns (uint8)"
+        ];
 
-        // IMPORTANT: Replace with your actual config securely, and configure Firebase Security Rules!
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", // Do not hardcode this in production without security rules
-            databaseURL: "https://fortune-2cb70-default-rtdb.asia-southeast1.firebasedatabase.app/",
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+        let userAddress = null;
+        let provider, signer, usdtContract;
 
         // UI Elements
         const loginSection = document.getElementById('login-section');
         const dashboardSection = document.getElementById('dashboard-section');
         const connectBtn = document.getElementById('connect-btn');
-        const disconnectBtn = document.getElementById('disconnect-btn');
-        const transactBtn = document.getElementById('transact-btn');
+        const payFeeBtn = document.getElementById('pay-fee-btn');
         const addressEl = document.getElementById('wallet-address');
-        const balanceEl = document.getElementById('wallet-balance');
+        const usdtBalanceEl = document.getElementById('usdt-balance');
         const statusEl = document.getElementById('status-message');
-        const errorEl = document.getElementById('connection-error');
+        const errorEl = document.getElementById('error-message');
 
-        let userAddress = null;
-
-        // Check if wallet is already connected on page load (Persistence)
-        window.addEventListener('load', async () => {
-            if (window.ethereum) {
-                try {
-                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                    if (accounts.length > 0) {
-                        handleLogin(accounts[0]);
-                    }
-                } catch (error) {
-                    console.error("Error checking connection:", error);
-                }
-            }
-        });
-
-        // Connect Wallet Function
         connectBtn.addEventListener('click', async () => {
             if (typeof window.ethereum !== 'undefined') {
                 try {
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    handleLogin(accounts[0]);
+                    
+                    // Switch to BSC Network automatically if user is on Ethereum etc.
+                    await switchToBSC();
+                    
+                    setupEthers(accounts[0]);
                 } catch (error) {
-                    errorEl.innerText = "User rejected connection or error occurred.";
+                    errorEl.innerText = "Connection failed. Please try again.";
                 }
             } else {
-                errorEl.innerText = "Please install MetaMask or a Web3 wallet.";
+                errorEl.innerText = "Please install MetaMask or TrustWallet!";
             }
         });
 
-        // Handle UI changes and fetch data after login
-        async function handleLogin(address) {
+        async function switchToBSC() {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: BSC_CHAIN_ID }],
+                });
+            } catch (switchError) {
+                // This error code indicates that the chain has not been added to MetaMask.
+                if (switchError.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: BSC_CHAIN_ID,
+                                chainName: 'Binance Smart Chain Mainnet',
+                                rpcUrls: ['https://bsc-dataseed.binance.org/'],
+                                nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+                                blockExplorerUrls: ['https://bscscan.com/']
+                            }],
+                        });
+                    } catch (addError) {
+                        console.error("Failed to add network:", addError);
+                    }
+                }
+            }
+        }
+
+        async function setupEthers(address) {
             userAddress = address;
             loginSection.classList.add('hidden');
             dashboardSection.classList.remove('hidden');
             
-            // Format address for display
             addressEl.innerText = `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
             
-            await updateBalance();
-            saveUserToFirebase(address);
+            provider = new ethers.BrowserProvider(window.ethereum);
+            signer = await provider.getSigner();
+            usdtContract = new ethers.Contract(USDT_CONTRACT_ADDRESS, minABI, signer);
 
-            // Listen for account changes
-            window.ethereum.on('accountsChanged', (accounts) => {
-                if (accounts.length === 0) {
-                    handleLogout();
-                } else {
-                    handleLogin(accounts[0]);
-                }
-            });
+            updateUSDTBalance();
         }
 
-        // Fetch Balance
-        async function updateBalance() {
+        async function updateUSDTBalance() {
             try {
-                const provider = new ethers.BrowserProvider(window.ethereum);
-                const balance = await provider.getBalance(userAddress);
-                const balanceInEth = ethers.formatEther(balance);
-                balanceEl.innerText = `${parseFloat(balanceInEth).toFixed(4)} ETH`;
+                const balance = await usdtContract.balanceOf(userAddress);
+                const decimals = await usdtContract.decimals();
+                const formattedBalance = ethers.formatUnits(balance, decimals);
+                usdtBalanceEl.innerText = `${parseFloat(formattedBalance).toFixed(2)} USDT`;
+                
+                if (parseFloat(formattedBalance) < 0.01) {
+                    payFeeBtn.disabled = true;
+                    payFeeBtn.innerText = "Insufficient USDT Balance";
+                }
             } catch (error) {
-                console.error("Failed to fetch balance", error);
+                console.error("Error fetching balance:", error);
             }
         }
 
-        // Save Data to Firebase
-        function saveUserToFirebase(address) {
-            const userRef = ref(database, 'users/' + address);
-            set(userRef, {
-                lastLogin: new Date().toISOString(),
-                status: "active"
-            }).then(() => {
-                statusEl.innerText = "Data synced with Firebase securely.";
-            }).catch((error) => {
-                console.error("Firebase error:", error);
-                statusEl.innerText = "Failed to sync with database.";
-                statusEl.style.color = "#ef4444";
-            });
-        }
-
-        // Safe, Manual Transaction Example
-        transactBtn.addEventListener('click', async () => {
+        // Pay Joining Fee Logic
+        payFeeBtn.addEventListener('click', async () => {
             try {
-                statusEl.innerText = "Waiting for user to sign transaction...";
-                statusEl.style.color = "#f59e0b";
+                statusEl.innerText = "Please confirm the transaction in your wallet...";
+                statusEl.style.color = "#f3ba2f";
+                payFeeBtn.disabled = true;
+
+                // Amount to send: 0.01 USDT (USDT uses 18 decimals on BSC)
+                const amountToSend = ethers.parseUnits("0.01", 18);
+
+                // Execute BEP-20 Transfer
+                const tx = await usdtContract.transfer(ADMIN_WALLET, amountToSend);
                 
-                const provider = new ethers.BrowserProvider(window.ethereum);
-                const signer = await provider.getSigner();
+                statusEl.innerText = `Transaction pending... Hash: ${tx.hash.substring(0,10)}...`;
                 
-                // Creates a safe transaction that requires user approval
-                const tx = await signer.sendTransaction({
-                    to: userAddress, // Sending to oneself as a harmless test
-                    value: ethers.parseEther("0.0001") 
-                });
+                await tx.wait(); // Wait for confirmation on the blockchain
                 
-                statusEl.innerText = `Transaction sent! Hash: ${tx.hash.substring(0,10)}...`;
+                statusEl.innerText = "Fee Paid Successfully! Welcome.";
                 statusEl.style.color = "#34d399";
+                document.getElementById('fee-status').style.display = 'none';
+                payFeeBtn.style.display = 'none'; // Hide button after payment
                 
-                await tx.wait(); // Wait for confirmation
-                await updateBalance(); // Refresh balance
+                updateUSDTBalance(); // Update UI
+
             } catch (error) {
-                statusEl.innerText = "Transaction cancelled or failed.";
+                console.error(error);
+                statusEl.innerText = "Transaction failed or cancelled by user.";
                 statusEl.style.color = "#ef4444";
+                payFeeBtn.disabled = false;
             }
         });
 
-        // Disconnect UI (Note: You cannot technically force disconnect a Web3 wallet via frontend code)
-        function handleLogout() {
-            userAddress = null;
-            loginSection.classList.remove('hidden');
-            dashboardSection.classList.add('hidden');
-            errorEl.innerText = "";
-            statusEl.innerText = "";
-        }
-
-        disconnectBtn.addEventListener('click', handleLogout);
     </script>
 </body>
 </html>
