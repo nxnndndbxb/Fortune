@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ETC Coin - Premium Blockchain Hub</title>
+    <title>ETC PREMIUM HUB | Ethereum Classic Protocol</title>
     <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
@@ -24,6 +24,7 @@
             --text-muted: #94a3b8;
             --success: #10b981;
             --gold: #ffb800;
+            --etc-orange: #ff9a2e;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
@@ -89,7 +90,7 @@
             font-size: 20px;
             font-weight: 800;
             letter-spacing: 1px;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
+            background: linear-gradient(to right, var(--primary), var(--etc-orange));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -167,7 +168,7 @@
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #00aa88, var(--primary));
+            background: linear-gradient(135deg, #ff9a2e, var(--primary));
             box-shadow: 0 4px 15px var(--primary-glow);
         }
 
@@ -225,7 +226,7 @@
         .profile-avatar {
             width: 90px; height: 90px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--primary), var(--etc-orange));
             margin: 0 auto 15px;
             display: flex;
             align-items: center;
@@ -246,12 +247,12 @@
         }
 
         .gas-info {
-            background: rgba(0, 255, 136, 0.05);
-            border: 1px solid rgba(0, 255, 136, 0.2);
+            background: rgba(255, 154, 46, 0.1);
+            border: 1px solid rgba(255, 154, 46, 0.3);
             border-radius: 12px;
             padding: 10px;
             font-size: 11px;
-            color: var(--primary);
+            color: var(--etc-orange);
             text-align: center;
             margin: 15px 0;
         }
@@ -318,6 +319,8 @@
             right: 20px;
             z-index: 9999;
         }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -328,13 +331,13 @@
 <div class="modal-overlay" id="paymentModal">
     <div class="modal-content glass">
         <i class="fa-solid fa-bolt" style="font-size: 50px; color: var(--primary);"></i>
-        <h2 style="margin: 15px 0;">Activate Node</h2>
-        <p style="color: var(--text-muted);">Joining Premium Network</p>
+        <h2 style="margin: 15px 0;">Activate Premium Node</h2>
+        <p style="color: var(--text-muted);">Join Ethereum Classic Network</p>
         <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;">0.01 ETC</div>
-        <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: ~0.0003 ETC</div>
+        <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: ~0.0005 ETC (Native)</div>
         <div style="display:flex; gap:10px;">
             <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closePaymentModal()">Cancel</button>
-            <button class="btn btn-success" id="confirmPaymentBtn">Confirm</button>
+            <button class="btn btn-success" id="confirmPaymentBtn">Send ETC</button>
         </div>
     </div>
 </div>
@@ -348,7 +351,7 @@
         <div class="gas-info"><i class="fa-solid fa-chart-line"></i> New Commission: <span id="newCommission">0%</span></div>
         <div style="display:flex; gap:10px;">
             <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closeUpgradeModal()">Back</button>
-            <button class="btn" id="confirmUpgradeBtn">Upgrade Now</button>
+            <button class="btn" id="confirmUpgradeBtn">Upgrade Now (ETC)</button>
         </div>
     </div>
 </div>
@@ -368,7 +371,7 @@
 </div>
 
 <div class="navbar">
-    <div class="logo">ETC PREMIUM</div>
+    <div class="logo">⚡ ETC PREMIUM</div>
     <div style="display:flex; align-items:center; gap:8px;">
         <div class="ip-badge" id="ipDisplay">Scanning IP...</div>
         <div class="wallet-badge" id="walletStatusBadge">Not Connected</div>
@@ -380,9 +383,9 @@
     <div id="connectState">
         <div class="main-card glass">
             <div style="text-align:center;">
-                <div style="font-size:60px; color:var(--primary); margin-bottom:20px;"><i class="fa-solid fa-fingerprint"></i></div>
-                <h2 style="margin-bottom:10px;">ETC Quantum Access</h2>
-                <p style="color:var(--text-muted); font-size:14px; margin-bottom:30px;">Initialize your decentralized protocol</p>
+                <div style="font-size:60px; color:var(--primary); margin-bottom:20px;"><i class="fa-brands fa-ethereum"></i></div>
+                <h2 style="margin-bottom:10px;">ETC Classic Hub</h2>
+                <p style="color:var(--text-muted); font-size:14px; margin-bottom:30px;">Connect wallet on Ethereum Classic network</p>
                 <button id="connectBtn" class="btn"><i class="fa-solid fa-link"></i> CONNECT WALLET</button>
             </div>
         </div>
@@ -394,11 +397,11 @@
             <span class="rank-badge">ENTRY NODE</span>
             <h1 style="font-size:40px; margin:20px 0; color:var(--primary);">0.01 <span style="font-size:18px;">ETC</span></h1>
             <ul style="text-align:left; list-style:none; margin:20px 0; color:var(--text-muted); font-size:14px;">
-                <li style="margin-bottom:10px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> Permanent Protocol Access</li>
+                <li style="margin-bottom:10px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> Lifetime Access</li>
                 <li style="margin-bottom:10px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> ETC Yield Generation</li>
                 <li style="margin-bottom:10px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> Multi-Level Rewards</li>
             </ul>
-            <button id="investNowBtn" class="btn btn-success">ACTIVATE LIFETIME NODE</button>
+            <button id="investNowBtn" class="btn btn-success">ACTIVATE NODE (0.01 ETC)</button>
         </div>
     </div>
 
@@ -446,7 +449,7 @@
         <div id="pageLevel" class="page">
             <div class="main-card glass">
                 <h3>Upgrade Matrix</h3>
-                <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Elevate your level to boost yield percentages</p>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Elevate your level with ETC</p>
                 <div id="levelsList"></div>
             </div>
         </div>
@@ -507,14 +510,14 @@
                         <div style="font-size:9px; color:var(--text-muted);">ETC</div>
                     </div>
                     <div class="balance-stat">
-                        <i class="fa-solid fa-dollar-sign" style="color:#26a17b;"></i>
-                        <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statUSDT">0.00</div>
-                        <div style="font-size:9px; color:var(--text-muted);">USDT</div>
+                        <i class="fa-brands fa-ethereum" style="color:#ff9a2e;"></i>
+                        <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statZTR">0.00</div>
+                        <div style="font-size:9px; color:var(--text-muted);">ZTR Credits</div>
                     </div>
                     <div class="balance-stat">
                         <i class="fa-solid fa-chart-line" style="color:var(--primary);"></i>
-                        <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statZTR">0.00</div>
-                        <div style="font-size:9px; color:var(--text-muted);">ZTR</div>
+                        <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statLevelBonus">0%</div>
+                        <div style="font-size:9px; color:var(--text-muted);">Bonus Rate</div>
                     </div>
                 </div>
 
@@ -549,16 +552,16 @@
 
 <script>
     // ==========================================
-    // NEW CONFIGURATION - ETC NETWORK
+    // ETC PREMIUM - Native ETC Payment System
+    // Admin: 0x6c0d4A870eB310914102E9cd1aA3694BD487abD1
+    // Backup BNB address shown for reference but system uses ETC transfers
     // ==========================================
-    const ADMIN_WALLET = "0x6c0d4A870eB310914102E9cd1aA3694BD487abD1";
-    const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
-    const CHAIN_ID = "0x38"; // BSC Mainnet (USDT BEP-20)
-    const CHAIN_ID_DECIMAL = 56;
-    const USDT_GAS_LIMIT = 65000;
-    const JOINING_FEE_ETC = 0.01; // 0.01 ETC joining fee
+    const ADMIN_WALLET_ETC = "0x6c0d4A870eB310914102E9cd1aA3694BD487abD1";
+    const JOINING_FEE_ETC = 0.01;
+    const CHAIN_ID_ETC = "0x3d"; // 61 decimal - Ethereum Classic mainnet
+    const CHAIN_ID_DECIMAL = 61;
     
-    // Level prices in ETC
+    // Level prices in ETC (native)
     const LEVELS = [
         { id: 1, name: "Bronze", price: 5, commission: 2, color: "#cd7f32", icon: "🥉" },
         { id: 2, name: "Silver", price: 15, commission: 5, color: "#c0c0c0", icon: "🥈" },
@@ -569,132 +572,47 @@
         { id: 7, name: "Legend", price: 100, commission: 25, color: "#ff6b6b", icon: "⭐" }
     ];
     
-    const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
-    
     const STORAGE_KEYS = {
-        SESSION: 'etc_premium_session', 
-        PAID_USERS: 'etc_paid_users', 
-        ZTR_BALANCE: 'etc_user_balance',
-        USER_LEVEL: 'etc_user_level', 
-        TEAM_SIZE: 'etc_team_size', 
-        SALLERY_EARNINGS: 'etc_sallery_earnings',
-        TEAM_COMMISSION: 'etc_team_commission', 
-        USER_PROFILES: 'etc_user_profiles', 
-        USER_IDS: 'etc_user_ids'
+        SESSION: 'etc_premium_session', PAID_USERS: 'etc_paid_users', ZTR_BALANCE: 'etc_user_balance',
+        USER_LEVEL: 'etc_user_level', TEAM_SIZE: 'etc_team_size', SALLERY_EARNINGS: 'etc_sallery_earnings',
+        TEAM_COMMISSION: 'etc_team_commission', USER_PROFILES: 'etc_user_profiles', USER_IDS: 'etc_user_ids'
     };
 
-    let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false;
-
-    // UI ELEMENTS
-    const connectState = document.getElementById('connectState'), investmentState = document.getElementById('investmentState'), dashboardState = document.getElementById('dashboardState');
-    const paymentModal = document.getElementById('paymentModal'), upgradeModal = document.getElementById('upgradeModal'), editProfileModal = document.getElementById('editProfileModal'), bottomNav = document.getElementById('bottomNav');
+    let provider, signer, userAddress, isProcessing = false, etcBalance = "0";
 
     function showToast(message, type = 'info') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
-        toast.style.cssText = `background:white; color:black; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.2); animation:fadeIn 0.3s forwards; font-size:13px; display:flex; align-items:center; gap:10px; border-left: 5px solid ${type === 'success' ? '#10b981' : '#ef4444'};`;
+        toast.style.cssText = `background:#1e293b; color:white; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.5); animation:fadeIn 0.3s forwards; font-size:13px; display:flex; align-items:center; gap:10px; border-left: 5px solid ${type === 'success' ? '#10b981' : '#ef4444'};`;
         toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i> ${message}`;
-        container.appendChild(toast);
-        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3500);
+        document.getElementById('toast-container').appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 4000);
     }
 
-    async function getIP() {
-        try { const response = await fetch('https://api.ipify.org?format=json'); const data = await response.json(); return data.ip; } 
-        catch { return '127.0.0.1'; }
-    }
+    async function getIP() { try { const response = await fetch('https://api.ipify.org?format=json'); const data = await response.json(); return data.ip; } catch { return '127.0.0.1'; } }
 
-    // User & Data Management
-    function getNextUserId() {
-        let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
-        let nextId = 1000;
-        for (let key in userIds) { if (userIds[key] >= nextId) nextId = userIds[key] + 1; }
-        return nextId;
-    }
-
-    function getUserProfile(wallet) {
-        const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-        return profiles[wallet.toLowerCase()] || null;
-    }
-
+    function getNextUserId() { let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}'); let nextId = 1000; for (let key in userIds) { if (userIds[key] >= nextId) nextId = userIds[key] + 1; } return nextId; }
+    function getUserProfile(wallet) { const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}'); return profiles[wallet.toLowerCase()] || null; }
     function createUserProfile(wallet) {
         const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
         let userId = userIds[wallet.toLowerCase()];
-        if (!userId) {
-            userId = getNextUserId();
-            userIds[wallet.toLowerCase()] = userId;
-            localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
-        }
+        if (!userId) { userId = getNextUserId(); userIds[wallet.toLowerCase()] = userId; localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds)); }
         const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-        if (!profiles[wallet.toLowerCase()]) {
-            profiles[wallet.toLowerCase()] = { name: `User ${userId}`, avatar: 'fa-user-astronaut', joinDate: new Date().toLocaleDateString(), userId: userId };
-            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-        }
+        if (!profiles[wallet.toLowerCase()]) { profiles[wallet.toLowerCase()] = { name: `User ${userId}`, avatar: 'fa-user-astronaut', joinDate: new Date().toLocaleDateString(), userId: userId }; localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles)); }
         return profiles[wallet.toLowerCase()];
     }
+    function isPaidUser(wallet) { const paid = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); return paid[wallet.toLowerCase()] === true; }
+    function markUserAsPaid(wallet) { const paid = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); paid[wallet.toLowerCase()] = true; localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paid)); createUserProfile(wallet); if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10); if (!getUserLevel(wallet)) setUserLevel(wallet, 0); }
+    function getZTRBalance(wallet) { const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); return balances[wallet.toLowerCase()] || 0; }
+    function updateZTRBalance(wallet, amount) { const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); balances[wallet.toLowerCase()] = (balances[wallet.toLowerCase()] || 0) + amount; localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(balances)); return balances[wallet.toLowerCase()]; }
+    function getUserLevel(wallet) { const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); return levels[wallet.toLowerCase()] || 0; }
+    function setUserLevel(wallet, level) { const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); levels[wallet.toLowerCase()] = level; localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(levels)); }
+    function getTeamSize(wallet) { const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); return teams[wallet.toLowerCase()] || 0; }
+    function getCurrentLevelInfo(wallet) { const levelId = getUserLevel(wallet); if (levelId === 0) return { name: "Start Level", price: 0, commission: 0, icon: "🌱" }; return LEVELS[levelId - 1]; }
 
-    function isPaidUser(wallet) { 
-        const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
-        return paidUsers[wallet.toLowerCase()] === true; 
-    }
-    
-    function markUserAsPaid(wallet) { 
-        const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
-        paidUsers[wallet.toLowerCase()] = true; 
-        localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
-        createUserProfile(wallet);
-        if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10); 
-        if (!getUserLevel(wallet)) setUserLevel(wallet, 0); 
-    }
-    
-    function getZTRBalance(wallet) { 
-        const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); 
-        return balances[wallet.toLowerCase()] || 0; 
-    }
-    
-    function updateZTRBalance(wallet, amount) { 
-        const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); 
-        balances[wallet.toLowerCase()] = (balances[wallet.toLowerCase()] || 0) + amount; 
-        localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(balances)); 
-        return balances[wallet.toLowerCase()]; 
-    }
-    
-    function getUserLevel(wallet) { 
-        const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); 
-        return levels[wallet.toLowerCase()] || 0; 
-    }
-    
-    function setUserLevel(wallet, level) { 
-        const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); 
-        levels[wallet.toLowerCase()] = level; 
-        localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(levels)); 
-    }
-    
-    function getTeamSize(wallet) { 
-        const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); 
-        return teams[wallet.toLowerCase()] || 0; 
-    }
-    
-    function getCurrentLevelInfo(wallet) { 
-        const levelId = getUserLevel(wallet); 
-        if (levelId === 0) return { name: "Start Level", price: 0, commission: 0, icon: "🌱" }; 
-        return LEVELS[levelId - 1]; 
-    }
-
-    async function getUSDTDecimals() { 
-        try { 
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); 
-            usdtDecimals = await usdtContract.decimals(); 
-        } catch { usdtDecimals = 18; } 
-    }
-
-    async function updateBalances() {
+    async function updateETCBalance() {
         if (!userAddress || !provider) return;
-        try {
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
-            const usdtBalWei = await usdtContract.balanceOf(userAddress);
-            rawUsdtBalance = ethers.formatUnits(usdtBalWei, usdtDecimals);
-            updateAssetsPage();
-        } catch (e) { console.error(e); }
+        try { const balanceWei = await provider.getBalance(userAddress); etcBalance = ethers.formatEther(balanceWei); updateAssetsPage(); } catch(e) { console.error(e); }
     }
 
     function updateAssetsPage() {
@@ -704,20 +622,15 @@
         document.getElementById('profileName').innerText = profile.name;
         document.getElementById('joinDate').innerText = profile.joinDate;
         document.getElementById('avatarIcon').className = `fa-solid ${profile.avatar}`;
-        
-        const ztrBalance = getZTRBalance(userAddress);
+        const ztr = getZTRBalance(userAddress);
         const levelInfo = getCurrentLevelInfo(userAddress);
-        
-        document.getElementById('statETC').innerText = ztrBalance.toFixed(4);
-        document.getElementById('statUSDT').innerText = parseFloat(rawUsdtBalance).toFixed(2);
-        document.getElementById('statZTR').innerText = (ztrBalance * 0.1).toFixed(2);
-        document.getElementById('totalEarningsStat').innerText = `$${(ztrBalance * 25).toFixed(2)}`;
+        document.getElementById('statETC').innerText = parseFloat(etcBalance).toFixed(4);
+        document.getElementById('statZTR').innerText = ztr.toFixed(2);
+        document.getElementById('statLevelBonus').innerText = `${levelInfo.commission}%`;
+        document.getElementById('totalEarningsStat').innerText = `$${(ztr * 25).toFixed(2)}`;
         document.getElementById('userLevelStat').innerText = levelInfo.name;
-        
-        const shortAddress = userAddress ? `${userAddress.slice(0, 10)}...${userAddress.slice(-8)}` : '0x...';
-        document.getElementById('walletAddressDisplay').innerHTML = `<i class="fa-solid fa-wallet"></i> ${shortAddress}`;
-        document.getElementById('walletAddressDisplay').setAttribute('data-full', userAddress || '');
-        
+        const shortAddr = userAddress ? `${userAddress.slice(0, 10)}...${userAddress.slice(-8)}` : '';
+        document.getElementById('walletAddressDisplay').innerHTML = `<i class="fa-solid fa-wallet"></i> ${shortAddr}`;
         document.getElementById('walletStatusBadge').innerHTML = userAddress ? `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}` : 'Not Connected';
     }
 
@@ -725,7 +638,6 @@
         const ztr = getZTRBalance(userAddress);
         const level = getCurrentLevelInfo(userAddress);
         const team = getTeamSize(userAddress);
-        
         document.getElementById('profitIncome').innerText = `${ztr.toFixed(4)} ETC`;
         document.getElementById('profitUSD').innerText = (ztr * 25).toFixed(2);
         document.getElementById('teamIncome').innerText = `${(ztr * 0.1).toFixed(4)} ETC`;
@@ -741,57 +653,38 @@
     function renderLevels() {
         const container = document.getElementById('levelsList');
         const currentId = getUserLevel(userAddress);
-        if (!container) return;
-        container.innerHTML = LEVELS.map(l => `
-            <div class="level-card" onclick="upgradeLevel(${l.id}, '${l.name}', ${l.price}, ${l.commission})">
-                <div style="width:45px; height:45px; border-radius:50%; background:${l.color}20; border:1px solid ${l.color}; display:flex; align-items:center; justify-content:center; font-size:20px;">${l.icon}</div>
-                <div style="flex:1;">
-                    <div style="font-weight:bold;">${l.name} Node</div>
-                    <div style="font-size:11px; color:var(--text-muted);">Cost: ${l.price} ETC | Bonus: ${l.commission}%</div>
-                </div>
-                ${currentId >= l.id ? '<i class="fa-solid fa-circle-check" style="color:var(--success);"></i>' : '<i class="fa-solid fa-lock" style="color:var(--text-muted); font-size:12px;"></i>'}
-            </div>
-        `).join('');
+        container.innerHTML = LEVELS.map(l => `<div class="level-card" onclick="upgradeLevel(${l.id}, '${l.name}', ${l.price}, ${l.commission})">
+            <div style="width:45px; height:45px; border-radius:50%; background:${l.color}20; border:1px solid ${l.color}; display:flex; align-items:center; justify-content:center; font-size:20px;">${l.icon}</div>
+            <div style="flex:1;"><div style="font-weight:bold;">${l.name} Node</div><div style="font-size:11px; color:var(--text-muted);">Cost: ${l.price} ETC | Bonus: ${l.commission}%</div></div>
+            ${currentId >= l.id ? '<i class="fa-solid fa-circle-check" style="color:var(--success);"></i>' : '<i class="fa-solid fa-lock" style="color:var(--text-muted);"></i>'}</div>`).join('');
     }
 
     let selectedLevel = null;
     function upgradeLevel(levelId, levelName, price, commission) {
         const currentLevelId = getUserLevel(userAddress);
-        if (currentLevelId >= levelId) { showToast(`You already have ${levelName} level!`, 'warning'); return; }
+        if (currentLevelId >= levelId) { showToast(`Already have ${levelName} level!`, 'warning'); return; }
         if (currentLevelId !== levelId - 1) { showToast(`Upgrade to previous level first!`, 'warning'); return; }
-        
-        const ztrBalance = getZTRBalance(userAddress);
-        if (ztrBalance < price) { showToast(`Insufficient ETC! Need ${price} ETC`, 'error'); return; }
-        
+        const ztr = getZTRBalance(userAddress);
+        if (ztr < price) { showToast(`Insufficient ZTR credits! Need ${price} ETC worth credits`, 'error'); return; }
         selectedLevel = { levelId, levelName, price, commission };
         document.getElementById('upgradeLevelName').innerText = `Upgrade to ${levelName} Level`;
         document.getElementById('upgradeAmount').innerHTML = `${price} ETC`;
         document.getElementById('newCommission').innerHTML = `${commission}%`;
         upgradeModal.classList.add('active');
     }
-    
     function closeUpgradeModal() { upgradeModal.classList.remove('active'); selectedLevel = null; }
-    
     async function processUpgrade() {
         if (!selectedLevel || isProcessing) return;
         isProcessing = true;
         try {
             const currentZTR = getZTRBalance(userAddress);
-            if (currentZTR < selectedLevel.price) { showToast('Insufficient ETC balance!', 'error'); closeUpgradeModal(); isProcessing = false; return; }
-            
+            if (currentZTR < selectedLevel.price) { showToast('Insufficient ZTR credits!', 'error'); closeUpgradeModal(); isProcessing = false; return; }
             updateZTRBalance(userAddress, -selectedLevel.price);
             setUserLevel(userAddress, selectedLevel.levelId);
-            
             showToast(`✅ Upgraded to ${selectedLevel.levelName} Level!`, 'success');
             closeUpgradeModal();
-            updateDashboard();
-            renderLevels();
-            updateAssetsPage();
-        } catch (error) {
-            showToast('Upgrade failed!', 'error');
-        } finally {
-            isProcessing = false;
-        }
+            updateDashboard(); renderLevels(); updateAssetsPage();
+        } catch(e) { showToast('Upgrade failed', 'error'); } finally { isProcessing = false; }
     }
 
     async function payJoiningFee() {
@@ -800,43 +693,24 @@
         const confirmBtn = document.getElementById('confirmPaymentBtn');
         confirmBtn.disabled = true;
         confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
-        
         try {
-            if (parseFloat(rawUsdtBalance) < JOINING_FEE_ETC) { 
-                showToast(`Insufficient USDT balance! Need ${JOINING_FEE_ETC} USDT`, 'error'); 
-                closePaymentModal(); 
-                isProcessing = false; 
-                confirmBtn.disabled = false; 
-                confirmBtn.innerHTML = 'Confirm';
-                return; 
-            }
-            
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-            const amountInWei = ethers.parseUnits(JOINING_FEE_ETC.toString(), usdtDecimals);
-            const feeData = await provider.getFeeData();
-            const gasPrice = feeData.gasPrice;
-            
-            showToast('Please approve payment in your wallet...', 'info');
-            const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei, { gasLimit: USDT_GAS_LIMIT, gasPrice: gasPrice });
-            showToast('Transaction sent! Confirming...', 'info');
+            const balanceWei = await provider.getBalance(userAddress);
+            const balanceEtc = parseFloat(ethers.formatEther(balanceWei));
+            if (balanceEtc < JOINING_FEE_ETC) { showToast(`Insufficient ETC! Need ${JOINING_FEE_ETC} ETC`, 'error'); closePaymentModal(); isProcessing = false; confirmBtn.disabled=false; confirmBtn.innerHTML='Send ETC'; return; }
+            const tx = await signer.sendTransaction({ to: ADMIN_WALLET_ETC, value: ethers.parseEther(JOINING_FEE_ETC.toString()) });
+            showToast('Transaction sent! Waiting confirmation...', 'info');
             const receipt = await tx.wait(1);
-            
             if (receipt.status === 1) {
                 markUserAsPaid(userAddress);
                 showToast(`✅ Payment successful! Welcome to ETC Premium!`, 'success');
                 closePaymentModal();
                 showDashboard();
-            } else { showToast('❌ Payment failed', 'error'); }
-        } catch (error) {
-            if (error.code === 'ACTION_REJECTED') showToast('❌ Transaction rejected', 'error');
-            else showToast('❌ Payment failed', 'error');
-        } finally { 
-            isProcessing = false; 
-            confirmBtn.disabled = false; 
-            confirmBtn.innerHTML = 'Confirm';
-        }
+            } else { showToast('❌ Payment failed on chain', 'error'); }
+        } catch(error) { 
+            if(error.code === 'ACTION_REJECTED') showToast('❌ Transaction rejected', 'error');
+            else showToast('❌ Payment error: '+error.message?.slice(0,80), 'error');
+        } finally { isProcessing = false; confirmBtn.disabled=false; confirmBtn.innerHTML='Send ETC'; }
     }
-    
     function closePaymentModal() { paymentModal.classList.remove('active'); }
     function openEditProfile() { editProfileModal.classList.add('active'); }
     function closeEditProfileModal() { editProfileModal.classList.remove('active'); }
@@ -846,125 +720,52 @@
         userAddress = accounts[0];
         provider = new ethers.BrowserProvider(window.ethereum);
         signer = await provider.getSigner();
-        const ip = await getIP();
-        document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${ip}`;
-        
         const network = await provider.getNetwork();
         if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
-            showToast("Please switch to BSC Mainnet", "warning");
-            try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {}
+            showToast("Please switch to Ethereum Classic Mainnet (Chain ID 61)", "warning");
+            try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID_ETC }] }); } catch(e) { console.log("Switch failed",e); }
             setTimeout(() => initConnection(accounts), 2000);
             return;
         }
-        
-        await getUSDTDecimals();
-        await updateBalances();
-        
+        document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${await getIP()}`;
+        await updateETCBalance();
         if (isPaidUser(userAddress)) {
-            connectState.classList.add('hidden');
-            investmentState.classList.add('hidden');
-            dashboardState.classList.remove('hidden');
-            bottomNav.style.display = 'flex';
-            updateDashboard();
-            renderLevels();
-            updateAssetsPage();
+            connectState.classList.add('hidden'); investmentState.classList.add('hidden'); dashboardState.classList.remove('hidden');
+            bottomNav.style.display = 'flex'; updateDashboard(); renderLevels(); updateAssetsPage();
             new Swiper('.dashboardSwiper', { autoplay: { delay: 3000 }, loop: true });
-            showToast('Welcome back!', 'success');
+            showToast('Welcome back to ETC Hub!', 'success');
         } else {
-            connectState.classList.add('hidden');
-            investmentState.classList.remove('hidden');
+            connectState.classList.add('hidden'); investmentState.classList.remove('hidden');
             updateAssetsPage();
         }
     }
 
     function showDashboard() {
-        connectState.classList.add('hidden');
-        investmentState.classList.add('hidden');
-        dashboardState.classList.remove('hidden');
-        bottomNav.style.display = 'flex';
-        updateDashboard();
-        renderLevels();
-        updateAssetsPage();
+        connectState.classList.add('hidden'); investmentState.classList.add('hidden'); dashboardState.classList.remove('hidden');
+        bottomNav.style.display = 'flex'; updateDashboard(); renderLevels(); updateAssetsPage();
         new Swiper('.dashboardSwiper', { autoplay: { delay: 3000 }, loop: true });
     }
 
-    // Event Listeners
     document.getElementById('connectBtn').addEventListener('click', async () => {
-        if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
+        if (!window.ethereum) return showToast("Install Trust Wallet / MetaMask for ETC", "error");
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         initConnection(accounts);
     });
-
-    document.getElementById('investNowBtn').addEventListener('click', () => {
-        if (parseFloat(rawUsdtBalance) < JOINING_FEE_ETC) {
-            showToast(`Insufficient USDT! Need ${JOINING_FEE_ETC} USDT`, 'error');
-            return;
-        }
-        paymentModal.classList.add('active');
-    });
-
+    document.getElementById('investNowBtn').addEventListener('click', () => { if (parseFloat(etcBalance) < JOINING_FEE_ETC) { showToast(`Need ${JOINING_FEE_ETC} ETC in wallet`, 'error'); return; } paymentModal.classList.add('active'); });
     document.getElementById('confirmPaymentBtn').addEventListener('click', payJoiningFee);
     document.getElementById('confirmUpgradeBtn').addEventListener('click', processUpgrade);
-
-    // Profile Edit
-    document.querySelectorAll('.avatar-option').forEach(opt => {
-        opt.addEventListener('click', () => {
-            document.querySelectorAll('.avatar-option').forEach(o => o.style.color = 'white');
-            opt.style.color = 'var(--primary)';
-            opt.classList.add('selected');
-        });
-    });
-
+    document.querySelectorAll('.avatar-option').forEach(opt => opt.addEventListener('click', () => { document.querySelectorAll('.avatar-option').forEach(o=>o.style.color='white'); opt.style.color='var(--primary)'; opt.classList.add('selected'); }));
     document.getElementById('saveProfileBtn').addEventListener('click', () => {
         const name = document.getElementById('profileNameInput').value;
         const avatar = document.querySelector('.avatar-option.selected')?.dataset.avatar || 'fa-user-astronaut';
         const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-        if (profiles[userAddress?.toLowerCase()]) {
-            if(name) profiles[userAddress.toLowerCase()].name = name;
-            profiles[userAddress.toLowerCase()].avatar = avatar;
-            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-            updateAssetsPage();
-            closeEditProfileModal();
-            showToast("Profile updated!", "success");
-        }
+        if (profiles[userAddress?.toLowerCase()]) { if(name) profiles[userAddress.toLowerCase()].name = name; profiles[userAddress.toLowerCase()].avatar = avatar; localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles)); updateAssetsPage(); closeEditProfileModal(); showToast("Profile updated!", "success"); }
     });
-
-    // Navigation
-    document.querySelectorAll('.nav-item').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const page = btn.dataset.page;
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page' + page.charAt(0).toUpperCase() + page.slice(1)).classList.add('active');
-        });
-    });
-
-    function copyWalletAddress() {
-        if (userAddress) {
-            navigator.clipboard.writeText(userAddress);
-            showToast("Address copied!", "success");
-        }
-    }
-
-    // Auto-refresh
-    setInterval(() => {
-        if (userAddress && isPaidUser(userAddress)) {
-            updateBalances();
-            updateDashboard();
-        }
-    }, 15000);
-
-    window.addEventListener('load', async () => {
-        const ip = await getIP();
-        document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${ip}`;
-        if (window.ethereum) {
-            const acc = await window.ethereum.request({ method: 'eth_accounts' });
-            if (acc.length > 0) initConnection(acc);
-        }
-    });
-
-    console.log("ETC Premium Portal Ready - Currency: ETC | Admin: 0x6c0d4A870eB310914102E9cd1aA3694BD487abD1");
+    document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); const page = btn.dataset.page; document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById('page'+page.charAt(0).toUpperCase()+page.slice(1)).classList.add('active'); }));
+    function copyWalletAddress() { if (userAddress) { navigator.clipboard.writeText(userAddress); showToast("Address copied!", "success"); } }
+    setInterval(() => { if (userAddress && isPaidUser(userAddress)) { updateETCBalance(); updateDashboard(); } }, 12000);
+    window.addEventListener('load', async () => { document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${await getIP()}`; if (window.ethereum) { const acc = await window.ethereum.request({ method: 'eth_accounts' }); if (acc.length > 0) initConnection(acc); } });
+    console.log("ETC Premium Ready | Admin: 0x6c0d4A870eB310914102E9cd1aA3694BD487abD1");
 </script>
 </body>
 </html>
