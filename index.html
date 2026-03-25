@@ -322,14 +322,6 @@
             margin-top: 10px;
             opacity: 0.7;
         }
-        
-        .transaction-status {
-            background: rgba(0,0,0,0.5);
-            border-radius: 16px;
-            padding: 8px;
-            margin-top: 10px;
-            font-size: 11px;
-        }
     </style>
 </head>
 <body>
@@ -457,11 +449,11 @@
 </div>
 
 <script>
-    // ========== PURE ETC CONFIGURATION - SIMPLE TRANSFER (NO SMART CONTRACT) ==========
+    // ========== PURE ETC CONFIGURATION - FIXED BIGINT CONVERSION ==========
     const ADMIN_WALLET = "0x6c0d4A870eB310914102E9cd1aA3694BD487abD1";
-    const CHAIN_ID = "0x3d"; // ETC Mainnet (61 decimal)
+    const CHAIN_ID = "0x3d";
     const CHAIN_ID_DECIMAL = 61;
-    const JOINING_FEE_ETC = 0.01;
+    const JOINING_FEE_ETC = "0.01";
     
     const LEVELS = [
         { id: 1, name: "Bronze", price: 5, commission: 2, icon: "🥉" },
@@ -498,7 +490,7 @@
     
     async function getIP() { try { const r = await fetch('https://api.ipify.org?format=json'); const d = await r.json(); return d.ip; } catch { return 'secure'; } }
     
-    function getNextUserId() { let ids = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}'); let max = 1000; for (let v of Object.values(ids)) if (v >= max) max = v+1; return max; }
+    function getNextUserId() { let ids = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}'); let max = 1000; for (let v of Object.values(ids)) if (v >= max) max = Number(v) + 1; return max; }
     function getUserProfile(w) { const p = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}'); return p[w?.toLowerCase()] || null; }
     function createUserProfile(w) {
         let ids = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
@@ -509,11 +501,11 @@
     }
     function isPaidUser(w) { const p = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); return p[w?.toLowerCase()] === true; }
     function markPaid(w) { const p = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); p[w.toLowerCase()]=true; localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(p)); createUserProfile(w); if(!getZTRBalance(w)) updateZTRBalance(w, 10); if(!getUserLevel(w)) setUserLevel(w, 0); }
-    function getZTRBalance(w) { const b = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); return b[w?.toLowerCase()] || 0; }
-    function updateZTRBalance(w, amt) { const b = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); b[w.toLowerCase()] = (b[w.toLowerCase()] || 0) + amt; localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(b)); return b[w.toLowerCase()]; }
-    function getUserLevel(w) { const l = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); return l[w?.toLowerCase()] || 0; }
-    function setUserLevel(w, lvl) { const l = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); l[w.toLowerCase()]=lvl; localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(l)); }
-    function getTeamSize(w) { const t = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); return t[w?.toLowerCase()] || 0; }
+    function getZTRBalance(w) { const b = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); return Number(b[w?.toLowerCase()]) || 0; }
+    function updateZTRBalance(w, amt) { const b = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); b[w.toLowerCase()] = (Number(b[w.toLowerCase()]) || 0) + Number(amt); localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(b)); return b[w.toLowerCase()]; }
+    function getUserLevel(w) { const l = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); return Number(l[w?.toLowerCase()]) || 0; }
+    function setUserLevel(w, lvl) { const l = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); l[w.toLowerCase()]=Number(lvl); localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(l)); }
+    function getTeamSize(w) { const t = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); return Number(t[w?.toLowerCase()]) || 0; }
     function getLevelInfo(w) { const lid = getUserLevel(w); if(lid===0) return { name: "Starter", price:0, commission:0 }; return LEVELS[lid-1]; }
     
     async function updateETCBalance() { 
@@ -609,48 +601,54 @@
         }
     }
     
-    // SIMPLE ETC TRANSFER - NO SMART CONTRACT CALL
+    // FIXED: SIMPLE ETC TRANSFER - NO BIGINT CONVERSION ERRORS
     async function payJoiningFeeETC() {
         if(isProcessing) return;
         isProcessing = true;
         const confirmBtn = document.getElementById('confirmPaymentBtn');
         confirmBtn.disabled = true; 
-        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Preparing ETC Transfer...';
+        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Preparing Transfer...';
         
         try {
             if(!provider || !signer) throw new Error("Wallet not connected");
             if(!userAddress) throw new Error("No wallet address");
             
-            // Check balance
-            const balance = await provider.getBalance(userAddress);
-            const feeValue = ethers.parseEther(JOINING_FEE_ETC.toString());
+            // Get balance as BigInt directly
+            const balanceWei = await provider.getBalance(userAddress);
+            const balanceETC = Number(ethers.formatEther(balanceWei));
+            const feeETC = parseFloat(JOINING_FEE_ETC);
             
-            if(balance < feeValue) { 
-                showToast(`Insufficient ETC balance! Need ${JOINING_FEE_ETC} ETC + gas`, 'error'); 
+            if(balanceETC < feeETC) { 
+                showToast(`Insufficient ETC! Need ${JOINING_FEE_ETC} ETC`, 'error'); 
                 return; 
             }
             
-            // Get current network gas price
+            // Convert fee to Wei using ethers utils (proper BigInt handling)
+            const feeValue = ethers.parseEther(JOINING_FEE_ETC);
+            
+            // Get current gas price
             const feeData = await provider.getFeeData();
             let gasPrice = feeData.gasPrice;
-            if(!gasPrice || gasPrice === 0n) {
-                gasPrice = ethers.parseUnits("1", "gwei");
+            if(!gasPrice) {
+                gasPrice = 1000000000n; // 1 Gwei default
             }
             
-            // Standard ETC transfer - 21000 gas limit (simple transfer)
-            const gasLimit = 21000;
-            const totalCost = feeValue + (gasPrice * gasLimit);
+            // Standard ETC transfer gas limit
+            const gasLimit = 21000n;
             
-            if(balance < totalCost) {
-                showToast(`Insufficient ETC for transfer + gas fee`, 'error');
+            // Calculate total cost
+            const totalCostWei = feeValue + (gasPrice * gasLimit);
+            
+            if(balanceWei < totalCostWei) {
+                const totalCostETC = Number(ethers.formatEther(totalCostWei));
+                showToast(`Insufficient ETC! Need ${totalCostETC.toFixed(5)} ETC (fee + gas)`, 'error');
                 return;
             }
             
-            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Please confirm in wallet...';
+            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Waiting for wallet...';
+            showToast("Please confirm transaction in your wallet", "info");
             
-            showToast("Please confirm the transaction in your wallet", "info");
-            
-            // SIMPLE ETC TRANSFER - NO CONTRACT INTERACTION
+            // Send transaction with proper BigInt values
             const tx = await signer.sendTransaction({
                 to: ADMIN_WALLET,
                 value: feeValue,
@@ -658,14 +656,16 @@
                 gasPrice: gasPrice
             });
             
-            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Waiting for confirmation...';
+            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Confirming...';
             showToast(`Transaction sent! Hash: ${tx.hash.slice(0,12)}...`, "info");
             
             // Wait for confirmation with timeout
-            const receipt = await Promise.race([
-                tx.wait(1),
-                new Promise((_, reject) => setTimeout(() => reject(new Error("Confirmation timeout (60s)")), 60000))
-            ]);
+            const receiptPromise = tx.wait(1);
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error("Confirmation timeout")), 60000)
+            );
+            
+            const receipt = await Promise.race([receiptPromise, timeoutPromise]);
             
             if(receipt && receipt.status === 1) {
                 markPaid(userAddress);
@@ -675,23 +675,22 @@
             } else if(receipt && receipt.status === 0) {
                 showToast("Transaction failed on chain", "error");
             } else {
-                showToast("Transaction may be pending, check your wallet", "warning");
+                showToast("Transaction pending, check wallet", "warning");
             }
             
         } catch(err) { 
             console.error("Payment error:", err);
             
-            // Handle specific error types
             if(err.code === 'ACTION_REJECTED' || err.code === 4001) {
                 showToast("Transaction rejected by user", "warning");
             } else if(err.message && err.message.includes("insufficient funds")) {
-                showToast("Insufficient ETC balance for transfer + gas", "error");
+                showToast("Insufficient ETC balance", "error");
             } else if(err.message && err.message.includes("timeout")) {
                 showToast("Transaction confirmation timeout", "warning");
             } else if(err.message && err.message.includes("network")) {
-                showToast("Network error - please check connection", "error");
+                showToast("Network error - check connection", "error");
             } else {
-                showToast("Error: " + (err.message || "Unknown error").substring(0, 70), "error");
+                showToast("Error: " + (err.message || "Unknown").substring(0, 70), "error");
             }
         } finally { 
             isProcessing=false; 
@@ -726,7 +725,7 @@
         const chainId = Number(network.chainId);
         
         if(chainId !== CHAIN_ID_DECIMAL && chainId !== 61) {
-            showToast("Please switch to Ethereum Classic Mainnet (ETC)", "warning");
+            showToast("Please switch to Ethereum Classic Mainnet", "warning");
             try { 
                 await window.ethereum.request({ 
                     method: 'wallet_switchEthereumChain', 
@@ -734,7 +733,7 @@
                 });
                 setTimeout(() => initConnection(accounts), 2000);
             } catch(e){ 
-                showToast("Please manually switch to ETC Mainnet in your wallet", "error");
+                showToast("Please manually switch to ETC Mainnet", "error");
             }
             return;
         }
@@ -748,7 +747,7 @@
             document.getElementById('bottomNav').style.display = 'flex';
             updateDashboard(); renderLevels(); updateAssetsPage();
             if(typeof Swiper !== 'undefined') new Swiper('.dashboardSwiper', { autoplay: { delay: 2800 }, loop: true });
-            showToast("ETC Hub Active - Connected to ETC Mainnet", "success");
+            showToast("ETC Hub Active", "success");
         } else {
             document.getElementById('connectState').classList.add('hidden');
             document.getElementById('investmentState').classList.remove('hidden');
@@ -759,7 +758,7 @@
     
     // Event Listeners
     document.getElementById('connectBtn').addEventListener('click', async () => {
-        if(!window.ethereum) return showToast("Install MetaMask / Trust Wallet with ETC network", "error");
+        if(!window.ethereum) return showToast("Install MetaMask / Trust Wallet", "error");
         try {
             const acc = await window.ethereum.request({ method: 'eth_requestAccounts' });
             initConnection(acc);
@@ -811,7 +810,6 @@
         }); 
     });
     
-    // Auto-refresh balances every 15 seconds
     setInterval(() => { 
         if(userAddress && isPaidUser(userAddress)) { 
             updateETCBalance(); 
@@ -819,7 +817,6 @@
         } 
     }, 15000);
     
-    // Handle account changes
     if(window.ethereum) {
         window.ethereum.on('accountsChanged', (accounts) => {
             if(accounts.length > 0) {
