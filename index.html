@@ -163,12 +163,6 @@
             box-shadow: 0 0 15px var(--primary-glow);
             transform: translateY(-3px);
         }
-        
-        .income-card p {
-            font-size:11px; 
-            color:var(--text-muted);
-            margin-bottom: 8px;
-        }
 
         .income-card h3 {
             font-size: 22px;
@@ -176,9 +170,35 @@
             text-shadow: 0 0 10px var(--primary-glow);
         }
         
-        .income-card .main-stat {
-            font-size: 22px;
-            font-weight: bold;
+        .level-dashboard-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            border-radius: 20px;
+            margin-top: 15px;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            box-shadow: 0 8px 30px var(--secondary-glow);
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+        .level-dashboard-button:hover {
+            transform: scale(1.03);
+            filter: brightness(1.2);
+        }
+        .level-dashboard-button i {
+            font-size: 30px;
+        }
+        .level-dashboard-button-text h3 {
+            font-size: 18px;
+            margin: 0;
+            color: white;
+        }
+         .level-dashboard-button-text small {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
         }
 
         /* Buttons */
@@ -223,7 +243,7 @@
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
 
-        /* --- EDITED BOTTOM NAV --- */
+        /* --- EDITED: Bottom Nav - Island Style --- */
         .bottom-nav {
             position: fixed;
             bottom: 15px;
@@ -254,33 +274,33 @@
             height: 100%;
             justify-content: center;
         }
-        
+
         .nav-item i { font-size: 20px; }
+        
         .nav-item.active {
             color: var(--primary);
             text-shadow: 0 0 10px var(--primary-glow);
         }
-        
-        /* New central button style */
+
+        /* --- NEW: Special Nav Button --- */
         .nav-item-special {
-            width: 65px;
-            height: 65px;
-            margin-top: -30px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            border: 3px solid #0f172a;
-            box-shadow: 0 0 20px var(--secondary-glow);
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
             color: white;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
-            transition: transform 0.3s ease;
+            transform: translateY(-20px); /* Lifts it up */
+            border: 3px solid var(--bg-deep);
+            box-shadow: 0 0 20px var(--primary-glow);
+            transition: 0.3s ease;
         }
-        
         .nav-item-special:hover {
-            transform: scale(1.1) rotate(10deg);
+            transform: translateY(-20px) scale(1.1);
             filter: brightness(1.2);
         }
 
@@ -835,38 +855,40 @@
                     <span class="rank-badge" id="userRankBadge">Verified Member</span>
                 </div>
 
-                <!-- EDITED INCOME GRID -->
+                <!-- EDITED: Simplified Income Grid -->
                 <div class="income-grid">
                     <div class="income-card glass">
-                        <p>ZTR Balance</p>
-                        <h3 id="ztrBalance">0.00 ZTR</h3>
-                        <small style="color:var(--success);">≈ $<span id="ztrBalanceUSD">0</span></small>
+                        <p style="font-size:11px; color:var(--text-muted);">Core Profit</p>
+                        <h3 id="profitIncome">0.00 ZTR</h3>
+                        <small style="color:var(--success);">≈ $<span id="profitUSD">0</span></small>
                     </div>
                     <div class="income-card glass">
-                        <p>Network Size</p>
-                        <h3 id="teamCount" class="main-stat" style="color:var(--secondary);">0</h3>
-                        <small>Members</small>
+                        <p style="font-size:11px; color:var(--text-muted);">Network Size</p>
+                        <h3 id="teamIncome" style="color:var(--text-main);">0</h3>
+                        <small id="teamCount">Members</small>
                     </div>
                     <div class="income-card glass">
-                        <p>Current Level</p>
-                        <h3 id="levelDisplay" class="main-stat" style="font-size: 18px;">Starter</h3>
-                        <small id="levelNameDisplay">Level 0</small>
+                        <p style="font-size:11px; color:var(--text-muted);">Monthly Salary</p>
+                        <h3 id="salleryIncome" style="color:var(--gold);">0.00 ZTR</h3>
+                        <small>From Stars</small>
                     </div>
                      <div class="income-card glass">
-                        <p>Deployment Date</p>
-                        <h3 id="deploymentDateDisplay" class="main-stat" style="font-size: 18px;">--/--/----</h3>
-                        <small>Joined</small>
+                        <p style="font-size:11px; color:var(--text-muted);">Current Node</p>
+                        <h3 id="levelIncome" style="font-size: 18px; color: var(--text-main);">Starter</h3>
+                        <small id="levelNameDisplay" style="visibility: hidden;">Phase 1</small>
                     </div>
                 </div>
+
+                <!-- REMOVED: Level Dashboard Button was here -->
                 
-                <div class="gas-info" style="margin-top: 20px;">
+                <div class="gas-info" style="margin-top: 15px;">
                     <i class="fa-solid fa-wallet"></i> Wallet: <span id="dashboardWalletAddress">Not Connected</span>
                 </div>
             </div>
         </div>
 
         <div id="pageLevel" class="page">
-             <!-- This page is now replaced by the full-screen overlay -->
+             <!-- This page is now replaced by the full-screen overlay, triggered by nav button -->
         </div>
 
         <div id="pageTeam" class="page">
@@ -949,7 +971,7 @@
     </div>
 </div>
 
-<!-- EDITED BOTTOM NAV -->
+<!-- EDITED: New Bottom Nav Structure -->
 <div class="bottom-nav" id="bottomNav" style="display: none;">
     <div class="nav-item active" data-page="dashboard"><i class="fa-solid fa-house-chimney-window"></i><span>Home</span></div>
     <div class="nav-item" data-page="team"><i class="fa-solid fa-diagram-project"></i><span>Network</span></div>
@@ -957,7 +979,6 @@
     <div class="nav-item" data-page="stars"><i class="fa-solid fa-star"></i><span>Stars</span></div>
     <div class="nav-item" data-page="assets"><i class="fa-solid fa-wallet"></i><span>Vault</span></div>
 </div>
-
 
 <script>
     /* CORE SYSTEM CONFIGURATION */
@@ -1083,7 +1104,7 @@
     function setUserLevel(wallet, level) { const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); levels[wallet.toLowerCase()] = level; localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(levels)); }
     function getTeamSize(wallet) { const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); return teams[wallet.toLowerCase()] || 0; }
     function getSalleryEarnings(wallet) { const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); return earnings[wallet.toLowerCase()] || 0; }
-    function getCurrentLevelInfo(wallet) { const levelId = getUserLevel(wallet); if (levelId === 0) return { id: 0, name: "Starter", price: 0, commission: 0, icon: "🌱" }; return LEVELS[levelId - 1]; }
+    function getCurrentLevelInfo(wallet) { const levelId = getUserLevel(wallet); if (levelId === 0) return { name: "Starter", price: 0, commission: 0, icon: "🌱" }; return LEVELS[levelId - 1]; }
 
     // Balance & UI Updates
     async function updateBalances() {
@@ -1115,31 +1136,30 @@
         document.getElementById('totalEarningsStat').innerText = `$${ztrBalance.toFixed(2)}`;
         document.getElementById('userLevelStat').innerText = levelInfo.name;
     }
-    
-    // EDITED DASHBOARD UPDATE FUNCTION
+
+    // EDITED: Simplified Dashboard Update Function
     function updateDashboard() {
-        if (!userAddress) return;
         const ztr = getZTRBalance(userAddress);
         const level = getCurrentLevelInfo(userAddress);
         const team = getTeamSize(userAddress);
-        const profile = getUserProfile(userAddress);
-
-        // Update ZTR Balance card
-        document.getElementById('ztrBalance').innerText = `${ztr.toFixed(2)} ZTR`;
-        document.getElementById('ztrBalanceUSD').innerText = ztr.toFixed(2);
+        const salary = getSalleryEarnings(userAddress);
         
-        // Update Team Size card
-        document.getElementById('teamCount').innerText = team;
-
-        // Update Level card
-        document.getElementById('levelDisplay').innerText = level.name;
-        document.getElementById('levelNameDisplay').innerText = `Level ${level.id}`;
+        // Core Profit
+        document.getElementById('profitIncome').innerText = `${ztr.toFixed(2)} ZTR`;
+        document.getElementById('profitUSD').innerText = ztr.toFixed(2);
+        
+        // Team Size
+        document.getElementById('teamIncome').innerText = team;
+        document.getElementById('teamCount').innerText = `Member${team === 1 ? '' : 's'}`;
+        
+        // Salary
+        document.getElementById('salleryIncome').innerText = `${salary.toFixed(2)} ZTR`;
+        
+        // Level Name
+        document.getElementById('levelIncome').innerText = level.name;
+        
+        // Rank Badge
         document.getElementById('userRankBadge').innerText = level.name;
-        
-        // Update Deployment Date card
-        if (profile) {
-            document.getElementById('deploymentDateDisplay').innerText = profile.joinDate;
-        }
     }
     
     // --- NEW LEVEL PAGE FUNCTIONS ---
@@ -1197,7 +1217,7 @@
         levelSwiper = new Swiper('.levelSwiper', {
             effect: 'cards',
             grabCursor: true,
-            initialSlide: currentLevelId + 1, // Show the next available level
+            initialSlide: currentLevelId,
             navigation: {
                 nextEl: '.swiper-button-next',
                 prevEl: '.swiper-button-prev',
