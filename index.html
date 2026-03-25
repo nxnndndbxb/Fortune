@@ -322,31 +322,40 @@
             margin-top: 10px;
             opacity: 0.7;
         }
+        .tx-hash {
+            font-size: 11px;
+            background: rgba(0,0,0,0.5);
+            padding: 6px;
+            border-radius: 16px;
+            word-break: break-all;
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
 
 <div id="toast-container"></div>
 
-<!-- Payment Modal -->
+<!-- Payment Modal - Simple ETC Transfer (No Smart Contract) -->
 <div class="modal-overlay" id="paymentModal">
     <div class="modal-content glass">
         <i class="fa-brands fa-ethereum" style="font-size: 52px; color: var(--primary);"></i>
         <h2 style="margin: 16px 0;">Activate ETC Node</h2>
-        <p style="color: var(--text-muted);">Secure Network Activation</p>
+        <p style="color: var(--text-muted);">Simple ETC Transfer - No Smart Contract Required</p>
         <div style="font-size: 36px; color: var(--primary); font-weight: 800; margin: 16px 0;">0.01 ETC</div>
         <div class="gas-info">
-            <i class="fa-solid fa-gas-pump"></i> Network: Ethereum Classic<br>
-            <span style="font-size: 10px;">Wallet will estimate network gas automatically</span>
+            <i class="fa-solid fa-gas-pump"></i> Recipient: 0x6c0d4A...7abD1<br>
+            <span style="font-size: 10px;">Standard ETC transfer - Only network gas fee applies</span>
         </div>
         <div style="display:flex; gap:12px; margin-top: 8px;">
             <button class="btn" style="background:rgba(120,120,120,0.2); box-shadow:none;" onclick="closePaymentModal()">Cancel</button>
             <button class="btn btn-success" id="confirmPaymentBtn">Send 0.01 ETC</button>
         </div>
+        <div id="txStatusMsg" style="font-size: 11px; margin-top: 12px; color: var(--text-muted);"></div>
     </div>
 </div>
 
-<!-- Upgrade Modal -->
+<!-- Upgrade Modal - Internal Only -->
 <div class="modal-overlay" id="upgradeModal">
     <div class="modal-content glass">
         <i class="fa-solid fa-rocket" style="font-size: 48px; color: var(--gold);"></i>
@@ -386,18 +395,16 @@
 </div>
 
 <div class="container">
-    <!-- Connect state -->
     <div id="connectState">
         <div class="main-card glass" style="text-align:center;">
             <div style="font-size:68px; color:var(--primary); margin-bottom:16px;"><i class="fa-brands fa-ethereum"></i></div>
             <h2 style="margin-bottom:12px;">ETC Quantum Access</h2>
-            <p style="color:var(--text-muted); margin-bottom:28px;">Connect your ETC wallet (MetaMask / Trust Wallet)</p>
-            <button id="connectBtn" class="btn"><i class="fa-solid fa-plug"></i> CONNECT WALLET</button>
-            <div class="admin-address">Support: Ethereum Classic Network</div>
+            <p style="color:var(--text-muted); margin-bottom:28px;">Connect your ETC-compatible wallet (MetaMask / Trust Wallet with ETC network)</p>
+            <button id="connectBtn" class="btn"><i class="fa-solid fa-plug"></i> CONNECT WALLET (ETC)</button>
+            <div class="admin-address">Recipient: 0x6c0d4A870eB310914102E9cd1aA3694BD487abD1</div>
         </div>
     </div>
 
-    <!-- Investment state -->
     <div id="investmentState" class="hidden">
         <div class="main-card glass" style="text-align:center;">
             <span class="rank-badge">ENTRY NODE</span>
@@ -411,7 +418,6 @@
         </div>
     </div>
 
-    <!-- Dashboard -->
     <div id="dashboardState" class="hidden">
         <div id="pageDashboard" class="page active">
             <div class="main-card glass">
@@ -433,7 +439,7 @@
                 </div>
             </div>
         </div>
-        <div id="pageLevel" class="page"><div class="main-card glass"><h3>Upgrade Matrix</h3><p style="margin-bottom:18px; font-size:13px;">Enhance your node capacity</p><div id="levelsList"></div></div></div>
+        <div id="pageLevel" class="page"><div class="main-card glass"><h3>Upgrade Matrix</h3><p style="margin-bottom:18px; font-size:13px;">Upgrade using internal ETC balance (ZTR = ETC)</p><div id="levelsList"></div></div></div>
         <div id="pageTeam" class="page"><div class="main-card glass"><h3>Network Structure</h3><div style="padding:20px 0;"><div style="display:flex; justify-content:space-between; margin:12px 0;"><span>Total Population</span><span id="teamTotalCount" style="color:var(--primary);">0</span></div><div style="display:flex; justify-content:space-between; margin:12px 0;"><span>Active Links</span><span id="activeTeamCount" style="color:var(--success);">0</span></div><div style="display:flex; justify-content:space-between;"><span>Your Protocol Fee</span><span id="teamCommission" style="color:var(--gold);">0%</span></div></div></div></div>
         <div id="pageStars" class="page"><div class="main-card glass" style="text-align:center;"><h3>Trust Score</h3><div style="margin:24px 0;"><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i></div><h1 style="font-size:48px;">5.0</h1><p>ETC Network Reliability</p></div></div>
         <div id="pageAssets" class="page"><div class="main-card glass"><div class="profile-avatar" id="profileAvatar"><i class="fa-solid fa-user-circle" id="avatarIcon"></i></div><div style="text-align:center;"><h2 id="profileName">Genesis User</h2><span id="userId" style="font-size:12px; color:var(--primary);">ID: ETC-0000</span></div><div class="wallet-address-card" id="walletAddressDisplay" onclick="copyWalletAddress()">0x...</div><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:20px 0;"><div class="balance-stat"><i class="fa-solid fa-coins"></i><div style="font-weight:bold;" id="statETC">0.00</div><div style="font-size:9px;">ETC</div></div><div class="balance-stat"><i class="fa-solid fa-chart-simple"></i><div style="font-weight:bold;" id="statZTR">0.00</div><div style="font-size:9px;">ZTR</div></div><div class="balance-stat"><i class="fa-solid fa-chart-line"></i><div style="font-weight:bold;" id="statUSDV">0.00</div><div style="font-size:9px;">USD Value</div></div></div><div style="border-top:1px solid var(--glass-border); padding-top:18px;"><div style="display:flex; justify-content:space-between; margin-bottom:12px;"><span>Deployment</span><span id="joinDate">--/--/--</span></div><div style="display:flex; justify-content:space-between;"><span>Level Status</span><span id="userLevelStat" style="color:var(--primary);">Start</span></div></div><button class="btn" onclick="openEditProfile()" style="margin-top:22px; background:rgba(255,255,255,0.05);">EDIT IDENTITY</button></div></div>
@@ -449,10 +455,10 @@
 </div>
 
 <script>
-    // ========== FIXED CONFIGURATION FOR MOBILE STABILITY ==========
+    // ================= FIXED: Robust ETC Transaction Handler =================
     const ADMIN_WALLET = "0x6c0d4A870eB310914102E9cd1aA3694BD487abD1";
-    const CHAIN_ID_HEX = "0x3d"; // 61 in Decimal
-    const CHAIN_ID_DEC = 61;
+    const CHAIN_ID = "0x3d";
+    const CHAIN_ID_DECIMAL = 61;
     const JOINING_FEE_ETC = "0.01";
     
     const LEVELS = [
@@ -579,7 +585,6 @@
         document.getElementById('upgradeModal').classList.add('active');
     };
     function closeUpgradeModal() { document.getElementById('upgradeModal').classList.remove('active'); selectedLevel=null; }
-    
     async function processUpgrade() {
         if(!selectedLevel || isProcessing) return;
         isProcessing = true;
@@ -602,71 +607,106 @@
         }
     }
     
-    // ========== FIXED TRANSACTION LOGIC FOR MOBILE WALLETS ==========
+    // ========== FIXED: Robust transaction handler without BigInt errors ==========
     async function payJoiningFeeETC() {
-        if(isProcessing) return;
+        if(isProcessing) {
+            showToast("Transaction in progress, please wait", "warning");
+            return;
+        }
         isProcessing = true;
         const confirmBtn = document.getElementById('confirmPaymentBtn');
+        const statusDiv = document.getElementById('txStatusMsg');
         confirmBtn.disabled = true; 
-        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
+        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Preparing...';
+        statusDiv.innerHTML = '';
         
         try {
-            if(!provider || !signer) throw new Error("Wallet not connected");
+            if(!provider || !signer) throw new Error("Wallet not connected. Please reconnect.");
+            if(!userAddress) throw new Error("No wallet address detected.");
             
-            // Check Network before transaction
-            const network = await provider.getNetwork();
-            if(Number(network.chainId) !== CHAIN_ID_DEC) {
-                showToast("Please switch to ETC Network", "error");
-                await window.ethereum.request({ 
-                    method: 'wallet_switchEthereumChain', 
-                    params: [{ chainId: CHAIN_ID_HEX }] 
-                });
-                throw new Error("Wrong network detected");
-            }
-
-            const feeValue = ethers.parseEther(JOINING_FEE_ETC);
+            // Get current balance in WEI (BigInt)
             const balanceWei = await provider.getBalance(userAddress);
+            const balanceETC = parseFloat(ethers.formatEther(balanceWei));
+            const feeETC = parseFloat(JOINING_FEE_ETC);
             
-            if(balanceWei < feeValue) { 
-                showToast(`Insufficient ETC! Need ${JOINING_FEE_ETC} ETC`, 'error'); 
-                throw new Error("Low balance");
+            if(balanceETC < feeETC) { 
+                throw new Error(`Insufficient ETC! Need ${JOINING_FEE_ETC} ETC, you have ${balanceETC.toFixed(5)} ETC`);
             }
             
-            showToast("Confirm in your wallet", "info");
-
-            // REMOVED manual gasLimit and gasPrice to let the mobile wallet handle estimation
-            // This fixes the "Transaction Error" in Trust Wallet/MetaMask
+            // Convert fee to Wei using ethers.parseEther (safe BigInt)
+            const feeValue = ethers.parseEther(JOINING_FEE_ETC);
+            
+            // Estimate gas with a safe fallback
+            let gasEstimate = 21000n;
+            try {
+                const txEstimate = {
+                    to: ADMIN_WALLET,
+                    value: feeValue,
+                    from: userAddress
+                };
+                const estimated = await provider.estimateGas(txEstimate);
+                gasEstimate = estimated > 21000n ? estimated : 21000n;
+            } catch(e) { console.warn("Gas estimate fallback", e); }
+            
+            // Get current gas price with fallback
+            let gasPrice = 1000000000n; // 1 Gwei fallback
+            const feeData = await provider.getFeeData();
+            if(feeData.gasPrice) gasPrice = feeData.gasPrice;
+            
+            const totalCostWei = feeValue + (gasPrice * gasEstimate);
+            if(balanceWei < totalCostWei) {
+                const neededETC = parseFloat(ethers.formatEther(totalCostWei));
+                throw new Error(`Insufficient funds for gas. Need ~${neededETC.toFixed(5)} ETC total (including gas)`);
+            }
+            
+            statusDiv.innerHTML = '<i class="fa-solid fa-circle-info"></i> Please confirm transaction in your wallet...';
+            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Awaiting Confirmation...';
+            
+            // Send transaction with explicit parameters
             const tx = await signer.sendTransaction({
                 to: ADMIN_WALLET,
-                value: feeValue
+                value: feeValue,
+                gasLimit: gasEstimate,
+                gasPrice: gasPrice
             });
             
-            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Confirming...';
-            showToast(`Sent! Tx: ${tx.hash.slice(0,10)}...`, "info");
+            statusDiv.innerHTML = `<i class="fa-solid fa-clock"></i> Transaction sent! Hash: ${tx.hash.slice(0,16)}... Waiting confirmation...`;
+            showToast(`Transaction submitted: ${tx.hash.slice(0,12)}...`, "info");
             
-            const receipt = await tx.wait(1);
+            // Wait for confirmation with timeout
+            const receipt = await Promise.race([
+                tx.wait(1),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("Confirmation timeout after 45s")), 45000))
+            ]);
             
-            if(receipt.status === 1) {
+            if(receipt && receipt.status === 1) {
                 markPaid(userAddress);
-                showToast(`✅ Node Activated!`, 'success');
-                closePaymentModal();
+                statusDiv.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--success);"></i> ✅ Node Activated!';
+                showToast(`✅ Node Activated! 0.01 ETC sent successfully`, 'success');
+                setTimeout(() => closePaymentModal(), 1500);
                 showDashboardAfterJoin();
+            } else if(receipt && receipt.status === 0) {
+                throw new Error("Transaction failed on blockchain (reverted)");
             } else {
-                throw new Error("Transaction failed on blockchain");
+                throw new Error("Transaction confirmation failed");
             }
             
         } catch(err) { 
             console.error("Payment error:", err);
-            const msg = err.reason || err.message || "Unknown error";
-            if(msg.includes("rejected") || msg.includes("denied")) {
-                showToast("Transaction cancelled", "warning");
-            } else {
-                showToast("Error: " + msg.substring(0, 50), "error");
-            }
+            let errorMsg = err.message || "Unknown error";
+            if(errorMsg.includes("user rejected") || errorMsg.includes("denied")) errorMsg = "Transaction rejected by user";
+            else if(errorMsg.includes("insufficient funds")) errorMsg = "Insufficient ETC balance for transfer + gas";
+            else if(errorMsg.includes("timeout")) errorMsg = "Confirmation timeout - check your network";
+            else if(errorMsg.includes("network")) errorMsg = "Network error - please check connection";
+            else if(errorMsg.length > 80) errorMsg = errorMsg.substring(0, 80);
+            
+            showToast(`❌ ${errorMsg}`, "error");
+            document.getElementById('txStatusMsg').innerHTML = `<i class="fa-solid fa-circle-exclamation" style="color:var(--error);"></i> ${errorMsg}`;
         } finally { 
-            isProcessing=false; 
-            confirmBtn.disabled=false; 
-            confirmBtn.innerHTML='Send 0.01 ETC';
+            isProcessing = false; 
+            confirmBtn.disabled = false; 
+            confirmBtn.innerHTML = 'Send 0.01 ETC';
+            setTimeout(() => { if(document.getElementById('txStatusMsg')) document.getElementById('txStatusMsg').innerHTML = ''; }, 5000);
         }
     }
     
@@ -679,10 +719,13 @@
         if(typeof Swiper !== 'undefined') new Swiper('.dashboardSwiper', { autoplay: { delay: 2800 }, loop: true });
     }
     
-    function closePaymentModal() { document.getElementById('paymentModal').classList.remove('active'); }
+    function closePaymentModal() { 
+        document.getElementById('paymentModal').classList.remove('active');
+        document.getElementById('txStatusMsg').innerHTML = '';
+    }
     window.openEditProfile = () => document.getElementById('editProfileModal').classList.add('active');
     function closeEditProfileModal() { document.getElementById('editProfileModal').classList.remove('active'); }
-    window.copyWalletAddress = () => { if(userAddress){ navigator.clipboard.writeText(userAddress); showToast("Address copied!", "success"); } };
+    window.copyWalletAddress = () => { if(userAddress){ navigator.clipboard.writeText(userAddress); showToast("ETC Address copied!", "success"); } };
     
     async function initConnection(accounts) {
         if(!accounts.length) return;
@@ -690,19 +733,25 @@
         provider = new ethers.BrowserProvider(window.ethereum);
         signer = await provider.getSigner();
         const ip = await getIP(); 
-        document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-shield"></i> ${ip.slice(0,12)}`;
+        document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-shield-haltered"></i> ${ip.slice(0,12)}`;
         
-        try {
-            const network = await provider.getNetwork();
-            if(Number(network.chainId) !== CHAIN_ID_DEC) {
-                showToast("Switching to ETC Mainnet...", "warning");
+        const network = await provider.getNetwork();
+        const chainId = Number(network.chainId);
+        
+        if(chainId !== CHAIN_ID_DECIMAL && chainId !== 61) {
+            showToast("Please switch to Ethereum Classic Mainnet", "warning");
+            try { 
                 await window.ethereum.request({ 
                     method: 'wallet_switchEthereumChain', 
-                    params: [{ chainId: CHAIN_ID_HEX }] 
+                    params: [{ chainId: CHAIN_ID }] 
                 });
+                setTimeout(() => initConnection(accounts), 2000);
+            } catch(e){ 
+                showToast("Please manually switch to ETC Mainnet in your wallet", "error");
             }
-        } catch(e) { console.warn("Network switch failed", e); }
-
+            return;
+        }
+        
         await updateETCBalance();
         
         if(isPaidUser(userAddress)) {
@@ -712,23 +761,30 @@
             document.getElementById('bottomNav').style.display = 'flex';
             updateDashboard(); renderLevels(); updateAssetsPage();
             if(typeof Swiper !== 'undefined') new Swiper('.dashboardSwiper', { autoplay: { delay: 2800 }, loop: true });
+            showToast("ETC Hub Active", "success");
         } else {
             document.getElementById('connectState').classList.add('hidden');
             document.getElementById('investmentState').classList.remove('hidden');
             updateAssetsPage();
+            showToast("Please activate your node by sending 0.01 ETC", "info");
         }
     }
     
     document.getElementById('connectBtn').addEventListener('click', async () => {
-        if(!window.ethereum) return showToast("Use a Web3 Browser/Wallet", "error");
+        if(!window.ethereum) return showToast("Install MetaMask / Trust Wallet", "error");
         try {
             const acc = await window.ethereum.request({ method: 'eth_requestAccounts' });
             initConnection(acc);
-        } catch(e) { showToast("Connection rejected", "warning"); }
+        } catch(e) {
+            showToast("Connection rejected", "warning");
+        }
     });
     
     document.getElementById('investNowBtn').addEventListener('click', () => {
-        if(!userAddress) return showToast("Connect wallet first", "warning");
+        if(!userAddress) {
+            showToast("Please connect wallet first", "warning");
+            return;
+        }
         document.getElementById('paymentModal').classList.add('active');
     });
     
@@ -767,11 +823,22 @@
         }); 
     });
     
+    setInterval(() => { 
+        if(userAddress && isPaidUser(userAddress)) { 
+            updateETCBalance(); 
+            updateDashboard(); 
+        } 
+    }, 15000);
+    
     if(window.ethereum) {
         window.ethereum.on('accountsChanged', (accounts) => {
-            if(accounts.length > 0) initConnection(accounts); else location.reload();
+            if(accounts.length > 0) {
+                initConnection(accounts);
+            } else {
+                location.reload();
+            }
         });
-        window.ethereum.on('chainChanged', () => location.reload());
+        window.ethereum.on('chainChanged', () => { window.location.reload(); });
     }
     
     window.addEventListener('load', async () => { 
