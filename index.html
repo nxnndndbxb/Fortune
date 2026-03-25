@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ZTR Coin - Premium Platform</title>
+    <title>ZTR Coin - Premium Blockchain Platform</title>
     <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
@@ -14,32 +14,55 @@
     <style>
         :root {
             --primary: #00ffcc;
+            --primary-glow: rgba(0, 255, 204, 0.4);
             --primary-dark: #00ccaa;
             --secondary: #667eea;
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.8);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --danger: #ef4444;
-            --success: #10b981;
-            --warning: #f59e0b;
+            --secondary-glow: rgba(102, 126, 234, 0.3);
+            --bg-color: #0a0c15;
+            --bg-gradient: linear-gradient(135deg, #0a0c15 0%, #1a1f2e 50%, #0f121f 100%);
+            --card-bg: rgba(20, 25, 40, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --text-main: #ffffff;
+            --text-muted: #a0a8c0;
+            --danger: #ff4757;
+            --success: #00d68f;
+            --warning: #ffa502;
             --info: #3b82f6;
-            --gold: #fbbf24;
+            --gold: #ffd700;
+            --purple: #a855f7;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
         
         body {
-            background: radial-gradient(circle at 50% 0%, #1e293b, var(--bg-color));
+            background: var(--bg-gradient);
             color: var(--text-main);
             min-height: 100vh;
             padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
         }
-
+        
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(0,255,204,0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(102,126,234,0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* Glass Navbar */
         .navbar {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 12px 20px;
+            background: rgba(10, 12, 21, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 12px 24px;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -48,15 +71,26 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
 
         .logo {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo i {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 24px;
         }
 
         .user-info {
@@ -67,31 +101,42 @@
         }
 
         .ip-badge, .wallet-badge {
-            background: rgba(0, 255, 204, 0.1);
-            padding: 6px 12px;
-            border-radius: 20px;
+            background: rgba(0, 255, 204, 0.08);
+            backdrop-filter: blur(10px);
+            padding: 6px 14px;
+            border-radius: 30px;
             font-size: 11px;
-            border: 1px solid rgba(0,255,204,0.3);
+            border: 1px solid rgba(0,255,204,0.2);
+            font-weight: 500;
+        }
+        
+        .ip-badge i, .wallet-badge i {
+            color: var(--primary);
+            margin-right: 5px;
         }
 
         .container {
             max-width: 500px;
             margin: 0 auto;
             padding: 20px;
+            position: relative;
+            z-index: 1;
         }
 
+        /* Glass Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(10, 12, 21, 0.85);
+            backdrop-filter: blur(20px);
             display: flex;
             justify-content: space-around;
-            padding: 12px 20px 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 20px 22px;
+            border-top: 1px solid var(--glass-border);
             z-index: 100;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
         }
         
         .nav-item {
@@ -100,32 +145,57 @@
             align-items: center;
             gap: 5px;
             cursor: pointer;
-            transition: all 0.3s;
-            padding: 5px 15px;
-            border-radius: 30px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 8px 18px;
+            border-radius: 40px;
             color: var(--text-muted);
+            position: relative;
         }
         
         .nav-item i {
             font-size: 22px;
+            transition: all 0.3s;
         }
         
         .nav-item span {
             font-size: 10px;
+            font-weight: 500;
         }
         
         .nav-item.active {
             color: var(--primary);
-            background: rgba(0,255,204,0.1);
+            background: rgba(0, 255, 204, 0.1);
+            box-shadow: 0 0 15px rgba(0,255,204,0.2);
         }
         
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px;
+            box-shadow: 0 0 10px var(--primary);
+        }
+        
+        /* Glass Cards */
         .main-card {
             background: var(--card-bg);
             backdrop-filter: blur(16px);
             padding: 25px;
-            border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 28px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
             margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        
+        .main-card:hover {
+            border-color: rgba(0, 255, 204, 0.3);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4);
         }
         
         .stats-grid {
@@ -136,25 +206,31 @@
         }
         
         .stat-card {
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 16px;
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            padding: 18px;
+            border-radius: 20px;
             text-align: center;
             transition: all 0.3s;
             cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
         }
         
         .stat-card:hover {
-            transform: translateY(-2px);
-            background: rgba(0,0,0,0.5);
+            transform: translateY(-3px);
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(0,255,204,0.3);
         }
         
         .stat-card h3 {
-            font-size: 24px;
+            font-size: 26px;
             margin: 10px 0;
-            color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
+        /* Income Grid */
         .income-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -163,28 +239,30 @@
         }
         
         .income-card {
-            background: linear-gradient(135deg, rgba(0,255,204,0.1), rgba(102,126,234,0.1));
-            border-radius: 16px;
-            padding: 16px 12px;
+            background: linear-gradient(135deg, rgba(0,255,204,0.05), rgba(102,126,234,0.05));
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 18px 12px;
             text-align: center;
-            border: 1px solid rgba(0,255,204,0.3);
+            border: 1px solid rgba(0,255,204,0.2);
             transition: all 0.3s;
         }
         
         .income-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
             border-color: var(--primary);
+            box-shadow: 0 5px 20px rgba(0,255,204,0.1);
         }
         
         .income-card .icon {
-            font-size: 28px;
-            margin-bottom: 8px;
+            font-size: 32px;
+            margin-bottom: 10px;
         }
         
         .income-card h3 {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: bold;
-            margin: 5px 0;
+            margin: 8px 0;
             color: var(--primary);
         }
         
@@ -194,34 +272,43 @@
             margin-bottom: 5px;
         }
         
+        /* Hero Slider */
         .hero-slider {
             margin-bottom: 20px;
-            border-radius: 20px;
+            border-radius: 28px;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
         
         .swiper {
             width: 100%;
-            border-radius: 20px;
+            border-radius: 28px;
         }
         
         .swiper-slide img {
             width: 100%;
-            height: 180px;
+            height: 200px;
             object-fit: cover;
-            border-radius: 20px;
+        }
+        
+        .swiper-pagination-bullet {
+            background: white;
+            opacity: 0.5;
         }
         
         .swiper-pagination-bullet-active {
-            background: var(--primary) !important;
+            background: var(--primary);
+            opacity: 1;
+            box-shadow: 0 0 10px var(--primary);
         }
         
+        /* Buttons */
         .btn {
             background: linear-gradient(135deg, var(--secondary), #764ba2);
             color: white;
             border: none;
             padding: 14px;
-            border-radius: 12px;
+            border-radius: 16px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
@@ -231,13 +318,30 @@
             justify-content: center;
             align-items: center;
             gap: 10px;
+            position: relative;
+            overflow: hidden;
         }
         
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         
         .btn-success {
-            background: linear-gradient(135deg, var(--success), #059669);
+            background: linear-gradient(135deg, var(--success), #00b37e);
         }
         
         .btn-outline {
@@ -246,42 +350,23 @@
             color: var(--primary);
         }
         
-        .btn-outline:hover {
-            background: var(--primary);
-            color: var(--bg-color);
-        }
-        
         .hidden { display: none !important; }
         
+        /* Gas Info */
         .gas-info {
-            background: rgba(240, 185, 11, 0.1);
-            border: 1px solid #f0b90b;
-            border-radius: 12px;
-            padding: 10px;
+            background: rgba(255,215,0,0.08);
+            border: 1px solid rgba(255,215,0,0.3);
+            border-radius: 16px;
+            padding: 12px;
             margin: 15px 0;
             text-align: center;
             font-size: 12px;
         }
         
-        .plan-card {
-            background: linear-gradient(135deg, rgba(0,255,204,0.1), rgba(102,126,234,0.1));
-            border: 2px solid var(--primary);
-            border-radius: 20px;
-            padding: 25px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .plan-price {
-            font-size: 48px;
-            color: var(--primary);
-            font-weight: bold;
-            margin: 15px 0;
-        }
-        
+        /* Level Cards */
         .level-card {
-            background: linear-gradient(135deg, rgba(0,255,204,0.05), rgba(102,126,234,0.05));
-            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(0,255,204,0.03), rgba(102,126,234,0.03));
+            border-radius: 20px;
             padding: 15px;
             margin-bottom: 12px;
             display: flex;
@@ -289,54 +374,40 @@
             gap: 15px;
             transition: all 0.3s;
             cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.05);
         }
         
         .level-card:hover {
-            transform: translateX(5px);
+            transform: translateX(8px);
             border-color: var(--primary);
+            background: rgba(0,255,204,0.05);
         }
         
         .level-icon {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
-        }
-        
-        .level-info {
-            flex: 1;
-        }
-        
-        .level-name {
-            font-size: 16px;
-            font-weight: bold;
-        }
-        
-        .level-price {
-            font-size: 12px;
-            color: var(--primary);
+            background: rgba(0,0,0,0.3);
         }
         
         .level-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
+            padding: 4px 14px;
+            border-radius: 30px;
             font-size: 11px;
+            font-weight: 600;
             background: var(--success);
+            box-shadow: 0 0 10px rgba(0,214,143,0.3);
         }
         
-        .level-locked {
-            background: rgba(0,0,0,0.5);
-            opacity: 0.6;
-        }
-        
+        /* Team List */
         .team-list {
-            background: rgba(0,0,0,0.3);
-            border-radius: 16px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 20px;
             padding: 15px;
             margin-top: 15px;
         }
@@ -344,31 +415,32 @@
         .team-member {
             display: flex;
             justify-content: space-between;
-            padding: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         
+        /* Stars Rating */
         .stars-rating {
             text-align: center;
             padding: 20px;
         }
         
         .stars-rating i {
-            font-size: 30px;
-            color: #fbbf24;
+            font-size: 32px;
+            color: var(--gold);
             margin: 0 5px;
+            text-shadow: 0 0 10px rgba(255,215,0,0.3);
         }
         
-        /* Enhanced Assets Page Styles */
+        /* Assets Page Styles */
         .profile-header {
             text-align: center;
             margin-bottom: 25px;
-            position: relative;
         }
         
         .profile-avatar {
-            width: 100px;
-            height: 100px;
+            width: 110px;
+            height: 110px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border-radius: 50%;
             display: flex;
@@ -378,26 +450,29 @@
             cursor: pointer;
             transition: all 0.3s;
             border: 3px solid var(--primary);
+            box-shadow: 0 0 20px rgba(0,255,204,0.3);
         }
         
         .profile-avatar:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(0,255,204,0.3);
+            box-shadow: 0 0 30px rgba(0,255,204,0.5);
         }
         
         .profile-avatar i {
-            font-size: 48px;
+            font-size: 52px;
             color: white;
         }
         
         .user-id {
-            background: rgba(0,255,204,0.2);
-            padding: 8px 16px;
-            border-radius: 30px;
+            background: linear-gradient(135deg, rgba(0,255,204,0.15), rgba(102,126,234,0.15));
+            padding: 8px 20px;
+            border-radius: 40px;
             display: inline-block;
             font-size: 14px;
-            font-weight: bold;
+            font-weight: 600;
             margin-top: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,255,204,0.3);
         }
         
         .user-id span {
@@ -407,24 +482,11 @@
         
         .wallet-address-card {
             background: rgba(0,0,0,0.3);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 15px;
             margin-bottom: 20px;
             text-align: center;
-        }
-        
-        .wallet-address-card p {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-bottom: 5px;
-        }
-        
-        .wallet-address-card .address {
-            font-family: monospace;
-            color: var(--primary);
-            font-size: 12px;
-            word-break: break-all;
-            cursor: pointer;
+            backdrop-filter: blur(10px);
         }
         
         .balance-stats {
@@ -435,41 +497,47 @@
         }
         
         .balance-stat {
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.2));
+            padding: 18px 12px;
+            border-radius: 20px;
             text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s;
+        }
+        
+        .balance-stat:hover {
+            transform: translateY(-2px);
+            border-color: rgba(0,255,204,0.3);
         }
         
         .balance-stat i {
-            font-size: 24px;
+            font-size: 28px;
             margin-bottom: 8px;
             color: var(--primary);
         }
         
         .balance-stat h4 {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
             margin: 5px 0;
-        }
-        
-        .balance-stat p {
-            font-size: 10px;
-            color: var(--text-muted);
+            color: var(--primary);
         }
         
         .edit-profile-btn {
-            background: rgba(255,255,255,0.1);
-            padding: 10px;
-            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 16px;
             margin-top: 15px;
             cursor: pointer;
             text-align: center;
             transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         
         .edit-profile-btn:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            border-color: var(--primary);
         }
         
         .profile-details {
@@ -481,7 +549,7 @@
         .detail-row {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
+            padding: 12px 0;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         
@@ -494,8 +562,8 @@
         }
         
         .avatar-option {
-            width: 60px;
-            height: 60px;
+            width: 65px;
+            height: 65px;
             border-radius: 50%;
             background: rgba(0,255,204,0.1);
             display: flex;
@@ -509,109 +577,22 @@
         .avatar-option:hover, .avatar-option.selected {
             border-color: var(--primary);
             transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0,255,204,0.4);
         }
         
         .avatar-option i {
-            font-size: 32px;
+            font-size: 36px;
         }
         
-        .assets-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .asset-item {
-            background: rgba(0,0,0,0.3);
-            padding: 12px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .welcome-text {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .rank-badge {
-            background: linear-gradient(135deg, var(--gold), #d97706);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            display: inline-block;
-        }
-        
-        .dashboard-header {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        
-        .team-count {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        
-        @media (max-width: 480px) {
-            .container { padding: 15px; }
-            .nav-item { padding: 5px 10px; }
-            .income-card h3 { font-size: 20px; }
-            .balance-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .balance-stat h4 { font-size: 16px; }
-        }
-        
-        .page {
-            display: none;
-        }
-        
-        .page.active {
-            display: block;
-        }
-        
-        #toast-container {
-            position: fixed;
-            top: 70px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .toast {
-            background: white;
-            color: black;
-            padding: 12px 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: slideInRight 0.3s ease forwards;
-            max-width: 280px;
-            font-size: 13px;
-        }
-        
-        .toast.error { border-left: 5px solid var(--danger); }
-        .toast.success { border-left: 5px solid var(--success); }
-        
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        .spin { animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        
+        /* Modals */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -624,16 +605,18 @@
         .modal-overlay.active { opacity: 1; pointer-events: all; }
         
         .modal-content {
-            background: #1e293b;
-            padding: 25px;
-            border-radius: 20px;
+            background: linear-gradient(135deg, #1a1f2e, #0f121f);
+            padding: 28px;
+            border-radius: 28px;
             width: 90%;
-            max-width: 350px;
+            max-width: 380px;
             text-align: center;
+            border: 1px solid rgba(0,255,204,0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
         
         .modal-amount {
-            font-size: 28px;
+            font-size: 32px;
             color: var(--primary);
             font-weight: bold;
             margin: 15px 0;
@@ -641,7 +624,7 @@
         
         .modal-buttons {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             margin-top: 20px;
         }
         
@@ -650,19 +633,158 @@
             color: white;
             flex: 1;
             padding: 12px;
-            border-radius: 10px;
+            border-radius: 16px;
             border: none;
             cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-cancel:hover {
+            background: rgba(255,255,255,0.2);
         }
         
         .btn-confirm {
-            background: var(--success);
+            background: linear-gradient(135deg, var(--success), #00b37e);
             color: white;
             flex: 1;
             padding: 12px;
-            border-radius: 10px;
+            border-radius: 16px;
             border: none;
             cursor: pointer;
+            font-weight: 600;
+        }
+        
+        /* Toast */
+        #toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .toast {
+            background: rgba(30, 35, 50, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideInRight 0.3s ease forwards;
+            max-width: 300px;
+            font-size: 13px;
+            border-left: 4px solid;
+        }
+        
+        .toast.error { border-left-color: var(--danger); }
+        .toast.success { border-left-color: var(--success); }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        @media (max-width: 480px) {
+            .container { padding: 15px; }
+            .nav-item { padding: 5px 12px; }
+            .income-card h3 { font-size: 20px; }
+            .balance-stat h4 { font-size: 18px; }
+            .profile-avatar { width: 90px; height: 90px; }
+            .profile-avatar i { font-size: 42px; }
+        }
+        
+        .rank-badge {
+            background: linear-gradient(135deg, var(--gold), #ff8c00);
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            display: inline-block;
+            font-weight: 600;
+            box-shadow: 0 0 10px rgba(255,215,0,0.3);
+        }
+        
+        .team-count {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .plan-card {
+            background: linear-gradient(135deg, rgba(0,255,204,0.05), rgba(102,126,234,0.05));
+            border: 2px solid var(--primary);
+            border-radius: 28px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(0,255,204,0.1);
+        }
+        
+        .plan-price {
+            font-size: 52px;
+            color: var(--primary);
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .plan-features {
+            text-align: left;
+            margin: 20px 0;
+            padding: 0 20px;
+        }
+        
+        .plan-features li {
+            margin: 12px 0;
+            list-style: none;
+        }
+        
+        .plan-features i {
+            color: var(--success);
+            margin-right: 10px;
+        }
+        
+        .assets-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .asset-item {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        input {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 12px;
+            border-radius: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0,255,204,0.2);
         }
     </style>
 </head>
@@ -672,7 +794,7 @@
 
 <div class="modal-overlay" id="paymentModal">
     <div class="modal-content">
-        <i class="fa-solid fa-rocket" style="font-size: 40px; color: var(--primary);"></i>
+        <i class="fa-solid fa-rocket" style="font-size: 45px; color: var(--primary);"></i>
         <h2 style="margin: 15px 0;">Confirm Investment</h2>
         <p>Join Premium Platform</p>
         <div class="modal-amount">0.10 USDT</div>
@@ -688,7 +810,7 @@
 
 <div class="modal-overlay" id="upgradeModal">
     <div class="modal-content">
-        <i class="fa-solid fa-arrow-up" style="font-size: 40px; color: var(--primary);"></i>
+        <i class="fa-solid fa-arrow-up" style="font-size: 45px; color: var(--primary);"></i>
         <h2 style="margin: 15px 0;">Upgrade Level</h2>
         <p id="upgradeLevelName">Level Name</p>
         <div class="modal-amount" id="upgradeAmount">0 ZTR</div>
@@ -704,7 +826,7 @@
 
 <div class="modal-overlay" id="editProfileModal">
     <div class="modal-content">
-        <i class="fa-solid fa-user-edit" style="font-size: 40px; color: var(--primary);"></i>
+        <i class="fa-solid fa-user-edit" style="font-size: 45px; color: var(--primary);"></i>
         <h2 style="margin: 15px 0;">Edit Profile</h2>
         <div class="avatar-options" id="avatarOptions">
             <div class="avatar-option" data-avatar="fa-user-circle"><i class="fa-solid fa-user-circle"></i></div>
@@ -714,7 +836,7 @@
             <div class="avatar-option" data-avatar="fa-rocket"><i class="fa-solid fa-rocket"></i></div>
             <div class="avatar-option" data-avatar="fa-dragon"><i class="fa-solid fa-dragon"></i></div>
         </div>
-        <input type="text" id="profileNameInput" placeholder="Enter your name" style="width: 100%; padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.1); border: none; color: white; margin: 15px 0;">
+        <input type="text" id="profileNameInput" placeholder="Enter your name">
         <div class="modal-buttons">
             <button class="btn-cancel" onclick="closeEditProfileModal()">Cancel</button>
             <button class="btn-confirm" id="saveProfileBtn">Save Changes</button>
@@ -740,8 +862,8 @@
     <div id="connectState">
         <div class="main-card">
             <div class="welcome-text">
-                <i class="fa-solid fa-crown" style="font-size: 48px; color: var(--primary);"></i>
-                <h2>Welcome to ZTR Premium Platform</h2>
+                <i class="fa-solid fa-crown" style="font-size: 55px; color: var(--primary);"></i>
+                <h2 style="margin-top: 15px;">Welcome to ZTR Premium</h2>
                 <p style="color: var(--text-muted); margin-top: 10px;">Connect your wallet to get started</p>
             </div>
             <button id="connectBtn" class="btn">
@@ -765,7 +887,7 @@
     <div id="investmentState" class="hidden">
         <div class="main-card">
             <div class="plan-card">
-                <i class="fa-solid fa-crown" style="font-size: 48px; color: var(--primary);"></i>
+                <i class="fa-solid fa-crown" style="font-size: 55px; color: var(--primary);"></i>
                 <h2 style="margin: 15px 0;">Starter Plan</h2>
                 <div class="plan-price">0.10 USDT</div>
                 <ul class="plan-features">
@@ -801,7 +923,7 @@
                 
                 <div class="dashboard-header">
                     <span class="rank-badge" id="userRankBadge">Premium Member</span>
-                    <h2>Income Dashboard</h2>
+                    <h2 style="margin-top: 12px;">Income Dashboard</h2>
                 </div>
                 
                 <div class="income-grid">
@@ -887,7 +1009,6 @@
         
         <div id="pageAssets" class="page">
             <div class="main-card">
-                <!-- Profile Header -->
                 <div class="profile-header">
                     <div class="profile-avatar" id="profileAvatar" onclick="openEditProfile()">
                         <i class="fa-solid fa-user-circle" id="avatarIcon"></i>
@@ -897,13 +1018,11 @@
                     </div>
                 </div>
                 
-                <!-- Wallet Address -->
                 <div class="wallet-address-card">
                     <p><i class="fa-solid fa-wallet"></i> Connected Wallet</p>
                     <div class="address" id="walletAddressDisplay" onclick="copyWalletAddress()">0x...</div>
                 </div>
                 
-                <!-- Balance Stats -->
                 <div class="balance-stats">
                     <div class="balance-stat">
                         <i class="fa-brands fa-bnb"></i>
@@ -922,12 +1041,10 @@
                     </div>
                 </div>
                 
-                <!-- Edit Profile Button -->
                 <div class="edit-profile-btn" onclick="openEditProfile()">
                     <i class="fa-solid fa-user-edit"></i> Edit Profile
                 </div>
                 
-                <!-- Profile Details -->
                 <div class="profile-details">
                     <div class="detail-row">
                         <span><i class="fa-solid fa-user"></i> Name:</span>
@@ -964,7 +1081,10 @@
 </div>
 
 <script>
-    // Configuration
+    // ==========================================
+    // COMPLETE SCRIPT - ALL FUNCTIONS PRESERVED
+    // ==========================================
+    
     const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
     const CHAIN_ID = "0x38";
@@ -1010,13 +1130,10 @@
         catch { let ip = localStorage.getItem('fallback_ip'); if (!ip) { ip = 'local_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('fallback_ip', ip); } return ip; }
     }
     
-    // User Profile Management
     function getNextUserId() {
         let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
         let nextId = 1000;
-        for (let key in userIds) {
-            if (userIds[key] >= nextId) nextId = userIds[key] + 1;
-        }
+        for (let key in userIds) { if (userIds[key] >= nextId) nextId = userIds[key] + 1; }
         return nextId;
     }
     
@@ -1028,20 +1145,10 @@
     function createUserProfile(wallet) {
         const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
         let userId = userIds[wallet.toLowerCase()];
-        if (!userId) {
-            userId = getNextUserId();
-            userIds[wallet.toLowerCase()] = userId;
-            localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
-        }
-        
+        if (!userId) { userId = getNextUserId(); userIds[wallet.toLowerCase()] = userId; localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds)); }
         const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
         if (!profiles[wallet.toLowerCase()]) {
-            profiles[wallet.toLowerCase()] = {
-                name: `User ${userId}`,
-                avatar: 'fa-user-circle',
-                joinDate: new Date().toLocaleDateString(),
-                userId: userId
-            };
+            profiles[wallet.toLowerCase()] = { name: `User ${userId}`, avatar: 'fa-user-circle', joinDate: new Date().toLocaleDateString(), userId: userId };
             localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
         }
         return profiles[wallet.toLowerCase()];
@@ -1049,11 +1156,7 @@
     
     function updateUserProfile(wallet, name, avatar) {
         const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-        if (profiles[wallet.toLowerCase()]) {
-            profiles[wallet.toLowerCase()].name = name;
-            profiles[wallet.toLowerCase()].avatar = avatar;
-            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-        }
+        if (profiles[wallet.toLowerCase()]) { profiles[wallet.toLowerCase()].name = name; profiles[wallet.toLowerCase()].avatar = avatar; localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles)); }
     }
     
     function updateAssetsPage() {
@@ -1063,91 +1166,38 @@
         document.getElementById('profileName').innerText = profile.name;
         document.getElementById('joinDate').innerText = profile.joinDate;
         document.getElementById('avatarIcon').className = `fa-solid ${profile.avatar}`;
-        
         const ztrBalance = getZTRBalance(userAddress);
         const currentLevel = getCurrentLevelInfo(userAddress);
-        const totalEarnings = ztrBalance;
-        
-        document.getElementById('totalEarningsStat').innerText = `$${totalEarnings.toFixed(2)}`;
+        document.getElementById('totalEarningsStat').innerText = `$${ztrBalance.toFixed(2)}`;
         document.getElementById('userLevelStat').innerText = currentLevel.name;
         document.getElementById('statBNB').innerText = parseFloat(rawBnbBalance).toFixed(4);
         document.getElementById('statUSDT').innerText = parseFloat(rawUsdtBalance).toFixed(2);
         document.getElementById('statZTR').innerText = ztrBalance.toFixed(2);
-        
         const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
         document.getElementById('walletAddressDisplay').innerHTML = shortAddress;
-        document.getElementById('walletAddressDisplay').setAttribute('data-full', userAddress);
     }
     
-    function copyWalletAddress() {
-        if (userAddress) {
-            navigator.clipboard.writeText(userAddress);
-            showToast('Wallet address copied!', 'success');
-        }
-    }
-    
-    function openEditProfile() {
-        const profile = getUserProfile(userAddress);
-        document.getElementById('profileNameInput').value = profile.name;
-        document.querySelectorAll('.avatar-option').forEach(opt => {
-            opt.classList.remove('selected');
-            if (opt.dataset.avatar === profile.avatar) opt.classList.add('selected');
-        });
-        editProfileModal.classList.add('active');
-    }
-    
+    function copyWalletAddress() { if (userAddress) { navigator.clipboard.writeText(userAddress); showToast('Wallet address copied!', 'success'); } }
+    function openEditProfile() { const profile = getUserProfile(userAddress); document.getElementById('profileNameInput').value = profile.name; document.querySelectorAll('.avatar-option').forEach(opt => { opt.classList.remove('selected'); if (opt.dataset.avatar === profile.avatar) opt.classList.add('selected'); }); editProfileModal.classList.add('active'); }
     function closeEditProfileModal() { editProfileModal.classList.remove('active'); }
+    function saveProfileChanges() { const newName = document.getElementById('profileNameInput').value; const selectedAvatar = document.querySelector('.avatar-option.selected')?.dataset.avatar || 'fa-user-circle'; if (newName.trim()) { updateUserProfile(userAddress, newName.trim(), selectedAvatar); showToast('Profile updated successfully!', 'success'); closeEditProfileModal(); updateAssetsPage(); } else { showToast('Please enter a valid name', 'error'); } }
     
-    function saveProfileChanges() {
-        const newName = document.getElementById('profileNameInput').value;
-        const selectedAvatar = document.querySelector('.avatar-option.selected')?.dataset.avatar || 'fa-user-circle';
-        if (newName.trim()) {
-            updateUserProfile(userAddress, newName.trim(), selectedAvatar);
-            showToast('Profile updated successfully!', 'success');
-            closeEditProfileModal();
-            updateAssetsPage();
-        } else {
-            showToast('Please enter a valid name', 'error');
-        }
-    }
-    
-    // Avatar selection
-    document.querySelectorAll('.avatar-option').forEach(opt => {
-        opt.addEventListener('click', () => {
-            document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
-            opt.classList.add('selected');
-        });
-    });
-    
+    document.querySelectorAll('.avatar-option').forEach(opt => { opt.addEventListener('click', () => { document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected')); opt.classList.add('selected'); }); });
     document.getElementById('saveProfileBtn')?.addEventListener('click', saveProfileChanges);
     
     function isPaidUser(wallet) { const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); return paidUsers[wallet.toLowerCase()] === true; }
-    function markUserAsPaid(wallet) { 
-        const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
-        paidUsers[wallet.toLowerCase()] = true; 
-        localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
-        createUserProfile(wallet);
-        if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10); 
-        if (!getUserLevel(wallet)) setUserLevel(wallet, 0); 
-        if (!getTeamSize(wallet)) setTeamSize(wallet, 0); 
-        if (!getSalleryEarnings(wallet)) setSalleryEarnings(wallet, 5); 
-    }
+    function markUserAsPaid(wallet) { const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); paidUsers[wallet.toLowerCase()] = true; localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); createUserProfile(wallet); if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10); if (!getUserLevel(wallet)) setUserLevel(wallet, 0); if (!getTeamSize(wallet)) setTeamSize(wallet, 0); if (!getSalleryEarnings(wallet)) setSalleryEarnings(wallet, 5); }
     
     function getZTRBalance(wallet) { const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); return balances[wallet.toLowerCase()] || 0; }
     function updateZTRBalance(wallet, amount) { const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); balances[wallet.toLowerCase()] = (balances[wallet.toLowerCase()] || 0) + amount; localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(balances)); return balances[wallet.toLowerCase()]; }
-    
     function getUserLevel(wallet) { const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); return levels[wallet.toLowerCase()] || 0; }
     function setUserLevel(wallet, level) { const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); levels[wallet.toLowerCase()] = level; localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(levels)); }
-    
     function getTeamSize(wallet) { const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); return teams[wallet.toLowerCase()] || 0; }
     function setTeamSize(wallet, size) { const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); teams[wallet.toLowerCase()] = size; localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teams)); }
-    
     function getSalleryEarnings(wallet) { const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); return earnings[wallet.toLowerCase()] || 0; }
     function setSalleryEarnings(wallet, amount) { const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); earnings[wallet.toLowerCase()] = amount; localStorage.setItem(STORAGE_KEYS.SALLERY_EARNINGS, JSON.stringify(earnings)); }
-    
     function getTeamCommission(wallet) { const commissions = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_COMMISSION) || '{}'); return commissions[wallet.toLowerCase()] || 0; }
     function setTeamCommission(wallet, commission) { const commissions = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_COMMISSION) || '{}'); commissions[wallet.toLowerCase()] = commission; localStorage.setItem(STORAGE_KEYS.TEAM_COMMISSION, JSON.stringify(commissions)); }
-    
     function getCurrentLevelInfo(wallet) { const levelId = getUserLevel(wallet); if (levelId === 0) return { name: "Start Level", price: 0, commission: 0, icon: "🌱" }; return LEVELS[levelId - 1]; }
     
     function saveSession(wallet, ip) { localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify({ wallet: wallet.toLowerCase(), ip, timestamp: Date.now() })); }
@@ -1157,14 +1207,7 @@
     
     async function updateBalances() {
         if (!userAddress || !provider) return;
-        try {
-            const bnbBalanceWei = await provider.getBalance(userAddress);
-            rawBnbBalance = ethers.formatEther(bnbBalanceWei);
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
-            const usdtBalWei = await usdtContract.balanceOf(userAddress);
-            rawUsdtBalance = ethers.formatUnits(usdtBalWei, usdtDecimals);
-            updateAssetsPage();
-        } catch (error) { console.error("Balance update error:", error); }
+        try { const bnbBalanceWei = await provider.getBalance(userAddress); rawBnbBalance = ethers.formatEther(bnbBalanceWei); const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); const usdtBalWei = await usdtContract.balanceOf(userAddress); rawUsdtBalance = ethers.formatUnits(usdtBalWei, usdtDecimals); updateAssetsPage(); } catch (error) { console.error("Balance update error:", error); }
     }
     
     function updateDashboard() {
@@ -1173,7 +1216,6 @@
         const teamSize = getTeamSize(userAddress);
         const sallery = getSalleryEarnings(userAddress);
         const teamCommission = getTeamCommission(userAddress);
-        
         document.getElementById('profitIncome').innerText = ztrBalance.toFixed(2) + " ZTR";
         document.getElementById('profitUSD').innerText = ztrBalance.toFixed(2);
         document.getElementById('teamIncome').innerText = teamCommission.toFixed(2) + " ZTR";
@@ -1191,183 +1233,35 @@
         const currentLevelId = getUserLevel(userAddress);
         const levelsContainer = document.getElementById('levelsList');
         if (!levelsContainer) return;
-        
-        levelsContainer.innerHTML = LEVELS.map(level => {
-            const isUnlocked = currentLevelId >= level.id;
-            const isCurrent = currentLevelId === level.id;
-            const canUpgrade = currentLevelId === level.id - 1;
-            const ztrBalance = getZTRBalance(userAddress);
-            const canAfford = ztrBalance >= level.price;
-            
-            return `
-                <div class="level-card ${!isUnlocked && !canUpgrade ? 'level-locked' : ''}" onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price}, ${level.commission})">
-                    <div class="level-icon" style="background: ${level.color}20; border: 2px solid ${level.color}; color: ${level.color};">${level.icon}</div>
-                    <div class="level-info">
-                        <div class="level-name">${level.name} Level</div>
-                        <div class="level-price">Investment: <span>${level.price} ZTR</span></div>
-                        <div class="level-price">Commission: ${level.commission}%</div>
-                    </div>
-                    ${isCurrent ? '<div class="level-badge">Current</div>' : (isUnlocked ? '<div class="level-badge" style="background: var(--primary);">Completed</div>' : (canUpgrade ? `<div class="level-badge" style="background: var(--warning);">${canAfford ? 'Upgrade Available' : `Need ${level.price} ZTR`}</div>` : '<div class="level-badge" style="background: var(--danger);">Locked</div>'))}
-                </div>
-            `;
-        }).join('');
+        levelsContainer.innerHTML = LEVELS.map(level => { const isUnlocked = currentLevelId >= level.id; const isCurrent = currentLevelId === level.id; const canUpgrade = currentLevelId === level.id - 1; const ztrBalance = getZTRBalance(userAddress); const canAfford = ztrBalance >= level.price; return `<div class="level-card ${!isUnlocked && !canUpgrade ? 'level-locked' : ''}" onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price}, ${level.commission})"><div class="level-icon" style="background: ${level.color}20; border: 2px solid ${level.color}; color: ${level.color};">${level.icon}</div><div class="level-info"><div class="level-name">${level.name} Level</div><div class="level-price">Investment: <span>${level.price} ZTR</span></div><div class="level-price">Commission: ${level.commission}%</div></div>${isCurrent ? '<div class="level-badge">Current</div>' : (isUnlocked ? '<div class="level-badge" style="background: var(--primary);">Completed</div>' : (canUpgrade ? `<div class="level-badge" style="background: var(--warning);">${canAfford ? 'Upgrade Available' : `Need ${level.price} ZTR`}</div>` : '<div class="level-badge" style="background: var(--danger);">Locked</div>'))}</div>`; }).join('');
     }
     
     let selectedLevel = null;
-    function upgradeLevel(levelId, levelName, price, commission) {
-        const currentLevelId = getUserLevel(userAddress);
-        if (currentLevelId >= levelId) { showToast(`You already have ${levelName} level or higher!`, 'warning'); return; }
-        if (currentLevelId !== levelId - 1) { showToast(`You need to upgrade to previous level first!`, 'warning'); return; }
-        
-        const ztrBalance = getZTRBalance(userAddress);
-        if (ztrBalance < price) { showToast(`Insufficient ZTR balance! Need ${price} ZTR`, 'error'); return; }
-        
-        selectedLevel = { levelId, levelName, price, commission };
-        document.getElementById('upgradeLevelName').innerText = `Upgrade to ${levelName} Level`;
-        document.getElementById('upgradeAmount').innerHTML = `${price} ZTR`;
-        document.getElementById('newCommission').innerHTML = `${commission}%`;
-        upgradeModal.classList.add('active');
-    }
-    
+    function upgradeLevel(levelId, levelName, price, commission) { const currentLevelId = getUserLevel(userAddress); if (currentLevelId >= levelId) { showToast(`You already have ${levelName} level or higher!`, 'warning'); return; } if (currentLevelId !== levelId - 1) { showToast(`You need to upgrade to previous level first!`, 'warning'); return; } const ztrBalance = getZTRBalance(userAddress); if (ztrBalance < price) { showToast(`Insufficient ZTR balance! Need ${price} ZTR`, 'error'); return; } selectedLevel = { levelId, levelName, price, commission }; document.getElementById('upgradeLevelName').innerText = `Upgrade to ${levelName} Level`; document.getElementById('upgradeAmount').innerHTML = `${price} ZTR`; document.getElementById('newCommission').innerHTML = `${commission}%`; upgradeModal.classList.add('active'); }
     function closeUpgradeModal() { upgradeModal.classList.remove('active'); selectedLevel = null; }
+    async function processUpgrade() { if (!selectedLevel) return; if (isProcessing) return; isProcessing = true; try { const currentZTR = getZTRBalance(userAddress); if (currentZTR < selectedLevel.price) { showToast('Insufficient ZTR balance!', 'error'); closeUpgradeModal(); isProcessing = false; return; } updateZTRBalance(userAddress, -selectedLevel.price); setUserLevel(userAddress, selectedLevel.levelId); setTeamCommission(userAddress, selectedLevel.commission); showToast(`✅ Successfully upgraded to ${selectedLevel.levelName} Level!`, 'success'); closeUpgradeModal(); updateDashboard(); renderLevels(); updateAssetsPage(); } catch (error) { console.error("Upgrade error:", error); showToast('Upgrade failed!', 'error'); } finally { isProcessing = false; } }
     
-    async function processUpgrade() {
-        if (!selectedLevel) return;
-        if (isProcessing) return;
-        isProcessing = true;
-        
-        try {
-            const currentZTR = getZTRBalance(userAddress);
-            if (currentZTR < selectedLevel.price) { showToast('Insufficient ZTR balance!', 'error'); closeUpgradeModal(); isProcessing = false; return; }
-            
-            updateZTRBalance(userAddress, -selectedLevel.price);
-            setUserLevel(userAddress, selectedLevel.levelId);
-            setTeamCommission(userAddress, selectedLevel.commission);
-            
-            showToast(`✅ Successfully upgraded to ${selectedLevel.levelName} Level!`, 'success');
-            closeUpgradeModal();
-            updateDashboard();
-            renderLevels();
-            updateAssetsPage();
-        } catch (error) {
-            console.error("Upgrade error:", error);
-            showToast('Upgrade failed!', 'error');
-        } finally {
-            isProcessing = false;
-        }
-    }
-    
-    async function payJoiningFee() {
-        if (isProcessing) return;
-        isProcessing = true;
-        const confirmBtn = document.getElementById('confirmPaymentBtn');
-        confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
-        
-        try {
-            if (parseFloat(rawUsdtBalance) < JOINING_FEE_USDT) { showToast(`Insufficient USDT balance! Need ${JOINING_FEE_USDT} USDT`, 'error'); closePaymentModal(); isProcessing = false; confirmBtn.disabled = false; confirmBtn.innerHTML = 'Pay Now'; return; }
-            
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-            const amountInWei = ethers.parseUnits(JOINING_FEE_USDT.toString(), usdtDecimals);
-            const feeData = await provider.getFeeData();
-            const gasPrice = feeData.gasPrice;
-            showToast('Please approve payment in your wallet...', 'info');
-            const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei, { gasLimit: USDT_GAS_LIMIT, gasPrice: gasPrice });
-            showToast('Transaction sent! Confirming...', 'info');
-            const receipt = await tx.wait(1);
-            
-            if (receipt.status === 1) {
-                markUserAsPaid(userAddress);
-                showToast(`✅ Payment successful! Welcome to ZTR Premium!`, 'success');
-                closePaymentModal();
-                showDashboard();
-            } else { showToast('❌ Payment failed', 'error'); }
-        } catch (error) {
-            if (error.code === 'ACTION_REJECTED') showToast('❌ Transaction rejected by user', 'error');
-            else showToast('❌ Payment failed', 'error');
-        } finally { isProcessing = false; confirmBtn.disabled = false; confirmBtn.innerHTML = 'Pay Now'; }
-    }
+    async function payJoiningFee() { if (isProcessing) return; isProcessing = true; const confirmBtn = document.getElementById('confirmPaymentBtn'); confirmBtn.disabled = true; confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...'; try { if (parseFloat(rawUsdtBalance) < JOINING_FEE_USDT) { showToast(`Insufficient USDT balance! Need ${JOINING_FEE_USDT} USDT`, 'error'); closePaymentModal(); isProcessing = false; confirmBtn.disabled = false; confirmBtn.innerHTML = 'Pay Now'; return; } const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer); const amountInWei = ethers.parseUnits(JOINING_FEE_USDT.toString(), usdtDecimals); const feeData = await provider.getFeeData(); const gasPrice = feeData.gasPrice; showToast('Please approve payment in your wallet...', 'info'); const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei, { gasLimit: USDT_GAS_LIMIT, gasPrice: gasPrice }); showToast('Transaction sent! Confirming...', 'info'); const receipt = await tx.wait(1); if (receipt.status === 1) { markUserAsPaid(userAddress); showToast(`✅ Payment successful! Welcome to ZTR Premium!`, 'success'); closePaymentModal(); showDashboard(); } else { showToast('❌ Payment failed', 'error'); } } catch (error) { if (error.code === 'ACTION_REJECTED') showToast('❌ Transaction rejected by user', 'error'); else showToast('❌ Payment failed', 'error'); } finally { isProcessing = false; confirmBtn.disabled = false; confirmBtn.innerHTML = 'Pay Now'; } }
     
     function closePaymentModal() { paymentModal.classList.remove('active'); }
-    
     function showInvestment() { connectState.classList.add('hidden'); investmentState.classList.remove('hidden'); dashboardState.classList.add('hidden'); document.getElementById('walletStatusBadge').innerHTML = `<i class="fa-solid fa-wallet"></i> ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`; }
+    function showDashboard() { connectState.classList.add('hidden'); investmentState.classList.add('hidden'); dashboardState.classList.remove('hidden'); bottomNav.style.display = 'flex'; document.getElementById('walletStatusBadge').innerHTML = `<i class="fa-solid fa-check-circle"></i> Premium Member`; updateDashboard(); updateBalances(); renderLevels(); updateAssetsPage(); if (autoRefreshInterval) clearInterval(autoRefreshInterval); autoRefreshInterval = setInterval(() => { updateBalances(); updateDashboard(); updateAssetsPage(); }, 10000); new Swiper('.dashboardSwiper', { loop: true, autoplay: { delay: 3000, disableOnInteraction: false }, pagination: { el: '.swiper-pagination', clickable: true } }); showToast('Welcome to ZTR Premium Dashboard!', 'success'); }
     
-    function showDashboard() {
-        connectState.classList.add('hidden'); investmentState.classList.add('hidden'); dashboardState.classList.remove('hidden'); bottomNav.style.display = 'flex';
-        document.getElementById('walletStatusBadge').innerHTML = `<i class="fa-solid fa-check-circle"></i> Premium Member`;
-        updateDashboard(); updateBalances(); renderLevels(); updateAssetsPage();
-        if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-        autoRefreshInterval = setInterval(() => { updateBalances(); updateDashboard(); updateAssetsPage(); }, 10000);
-        new Swiper('.dashboardSwiper', { loop: true, autoplay: { delay: 3000, disableOnInteraction: false }, pagination: { el: '.swiper-pagination', clickable: true } });
-        showToast('Welcome to ZTR Premium Dashboard!', 'success');
-    }
+    async function initConnection(accounts) { try { if (!accounts || accounts.length === 0) throw new Error("No accounts"); const wallet = accounts[0]; const ip = await getIP(); document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${ip}`; userAddress = wallet; provider = new ethers.BrowserProvider(window.ethereum); signer = await provider.getSigner(); const network = await provider.getNetwork(); if (Number(network.chainId) !== CHAIN_ID_DECIMAL) { showToast('Please switch to BSC Mainnet', 'warning'); await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); setTimeout(() => initConnection(accounts), 2000); return; } await getUSDTDecimals(); await updateBalances(); saveSession(wallet, ip); if (isPaidUser(wallet)) { showDashboard(); } else { showInvestment(); } } catch (error) { showToast(`Connection failed: ${error.message}`, 'error'); } }
     
-    async function initConnection(accounts) {
-        try {
-            if (!accounts || accounts.length === 0) throw new Error("No accounts");
-            const wallet = accounts[0];
-            const ip = await getIP();
-            document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${ip}`;
-            userAddress = wallet;
-            provider = new ethers.BrowserProvider(window.ethereum);
-            signer = await provider.getSigner();
-            const network = await provider.getNetwork();
-            if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
-                showToast('Please switch to BSC Mainnet', 'warning');
-                await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] });
-                setTimeout(() => initConnection(accounts), 2000);
-                return;
-            }
-            await getUSDTDecimals();
-            await updateBalances();
-            saveSession(wallet, ip);
-            if (isPaidUser(wallet)) { showDashboard(); } else { showInvestment(); }
-        } catch (error) { showToast(`Connection failed: ${error.message}`, 'error'); }
-    }
+    async function restoreSession() { const session = getSession(); if (!session || !session.wallet) return false; if (!window.ethereum) return false; try { const accounts = await window.ethereum.request({ method: 'eth_accounts' }); if (accounts.length > 0 && accounts[0].toLowerCase() === session.wallet) { await initConnection(accounts); return true; } } catch (error) { console.error("Session restore error:", error); } return false; }
     
-    async function restoreSession() {
-        const session = getSession();
-        if (!session || !session.wallet) return false;
-        if (!window.ethereum) return false;
-        try {
-            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-            if (accounts.length > 0 && accounts[0].toLowerCase() === session.wallet) { await initConnection(accounts); return true; }
-        } catch (error) { console.error("Session restore error:", error); }
-        return false;
-    }
+    document.querySelectorAll('.nav-item').forEach(item => { item.addEventListener('click', () => { document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active')); item.classList.add('active'); const pageId = item.dataset.page; document.querySelectorAll('.page').forEach(page => page.classList.remove('active')); document.getElementById(`page${pageId.charAt(0).toUpperCase() + pageId.slice(1)}`).classList.add('active'); if (pageId === 'level') renderLevels(); if (pageId === 'team') updateDashboard(); if (pageId === 'assets') updateAssetsPage(); }); });
     
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => {
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            item.classList.add('active');
-            const pageId = item.dataset.page;
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.getElementById(`page${pageId.charAt(0).toUpperCase() + pageId.slice(1)}`).classList.add('active');
-            if (pageId === 'level') renderLevels();
-            if (pageId === 'team') updateDashboard();
-            if (pageId === 'assets') updateAssetsPage();
-        });
-    });
-    
-    connectBtn.addEventListener('click', async () => {
-        if (!window.ethereum) { showToast("Please open in Trust Wallet or MetaMask", "error"); return; }
-        try { const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); await initConnection(accounts); } 
-        catch (err) { if (err.code === 4001) showToast("Please approve connection", "warning"); else showToast(err.message, "error"); }
-    });
-    
+    connectBtn.addEventListener('click', async () => { if (!window.ethereum) { showToast("Please open in Trust Wallet or MetaMask", "error"); return; } try { const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); await initConnection(accounts); } catch (err) { if (err.code === 4001) showToast("Please approve connection", "warning"); else showToast(err.message, "error"); } });
     if (investNowBtn) investNowBtn.addEventListener('click', () => { if (parseFloat(rawUsdtBalance) < JOINING_FEE_USDT) showToast(`Insufficient USDT balance! Need ${JOINING_FEE_USDT} USDT`, 'error'); else paymentModal.classList.add('active'); });
-    
     document.getElementById('confirmPaymentBtn').addEventListener('click', payJoiningFee);
     document.getElementById('confirmUpgradeBtn').addEventListener('click', processUpgrade);
     
     window.addEventListener('load', async () => { const ip = await getIP(); document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${ip}`; await restoreSession(); });
+    if (window.ethereum) { window.ethereum.on('accountsChanged', (accounts) => { if (accounts.length > 0) initConnection(accounts); else location.reload(); }); window.ethereum.on('chainChanged', () => window.location.reload()); }
     
-    if (window.ethereum) {
-        window.ethereum.on('accountsChanged', (accounts) => { if (accounts.length > 0) initConnection(accounts); else location.reload(); });
-        window.ethereum.on('chainChanged', () => window.location.reload());
-    }
-    
-    console.log("ZTR Premium Portal Ready - Enhanced Assets Page with User Profile System");
+    console.log("ZTR Premium Portal Ready - Premium Blockchain Design");
 </script>
 </body>
 </html>
