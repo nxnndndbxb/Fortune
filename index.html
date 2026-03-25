@@ -342,6 +342,87 @@
             color: black;
             transform: scale(1.1);
         }
+
+        /* --- NEW STYLES FOR NETWORK PAGE --- */
+        .invite-link-wrapper {
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            padding: 5px;
+        }
+        .invite-link-wrapper i.fa-link {
+            padding: 0 15px;
+            color: var(--text-muted);
+        }
+        .invite-link-wrapper input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            font-family: monospace;
+            font-size: 12px;
+            outline: none;
+        }
+        .invite-link-wrapper button {
+            background: var(--primary);
+            color: var(--bg-deep);
+            border: none;
+            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .invite-link-wrapper button:hover {
+            filter: brightness(1.2);
+        }
+        .team-list {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .team-list::-webkit-scrollbar { width: 4px; }
+        .team-list::-webkit-scrollbar-track { background: transparent; }
+        .team-list::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        .team-member-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+        .team-member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .team-member-info { flex-grow: 1; }
+        .team-member-info strong { font-size: 14px; }
+        .team-member-info small {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .team-member-level {
+            font-size: 11px;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 8px;
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary-glow);
+        }
     </style>
 </head>
 <body>
@@ -486,21 +567,24 @@
         </div>
 
         <div id="pageTeam" class="page">
+            <!-- NEW Network Page UI -->
             <div class="main-card glass">
-                <h3>Network Structure</h3>
-                <div style="background:rgba(0,0,0,0.3); border-radius:20px; padding:20px; margin-top:15px;">
-                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
-                        <span>Total Population</span>
-                        <span id="teamTotalCount" style="color:var(--primary); font-weight:bold;">0</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
-                        <span>Active Links</span>
-                        <span id="activeTeamCount" style="color:var(--success);">0</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; padding:10px 0;">
-                        <span>Your Protocol Fee</span>
-                        <span id="teamCommission" style="color:var(--gold);">0%</span>
-                    </div>
+                <h3>Share Your Protocol Link</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">
+                    Grow your network and increase your rewards with a unique invitation link.
+                </p>
+                <div class="invite-link-wrapper">
+                    <i class="fa-solid fa-link"></i>
+                    <input type="text" id="inviteLink" readonly value="Loading link...">
+                    <button id="copyInviteLinkBtn"><i class="fa-solid fa-copy"></i></button>
+                </div>
+            </div>
+            
+            <div class="main-card glass" style="margin-top:20px;">
+                <h3>Your Network (<span id="teamPageTotalCount">0</span>)</h3>
+                <div id="teamListContainer" class="team-list">
+                    <!-- Team members will be injected here by JavaScript -->
+                    <p style="text-align:center; color:var(--text-muted); font-size:13px;">Loading network data...</p>
                 </div>
             </div>
         </div>
@@ -627,31 +711,13 @@
     // Update Wallet Address Display Everywhere
     function updateAllWalletAddressDisplays() {
         if (!userAddress) return;
-        
         const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
         const fullAddress = userAddress;
-        
-        // Navbar badge
-        const walletBadge = document.getElementById('walletAddressBadge');
-        const walletShortSpan = document.getElementById('walletAddressShort');
-        if (walletBadge && walletShortSpan) {
-            walletBadge.style.display = 'flex';
-            walletShortSpan.innerText = shortAddress;
-        }
-        
-        // Investment page
-        const investmentWalletSpan = document.getElementById('investmentWalletAddress');
-        if (investmentWalletSpan) investmentWalletSpan.innerText = shortAddress;
-        
-        // Dashboard page
-        const dashboardWalletSpan = document.getElementById('dashboardWalletAddress');
-        if (dashboardWalletSpan) dashboardWalletSpan.innerText = shortAddress;
-        
-        // Assets page
-        const walletAddressDisplay = document.getElementById('walletAddressDisplay');
-        if (walletAddressDisplay) walletAddressDisplay.innerText = shortAddress;
-        
-        // Store full address for copying
+        document.getElementById('walletAddressBadge').style.display = 'flex';
+        document.getElementById('walletAddressShort').innerText = shortAddress;
+        document.getElementById('investmentWalletAddress').innerText = shortAddress;
+        document.getElementById('dashboardWalletAddress').innerText = shortAddress;
+        document.getElementById('walletAddressDisplay').innerText = fullAddress;
         window.currentWalletFullAddress = fullAddress;
     }
 
@@ -718,7 +784,7 @@
     function setUserLevel(wallet, level) { const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); levels[wallet.toLowerCase()] = level; localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(levels)); }
     function getTeamSize(wallet) { const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); return teams[wallet.toLowerCase()] || 0; }
     function getSalleryEarnings(wallet) { const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); return earnings[wallet.toLowerCase()] || 0; }
-    function getCurrentLevelInfo(wallet) { const levelId = getUserLevel(wallet); if (levelId === 0) return { name: "Start Level", price: 0, commission: 0, icon: "🌱" }; return LEVELS[levelId - 1]; }
+    function getCurrentLevelInfo(wallet) { const levelId = getUserLevel(wallet); if (levelId === 0) return { name: "Start", price: 0, commission: 0, icon: "🌱" }; return LEVELS[levelId - 1]; }
 
     // Balance & UI Updates
     async function updateBalances() {
@@ -763,9 +829,6 @@
         document.getElementById('salleryIncome').innerText = `${(ztr * 0.05).toFixed(2)} ZTR`;
         document.getElementById('levelIncome').innerText = `${(ztr * (level.commission/100)).toFixed(2)} ZTR`;
         document.getElementById('levelNameDisplay').innerText = level.name;
-        document.getElementById('teamTotalCount').innerText = team;
-        document.getElementById('activeTeamCount').innerText = Math.floor(team * 0.7);
-        document.getElementById('teamCommission').innerText = `${level.commission}%`;
     }
 
     function renderLevels() {
@@ -784,6 +847,61 @@
         `).join('');
     }
 
+    // --- NEW FUNCTIONS FOR NETWORK PAGE ---
+    // Function to generate mock team data for display purposes
+    // NOTE: This is for UI demonstration as the current system doesn't store a real referral tree.
+    function generateMockTeamData(count) {
+        const mockTeam = [];
+        const levelNames = ["Start", ...LEVELS.map(l => l.name)];
+        for (let i = 0; i < count; i++) {
+            const randomLevelIndex = Math.floor(Math.random() * levelNames.length);
+            const joinDate = new Date();
+            joinDate.setDate(joinDate.getDate() - Math.floor(Math.random() * 30));
+            mockTeam.push({
+                id: 1001 + i + Math.floor(Math.random() * 1000),
+                level: levelNames[randomLevelIndex],
+                joinDate: joinDate.toLocaleDateString(),
+                avatarIcon: ['fa-user-astronaut', 'fa-user-ninja', 'fa-user-secret', 'fa-user-tie'][Math.floor(Math.random() * 4)]
+            });
+        }
+        return mockTeam;
+    }
+
+    // Renders the new team/network page
+    function renderTeamPage() {
+        if (!userAddress) return;
+        const profile = getUserProfile(userAddress);
+        const teamSize = getTeamSize(userAddress);
+        
+        // 1. Set up the invitation link
+        const inviteLinkInput = document.getElementById('inviteLink');
+        const refLink = `${window.location.origin}${window.location.pathname}?ref=${profile.userId}`;
+        inviteLinkInput.value = refLink;
+
+        // 2. Update team count display
+        document.getElementById('teamPageTotalCount').innerText = teamSize;
+
+        // 3. Generate and display the mock team list
+        const teamListContainer = document.getElementById('teamListContainer');
+        if (teamSize === 0) {
+            teamListContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px;">Your network is empty. Share your link to start building!</p>`;
+            return;
+        }
+
+        const teamData = generateMockTeamData(teamSize);
+        teamListContainer.innerHTML = teamData.map(member => `
+            <div class="team-member-card">
+                <div class="team-member-avatar"><i class="fa-solid ${member.avatarIcon}"></i></div>
+                <div class="team-member-info">
+                    <strong>User #${member.id}</strong>
+                    <small>Joined: ${member.joinDate}</small>
+                </div>
+                <div class="team-member-level">${member.level}</div>
+            </div>
+        `).join('');
+    }
+    // --- END OF NEW FUNCTIONS ---
+
     // Modal Controls
     window.openEditProfile = function() { editProfileModal.classList.add('active'); };
     window.closeEditProfileModal = function() { editProfileModal.classList.remove('active'); };
@@ -793,11 +911,10 @@
 
     window.upgradeLevel = function(levelId, levelName, price, commission) {
         const currentId = getUserLevel(userAddress);
-        if (currentId >= levelId) { showToast(`Already have ${levelName} level!`, 'warning'); return; }
-        if (currentId !== levelId - 1) { showToast(`Need to upgrade previous level first!`, 'warning'); return; }
-        
+        if (currentId >= levelId) { showToast(`You already have the ${levelName} level!`, 'info'); return; }
+        if (currentId !== levelId - 1) { showToast(`Upgrade to the previous level first!`, 'info'); return; }
         const ztrBalance = getZTRBalance(userAddress);
-        if (ztrBalance < price) { showToast(`Need ${price} ZTR to upgrade!`, 'error'); return; }
+        if (ztrBalance < price) { showToast(`Insufficient ZTR. Need ${price} ZTR to upgrade.`, 'error'); return; }
         
         window.selectedLevel = { levelId, levelName, price, commission };
         document.getElementById('upgradeLevelName').innerText = `Upgrade to ${levelName}`;
@@ -807,8 +924,7 @@
     };
 
     document.getElementById('confirmUpgradeBtn')?.addEventListener('click', async () => {
-        if (!window.selectedLevel) return;
-        if (isProcessing) return;
+        if (!window.selectedLevel || isProcessing) return;
         isProcessing = true;
         try {
             updateZTRBalance(userAddress, -window.selectedLevel.price);
@@ -818,7 +934,7 @@
             updateDashboard();
             renderLevels();
             updateAssetsPage();
-        } catch (e) { showToast("Upgrade failed", "error"); }
+        } catch (e) { showToast("Upgrade failed.", "error"); }
         finally { isProcessing = false; window.selectedLevel = null; }
     });
 
@@ -831,12 +947,11 @@
         const ip = await getIP();
         document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
         
-        // Update all wallet address displays
         updateAllWalletAddressDisplays();
         
         const network = await provider.getNetwork();
         if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
-            showToast("Switching to BSC...", "info");
+            showToast("Please switch to BSC network.", "info");
             try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {}
         }
         
@@ -866,7 +981,7 @@
         } catch { usdtDecimals = 18; }
     }
 
-    // Connect Button
+    // Event Listeners
     document.getElementById('connectBtn').addEventListener('click', async () => {
         if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
         try {
@@ -877,7 +992,6 @@
         }
     });
 
-    // Investment Button
     document.getElementById('investNowBtn').addEventListener('click', () => {
         paymentModal.classList.add('active');
     });
@@ -897,12 +1011,12 @@
             closePaymentModal();
             initConnection([userAddress]);
         } catch (e) {
-            showToast("Transaction failed", "error");
+            showToast("Transaction failed. Please try again.", "error");
+        } finally {
             isProcessing = false;
         }
     });
 
-    // Profile Edit
     document.querySelectorAll('.avatar-option').forEach(opt => {
         opt.addEventListener('click', () => {
             document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
@@ -925,14 +1039,27 @@
         }
     });
 
+    document.getElementById('copyInviteLinkBtn').addEventListener('click', () => {
+        const linkInput = document.getElementById('inviteLink');
+        linkInput.select();
+        linkInput.setSelectionRange(0, 99999); // For mobile devices
+        navigator.clipboard.writeText(linkInput.value);
+        showToast('Invitation link copied!', 'success');
+    });
+
     // Navigation
     document.querySelectorAll('.nav-item').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            const page = btn.dataset.page;
+            const pageId = btn.dataset.page;
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page' + page.charAt(0).toUpperCase() + page.slice(1)).classList.add('active');
+            document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
+            
+            // Render team page content when navigating to it
+            if (pageId === 'team') {
+                renderTeamPage();
+            }
         });
     });
 
@@ -954,7 +1081,7 @@
         }
     });
     
-    // Make functions global for onclick
+    // Make functions global for onclick attributes
     window.closePaymentModal = closePaymentModal;
     window.closeUpgradeModal = closeUpgradeModal;
     window.closeEditProfileModal = closeEditProfileModal;
