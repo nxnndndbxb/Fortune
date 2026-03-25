@@ -140,7 +140,7 @@
 
         .income-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 12px;
             margin-top: 20px;
         }
@@ -161,7 +161,7 @@
         }
 
         .income-card h3 {
-            font-size: 22px;
+            font-size: 20px;
             color: var(--primary);
             text-shadow: 0 0 10px var(--primary-glow);
         }
@@ -229,7 +229,7 @@
             color: var(--primary);
             text-shadow: 0 0 10px var(--primary-glow);
         }
-
+        
         /* Profile HUD */
         .profile-avatar {
             width: 90px; height: 90px;
@@ -324,7 +324,7 @@
             transform: scale(1.1);
         }
 
-        /* Network Page */
+        /* --- NEW STYLES FOR NETWORK PAGE --- */
         .invite-link-wrapper {
             display: flex;
             align-items: center;
@@ -334,159 +334,123 @@
             padding: 5px;
         }
         .invite-link-wrapper i.fa-link { padding: 0 15px; color: var(--text-muted); }
-        .invite-link-wrapper input {
-            flex-grow: 1; background: transparent; border: none;
-            color: var(--primary); font-family: monospace; font-size: 12px; outline: none;
-        }
-        .invite-link-wrapper button {
-            background: var(--primary); color: var(--bg-deep); border: none; border-radius: 12px;
-            width: 40px; height: 40px; cursor: pointer; transition: 0.2s;
-        }
+        .invite-link-wrapper input { flex-grow: 1; background: transparent; border: none; color: var(--primary); font-family: monospace; font-size: 12px; outline: none; }
+        .invite-link-wrapper button { background: var(--primary); color: var(--bg-deep); border: none; border-radius: 12px; width: 40px; height: 40px; cursor: pointer; transition: 0.2s; }
         .invite-link-wrapper button:hover { filter: brightness(1.2); }
         .team-list { margin-top: 20px; max-height: 300px; overflow-y: auto; padding-right: 5px; }
         .team-list::-webkit-scrollbar { width: 4px; }
         .team-list::-webkit-scrollbar-track { background: transparent; }
         .team-list::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
-        .team-member-card {
-            display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.03);
-            border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; margin-bottom: 8px;
-        }
-        .team-member-avatar {
-            width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex; align-items: center; justify-content: center; font-size: 18px;
-        }
+        .team-member-card { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; margin-bottom: 8px; }
+        .team-member-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-size: 18px; }
         .team-member-info { flex-grow: 1; }
         .team-member-info strong { font-size: 14px; }
         .team-member-info small { display: block; font-size: 11px; color: var(--text-muted); }
-        .team-member-level {
-            font-size: 11px; font-weight: bold; padding: 5px 10px; border-radius: 8px;
-            background: rgba(0, 242, 255, 0.1); color: var(--primary); border: 1px solid var(--primary-glow);
-        }
-
-        /* --- NEW STYLES FOR DASHBOARD LEVEL BUTTON --- */
-        .level-display-button {
-            margin-top: 25px;
+        .team-member-level { font-size: 11px; font-weight: bold; padding: 5px 10px; border-radius: 8px; background: rgba(0, 242, 255, 0.1); color: var(--primary); border: 1px solid var(--primary-glow); }
+        
+        /* --- NEW STYLES FOR DASHBOARD LEVEL BUTTON & LEVEL PAGE --- */
+        .level-access-button {
+            margin-top: 20px;
             padding: 20px;
-            border-radius: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            text-align: center;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-            border: 1px solid var(--primary-glow);
-            background: linear-gradient(135deg, rgba(0, 242, 255, 0.05), rgba(112, 0, 255, 0.05));
+            transition: 0.3s ease;
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 25px var(--primary-glow);
         }
-        .level-display-button:hover {
+        .level-access-button:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px var(--primary-glow);
+            box-shadow: 0 0 35px var(--primary-glow);
         }
-        .level-display-button h2 {
-            font-size: 28px;
-            color: var(--primary);
-            margin: 4px 0;
-            text-shadow: 0 0 10px var(--primary-glow);
-        }
-        .level-display-button small, .level-display-button .level-button-label {
-            color: var(--text-muted);
+        .level-access-button span {
+            display: block;
             font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
         }
-        .level-button-icon i {
-            font-size: 24px;
-            color: var(--primary);
+        .level-access-button h2 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--primary), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        /* --- NEW STYLES FOR LEVEL SLIDER PAGE --- */
-        #levelSliderContainer {
-            position: relative;
-            min-height: 380px;
-            overflow: hidden;
-            margin-bottom: 20px;
+        .level-slider-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            min-height: 400px; /* Ensure container has height */
         }
-        .level-slide-card {
-            position: absolute;
-            width: 100%; height: 100%;
-            padding: 25px;
-            background: rgba(15, 23, 42, 0.5);
+        .level-slider-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .level-slider-arrow {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.05);
             border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .level-slider-arrow:hover {
+            background: var(--primary);
+            color: var(--bg-deep);
+        }
+        #levelSliderViewport {
+            width: 100%;
+            perspective: 1000px;
+        }
+        .level-slider-card {
+            padding: 30px;
             border-radius: 20px;
             text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            align-items: center;
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            opacity: 0;
-            transform: scale(0.95);
-            pointer-events: none;
+            background: linear-gradient(145deg, rgba(112, 0, 255, 0.1), rgba(0, 242, 255, 0.1));
+            border: 1px solid var(--glass-border);
+            animation: flipIn 0.6s ease;
         }
-        .level-slide-card.active {
-            opacity: 1;
-            transform: scale(1);
-            pointer-events: all;
+        @keyframes flipIn {
+            from { transform: rotateY(90deg) scale(0.8); opacity: 0; }
+            to { transform: rotateY(0) scale(1); opacity: 1; }
         }
-        .level-slide-icon {
-            font-size: 70px;
+        .level-slider-card.achieved {
+            border-color: var(--gold);
+            box-shadow: 0 0 20px rgba(255, 184, 0, 0.3);
+        }
+        .level-icon {
+            font-size: 60px;
+            line-height: 1;
+            margin-bottom: 15px;
+        }
+        .level-name {
+            font-size: 24px;
+            font-weight: 700;
             margin-bottom: 10px;
-            text-shadow: 0 0 20px var(--primary-glow);
         }
-        .level-slide-card.locked .level-slide-icon {
-            filter: grayscale(1);
-            opacity: 0.4;
-            text-shadow: none;
-        }
-        .level-slide-card h4 { font-size: 26px; }
-        .level-slide-card .level-cost {
-            font-size: 32px;
-            font-weight: 900;
-            color: var(--primary);
-            margin: 10px 0;
-        }
-        .level-slide-card .level-commission {
+        .level-price {
             font-size: 14px;
             color: var(--text-muted);
+            margin-bottom: 25px;
         }
         .level-status-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 6px 15px;
-            font-size: 12px;
-            border-radius: 50px;
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 12px;
             font-weight: bold;
         }
         .level-status-badge.achieved {
-            background: var(--success);
-            color: white;
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
-        }
-        .level-status-badge.locked {
-            background: rgba(255,255,255,0.1);
-            color: var(--text-muted);
-        }
-        .level-navigation {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-        }
-        .level-nav-arrow {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid var(--glass-border);
-            color: var(--primary);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            transition: 0.3s;
-        }
-        .level-nav-arrow:hover { background: var(--primary); color: var(--bg-deep); }
-        .level-nav-arrow:disabled { opacity: 0.3; cursor: not-allowed; }
-        #levelSliderIndicator {
-            font-size: 14px;
-            font-weight: bold;
-            color: var(--text-muted);
-            font-family: monospace;
+            background: var(--gold);
+            color: #000;
         }
     </style>
 </head>
@@ -515,7 +479,7 @@
         <h2 style="margin: 15px 0;">Level Upgrade</h2>
         <p id="upgradeLevelName" style="color: var(--gold);">Level Name</p>
         <div id="upgradeAmount" style="font-size: 32px; color: white; font-weight: 900; margin: 15px 0;">0 ZTR</div>
-        <div class="gas-info"><i class="fa-solid fa-chart-line"></i> New Commission: <span id="newCommission">0%</span></div>
+        <div class="gas-info"><i class="fa-solid fa-check"></i> You are about to unlock this node.</div>
         <div style="display:flex; gap:10px;">
             <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closeUpgradeModal()">Back</button>
             <button class="btn" id="confirmUpgradeBtn">Upgrade Now</button>
@@ -594,7 +558,7 @@
                     <span class="rank-badge" id="userRankBadge">Verified Member</span>
                 </div>
 
-                <div class="income-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                <div class="income-grid">
                     <div class="income-card glass">
                         <p style="font-size:11px; color:var(--text-muted);">Core Profit</p>
                         <h3 id="profitIncome">0.00 ZTR</h3>
@@ -602,45 +566,43 @@
                     </div>
                     <div class="income-card glass">
                         <p style="font-size:11px; color:var(--text-muted);">Network Size</p>
-                        <h3 id="teamIncome" style="color:var(--secondary);">0 Units</h3>
+                        <h3 id="teamIncome" style="color:var(--secondary);">0.00 ZTR</h3>
+                        <small id="teamCount">0 Units</small>
                     </div>
                     <div class="income-card glass">
                         <p style="font-size:11px; color:var(--text-muted);">Staking Yield</p>
                         <h3 id="salleryIncome" style="color:var(--gold);">0.00 ZTR</h3>
+                        <small>Monthly</small>
                     </div>
                 </div>
                 
-                <!-- NEW BIG LEVEL BUTTON -->
-                <div id="levelDisplayButton" class="level-display-button glass">
-                    <div class="level-button-content">
-                        <span class="level-button-label">Current Node</span>
-                        <h2 id="levelButtonName">Start</h2>
-                        <small>Tap to view Upgrade Matrix</small>
-                    </div>
-                    <div class="level-button-icon">
-                        <i class="fa-solid fa-layer-group"></i>
-                    </div>
+                <!-- NEW LEVEL BUTTON -->
+                <div id="levelAccessButton" class="level-access-button glass">
+                    <span>Current Node Status</span>
+                    <h2 id="dashboardLevelName">Loading...</h2>
                 </div>
-                
-                <div class="gas-info" style="margin-top: 20px;">
+
+                <div class="gas-info" style="margin-top: 15px;">
                     <i class="fa-solid fa-wallet"></i> Wallet: <span id="dashboardWalletAddress">Not Connected</span>
                 </div>
             </div>
         </div>
 
         <div id="pageLevel" class="page">
+             <!-- NEW LEVEL SLIDER UI -->
             <div class="main-card glass">
-                <h3>Upgrade Matrix</h3>
-                <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Elevate your node to boost yield percentages.</p>
-                
-                <div id="levelSliderContainer">
-                    <!-- JS will inject the beautiful level slider card here -->
-                </div>
-        
-                <div class="level-navigation">
-                    <button id="prevLevelBtn" class="level-nav-arrow"><i class="fa-solid fa-arrow-left"></i></button>
-                    <span id="levelSliderIndicator">1 / 10</span>
-                    <button id="nextLevelBtn" class="level-nav-arrow"><i class="fa-solid fa-arrow-right"></i></button>
+                <div class="level-slider-container">
+                    <div class="level-slider-nav">
+                        <div class="level-slider-arrow" id="levelSliderPrev"><i class="fa-solid fa-chevron-left"></i></div>
+                        <div style="text-align:center;">
+                            <h3>Upgrade Matrix</h3>
+                            <p style="font-size:12px; color:var(--text-muted);">Elevate your node</p>
+                        </div>
+                        <div class="level-slider-arrow" id="levelSliderNext"><i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                    <div id="levelSliderViewport">
+                        <!-- Level card will be injected here by JS -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -751,17 +713,18 @@
     const USDT_GAS_LIMIT = 65000;
     const JOINING_FEE_USDT = 0.10;
     
-    // UPDATED LEVELS ARRAY WITH 9 UPGRADABLE LEVELS
+    // NEW EXPANDED LEVELS ARRAY (0-indexed)
     const LEVELS = [
-        { id: 1, name: "Bronze", price: 5, commission: 2, color: "#cd7f32", icon: "🥉" },
-        { id: 2, name: "Silver", price: 15, commission: 5, color: "#c0c0c0", icon: "🥈" },
-        { id: 3, name: "Gold", price: 35, commission: 8, color: "#ffd700", icon: "🥇" },
-        { id: 4, name: "Platinum", price: 45, commission: 12, color: "#e5e4e2", icon: "💎" },
-        { id: 5, name: "Diamond", price: 65, commission: 15, color: "#b9f2ff", icon: "💠" },
-        { id: 6, name: "Crown", price: 80, commission: 20, color: "#ffd966", icon: "👑" },
-        { id: 7, name: "Legend", price: 100, commission: 25, color: "#ff6b6b", icon: "⭐" },
-        { id: 8, name: "Titan", price: 150, commission: 30, color: "#a29bfe", icon: "🛡️" },
-        { id: 9, name: "Quantum", price: 250, commission: 35, color: "#00f2ff", icon: "⚛️" }
+        { id: 0, name: "Starter", price: 0, icon: "🌱" },
+        { id: 1, name: "Bronze", price: 5, icon: "🥉" },
+        { id: 2, name: "Silver", price: 15, icon: "🥈" },
+        { id: 3, name: "Gold", price: 35, icon: "🥇" },
+        { id: 4, name: "Platinum", price: 45, icon: "💎" },
+        { id: 5, name: "Diamond", price: 65, icon: "💠" },
+        { id: 6, name: "Titan", price: 80, icon: "🛡️" },
+        { id: 7, name: "Cosmic", price: 100, icon: "🌌" },
+        { id: 8, name: "Quantum", price: 150, icon: "⚛️" },
+        { id: 9, name: "Legend", price: 200, icon: "👑" }
     ];
     
     const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
@@ -773,10 +736,7 @@
     };
 
     let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false;
-
-    // --- NEW LEVEL SLIDER VARIABLES ---
-    let currentLevelSlide = 0;
-    let allLevels = [];
+    let currentLevelSliderIndex = 0; // For the new level page
 
     // UI ELEMENTS
     const connectState = document.getElementById('connectState'), investmentState = document.getElementById('investmentState'), dashboardState = document.getElementById('dashboardState');
@@ -865,10 +825,10 @@
         return balances[wallet.toLowerCase()]; 
     }
     function getUserLevel(wallet) { const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); return levels[wallet.toLowerCase()] ?? 0; }
-    function setUserLevel(wallet, level) { const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); levels[wallet.toLowerCase()] = level; localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(levels)); }
+    function setUserLevel(wallet, levelId) { const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); levels[wallet.toLowerCase()] = levelId; localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(levels)); }
     function getTeamSize(wallet) { const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); return teams[wallet.toLowerCase()] || 0; }
     function getSalleryEarnings(wallet) { const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); return earnings[wallet.toLowerCase()] || 0; }
-    function getCurrentLevelInfo(wallet) { const levelId = getUserLevel(wallet); if (levelId === 0) return { name: "Start", price: 0, commission: 0, icon: "🌱" }; return LEVELS[levelId - 1]; }
+    function getCurrentLevelInfo(wallet) { const levelId = getUserLevel(wallet); return LEVELS[levelId] || LEVELS[0]; }
 
     // Balance & UI Updates
     async function updateBalances() {
@@ -897,7 +857,7 @@
         document.getElementById('statBNB').innerText = parseFloat(rawBnbBalance).toFixed(4);
         document.getElementById('statUSDT').innerText = parseFloat(rawUsdtBalance).toFixed(2);
         document.getElementById('statZTR').innerText = ztrBalance.toFixed(2);
-        document.getElementById('totalEarningsStat').innerText = `$${(ztrBalance*1.0).toFixed(2)}`;
+        document.getElementById('totalEarningsStat').innerText = `$${ztrBalance.toFixed(2)}`;
         document.getElementById('userLevelStat').innerText = levelInfo.name;
     }
 
@@ -907,79 +867,45 @@
         const team = getTeamSize(userAddress);
         
         document.getElementById('profitIncome').innerText = `${ztr.toFixed(2)} ZTR`;
-        document.getElementById('profitUSD').innerText = (ztr * 1.0).toFixed(2);
-        document.getElementById('teamIncome').innerText = `${team} Units`;
+        document.getElementById('profitUSD').innerText = ztr.toFixed(2);
+        document.getElementById('teamIncome').innerText = `${(ztr * 0.1).toFixed(2)} ZTR`;
+        document.getElementById('teamCount').innerText = `${team} Units`;
         document.getElementById('salleryIncome').innerText = `${(ztr * 0.05).toFixed(2)} ZTR`;
-        document.getElementById('levelButtonName').innerText = level.name;
+        document.getElementById('dashboardLevelName').innerText = level.name;
     }
 
-    // --- NEW LEVEL SLIDER LOGIC ---
-    function initializeLevelSlider() {
-        const starterLevel = { id: 0, name: "Start", price: 0, commission: 0, icon: "🌱", color: "#10b981" };
-        allLevels = [starterLevel, ...LEVELS];
-        
-        // Find user's current level to set the initial slide
-        const currentUserLevelId = getUserLevel(userAddress);
-        currentLevelSlide = allLevels.findIndex(l => l.id === currentUserLevelId);
-        if(currentLevelSlide === -1) currentLevelSlide = 0; // Default to start
+    // --- NEW LEVEL PAGE LOGIC ---
+    function renderLevelSlider(index) {
+        const container = document.getElementById('levelSliderViewport');
+        if (!container || !userAddress) return;
 
-        showLevelSlide(currentLevelSlide);
-    }
-    
-    function showLevelSlide(index) {
-        const container = document.getElementById('levelSliderContainer');
-        if (!container) return;
+        const levelData = LEVELS[index];
+        const userLevelId = getUserLevel(userAddress);
+        const isAchieved = userLevelId >= levelData.id;
 
-        const level = allLevels[index];
-        const currentUserLevelId = getUserLevel(userAddress);
-        const isAchieved = currentUserLevelId >= level.id;
-        const statusClass = isAchieved ? 'achieved' : 'locked';
-
-        let buttonHtml = '';
+        let actionButtonHTML = '';
         if (isAchieved) {
-            buttonHtml = `<button class="btn btn-success" disabled><i class="fa-solid fa-check-circle"></i> Achieved</button>`;
+            actionButtonHTML = `<div class="level-status-badge achieved"><i class="fa-solid fa-check"></i> Node Achieved</div>`;
         } else {
-            buttonHtml = `<button class="btn" onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price}, ${level.commission})"><i class="fa-solid fa-bolt"></i> Upgrade Now</button>`;
+            actionButtonHTML = `<button class="btn" onclick="upgradeLevel(${levelData.id}, '${levelData.name}', ${levelData.price})">
+                <i class="fa-solid fa-unlock"></i> Unlock Node
+            </button>`;
         }
 
         container.innerHTML = `
-            <div class="level-slide-card active ${statusClass}">
-                <div class="level-status-badge ${statusClass}">${isAchieved ? 'ACHIEVED' : 'LOCKED'}</div>
-                <div>
-                    <div class="level-slide-icon" style="color:${level.color}">${level.icon}</div>
-                    <h4>${level.name} Node</h4>
-                    <p class="level-commission">Bonus: +${level.commission}% Yield</p>
-                </div>
-                <div>
-                    ${level.id > 0 ? `<div class="level-cost">${level.price} ZTR</div>` : `<div class="level-cost" style="font-size:18px;">Unlocked on Join</div>`}
-                    ${buttonHtml}
-                </div>
-            </div>`;
-
-        // Update indicator and nav buttons
-        document.getElementById('levelSliderIndicator').innerText = `${index + 1} / ${allLevels.length}`;
-        document.getElementById('prevLevelBtn').disabled = (index === 0);
-        document.getElementById('nextLevelBtn').disabled = (index === allLevels.length - 1);
+            <div class="level-slider-card glass ${isAchieved ? 'achieved' : ''}">
+                <div class="level-icon">${levelData.icon}</div>
+                <h2 class="level-name">${levelData.name} Node</h2>
+                <p class="level-price">Cost: ${levelData.price} ZTR</p>
+                ${actionButtonHTML}
+            </div>
+        `;
     }
 
-    document.getElementById('prevLevelBtn')?.addEventListener('click', () => {
-        if (currentLevelSlide > 0) {
-            currentLevelSlide--;
-            showLevelSlide(currentLevelSlide);
-        }
-    });
-
-    document.getElementById('nextLevelBtn')?.addEventListener('click', () => {
-        if (currentLevelSlide < allLevels.length - 1) {
-            currentLevelSlide++;
-            showLevelSlide(currentLevelSlide);
-        }
-    });
-
-    // --- TEAM/NETWORK PAGE LOGIC ---
+    // --- NEW NETWORK PAGE FUNCTIONS ---
     function generateMockTeamData(count) {
         const mockTeam = [];
-        const levelNames = ["Start", ...LEVELS.map(l => l.name)];
+        const levelNames = LEVELS.map(l => l.name);
         for (let i = 0; i < count; i++) {
             const randomLevelIndex = Math.floor(Math.random() * levelNames.length);
             const joinDate = new Date();
@@ -1022,26 +948,24 @@
             </div>
         `).join('');
     }
-
-    // Modal Controls
+    
+    // Modal Controls & Level Upgrade Logic
     window.openEditProfile = function() { editProfileModal.classList.add('active'); };
     window.closeEditProfileModal = function() { editProfileModal.classList.remove('active'); };
     window.closePaymentModal = function() { paymentModal.classList.remove('active'); };
     window.closeUpgradeModal = function() { upgradeModal.classList.remove('active'); };
     window.copyWalletAddress = copyWalletAddress;
 
-    // UPDATED upgradeLevel function
-    window.upgradeLevel = function(levelId, levelName, price, commission) {
+    window.upgradeLevel = function(levelId, levelName, price) {
         const currentId = getUserLevel(userAddress);
-        if (currentId >= levelId) { showToast(`You have already achieved this level!`, 'info'); return; }
-
+        if (currentId >= levelId) { showToast(`You have already achieved this node!`, 'info'); return; }
+        
         const ztrBalance = getZTRBalance(userAddress);
         if (ztrBalance < price) { showToast(`Insufficient ZTR. Need ${price} ZTR to upgrade.`, 'error'); return; }
         
-        window.selectedLevel = { levelId, levelName, price, commission };
+        window.selectedLevel = { levelId, levelName, price };
         document.getElementById('upgradeLevelName').innerText = `Upgrade to ${levelName}`;
         document.getElementById('upgradeAmount').innerHTML = `${price} ZTR`;
-        document.getElementById('newCommission').innerHTML = `${commission}%`;
         upgradeModal.classList.add('active');
     };
 
@@ -1054,8 +978,8 @@
             showToast(`✅ Upgraded to ${window.selectedLevel.levelName}!`, 'success');
             closeUpgradeModal();
             updateDashboard();
-            showLevelSlide(currentLevelSlide); // Re-render the current slide with updated status
             updateAssetsPage();
+            renderLevelSlider(currentLevelSliderIndex); // Re-render the current slider view
         } catch (e) { showToast("Upgrade failed.", "error"); }
         finally { isProcessing = false; window.selectedLevel = null; }
     });
@@ -1086,7 +1010,6 @@
             dashboardState.classList.remove('hidden');
             bottomNav.style.display = 'flex';
             updateDashboard();
-            initializeLevelSlider(); // Initialize the new level slider
             new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
             showToast("Welcome back! Dashboard ready.", "success");
         } else {
@@ -1168,14 +1091,23 @@
         navigator.clipboard.writeText(linkInput.value);
         showToast('Invitation link copied!', 'success');
     });
-    
-    // NEW: Dashboard level button click listener
-    document.getElementById('levelDisplayButton').addEventListener('click', () => {
-        // Find and click the 'Level' nav item to trigger navigation
+
+    // Dashboard Level Button Navigation
+    document.getElementById('levelAccessButton').addEventListener('click', () => {
         document.querySelector('.nav-item[data-page="level"]').click();
     });
 
-    // Navigation
+    // Level Slider Navigation
+    document.getElementById('levelSliderNext').addEventListener('click', () => {
+        currentLevelSliderIndex = (currentLevelSliderIndex + 1) % LEVELS.length;
+        renderLevelSlider(currentLevelSliderIndex);
+    });
+    document.getElementById('levelSliderPrev').addEventListener('click', () => {
+        currentLevelSliderIndex = (currentLevelSliderIndex - 1 + LEVELS.length) % LEVELS.length;
+        renderLevelSlider(currentLevelSliderIndex);
+    });
+
+    // Main Navigation
     document.querySelectorAll('.nav-item').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -1185,7 +1117,10 @@
             document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
             
             if (pageId === 'team') renderTeamPage();
-            if (pageId === 'level') initializeLevelSlider(); // Re-initialize slider when navigating to it
+            if (pageId === 'level') {
+                currentLevelSliderIndex = getUserLevel(userAddress);
+                renderLevelSlider(currentLevelSliderIndex);
+            }
         });
     });
 
@@ -1206,12 +1141,7 @@
             if (acc.length > 0) await initConnection(acc);
         }
     });
-    
-    // Make functions global for onclick attributes
-    window.closePaymentModal = closePaymentModal;
-    window.closeUpgradeModal = closeUpgradeModal;
-    window.closeEditProfileModal = closeEditProfileModal;
-    window.openEditProfile = openEditProfile;
+
 </script>
 
 </body>
