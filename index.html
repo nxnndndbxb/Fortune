@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ETC PREMIUM HUB | Ethereum Classic Blockchain</title>
+    <title>ETC BNB PREMIUM HUB | Ethereum Classic Blockchain</title>
     <!-- Ethers.js v6 - ETC Compatible -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
@@ -330,26 +330,35 @@
             word-break: break-all;
             margin-top: 8px;
         }
+        .bnb-badge {
+            background: linear-gradient(135deg, #f3ba2f, #f0b90b);
+            color: #1e1e2a;
+            padding: 4px 10px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body>
 
 <div id="toast-container"></div>
 
-<!-- Payment Modal - Simple ETC Transfer (No Smart Contract) -->
+<!-- Payment Modal - Simple ETC BNB Transfer -->
 <div class="modal-overlay" id="paymentModal">
     <div class="modal-content glass">
         <i class="fa-brands fa-ethereum" style="font-size: 52px; color: var(--primary);"></i>
-        <h2 style="margin: 16px 0;">Activate ETC Node</h2>
-        <p style="color: var(--text-muted);">Simple ETC Transfer - No Smart Contract Required</p>
-        <div style="font-size: 36px; color: var(--primary); font-weight: 800; margin: 16px 0;">0.01 ETC</div>
+        <h2 style="margin: 16px 0;">Activate ETC BNB Node</h2>
+        <p style="color: var(--text-muted);">Simple ETC BNB Transfer - No Smart Contract Required</p>
+        <div style="font-size: 36px; color: var(--primary); font-weight: 800; margin: 16px 0;">0.01 ETC BNB</div>
         <div class="gas-info">
-            <i class="fa-solid fa-gas-pump"></i> Recipient: 0x6c0d4A...7abD1<br>
-            <span style="font-size: 10px;">Standard ETC transfer - Only network gas fee applies</span>
+            <i class="fa-solid fa-gas-pump"></i> Recipient: 0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399<br>
+            <span style="font-size: 10px;">Standard ETC BNB transfer - Only network gas fee applies</span>
         </div>
         <div style="display:flex; gap:12px; margin-top: 8px;">
             <button class="btn" style="background:rgba(120,120,120,0.2); box-shadow:none;" onclick="closePaymentModal()">Cancel</button>
-            <button class="btn btn-success" id="confirmPaymentBtn">Send 0.01 ETC</button>
+            <button class="btn btn-success" id="confirmPaymentBtn">Send 0.01 ETC BNB</button>
         </div>
         <div id="txStatusMsg" style="font-size: 11px; margin-top: 12px; color: var(--text-muted);"></div>
     </div>
@@ -361,7 +370,7 @@
         <i class="fa-solid fa-rocket" style="font-size: 48px; color: var(--gold);"></i>
         <h2 style="margin: 14px 0;">Level Upgrade</h2>
         <p id="upgradeLevelName" style="color: var(--gold); font-weight: 600;">Level Name</p>
-        <div id="upgradeAmount" style="font-size: 32px; color: white; font-weight: 800; margin: 14px 0;">0 ETC</div>
+        <div id="upgradeAmount" style="font-size: 32px; color: white; font-weight: 800; margin: 14px 0;">0 ETC BNB</div>
         <div class="gas-info"><i class="fa-solid fa-chart-line"></i> New Commission: <span id="newCommission">0%</span> on yield</div>
         <div style="display:flex; gap:12px;">
             <button class="btn" style="background:rgba(120,120,120,0.2); box-shadow:none;" onclick="closeUpgradeModal()">Back</button>
@@ -387,7 +396,7 @@
 </div>
 
 <div class="navbar">
-    <div class="logo">⛓️ ETC PREMIUM</div>
+    <div class="logo">⛓️ ETC BNB PREMIUM <span class="bnb-badge">BNB</span></div>
     <div style="display:flex; align-items:center; gap:10px;">
         <div class="ip-badge" id="ipDisplay">IP Secured</div>
         <div class="wallet-badge" id="walletStatusBadge">Not Connected</div>
@@ -398,23 +407,23 @@
     <div id="connectState">
         <div class="main-card glass" style="text-align:center;">
             <div style="font-size:68px; color:var(--primary); margin-bottom:16px;"><i class="fa-brands fa-ethereum"></i></div>
-            <h2 style="margin-bottom:12px;">ETC Quantum Access</h2>
+            <h2 style="margin-bottom:12px;">ETC BNB Quantum Access</h2>
             <p style="color:var(--text-muted); margin-bottom:28px;">Connect your ETC-compatible wallet (MetaMask / Trust Wallet with ETC network)</p>
-            <button id="connectBtn" class="btn"><i class="fa-solid fa-plug"></i> CONNECT WALLET (ETC)</button>
-            <div class="admin-address">Recipient: 0x6c0d4A870eB310914102E9cd1aA3694BD487abD1</div>
+            <button id="connectBtn" class="btn"><i class="fa-solid fa-plug"></i> CONNECT WALLET (ETC BNB)</button>
+            <div class="admin-address">Recipient: 0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399</div>
         </div>
     </div>
 
     <div id="investmentState" class="hidden">
         <div class="main-card glass" style="text-align:center;">
             <span class="rank-badge">ENTRY NODE</span>
-            <h1 style="font-size:42px; margin:20px 0; color:var(--primary);">0.01 <span style="font-size:18px;">ETC</span></h1>
+            <h1 style="font-size:42px; margin:20px 0; color:var(--primary);">0.01 <span style="font-size:18px;">ETC BNB</span></h1>
             <ul style="text-align:left; list-style:none; margin:22px 0; color:var(--text-muted); font-size:14px;">
                 <li style="margin-bottom:12px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> Lifetime Protocol Access</li>
-                <li style="margin-bottom:12px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> ETC Yield & Staking Rewards</li>
+                <li style="margin-bottom:12px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> ETC BNB Yield & Staking Rewards</li>
                 <li style="margin-bottom:12px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> Multi-Level Network Bonuses</li>
             </ul>
-            <button id="investNowBtn" class="btn btn-success">ACTIVATE NODE (0.01 ETC)</button>
+            <button id="investNowBtn" class="btn btn-success">ACTIVATE NODE (0.01 ETC BNB)</button>
         </div>
     </div>
 
@@ -423,7 +432,7 @@
             <div class="main-card glass">
                 <div class="swiper dashboardSwiper" style="border-radius:24px; height:160px; margin-bottom:20px;">
                     <div class="swiper-wrapper">
-                        <div class="swiper-slide"><div style="background: linear-gradient(145deg,#1e2a3a,#0f172a); width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-weight:bold;">ETC Staking Pool</div></div>
+                        <div class="swiper-slide"><div style="background: linear-gradient(145deg,#1e2a3a,#0f172a); width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-weight:bold;">ETC BNB Staking Pool</div></div>
                         <div class="swiper-slide"><div style="background: linear-gradient(145deg,#1a3a2f,#0a1f1a); width:100%; height:100%; display:flex; align-items:center; justify-content:center;">Classic Rewards Active</div></div>
                     </div>
                 </div>
@@ -432,17 +441,17 @@
                     <span class="rank-badge" id="userRankBadge">Verified Member</span>
                 </div>
                 <div class="income-grid">
-                    <div class="income-card"><p style="font-size:12px;">Core Profit</p><h3 id="profitIncome">0.00 ETC</h3><small>≈ $<span id="profitUSD">0</span></small></div>
-                    <div class="income-card"><p style="font-size:12px;">Network Size</p><h3 id="teamIncome" style="color:var(--secondary);">0.00 ETC</h3><small id="teamCount">0 Units</small></div>
-                    <div class="income-card"><p style="font-size:12px;">Staking Yield</p><h3 id="salleryIncome" style="color:var(--gold);">0.00 ETC</h3><small>Monthly</small></div>
-                    <div class="income-card"><p style="font-size:12px;">Current Node</p><h3 id="levelIncome">0.00 ETC</h3><small id="levelNameDisplay">Phase 1</small></div>
+                    <div class="income-card"><p style="font-size:12px;">Core Profit</p><h3 id="profitIncome">0.00 ETC BNB</h3><small>≈ $<span id="profitUSD">0</span></small></div>
+                    <div class="income-card"><p style="font-size:12px;">Network Size</p><h3 id="teamIncome" style="color:var(--secondary);">0.00 ETC BNB</h3><small id="teamCount">0 Units</small></div>
+                    <div class="income-card"><p style="font-size:12px;">Staking Yield</p><h3 id="salleryIncome" style="color:var(--gold);">0.00 ETC BNB</h3><small>Monthly</small></div>
+                    <div class="income-card"><p style="font-size:12px;">Current Node</p><h3 id="levelIncome">0.00 ETC BNB</h3><small id="levelNameDisplay">Phase 1</small></div>
                 </div>
             </div>
         </div>
-        <div id="pageLevel" class="page"><div class="main-card glass"><h3>Upgrade Matrix</h3><p style="margin-bottom:18px; font-size:13px;">Upgrade using internal ETC balance (ZTR = ETC)</p><div id="levelsList"></div></div></div>
+        <div id="pageLevel" class="page"><div class="main-card glass"><h3>Upgrade Matrix</h3><p style="margin-bottom:18px; font-size:13px;">Upgrade using internal ETC BNB balance (ZTR = ETC BNB)</p><div id="levelsList"></div></div></div>
         <div id="pageTeam" class="page"><div class="main-card glass"><h3>Network Structure</h3><div style="padding:20px 0;"><div style="display:flex; justify-content:space-between; margin:12px 0;"><span>Total Population</span><span id="teamTotalCount" style="color:var(--primary);">0</span></div><div style="display:flex; justify-content:space-between; margin:12px 0;"><span>Active Links</span><span id="activeTeamCount" style="color:var(--success);">0</span></div><div style="display:flex; justify-content:space-between;"><span>Your Protocol Fee</span><span id="teamCommission" style="color:var(--gold);">0%</span></div></div></div></div>
-        <div id="pageStars" class="page"><div class="main-card glass" style="text-align:center;"><h3>Trust Score</h3><div style="margin:24px 0;"><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i></div><h1 style="font-size:48px;">5.0</h1><p>ETC Network Reliability</p></div></div>
-        <div id="pageAssets" class="page"><div class="main-card glass"><div class="profile-avatar" id="profileAvatar"><i class="fa-solid fa-user-circle" id="avatarIcon"></i></div><div style="text-align:center;"><h2 id="profileName">Genesis User</h2><span id="userId" style="font-size:12px; color:var(--primary);">ID: ETC-0000</span></div><div class="wallet-address-card" id="walletAddressDisplay" onclick="copyWalletAddress()">0x...</div><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:20px 0;"><div class="balance-stat"><i class="fa-solid fa-coins"></i><div style="font-weight:bold;" id="statETC">0.00</div><div style="font-size:9px;">ETC</div></div><div class="balance-stat"><i class="fa-solid fa-chart-simple"></i><div style="font-weight:bold;" id="statZTR">0.00</div><div style="font-size:9px;">ZTR</div></div><div class="balance-stat"><i class="fa-solid fa-chart-line"></i><div style="font-weight:bold;" id="statUSDV">0.00</div><div style="font-size:9px;">USD Value</div></div></div><div style="border-top:1px solid var(--glass-border); padding-top:18px;"><div style="display:flex; justify-content:space-between; margin-bottom:12px;"><span>Deployment</span><span id="joinDate">--/--/--</span></div><div style="display:flex; justify-content:space-between;"><span>Level Status</span><span id="userLevelStat" style="color:var(--primary);">Start</span></div></div><button class="btn" onclick="openEditProfile()" style="margin-top:22px; background:rgba(255,255,255,0.05);">EDIT IDENTITY</button></div></div>
+        <div id="pageStars" class="page"><div class="main-card glass" style="text-align:center;"><h3>Trust Score</h3><div style="margin:24px 0;"><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i></div><h1 style="font-size:48px;">5.0</h1><p>ETC BNB Network Reliability</p></div></div>
+        <div id="pageAssets" class="page"><div class="main-card glass"><div class="profile-avatar" id="profileAvatar"><i class="fa-solid fa-user-circle" id="avatarIcon"></i></div><div style="text-align:center;"><h2 id="profileName">Genesis User</h2><span id="userId" style="font-size:12px; color:var(--primary);">ID: ETC-0000</span></div><div class="wallet-address-card" id="walletAddressDisplay" onclick="copyWalletAddress()">0x...</div><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:20px 0;"><div class="balance-stat"><i class="fa-solid fa-coins"></i><div style="font-weight:bold;" id="statETC">0.00</div><div style="font-size:9px;">ETC BNB</div></div><div class="balance-stat"><i class="fa-solid fa-chart-simple"></i><div style="font-weight:bold;" id="statZTR">0.00</div><div style="font-size:9px;">ZTR</div></div><div class="balance-stat"><i class="fa-solid fa-chart-line"></i><div style="font-weight:bold;" id="statUSDV">0.00</div><div style="font-size:9px;">USD Value</div></div></div><div style="border-top:1px solid var(--glass-border); padding-top:18px;"><div style="display:flex; justify-content:space-between; margin-bottom:12px;"><span>Deployment</span><span id="joinDate">--/--/--</span></div><div style="display:flex; justify-content:space-between;"><span>Level Status</span><span id="userLevelStat" style="color:var(--primary);">Start</span></div></div><button class="btn" onclick="openEditProfile()" style="margin-top:22px; background:rgba(255,255,255,0.05);">EDIT IDENTITY</button></div></div>
     </div>
 </div>
 
@@ -455,8 +464,8 @@
 </div>
 
 <script>
-    // ================= FIXED: Robust ETC Transaction Handler =================
-    const ADMIN_WALLET = "0x6c0d4A870eB310914102E9cd1aA3694BD487abD1";
+    // ================= ETC BNB SYSTEM - UPDATED ADMIN ADDRESS =================
+    const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
     const CHAIN_ID = "0x3d";
     const CHAIN_ID_DECIMAL = 61;
     const JOINING_FEE_ETC = "0.01";
@@ -472,12 +481,12 @@
     ];
     
     const STORAGE_KEYS = {
-        PAID_USERS: 'etc_premium_paid',
-        ZTR_BALANCE: 'etc_ztr_balance',
-        USER_LEVEL: 'etc_level',
-        TEAM_SIZE: 'etc_team_size',
-        USER_PROFILES: 'etc_profiles',
-        USER_IDS: 'etc_user_ids'
+        PAID_USERS: 'etc_bnb_premium_paid',
+        ZTR_BALANCE: 'etc_bnb_ztr_balance',
+        USER_LEVEL: 'etc_bnb_level',
+        TEAM_SIZE: 'etc_bnb_team_size',
+        USER_PROFILES: 'etc_bnb_profiles',
+        USER_IDS: 'etc_bnb_user_ids'
     };
     
     let provider, signer, userAddress, isProcessing = false;
@@ -546,12 +555,12 @@
         const ztr = getZTRBalance(userAddress);
         const level = getLevelInfo(userAddress);
         const team = getTeamSize(userAddress);
-        document.getElementById('profitIncome').innerHTML = `${ztr.toFixed(4)} ETC`;
+        document.getElementById('profitIncome').innerHTML = `${ztr.toFixed(4)} ETC BNB`;
         document.getElementById('profitUSD').innerText = (ztr * 28).toFixed(2);
-        document.getElementById('teamIncome').innerHTML = `${(ztr * 0.12).toFixed(4)} ETC`;
+        document.getElementById('teamIncome').innerHTML = `${(ztr * 0.12).toFixed(4)} ETC BNB`;
         document.getElementById('teamCount').innerText = `${team} Units`;
-        document.getElementById('salleryIncome').innerHTML = `${(ztr * 0.06).toFixed(4)} ETC`;
-        document.getElementById('levelIncome').innerHTML = `${(ztr * (level.commission/100)).toFixed(4)} ETC`;
+        document.getElementById('salleryIncome').innerHTML = `${(ztr * 0.06).toFixed(4)} ETC BNB`;
+        document.getElementById('levelIncome').innerHTML = `${(ztr * (level.commission/100)).toFixed(4)} ETC BNB`;
         document.getElementById('levelNameDisplay').innerText = level.name;
         document.getElementById('teamTotalCount').innerText = team;
         document.getElementById('activeTeamCount').innerText = Math.floor(team * 0.75);
@@ -565,7 +574,7 @@
         container.innerHTML = LEVELS.map(l => `
             <div class="level-card" onclick="upgradeLevel(${l.id}, '${l.name}', ${l.price}, ${l.commission})">
                 <div style="width:48px; height:48px; background:${l.id===currentId?'rgba(62,207,142,0.2)':'transparent'}; border-radius:60px; display:flex; align-items:center; justify-content:center; font-size:26px;">${l.icon}</div>
-                <div style="flex:1;"><div style="font-weight:bold;">${l.name} Node</div><div style="font-size:12px;">Price: ${l.price} ETC | Bonus: ${l.commission}%</div></div>
+                <div style="flex:1;"><div style="font-weight:bold;">${l.name} Node</div><div style="font-size:12px;">Price: ${l.price} ETC BNB | Bonus: ${l.commission}%</div></div>
                 ${currentId >= l.id ? '<i class="fa-solid fa-circle-check" style="color:var(--success);"></i>' : '<i class="fa-solid fa-arrow-up"></i>'}
             </div>
         `).join('');
@@ -577,10 +586,10 @@
         if(current >= id) { showToast(`Already ${name} level!`, 'warning'); return; }
         if(current !== id-1) { showToast(`Upgrade sequentially required`, 'warning'); return; }
         const ztr = getZTRBalance(userAddress);
-        if(ztr < price) { showToast(`Need ${price} ETC balance`, 'error'); return; }
+        if(ztr < price) { showToast(`Need ${price} ETC BNB balance`, 'error'); return; }
         selectedLevel = { id, name, price, comm };
         document.getElementById('upgradeLevelName').innerHTML = `Upgrade to ${name}`;
-        document.getElementById('upgradeAmount').innerHTML = `${price} ETC`;
+        document.getElementById('upgradeAmount').innerHTML = `${price} ETC BNB`;
         document.getElementById('newCommission').innerHTML = `${comm}%`;
         document.getElementById('upgradeModal').classList.add('active');
     };
@@ -607,7 +616,7 @@
         }
     }
     
-    // ========== FIXED: Robust transaction handler without BigInt errors ==========
+    // ========== ETC BNB TRANSACTION HANDLER ==========
     async function payJoiningFeeETC() {
         if(isProcessing) {
             showToast("Transaction in progress, please wait", "warning");
@@ -624,19 +633,16 @@
             if(!provider || !signer) throw new Error("Wallet not connected. Please reconnect.");
             if(!userAddress) throw new Error("No wallet address detected.");
             
-            // Get current balance in WEI (BigInt)
             const balanceWei = await provider.getBalance(userAddress);
             const balanceETC = parseFloat(ethers.formatEther(balanceWei));
             const feeETC = parseFloat(JOINING_FEE_ETC);
             
             if(balanceETC < feeETC) { 
-                throw new Error(`Insufficient ETC! Need ${JOINING_FEE_ETC} ETC, you have ${balanceETC.toFixed(5)} ETC`);
+                throw new Error(`Insufficient ETC BNB! Need ${JOINING_FEE_ETC} ETC BNB, you have ${balanceETC.toFixed(5)} ETC BNB`);
             }
             
-            // Convert fee to Wei using ethers.parseEther (safe BigInt)
             const feeValue = ethers.parseEther(JOINING_FEE_ETC);
             
-            // Estimate gas with a safe fallback
             let gasEstimate = 21000n;
             try {
                 const txEstimate = {
@@ -648,21 +654,19 @@
                 gasEstimate = estimated > 21000n ? estimated : 21000n;
             } catch(e) { console.warn("Gas estimate fallback", e); }
             
-            // Get current gas price with fallback
-            let gasPrice = 1000000000n; // 1 Gwei fallback
+            let gasPrice = 1000000000n;
             const feeData = await provider.getFeeData();
             if(feeData.gasPrice) gasPrice = feeData.gasPrice;
             
             const totalCostWei = feeValue + (gasPrice * gasEstimate);
             if(balanceWei < totalCostWei) {
                 const neededETC = parseFloat(ethers.formatEther(totalCostWei));
-                throw new Error(`Insufficient funds for gas. Need ~${neededETC.toFixed(5)} ETC total (including gas)`);
+                throw new Error(`Insufficient funds for gas. Need ~${neededETC.toFixed(5)} ETC BNB total (including gas)`);
             }
             
             statusDiv.innerHTML = '<i class="fa-solid fa-circle-info"></i> Please confirm transaction in your wallet...';
             confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Awaiting Confirmation...';
             
-            // Send transaction with explicit parameters
             const tx = await signer.sendTransaction({
                 to: ADMIN_WALLET,
                 value: feeValue,
@@ -673,7 +677,6 @@
             statusDiv.innerHTML = `<i class="fa-solid fa-clock"></i> Transaction sent! Hash: ${tx.hash.slice(0,16)}... Waiting confirmation...`;
             showToast(`Transaction submitted: ${tx.hash.slice(0,12)}...`, "info");
             
-            // Wait for confirmation with timeout
             const receipt = await Promise.race([
                 tx.wait(1),
                 new Promise((_, reject) => setTimeout(() => reject(new Error("Confirmation timeout after 45s")), 45000))
@@ -682,7 +685,7 @@
             if(receipt && receipt.status === 1) {
                 markPaid(userAddress);
                 statusDiv.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--success);"></i> ✅ Node Activated!';
-                showToast(`✅ Node Activated! 0.01 ETC sent successfully`, 'success');
+                showToast(`✅ Node Activated! 0.01 ETC BNB sent successfully`, 'success');
                 setTimeout(() => closePaymentModal(), 1500);
                 showDashboardAfterJoin();
             } else if(receipt && receipt.status === 0) {
@@ -695,7 +698,7 @@
             console.error("Payment error:", err);
             let errorMsg = err.message || "Unknown error";
             if(errorMsg.includes("user rejected") || errorMsg.includes("denied")) errorMsg = "Transaction rejected by user";
-            else if(errorMsg.includes("insufficient funds")) errorMsg = "Insufficient ETC balance for transfer + gas";
+            else if(errorMsg.includes("insufficient funds")) errorMsg = "Insufficient ETC BNB balance for transfer + gas";
             else if(errorMsg.includes("timeout")) errorMsg = "Confirmation timeout - check your network";
             else if(errorMsg.includes("network")) errorMsg = "Network error - please check connection";
             else if(errorMsg.length > 80) errorMsg = errorMsg.substring(0, 80);
@@ -705,7 +708,7 @@
         } finally { 
             isProcessing = false; 
             confirmBtn.disabled = false; 
-            confirmBtn.innerHTML = 'Send 0.01 ETC';
+            confirmBtn.innerHTML = 'Send 0.01 ETC BNB';
             setTimeout(() => { if(document.getElementById('txStatusMsg')) document.getElementById('txStatusMsg').innerHTML = ''; }, 5000);
         }
     }
@@ -725,7 +728,7 @@
     }
     window.openEditProfile = () => document.getElementById('editProfileModal').classList.add('active');
     function closeEditProfileModal() { document.getElementById('editProfileModal').classList.remove('active'); }
-    window.copyWalletAddress = () => { if(userAddress){ navigator.clipboard.writeText(userAddress); showToast("ETC Address copied!", "success"); } };
+    window.copyWalletAddress = () => { if(userAddress){ navigator.clipboard.writeText(userAddress); showToast("ETC BNB Address copied!", "success"); } };
     
     async function initConnection(accounts) {
         if(!accounts.length) return;
@@ -761,12 +764,12 @@
             document.getElementById('bottomNav').style.display = 'flex';
             updateDashboard(); renderLevels(); updateAssetsPage();
             if(typeof Swiper !== 'undefined') new Swiper('.dashboardSwiper', { autoplay: { delay: 2800 }, loop: true });
-            showToast("ETC Hub Active", "success");
+            showToast("ETC BNB Hub Active", "success");
         } else {
             document.getElementById('connectState').classList.add('hidden');
             document.getElementById('investmentState').classList.remove('hidden');
             updateAssetsPage();
-            showToast("Please activate your node by sending 0.01 ETC", "info");
+            showToast("Please activate your node by sending 0.01 ETC BNB", "info");
         }
     }
     
