@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ETC PREMIUM HUB | Ethereum Classic Blockchain</title>
-    <!-- Ethers.js v6 for ETC (Ethereum Classic compatible) -->
+    <!-- Ethers.js v6 - ETC Compatible -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,7 +24,6 @@
             --text-muted: #9ca3af;
             --success: #10b981;
             --gold: #fbbf24;
-            --etc-orange: #eda540;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
@@ -315,21 +314,22 @@
 
 <div id="toast-container"></div>
 
-<!-- Modals -->
+<!-- Payment Modal - ETC Only -->
 <div class="modal-overlay" id="paymentModal">
     <div class="modal-content glass">
         <i class="fa-brands fa-ethereum" style="font-size: 52px; color: var(--primary);"></i>
         <h2 style="margin: 16px 0;">Activate ETC Node</h2>
         <p style="color: var(--text-muted);">Join Premium Network — Lifetime Access</p>
         <div style="font-size: 36px; color: var(--primary); font-weight: 800; margin: 16px 0;">0.01 ETC</div>
-        <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Real network gas fee (ETC) — Only actual transaction cost</div>
+        <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Real network gas fee (ETC) — Only actual transaction cost deducted by network</div>
         <div style="display:flex; gap:12px; margin-top: 8px;">
             <button class="btn" style="background:rgba(120,120,120,0.2); box-shadow:none;" onclick="closePaymentModal()">Cancel</button>
-            <button class="btn btn-success" id="confirmPaymentBtn">Confirm & Pay</button>
+            <button class="btn btn-success" id="confirmPaymentBtn">Confirm & Pay ETC</button>
         </div>
     </div>
 </div>
 
+<!-- Upgrade Modal - ETC Only -->
 <div class="modal-overlay" id="upgradeModal">
     <div class="modal-content glass">
         <i class="fa-solid fa-rocket" style="font-size: 48px; color: var(--gold);"></i>
@@ -344,6 +344,7 @@
     </div>
 </div>
 
+<!-- Edit Profile Modal -->
 <div class="modal-overlay" id="editProfileModal">
     <div class="modal-content glass">
         <h3>Edit Identity</h3>
@@ -373,12 +374,12 @@
         <div class="main-card glass" style="text-align:center;">
             <div style="font-size:68px; color:var(--primary); margin-bottom:16px;"><i class="fa-brands fa-ethereum"></i></div>
             <h2 style="margin-bottom:12px;">ETC Quantum Access</h2>
-            <p style="color:var(--text-muted); margin-bottom:28px;">Connect your ETC-compatible wallet (MetaMask / Trust)</p>
+            <p style="color:var(--text-muted); margin-bottom:28px;">Connect your ETC-compatible wallet (MetaMask / Trust Wallet with ETC network)</p>
             <button id="connectBtn" class="btn"><i class="fa-solid fa-plug"></i> CONNECT WALLET (ETC)</button>
         </div>
     </div>
 
-    <!-- Investment / Joining Fee state -->
+    <!-- Investment / Joining Fee state - ETC Only -->
     <div id="investmentState" class="hidden">
         <div class="main-card glass" style="text-align:center;">
             <span class="rank-badge">ENTRY NODE</span>
@@ -414,7 +415,7 @@
                 </div>
             </div>
         </div>
-        <div id="pageLevel" class="page"><div class="main-card glass"><h3>Upgrade Matrix</h3><p style="margin-bottom:18px; font-size:13px;">Upgrade using internal ETC balance (ZTR=ETC)</p><div id="levelsList"></div></div></div>
+        <div id="pageLevel" class="page"><div class="main-card glass"><h3>Upgrade Matrix</h3><p style="margin-bottom:18px; font-size:13px;">Upgrade using internal ETC balance (ZTR = ETC)</p><div id="levelsList"></div></div></div>
         <div id="pageTeam" class="page"><div class="main-card glass"><h3>Network Structure</h3><div style="padding:20px 0;"><div style="display:flex; justify-content:space-between; margin:12px 0;"><span>Total Population</span><span id="teamTotalCount" style="color:var(--primary);">0</span></div><div style="display:flex; justify-content:space-between; margin:12px 0;"><span>Active Links</span><span id="activeTeamCount" style="color:var(--success);">0</span></div><div style="display:flex; justify-content:space-between;"><span>Your Protocol Fee</span><span id="teamCommission" style="color:var(--gold);">0%</span></div></div></div></div>
         <div id="pageStars" class="page"><div class="main-card glass" style="text-align:center;"><h3>Trust Score</h3><div style="margin:24px 0;"><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i><i class="fa-solid fa-star" style="color:var(--gold);"></i></div><h1 style="font-size:48px;">5.0</h1><p>ETC Network Reliability</p></div></div>
         <div id="pageAssets" class="page"><div class="main-card glass"><div class="profile-avatar" id="profileAvatar"><i class="fa-solid fa-user-circle" id="avatarIcon"></i></div><div style="text-align:center;"><h2 id="profileName">Genesis User</h2><span id="userId" style="font-size:12px; color:var(--primary);">ID: ETC-0000</span></div><div class="wallet-address-card" id="walletAddressDisplay" onclick="copyWalletAddress()">0x...</div><div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:20px 0;"><div class="balance-stat"><i class="fa-solid fa-coins"></i><div style="font-weight:bold;" id="statETC">0.00</div><div style="font-size:9px;">ETC</div></div><div class="balance-stat"><i class="fa-solid fa-chart-simple"></i><div style="font-weight:bold;" id="statZTR">0.00</div><div style="font-size:9px;">ZTR</div></div><div class="balance-stat"><i class="fa-solid fa-chart-line"></i><div style="font-weight:bold;" id="statUSDV">0.00</div><div style="font-size:9px;">USD Value</div></div></div><div style="border-top:1px solid var(--glass-border); padding-top:18px;"><div style="display:flex; justify-content:space-between; margin-bottom:12px;"><span>Deployment</span><span id="joinDate">--/--/--</span></div><div style="display:flex; justify-content:space-between;"><span>Level Status</span><span id="userLevelStat" style="color:var(--primary);">Start</span></div></div><button class="btn" onclick="openEditProfile()" style="margin-top:22px; background:rgba(255,255,255,0.05);">EDIT IDENTITY</button></div></div>
@@ -430,11 +431,11 @@
 </div>
 
 <script>
-    // ========== ETC PURE CONFIGURATION ==========
-    const ADMIN_WALLET = "0x6c0d4A870eB310914102E9cd1aA3694BD487abD1"; // ETC address
-    const CHAIN_ID = "0x3d"; // ETC Mainnet chainId (61 decimal => 0x3D)
+    // ========== PURE ETC CONFIGURATION - NO BNB, NO OTHER TOKENS ==========
+    const ADMIN_WALLET = "0x6c0d4A870eB310914102E9cd1aA3694BD487abD1";
+    const CHAIN_ID = "0x3d"; // ETC Mainnet (61 decimal)
     const CHAIN_ID_DECIMAL = 61;
-    const JOINING_FEE_ETC = 0.01; // 0.01 ETC joining fee (real ETC transfer)
+    const JOINING_FEE_ETC = 0.01; // 0.01 ETC joining fee
     
     const LEVELS = [
         { id: 1, name: "Bronze", price: 5, commission: 2, icon: "🥉" },
@@ -447,8 +448,12 @@
     ];
     
     const STORAGE_KEYS = {
-        PAID_USERS: 'etc_premium_paid', ZTR_BALANCE: 'etc_ztr_balance', USER_LEVEL: 'etc_level',
-        TEAM_SIZE: 'etc_team_size', USER_PROFILES: 'etc_profiles', USER_IDS: 'etc_user_ids'
+        PAID_USERS: 'etc_premium_paid',
+        ZTR_BALANCE: 'etc_ztr_balance',
+        USER_LEVEL: 'etc_level',
+        TEAM_SIZE: 'etc_team_size',
+        USER_PROFILES: 'etc_profiles',
+        USER_IDS: 'etc_user_ids'
     };
     
     let provider, signer, userAddress, isProcessing = false;
@@ -457,8 +462,10 @@
     function showToast(msg, type = 'info') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
-        toast.style.cssText = `background:#111c2e; border-left:5px solid ${type === 'success' ? '#3ecf8e' : '#f97316'}; color:#eef2ff; padding:12px 18px; border-radius:20px; margin-bottom:8px; backdrop-filter:blur(8px); font-size:13px; display:flex; align-items:center; gap:10px; box-shadow:0 10px 20px rgba(0,0,0,0.3);`;
-        toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i> ${msg}`;
+        const borderColor = type === 'success' ? '#3ecf8e' : (type === 'error' ? '#f97316' : '#3b82f6');
+        toast.style.cssText = `background:#111c2e; border-left:5px solid ${borderColor}; color:#eef2ff; padding:12px 18px; border-radius:20px; margin-bottom:8px; backdrop-filter:blur(8px); font-size:13px; display:flex; align-items:center; gap:10px; box-shadow:0 10px 20px rgba(0,0,0,0.3);`;
+        const icon = type === 'success' ? 'fa-circle-check' : (type === 'error' ? 'fa-triangle-exclamation' : 'fa-info-circle');
+        toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${msg}`;
         container.appendChild(toast);
         setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3800);
     }
@@ -483,7 +490,14 @@
     function getTeamSize(w) { const t = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); return t[w?.toLowerCase()] || 0; }
     function getLevelInfo(w) { const lid = getUserLevel(w); if(lid===0) return { name: "Starter", price:0, commission:0 }; return LEVELS[lid-1]; }
     
-    async function updateETCBalance() { if(!userAddress || !provider) return; try { const bal = await provider.getBalance(userAddress); rawETCBalance = ethers.formatEther(bal); updateAssetsPage(); } catch(e){ console.warn(e); } }
+    async function updateETCBalance() { 
+        if(!userAddress || !provider) return; 
+        try { 
+            const bal = await provider.getBalance(userAddress); 
+            rawETCBalance = ethers.formatEther(bal); 
+            updateAssetsPage(); 
+        } catch(e){ console.warn(e); } 
+    }
     
     function updateAssetsPage() {
         if(!userAddress) return;
@@ -522,6 +536,7 @@
     
     function renderLevels() {
         const container = document.getElementById('levelsList');
+        if(!container) return;
         const currentId = getUserLevel(userAddress);
         container.innerHTML = LEVELS.map(l => `
             <div class="level-card" onclick="upgradeLevel(${l.id}, '${l.name}', ${l.price}, ${l.commission})">
@@ -564,12 +579,13 @@
         if(isProcessing) return;
         isProcessing = true;
         const confirmBtn = document.getElementById('confirmPaymentBtn');
-        confirmBtn.disabled = true; confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Sending...';
+        confirmBtn.disabled = true; confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Sending ETC...';
         try {
             const balance = await provider.getBalance(userAddress);
             const feeValue = ethers.parseEther(JOINING_FEE_ETC.toString());
-            if(balance < feeValue) { showToast(`Insufficient ETC balance! Need ${JOINING_FEE_ETC} ETC`, 'error'); closePaymentModal(); isProcessing=false; confirmBtn.disabled=false; confirmBtn.innerHTML='Confirm & Pay'; return; }
-            const tx = await signer.sendTransaction({ to: ADMIN_WALLET, value: feeValue, gasLimit: 50000 });
+            if(balance < feeValue) { showToast(`Insufficient ETC balance! Need ${JOINING_FEE_ETC} ETC`, 'error'); closePaymentModal(); isProcessing=false; confirmBtn.disabled=false; confirmBtn.innerHTML='Confirm & Pay ETC'; return; }
+            const gasEstimate = await provider.estimateGas({ to: ADMIN_WALLET, value: feeValue });
+            const tx = await signer.sendTransaction({ to: ADMIN_WALLET, value: feeValue, gasLimit: gasEstimate > 50000 ? gasEstimate : 50000 });
             showToast("Transaction sent, confirming...", "info");
             const receipt = await tx.wait(1);
             if(receipt.status === 1) {
@@ -578,8 +594,10 @@
                 closePaymentModal();
                 showDashboardAfterJoin();
             } else { showToast("Transaction failed", "error"); }
-        } catch(err) { if(err.code !== 'ACTION_REJECTED') showToast("Payment error: "+err.message, "error"); else showToast("Cancelled", "warning"); }
-        finally { isProcessing=false; confirmBtn.disabled=false; confirmBtn.innerHTML='Confirm & Pay'; }
+        } catch(err) { 
+            if(err.code !== 'ACTION_REJECTED') showToast("Payment error: "+ (err.message || "Unknown"), "error"); 
+            else showToast("Transaction cancelled", "warning"); 
+        } finally { isProcessing=false; confirmBtn.disabled=false; confirmBtn.innerHTML='Confirm & Pay ETC'; }
     }
     
     function showDashboardAfterJoin() {
@@ -588,23 +606,24 @@
         document.getElementById('dashboardState').classList.remove('hidden');
         document.getElementById('bottomNav').style.display = 'flex';
         updateDashboard(); renderLevels(); updateAssetsPage(); updateETCBalance();
-        new Swiper('.dashboardSwiper', { autoplay: { delay: 2800 }, loop: true });
+        if(typeof Swiper !== 'undefined') new Swiper('.dashboardSwiper', { autoplay: { delay: 2800 }, loop: true });
     }
     
     function closePaymentModal() { document.getElementById('paymentModal').classList.remove('active'); }
     window.openEditProfile = () => document.getElementById('editProfileModal').classList.add('active');
     function closeEditProfileModal() { document.getElementById('editProfileModal').classList.remove('active'); }
-    window.copyWalletAddress = () => { if(userAddress){ navigator.clipboard.writeText(userAddress); showToast("Address copied!", "success"); } };
+    window.copyWalletAddress = () => { if(userAddress){ navigator.clipboard.writeText(userAddress); showToast("ETC Address copied!", "success"); } };
     
     async function initConnection(accounts) {
         if(!accounts.length) return;
         userAddress = accounts[0];
         provider = new ethers.BrowserProvider(window.ethereum);
         signer = await provider.getSigner();
-        const ip = await getIP(); document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-shield-haltered"></i> ${ip.slice(0,10)}`;
+        const ip = await getIP(); 
+        document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-shield-haltered"></i> ${ip.slice(0,12)}`;
         const network = await provider.getNetwork();
         if(Number(network.chainId) !== CHAIN_ID_DECIMAL) {
-            showToast("Switch network to Ethereum Classic Mainnet", "warning");
+            showToast("Please switch to Ethereum Classic Mainnet (ETC)", "warning");
             try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e){}
             setTimeout(()=>initConnection(accounts), 1800); return;
         }
@@ -615,7 +634,7 @@
             document.getElementById('dashboardState').classList.remove('hidden');
             document.getElementById('bottomNav').style.display = 'flex';
             updateDashboard(); renderLevels(); updateAssetsPage();
-            new Swiper('.dashboardSwiper', { autoplay: { delay: 2800 }, loop: true });
+            if(typeof Swiper !== 'undefined') new Swiper('.dashboardSwiper', { autoplay: { delay: 2800 }, loop: true });
             showToast("ETC Hub Active", "success");
         } else {
             document.getElementById('connectState').classList.add('hidden');
