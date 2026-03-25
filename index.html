@@ -423,6 +423,123 @@
             color: var(--primary);
             border: 1px solid var(--primary-glow);
         }
+
+        /* --- NEW STYLES FOR STARS PAGE --- */
+        .stars-page-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            height: 180px;
+        }
+        .stars-page-button i {
+            font-size: 40px;
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+        .stars-page-button:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary) !important;
+        }
+        .stars-page-button:hover i {
+            transform: scale(1.1);
+            text-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .stars-modal {
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+        .stars-modal-content {
+            width: 100%;
+            max-width: 480px;
+            padding: 30px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: center;
+        }
+        .close-stars-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--glass-border);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 10;
+        }
+        .stars-modal-content h2 {
+            margin-bottom: 5px;
+        }
+        .stars-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .stars-pyramid-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .stars-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .star-icon {
+            font-size: 32px;
+            transition: 0.4s ease-in-out;
+        }
+        .star-icon.empty {
+            color: transparent;
+            -webkit-text-stroke: 1px var(--glass-border);
+        }
+        .star-icon.filled {
+            color: var(--gold);
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            transform: scale(1.1);
+        }
+        .salary-system-box {
+            background: rgba(0, 242, 255, 0.05);
+            border: 1px solid var(--primary-glow);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .salary-system-box h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .salary-system-box p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+        .salary-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 12px;
+        }
     </style>
 </head>
 <body>
@@ -470,6 +587,43 @@
         </div>
         <input type="text" id="profileNameInput" placeholder="Username" style="width:100%; padding:15px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); border-radius:15px; color:white; margin-bottom:15px;">
         <button class="btn" id="saveProfileBtn">Save Update</button>
+    </div>
+</div>
+
+<!-- NEW STARS MODALS -->
+<div class="modal-overlay stars-modal" id="levelStarsModal">
+    <div class="stars-modal-content glass">
+        <button class="close-stars-modal" onclick="closeStarsModal()"><i class="fa-solid fa-xmark"></i></button>
+        <h2>Level Achievement Stars</h2>
+        <p class="stars-subtitle">Each level you upgrade fills a star. Fill all stars to unlock a permanent salary.</p>
+        <div class="stars-pyramid-container" id="levelStarsContainer">
+            <!-- Stars injected by JS -->
+        </div>
+        <div class="salary-system-box hidden" id="levelSalarySystem">
+            <h3><i class="fa-solid fa-crown" style="color:var(--gold);"></i> Level Mastery Salary Unlocked!</h3>
+            <p>You have achieved the highest rank. As a reward, you will receive a monthly salary based on your total level investment.</p>
+            <div class="salary-amount" id="levelSalaryAmount">
+                <!-- Salary amount injected by JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay stars-modal" id="joiningStarsModal">
+    <div class="stars-modal-content glass">
+        <button class="close-stars-modal" onclick="closeStarsModal()"><i class="fa-solid fa-xmark"></i></button>
+        <h2>Network Invitation Stars</h2>
+        <p class="stars-subtitle">Each new member you invite fills a star. Fill all 10 stars to unlock a commission bonus.</p>
+        <div class="stars-pyramid-container" id="joiningStarsContainer">
+            <!-- Stars injected by JS -->
+        </div>
+        <div class="salary-system-box hidden" id="joiningSalarySystem">
+            <h3><i class="fa-solid fa-people-group" style="color:var(--primary);"></i> Network Leader Bonus Unlocked!</h3>
+            <p>You have successfully invited 10 members. You will now receive a permanent 10% bonus on all your future network commissions.</p>
+             <div class="salary-amount" id="joiningSalaryAmount">
+                +10% Network Commission
+            </div>
+        </div>
     </div>
 </div>
 
@@ -590,18 +744,7 @@
         </div>
 
         <div id="pageStars" class="page">
-            <div class="main-card glass" style="text-align:center;">
-                <h3>Network Trust Score</h3>
-                <div style="margin:25px 0;">
-                    <i class="fa-solid fa-star" style="color:var(--gold); font-size:30px;"></i>
-                    <i class="fa-solid fa-star" style="color:var(--gold); font-size:30px;"></i>
-                    <i class="fa-solid fa-star" style="color:var(--gold); font-size:30px;"></i>
-                    <i class="fa-solid fa-star" style="color:var(--gold); font-size:30px;"></i>
-                    <i class="fa-solid fa-star-half-stroke" style="color:var(--gold); font-size:30px;"></i>
-                </div>
-                <h1 style="font-size:48px;">4.9</h1>
-                <p style="color:var(--text-muted);">Protocol Reliability Rating</p>
-            </div>
+            <!-- Content will be injected by JavaScript -->
         </div>
 
         <div id="pageAssets" class="page">
@@ -661,7 +804,7 @@
     <div class="nav-item active" data-page="dashboard"><i class="fa-solid fa-house-chimney-window"></i><span>Home</span></div>
     <div class="nav-item" data-page="level"><i class="fa-solid fa-layer-group"></i><span>Level</span></div>
     <div class="nav-item" data-page="team"><i class="fa-solid fa-diagram-project"></i><span>Network</span></div>
-    <div class="nav-item" data-page="stars"><i class="fa-solid fa-award"></i><span>Rank</span></div>
+    <div class="nav-item" data-page="stars"><i class="fa-solid fa-star"></i><span>Stars</span></div>
     <div class="nav-item" data-page="assets"><i class="fa-solid fa-wallet"></i><span>Vault</span></div>
 </div>
 
@@ -697,6 +840,7 @@
     // UI ELEMENTS
     const connectState = document.getElementById('connectState'), investmentState = document.getElementById('investmentState'), dashboardState = document.getElementById('dashboardState');
     const paymentModal = document.getElementById('paymentModal'), upgradeModal = document.getElementById('upgradeModal'), editProfileModal = document.getElementById('editProfileModal'), bottomNav = document.getElementById('bottomNav');
+    const levelStarsModal = document.getElementById('levelStarsModal'), joiningStarsModal = document.getElementById('joiningStarsModal');
 
     // HELPER: Toasts
     function showToast(message, type = 'info') {
@@ -847,9 +991,7 @@
         `).join('');
     }
 
-    // --- NEW FUNCTIONS FOR NETWORK PAGE ---
-    // Function to generate mock team data for display purposes
-    // NOTE: This is for UI demonstration as the current system doesn't store a real referral tree.
+    // --- NEW FUNCTIONS FOR NETWORK & STARS PAGE ---
     function generateMockTeamData(count) {
         const mockTeam = [];
         const levelNames = ["Start", ...LEVELS.map(l => l.name)];
@@ -867,21 +1009,17 @@
         return mockTeam;
     }
 
-    // Renders the new team/network page
     function renderTeamPage() {
         if (!userAddress) return;
         const profile = getUserProfile(userAddress);
         const teamSize = getTeamSize(userAddress);
         
-        // 1. Set up the invitation link
         const inviteLinkInput = document.getElementById('inviteLink');
         const refLink = `${window.location.origin}${window.location.pathname}?ref=${profile.userId}`;
         inviteLinkInput.value = refLink;
 
-        // 2. Update team count display
         document.getElementById('teamPageTotalCount').innerText = teamSize;
 
-        // 3. Generate and display the mock team list
         const teamListContainer = document.getElementById('teamListContainer');
         if (teamSize === 0) {
             teamListContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px;">Your network is empty. Share your link to start building!</p>`;
@@ -900,14 +1038,101 @@
             </div>
         `).join('');
     }
-    // --- END OF NEW FUNCTIONS ---
+
+    function renderStarsPage() {
+        const container = document.getElementById('pageStars');
+        container.innerHTML = `
+            <div class="main-card glass stars-page-button" onclick="openLevelStars()">
+                <i class="fa-solid fa-layer-group" style="color:var(--gold);"></i>
+                <h3>Level Achieve Stars</h3>
+                <p style="font-size:12px; color:var(--text-muted);">Track your upgrade progress and unlock mastery rewards.</p>
+            </div>
+            <div class="main-card glass stars-page-button" onclick="openJoiningStars()">
+                <i class="fa-solid fa-users" style="color:var(--primary);"></i>
+                <h3>Network Joining Stars</h3>
+                <p style="font-size:12px; color:var(--text-muted);">Track your network growth and unlock leader bonuses.</p>
+            </div>
+        `;
+    }
+
+    function generatePyramidStarsHTML(count, filledCount) {
+        let starsHtml = '';
+        const rows = [1, 2, 3, 4]; // 10 stars total
+        let starCounter = 0;
+        rows.forEach(numInRow => {
+            let rowHtml = '<div class="stars-row">';
+            for (let i = 0; i < numInRow; i++) {
+                if (starCounter < count) {
+                    const state = starCounter < filledCount ? 'filled' : 'empty';
+                    rowHtml += `<i class="fa-solid fa-star star-icon ${state}"></i>`;
+                    starCounter++;
+                }
+            }
+            rowHtml += '</div>';
+            starsHtml += rowHtml;
+        });
+        return starsHtml;
+    }
+    
+    function generateFlexStarsHTML(count, filledCount) {
+        let starsHtml = '';
+        for(let i=0; i<count; i++) {
+            const state = i < filledCount ? 'filled' : 'empty';
+            starsHtml += `<i class="fa-solid fa-star star-icon ${state}"></i>`;
+        }
+        return `<div class="stars-row" style="flex-wrap: wrap; gap: 20px;">${starsHtml}</div>`;
+    }
+
+    function openLevelStars() {
+        const container = document.getElementById('levelStarsContainer');
+        const salarySystem = document.getElementById('levelSalarySystem');
+        const salaryAmount = document.getElementById('levelSalaryAmount');
+        const userLevel = getUserLevel(userAddress);
+        const maxLevel = LEVELS.length;
+
+        container.innerHTML = generateFlexStarsHTML(maxLevel, userLevel);
+        
+        if (userLevel >= maxLevel) {
+            const totalInvestment = LEVELS.reduce((acc, level) => acc + level.price, 0);
+            const salary = totalInvestment * 0.10;
+            salaryAmount.innerText = `${salary.toFixed(2)} ZTR / Month`;
+            salarySystem.classList.remove('hidden');
+        } else {
+            salarySystem.classList.add('hidden');
+        }
+        levelStarsModal.classList.add('active');
+    }
+
+    function openJoiningStars() {
+        const container = document.getElementById('joiningStarsContainer');
+        const salarySystem = document.getElementById('joiningSalarySystem');
+        const teamSize = getTeamSize(userAddress);
+        const requiredTeamSize = 10;
+        
+        container.innerHTML = generatePyramidStarsHTML(requiredTeamSize, teamSize);
+        
+        if (teamSize >= requiredTeamSize) {
+            salarySystem.classList.remove('hidden');
+        } else {
+            salarySystem.classList.add('hidden');
+        }
+        joiningStarsModal.classList.add('active');
+    }
+
+    function closeStarsModal() {
+        levelStarsModal.classList.remove('active');
+        joiningStarsModal.classList.remove('active');
+    }
 
     // Modal Controls
-    window.openEditProfile = function() { editProfileModal.classList.add('active'); };
-    window.closeEditProfileModal = function() { editProfileModal.classList.remove('active'); };
     window.closePaymentModal = function() { paymentModal.classList.remove('active'); };
     window.closeUpgradeModal = function() { upgradeModal.classList.remove('active'); };
+    window.openEditProfile = function() { editProfileModal.classList.add('active'); };
+    window.closeEditProfileModal = function() { editProfileModal.classList.remove('active'); };
     window.copyWalletAddress = copyWalletAddress;
+    window.closeStarsModal = closeStarsModal;
+    window.openLevelStars = openLevelStars;
+    window.openJoiningStars = openJoiningStars;
 
     window.upgradeLevel = function(levelId, levelName, price, commission) {
         const currentId = getUserLevel(userAddress);
@@ -1042,7 +1267,7 @@
     document.getElementById('copyInviteLinkBtn').addEventListener('click', () => {
         const linkInput = document.getElementById('inviteLink');
         linkInput.select();
-        linkInput.setSelectionRange(0, 99999); // For mobile devices
+        linkInput.setSelectionRange(0, 99999);
         navigator.clipboard.writeText(linkInput.value);
         showToast('Invitation link copied!', 'success');
     });
@@ -1056,10 +1281,8 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
             
-            // Render team page content when navigating to it
-            if (pageId === 'team') {
-                renderTeamPage();
-            }
+            if (pageId === 'team') renderTeamPage();
+            if (pageId === 'stars') renderStarsPage();
         });
     });
 
@@ -1080,12 +1303,7 @@
             if (acc.length > 0) await initConnection(acc);
         }
     });
-    
-    // Make functions global for onclick attributes
-    window.closePaymentModal = closePaymentModal;
-    window.closeUpgradeModal = closeUpgradeModal;
-    window.closeEditProfileModal = closeEditProfileModal;
-    window.openEditProfile = openEditProfile;
+
 </script>
 
 </body>
