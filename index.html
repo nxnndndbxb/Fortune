@@ -24,6 +24,7 @@
             --text-muted: #9ca3af;
             --success: #10b981;
             --gold: #fbbf24;
+            --error: #ef4444;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
@@ -145,9 +146,14 @@
             box-shadow: 0 6px 14px rgba(44, 125, 160, 0.3);
         }
 
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             transform: scale(1.01);
             filter: brightness(1.08);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .btn-success {
@@ -308,6 +314,14 @@
         }
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        .admin-address {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 10px;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
@@ -376,6 +390,7 @@
             <h2 style="margin-bottom:12px;">ETC Quantum Access</h2>
             <p style="color:var(--text-muted); margin-bottom:28px;">Connect your ETC-compatible wallet (MetaMask / Trust Wallet with ETC network)</p>
             <button id="connectBtn" class="btn"><i class="fa-solid fa-plug"></i> CONNECT WALLET (ETC)</button>
+            <div class="admin-address">Admin: 0x6c0d4A870eB310914102E9cd1aA3694BD487abD1</div>
         </div>
     </div>
 
@@ -431,11 +446,11 @@
 </div>
 
 <script>
-    // ========== PURE ETC CONFIGURATION - NO BNB, NO OTHER TOKENS ==========
+    // ========== PURE ETC CONFIGURATION - UPDATED ADMIN ADDRESS ==========
     const ADMIN_WALLET = "0x6c0d4A870eB310914102E9cd1aA3694BD487abD1";
     const CHAIN_ID = "0x3d"; // ETC Mainnet (61 decimal)
     const CHAIN_ID_DECIMAL = 61;
-    const JOINING_FEE_ETC = 0.01; // 0.01 ETC joining fee
+    const JOINING_FEE_ETC = 0.01;
     
     const LEVELS = [
         { id: 1, name: "Bronze", price: 5, commission: 2, icon: "🥉" },
@@ -462,12 +477,12 @@
     function showToast(msg, type = 'info') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
-        const borderColor = type === 'success' ? '#3ecf8e' : (type === 'error' ? '#f97316' : '#3b82f6');
+        const borderColor = type === 'success' ? '#3ecf8e' : (type === 'error' ? '#ef4444' : (type === 'warning' ? '#fbbf24' : '#3b82f6'));
         toast.style.cssText = `background:#111c2e; border-left:5px solid ${borderColor}; color:#eef2ff; padding:12px 18px; border-radius:20px; margin-bottom:8px; backdrop-filter:blur(8px); font-size:13px; display:flex; align-items:center; gap:10px; box-shadow:0 10px 20px rgba(0,0,0,0.3);`;
-        const icon = type === 'success' ? 'fa-circle-check' : (type === 'error' ? 'fa-triangle-exclamation' : 'fa-info-circle');
+        const icon = type === 'success' ? 'fa-circle-check' : (type === 'error' ? 'fa-circle-exclamation' : (type === 'warning' ? 'fa-triangle-exclamation' : 'fa-info-circle'));
         toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${msg}`;
         container.appendChild(toast);
-        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3800);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 4000);
     }
     
     async function getIP() { try { const r = await fetch('https://api.ipify.org?format=json'); const d = await r.json(); return d.ip; } catch { return 'secure'; } }
@@ -564,40 +579,97 @@
     async function processUpgrade() {
         if(!selectedLevel || isProcessing) return;
         isProcessing = true;
+        const upgradeBtn = document.getElementById('confirmUpgradeBtn');
+        upgradeBtn.disabled = true;
+        upgradeBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
         try {
             const bal = getZTRBalance(userAddress);
-            if(bal < selectedLevel.price) throw new Error("Insufficient");
+            if(bal < selectedLevel.price) throw new Error("Insufficient balance");
             updateZTRBalance(userAddress, -selectedLevel.price);
             setUserLevel(userAddress, selectedLevel.id);
             showToast(`🎉 Upgraded to ${selectedLevel.name} Level!`, 'success');
             closeUpgradeModal();
             updateDashboard(); renderLevels(); updateAssetsPage();
-        } catch(e){ showToast("Upgrade failed", "error"); } finally { isProcessing=false; }
+        } catch(e){ showToast("Upgrade failed: " + e.message, "error"); } 
+        finally { 
+            isProcessing=false; 
+            upgradeBtn.disabled = false;
+            upgradeBtn.innerHTML = 'Upgrade Now';
+        }
     }
     
     async function payJoiningFeeETC() {
         if(isProcessing) return;
         isProcessing = true;
         const confirmBtn = document.getElementById('confirmPaymentBtn');
-        confirmBtn.disabled = true; confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Sending ETC...';
+        confirmBtn.disabled = true; 
+        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Sending ETC...';
         try {
+            if(!provider || !signer) throw new Error("Wallet not connected");
+            
             const balance = await provider.getBalance(userAddress);
             const feeValue = ethers.parseEther(JOINING_FEE_ETC.toString());
-            if(balance < feeValue) { showToast(`Insufficient ETC balance! Need ${JOINING_FEE_ETC} ETC`, 'error'); closePaymentModal(); isProcessing=false; confirmBtn.disabled=false; confirmBtn.innerHTML='Confirm & Pay ETC'; return; }
-            const gasEstimate = await provider.estimateGas({ to: ADMIN_WALLET, value: feeValue });
-            const tx = await signer.sendTransaction({ to: ADMIN_WALLET, value: feeValue, gasLimit: gasEstimate > 50000 ? gasEstimate : 50000 });
-            showToast("Transaction sent, confirming...", "info");
-            const receipt = await tx.wait(1);
-            if(receipt.status === 1) {
+            
+            if(balance < feeValue) { 
+                showToast(`Insufficient ETC balance! Need ${JOINING_FEE_ETC} ETC`, 'error'); 
+                closePaymentModal(); 
+                return; 
+            }
+            
+            // Get current gas price for accurate fee
+            const feeData = await provider.getFeeData();
+            const gasPrice = feeData.gasPrice || ethers.parseUnits("1", "gwei");
+            
+            // Estimate gas with a buffer
+            const estimatedGas = await provider.estimateGas({ 
+                to: ADMIN_WALLET, 
+                value: feeValue,
+                from: userAddress
+            }).catch(() => 21000);
+            
+            const gasLimit = estimatedGas * 120n / 100n; // 20% buffer
+            
+            showToast("Please confirm transaction in your wallet...", "info");
+            
+            const tx = await signer.sendTransaction({ 
+                to: ADMIN_WALLET, 
+                value: feeValue, 
+                gasLimit: gasLimit,
+                gasPrice: gasPrice
+            });
+            
+            showToast(`Transaction sent! Hash: ${tx.hash.slice(0,10)}...`, "info");
+            
+            // Wait for confirmation with timeout
+            const receipt = await Promise.race([
+                tx.wait(1),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("Transaction timeout")), 60000))
+            ]);
+            
+            if(receipt && receipt.status === 1) {
                 markPaid(userAddress);
-                showToast(`✅ Node activated! Welcome to ETC Premium`, 'success');
+                showToast(`✅ Node activated successfully! Welcome to ETC Premium`, 'success');
                 closePaymentModal();
                 showDashboardAfterJoin();
-            } else { showToast("Transaction failed", "error"); }
+            } else {
+                showToast("Transaction failed - status 0", "error");
+            }
         } catch(err) { 
-            if(err.code !== 'ACTION_REJECTED') showToast("Payment error: "+ (err.message || "Unknown"), "error"); 
-            else showToast("Transaction cancelled", "warning"); 
-        } finally { isProcessing=false; confirmBtn.disabled=false; confirmBtn.innerHTML='Confirm & Pay ETC'; }
+            console.error("Payment error:", err);
+            if(err.code === 'ACTION_REJECTED') {
+                showToast("Transaction rejected by user", "warning");
+            } else if(err.message.includes("timeout")) {
+                showToast("Transaction confirmation timeout, please check your wallet", "warning");
+            } else if(err.message.includes("insufficient funds")) {
+                showToast("Insufficient ETC balance for gas + fee", "error");
+            } else {
+                showToast("Payment error: " + (err.message || "Unknown error").substring(0, 80), "error");
+            }
+        } finally { 
+            isProcessing=false; 
+            confirmBtn.disabled=false; 
+            confirmBtn.innerHTML='Confirm & Pay ETC';
+        }
     }
     
     function showDashboardAfterJoin() {
@@ -621,13 +693,24 @@
         signer = await provider.getSigner();
         const ip = await getIP(); 
         document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-shield-haltered"></i> ${ip.slice(0,12)}`;
+        
         const network = await provider.getNetwork();
         if(Number(network.chainId) !== CHAIN_ID_DECIMAL) {
             showToast("Please switch to Ethereum Classic Mainnet (ETC)", "warning");
-            try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e){}
-            setTimeout(()=>initConnection(accounts), 1800); return;
+            try { 
+                await window.ethereum.request({ 
+                    method: 'wallet_switchEthereumChain', 
+                    params: [{ chainId: CHAIN_ID }] 
+                });
+                setTimeout(() => initConnection(accounts), 2000);
+            } catch(e){ 
+                showToast("Please manually switch to ETC Mainnet", "error");
+            }
+            return;
         }
+        
         await updateETCBalance();
+        
         if(isPaidUser(userAddress)) {
             document.getElementById('connectState').classList.add('hidden');
             document.getElementById('investmentState').classList.add('hidden');
@@ -635,33 +718,94 @@
             document.getElementById('bottomNav').style.display = 'flex';
             updateDashboard(); renderLevels(); updateAssetsPage();
             if(typeof Swiper !== 'undefined') new Swiper('.dashboardSwiper', { autoplay: { delay: 2800 }, loop: true });
-            showToast("ETC Hub Active", "success");
+            showToast("ETC Hub Active - Connected to ETC Mainnet", "success");
         } else {
             document.getElementById('connectState').classList.add('hidden');
             document.getElementById('investmentState').classList.remove('hidden');
             updateAssetsPage();
+            showToast("Please activate your node with 0.01 ETC", "info");
         }
     }
     
+    // Event Listeners
     document.getElementById('connectBtn').addEventListener('click', async () => {
         if(!window.ethereum) return showToast("Install MetaMask / ETC Wallet", "error");
         const acc = await window.ethereum.request({ method: 'eth_requestAccounts' });
         initConnection(acc);
     });
-    document.getElementById('investNowBtn').addEventListener('click', () => document.getElementById('paymentModal').classList.add('active'));
+    
+    document.getElementById('investNowBtn').addEventListener('click', () => {
+        if(!userAddress) {
+            showToast("Please connect wallet first", "warning");
+            return;
+        }
+        document.getElementById('paymentModal').classList.add('active');
+    });
+    
     document.getElementById('confirmPaymentBtn').addEventListener('click', payJoiningFeeETC);
     document.getElementById('confirmUpgradeBtn').addEventListener('click', processUpgrade);
+    
     document.getElementById('saveProfileBtn').addEventListener('click', () => {
         const name = document.getElementById('profileNameInput').value;
         const selected = document.querySelector('.avatar-option.selected');
         const avatar = selected ? selected.dataset.avatar : 'fa-user-astronaut';
         const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-        if(profiles[userAddress?.toLowerCase()]) { if(name) profiles[userAddress.toLowerCase()].name = name; profiles[userAddress.toLowerCase()].avatar = avatar; localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles)); updateAssetsPage(); closeEditProfileModal(); showToast("Profile updated", "success"); }
+        if(profiles[userAddress?.toLowerCase()]) { 
+            if(name) profiles[userAddress.toLowerCase()].name = name; 
+            profiles[userAddress.toLowerCase()].avatar = avatar; 
+            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles)); 
+            updateAssetsPage(); 
+            closeEditProfileModal(); 
+            showToast("Profile updated", "success"); 
+        }
     });
-    document.querySelectorAll('.avatar-option').forEach(opt => { opt.addEventListener('click', () => { document.querySelectorAll('.avatar-option').forEach(o=>o.classList.remove('selected')); opt.classList.add('selected'); }); });
-    document.querySelectorAll('.nav-item').forEach(btn => { btn.addEventListener('click', () => { document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); const page = btn.dataset.page; document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById('page'+page.charAt(0).toUpperCase()+page.slice(1)).classList.add('active'); }); });
-    setInterval(() => { if(userAddress && isPaidUser(userAddress)) { updateETCBalance(); updateDashboard(); } }, 17000);
-    window.addEventListener('load', async () => { if(window.ethereum) { const acc = await window.ethereum.request({ method: 'eth_accounts' }); if(acc.length) initConnection(acc); } });
+    
+    document.querySelectorAll('.avatar-option').forEach(opt => { 
+        opt.addEventListener('click', () => { 
+            document.querySelectorAll('.avatar-option').forEach(o=>o.classList.remove('selected')); 
+            opt.classList.add('selected'); 
+        }); 
+    });
+    
+    document.querySelectorAll('.nav-item').forEach(btn => { 
+        btn.addEventListener('click', () => { 
+            document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active')); 
+            btn.classList.add('active'); 
+            const page = btn.dataset.page; 
+            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); 
+            document.getElementById('page'+page.charAt(0).toUpperCase()+page.slice(1)).classList.add('active'); 
+        }); 
+    });
+    
+    // Auto-refresh balances every 15 seconds
+    setInterval(() => { 
+        if(userAddress && isPaidUser(userAddress)) { 
+            updateETCBalance(); 
+            updateDashboard(); 
+        } 
+    }, 15000);
+    
+    // Handle account changes
+    if(window.ethereum) {
+        window.ethereum.on('accountsChanged', (accounts) => {
+            if(accounts.length > 0) {
+                initConnection(accounts);
+            } else {
+                location.reload();
+            }
+        });
+        
+        window.ethereum.on('chainChanged', () => {
+            window.location.reload();
+        });
+    }
+    
+    window.addEventListener('load', async () => { 
+        if(window.ethereum) { 
+            const acc = await window.ethereum.request({ method: 'eth_accounts' }); 
+            if(acc.length) initConnection(acc); 
+        } 
+    });
 </script>
 </body>
 </html>
