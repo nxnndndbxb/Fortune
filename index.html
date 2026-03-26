@@ -249,7 +249,7 @@
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
 
-        /* --- EDITED: Bottom Nav - Island Style --- */
+        /* Bottom Nav - Island Style */
         .bottom-nav {
             position: fixed;
             bottom: 15px;
@@ -288,7 +288,7 @@
             text-shadow: 0 0 10px var(--primary-glow);
         }
 
-        /* --- EDITED: Special Nav Button --- */
+        /* Special Nav Button */
         .nav-item-special {
             display: flex;
             align-items: center;
@@ -311,7 +311,7 @@
             animation: pulse 1.5s infinite;
         }
 
-        /* --- EDITED: Profile Section --- */
+        /* Profile Section */
         .profile-header {
             height: 150px;
             border-radius: 24px;
@@ -420,7 +420,7 @@
             text-align: center;
         }
 
-        /* --- EDITED STYLES FOR NETWORK PAGE --- */
+        /* Network Page Styles */
         .invite-link-wrapper {
             display: flex;
             align-items: center;
@@ -456,7 +456,7 @@
             filter: brightness(1.2);
         }
         
-        /* --- NEW: NETWORK TREE STYLES --- */
+        /* Network Tree Styles */
         .network-tree-container {
             padding: 10px;
             overflow-x: auto;
@@ -539,8 +539,7 @@
         }
         .network-tree .tree-node.is-user .tree-node-id { color: rgba(255,255,255,0.8); }
 
-
-        /* --- EDITED STYLES FOR STARS PAGE --- */
+        /* Stars Page Styles */
         .stars-page-button {
             display: flex;
             flex-direction: column;
@@ -567,7 +566,7 @@
             text-shadow: 0 0 20px var(--primary-glow);
         }
         
-        /* --- NEW: Fullscreen Overlay for Stars --- */
+        /* Fullscreen Overlay for Stars */
         .stars-page-overlay {
             position: fixed;
             inset: 0;
@@ -652,7 +651,7 @@
             border-radius: 12px;
         }
         
-        /* --- EDITED: Level Page Overlay & Cards --- */
+        /* Level Page Overlay */
         .level-page-overlay {
             position: fixed;
             inset: 0;
@@ -1039,7 +1038,6 @@
 </div>
 
 <script>
-    /* ========== WALLET SYSTEM ========== */
     /* CORE SYSTEM CONFIGURATION */
     const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
@@ -1179,15 +1177,13 @@
         if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10);
         if (!getUserLevel(wallet)) setUserLevel(wallet, 0);
 
+        // Distribute commissions
         distributeCommissions(wallet);
     }
 
     async function distributeCommissions(newUserWallet) {
         const newUserProfile = getUserProfile(newUserWallet);
-        if (!newUserProfile || !newUserProfile.uplinerId) {
-            console.log("No upliner found for new user. No commissions distributed.");
-            return;
-        }
+        if (!newUserProfile || !newUserProfile.uplinerId) return;
 
         const baseAmount = JOINING_FEE_USDT;
 
@@ -1297,6 +1293,30 @@
         document.getElementById('userRankBadge').innerText = level.name;
     }
     
+    // --- AUTO REDIRECT TO HOME PAGE AFTER PAYMENT ---
+    function showDashboardAfterPayment() {
+        // Hide connect and investment states
+        connectState.classList.add('hidden');
+        investmentState.classList.add('hidden');
+        // Show dashboard
+        dashboardState.classList.remove('hidden');
+        bottomNav.style.display = 'flex';
+        
+        // Initialize all dashboard components
+        updateDashboard();
+        updateAssetsPage();
+        renderNetworkTree();
+        
+        // Initialize swiper if not already
+        new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
+        
+        // Show success message
+        showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
+        
+        // Clear referral from session storage
+        sessionStorage.removeItem('ztr_ref_id');
+    }
+    
     // --- LEVEL PAGE FUNCTIONS ---
     function initializeLevelSwiper() {
         const wrapper = document.getElementById('levelSwiperWrapper');
@@ -1350,7 +1370,6 @@
         levelPageOverlay.classList.remove('active');
         document.body.style.overflow = 'auto';
     }
-
 
     // --- NETWORK & STARS PAGE FUNCTIONS ---
     
@@ -1410,7 +1429,6 @@
         treeContainer.innerHTML = treeHTML;
     }
 
-
     function generateLargeStarsHTML(count, filledCount) {
         let starsHtml = '';
         for (let i = 0; i < count; i++) {
@@ -1464,8 +1482,6 @@
     window.closeStarsPages = closeStarsPages;
     window.openLevelStarsPage = openLevelStarsPage;
     window.openJoiningStarsPage = openJoiningStarsPage;
-    window.closeModal = closeModal;
-    window.openModal = openModal;
 
     window.upgradeLevel = function(levelId, levelName, price, commission) {
         const currentId = getUserLevel(userAddress);
@@ -1495,23 +1511,6 @@
         finally { isProcessing = false; window.selectedLevel = null; }
     });
 
-    // Function to show dashboard after payment
-    function showDashboardAfterPayment() {
-        connectState.classList.add('hidden');
-        investmentState.classList.add('hidden');
-        dashboardState.classList.remove('hidden');
-        bottomNav.style.display = 'flex';
-        updateDashboard();
-        updateAssetsPage();
-        // Initialize swiper if not already done
-        if (typeof dashboardSwiper === 'undefined' || !dashboardSwiper) {
-            window.dashboardSwiper = new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
-        }
-        // Refresh network tree if needed
-        renderNetworkTree();
-        showToast("Welcome to ZTR Premium Dashboard!", "success");
-    }
-
     // Core Connection
     async function initConnection(accounts) {
         if (!accounts || accounts.length === 0) return;
@@ -1529,7 +1528,15 @@
         await getUSDTDecimals();
         await updateBalances();
         if (isPaidUser(userAddress)) {
-            showDashboardAfterPayment();
+            connectState.classList.add('hidden');
+            investmentState.classList.add('hidden');
+            dashboardState.classList.remove('hidden');
+            bottomNav.style.display = 'flex';
+            updateDashboard();
+            updateAssetsPage();
+            renderNetworkTree();
+            new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
+            showToast("Welcome back! Dashboard ready.", "success");
         } else {
             connectState.classList.add('hidden');
             investmentState.classList.remove('hidden');
@@ -1566,24 +1573,25 @@
             showToast("Transaction sent! Confirming...", "info");
             await tx.wait();
             
+            // Mark user as paid with referral ID
             markUserAsPaid(userAddress, referralId);
-            sessionStorage.removeItem('ztr_ref_id');
             
-            showToast("Node Activated! Welcome to ZTR Premium!", "success");
+            // Close modal first
             closeModal('paymentModal');
             
-            // Auto redirect to dashboard without refresh
+            // AUTO REDIRECT TO HOME PAGE - Show dashboard after successful payment
             showDashboardAfterPayment();
             
-            // Update balances after payment
+            // Refresh balances and data
             await updateBalances();
             updateDashboard();
+            updateAssetsPage();
             renderNetworkTree();
             
         } catch (e) { 
             showToast("Transaction failed. Please try again.", "error"); 
         } finally { 
-            isProcessing = false;
+            isProcessing = false; 
             confirmBtn.disabled = false;
             confirmBtn.innerHTML = 'Confirm';
         }
@@ -1652,7 +1660,7 @@
         });
     });
 
-    // Auto-Sync (refresh data without disconnecting)
+    // Auto-Sync
     setInterval(() => {
         if (userAddress && isPaidUser(userAddress)) {
             updateBalances();
@@ -1660,11 +1668,12 @@
         }
     }, 15000);
 
-    // Initial Load - restore session automatically
+    // Initial Load
     window.addEventListener('load', async () => {
         const ip = await getIP();
         document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
         
+        // Check for referral link
         const urlParams = new URLSearchParams(window.location.search);
         const ref = urlParams.get('ref');
         if (ref) {
@@ -1672,29 +1681,21 @@
             sessionStorage.setItem('ztr_ref_id', referralId);
             showToast(`Joining under sponsor ID: ${ref}`, 'info');
         } else {
-            const storedRef = sessionStorage.getItem('ztr_ref_id');
-            if (storedRef) referralId = parseInt(storedRef);
+            referralId = parseInt(sessionStorage.getItem('ztr_ref_id'));
         }
 
-        // Auto restore session if wallet was previously connected
         if (window.ethereum) {
             const acc = await window.ethereum.request({ method: 'eth_accounts' });
-            if (acc.length > 0) {
-                await initConnection(acc);
-            }
+            if (acc.length > 0) await initConnection(acc);
         }
     });
 </script>
 
 <style>
-    /* Add spin animation for loading */
-    .spin {
-        animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(20px); } }
 </style>
 
 </body>
