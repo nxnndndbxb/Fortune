@@ -420,7 +420,7 @@
             text-align: center;
         }
 
-        /* --- NEW STYLES FOR NETWORK PAGE --- */
+        /* --- EDITED STYLES FOR NETWORK PAGE --- */
         .invite-link-wrapper {
             display: flex;
             align-items: center;
@@ -455,51 +455,90 @@
         .invite-link-wrapper button:hover {
             filter: brightness(1.2);
         }
-        .team-list {
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-            padding-right: 5px;
+        
+        /* --- NEW: NETWORK TREE STYLES --- */
+        .network-tree-container {
+            padding: 10px;
+            overflow-x: auto;
         }
-        .team-list::-webkit-scrollbar { width: 4px; }
-        .team-list::-webkit-scrollbar-track { background: transparent; }
-        .team-list::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
-        .team-member-card {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: rgba(255,255,255,0.03);
+        .network-tree, .network-tree ul {
+            position: relative;
+            padding: 1em 0;
+            white-space: nowrap;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .network-tree ul { padding-top: 20px; }
+        .network-tree li {
+            display: inline-block;
+            vertical-align: top;
+            text-align: center;
+            list-style-type: none;
+            position: relative;
+            padding: 1em .5em 0 .5em;
+        }
+        .network-tree li::before, .network-tree li::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 50%;
+            border-top: 2px solid var(--glass-border);
+            width: 50%;
+            height: 1em;
+        }
+        .network-tree li::after {
+            right: auto;
+            left: 50%;
+            border-left: 2px solid var(--glass-border);
+        }
+        .network-tree li:only-child::after, .network-tree li:only-child::before { display: none; }
+        .network-tree li:only-child { padding-top: 0; }
+        .network-tree li:first-child::before, .network-tree li:last-child::after { border: 0 none; }
+        .network-tree li:last-child::before {
+            border-right: 2px solid var(--glass-border);
+            border-radius: 0 8px 0 0;
+        }
+        .network-tree li:first-child::after {
+            border-radius: 8px 0 0 0;
+        }
+        .network-tree ul ul::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            border-left: 2px solid var(--glass-border);
+            width: 0;
+            height: 20px;
+        }
+        .network-tree li .tree-node {
             border: 1px solid var(--glass-border);
-            padding: 12px;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 11px;
+            display: inline-block;
             border-radius: 12px;
-            margin-bottom: 8px;
+            min-width: 120px;
+            background: rgba(15, 23, 42, 0.8);
+            transition: .3s;
         }
-        .team-member-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-        .team-member-info { flex-grow: 1; }
-        .team-member-info strong { font-size: 14px; }
-        .team-member-info small {
-            display: block;
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-        .team-member-level {
-            font-size: 11px;
-            font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 8px;
+        .network-tree li .tree-node:hover,
+        .network-tree li .tree-node:hover+ul li .tree-node {
             background: rgba(0, 242, 255, 0.1);
+            border-color: var(--primary);
             color: var(--primary);
-            border: 1px solid var(--primary-glow);
         }
+        .tree-node i { margin-right: 8px; }
+        .tree-node-name { display: block; font-weight: bold; margin-bottom: 3px; }
+        .tree-node-id { font-family: monospace; color: var(--text-muted); }
+        .network-tree .tree-node.is-user {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: var(--bg-deep);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .network-tree .tree-node.is-user .tree-node-id { color: rgba(255,255,255,0.8); }
+
 
         /* --- EDITED STYLES FOR STARS PAGE --- */
         .stars-page-button {
@@ -899,7 +938,7 @@
         </div>
 
         <div id="pageTeam" class="page">
-            <div class="main-card glass">
+             <div class="main-card glass">
                 <h3>Share Your Protocol Link</h3>
                 <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">
                     Grow your network and increase your rewards with a unique invitation link.
@@ -912,8 +951,8 @@
             </div>
             
             <div class="main-card glass" style="margin-top:20px;">
-                <h3>Your Network (<span id="teamPageTotalCount">0</span>)</h3>
-                <div id="teamListContainer" class="team-list">
+                <h3>Your Network Tree (<span id="teamPageTotalCount">0</span>)</h3>
+                <div id="networkTreeContainer" class="network-tree-container">
                     <p style="text-align:center; color:var(--text-muted); font-size:13px;">Loading network data...</p>
                 </div>
             </div>
@@ -1030,7 +1069,7 @@
         TEAM_COMMISSION: 'ztr_team_commission', USER_PROFILES: 'ztr_user_profiles', USER_IDS: 'ztr_user_ids'
     };
 
-    let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper;
+    let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper, referralId = null;
 
     // UI ELEMENTS
     const connectState = document.getElementById('connectState'), investmentState = document.getElementById('investmentState'), dashboardState = document.getElementById('dashboardState');
@@ -1079,16 +1118,33 @@
     function getNextUserId() {
         let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
         let nextId = 1000;
-        for (let key in userIds) { if (userIds[key] >= nextId) nextId = userIds[key] + 1; }
+        const existingIds = Object.values(userIds);
+        if(existingIds.length > 0) {
+            nextId = Math.max(...existingIds) + 1;
+        }
         return nextId;
     }
 
+    function getWalletById(id) {
+        const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
+        for (const wallet in userIds) {
+            if (userIds[wallet] === parseInt(id)) {
+                return wallet;
+            }
+        }
+        return null;
+    }
+    
     function getUserProfile(wallet) {
+        if(!wallet) return null;
         const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
         return profiles[wallet.toLowerCase()] || null;
     }
 
-    function createUserProfile(wallet) {
+    function createUserProfile(wallet, uplinerId = null) {
+        const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+        if (profiles[wallet.toLowerCase()]) return profiles[wallet.toLowerCase()]; // Do not overwrite
+
         const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
         let userId = userIds[wallet.toLowerCase()];
         if (!userId) {
@@ -1096,22 +1152,84 @@
             userIds[wallet.toLowerCase()] = userId;
             localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
         }
-        const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-        if (!profiles[wallet.toLowerCase()]) {
-            profiles[wallet.toLowerCase()] = { name: `User ${userId}`, avatar: 'fa-user-astronaut', joinDate: new Date().toLocaleDateString(), userId: userId, profilePicUrl: null };
-            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-        }
+        
+        profiles[wallet.toLowerCase()] = { 
+            name: `User ${userId}`, 
+            avatar: 'fa-user-astronaut', 
+            joinDate: new Date().toLocaleDateString(), 
+            userId: userId, 
+            profilePicUrl: null,
+            uplinerId: uplinerId 
+        };
+        localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
+        
         return profiles[wallet.toLowerCase()];
     }
 
     function isPaidUser(wallet) { const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); return paidUsers[wallet.toLowerCase()] === true; }
-    function markUserAsPaid(wallet) { 
+    
+    function markUserAsPaid(wallet, uplinerId) {
         const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
         paidUsers[wallet.toLowerCase()] = true; 
         localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
-        createUserProfile(wallet);
-        if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10); 
-        if (!getUserLevel(wallet)) setUserLevel(wallet, 0); 
+        
+        createUserProfile(wallet, uplinerId);
+        
+        if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10); // Initial bonus
+        if (!getUserLevel(wallet)) setUserLevel(wallet, 0);
+
+        // NEW: After marking as paid, distribute commissions
+        distributeCommissions(wallet);
+    }
+
+    async function distributeCommissions(newUserWallet) {
+        const newUserProfile = getUserProfile(newUserWallet);
+        if (!newUserProfile || !newUserProfile.uplinerId) {
+            console.log("No upliner found for new user. No commissions distributed.");
+            return;
+        }
+
+        const baseAmount = JOINING_FEE_USDT; // Commissions calculated in ZTR (1 USDT = 1 ZTR)
+
+        // 1. Direct Upline (40%)
+        const directInviterWallet = getWalletById(newUserProfile.uplinerId);
+        if (directInviterWallet) {
+            const commission = baseAmount * 0.40;
+            updateZTRBalance(directInviterWallet, commission);
+            showToast(`Upliner received ${commission.toFixed(2)} ZTR commission!`, 'success');
+            
+            // Increment team size for the direct inviter
+            const teamSizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}');
+            teamSizes[directInviterWallet] = (teamSizes[directInviterWallet] || 0) + 1;
+            localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
+            
+            // 2. Second Level Upline (10%)
+            const directInviterProfile = getUserProfile(directInviterWallet);
+            if (directInviterProfile && directInviterProfile.uplinerId) {
+                const secondLevelUplinerWallet = getWalletById(directInviterProfile.uplinerId);
+                if (secondLevelUplinerWallet) {
+                    const secondLevelCommission = baseAmount * 0.10;
+                    updateZTRBalance(secondLevelUplinerWallet, secondLevelCommission);
+                }
+            }
+
+            // 3. Downline Dividend (20%)
+            const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+            const siblings = [];
+            for(const wallet in profiles) {
+                if(profiles[wallet].uplinerId === newUserProfile.uplinerId && wallet !== newUserWallet.toLowerCase()) {
+                    siblings.push(wallet);
+                }
+            }
+
+            if(siblings.length > 0) {
+                const downlinePool = baseAmount * 0.20;
+                const sharePerSibling = downlinePool / siblings.length;
+                siblings.forEach(siblingWallet => {
+                    updateZTRBalance(siblingWallet, sharePerSibling);
+                });
+            }
+        }
     }
     
     function getZTRBalance(wallet) { const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); return balances[wallet.toLowerCase()] || 0; }
@@ -1239,42 +1357,63 @@
 
 
     // --- NETWORK & STARS PAGE FUNCTIONS ---
-    function generateMockTeamData(count) {
-        const mockTeam = [];
-        const levelNames = ["Starter", ...LEVELS.map(l => l.name)];
-        for (let i = 0; i < count; i++) {
-            const randomLevelIndex = Math.floor(Math.random() * levelNames.length);
-            const joinDate = new Date();
-            joinDate.setDate(joinDate.getDate() - Math.floor(Math.random() * 30));
-            mockTeam.push({ id: 1001 + i + Math.floor(Math.random() * 1000), level: levelNames[randomLevelIndex], joinDate: joinDate.toLocaleDateString(), avatarIcon: ['fa-user-astronaut', 'fa-user-ninja', 'fa-user-secret', 'fa-user-tie'][Math.floor(Math.random() * 4)] });
-        }
-        return mockTeam;
-    }
-
-    function renderTeamPage() {
+    
+    function renderNetworkTree() {
         if (!userAddress) return;
-        const profile = getUserProfile(userAddress);
+        const currentUserProfile = getUserProfile(userAddress);
+        if(!currentUserProfile) return;
+
+        const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
         const teamSize = getTeamSize(userAddress);
-        document.getElementById('inviteLink').value = `${window.location.origin}${window.location.pathname}?ref=${profile.userId}`;
+
+        document.getElementById('inviteLink').value = `${window.location.origin}${window.location.pathname}?ref=${currentUserProfile.userId}`;
         document.getElementById('teamPageTotalCount').innerText = teamSize;
-        const teamListContainer = document.getElementById('teamListContainer');
-        if (teamSize === 0) { teamListContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px;">Your network is empty. Share your link to start building!</p>`; return; }
-        const teamData = generateMockTeamData(teamSize);
-        teamListContainer.innerHTML = teamData.map(member => `
-            <div class="team-member-card">
-                <div class="team-member-avatar"><i class="fa-solid ${member.avatarIcon}"></i></div>
-                <div class="team-member-info">
-                    <strong>User #${member.id}</strong>
-                    <small>Joined: ${member.joinDate}</small>
+
+        const treeContainer = document.getElementById('networkTreeContainer');
+        if (teamSize === 0) {
+            treeContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px;">Your network is empty. Share your link to start building!</p>`;
+            return;
+        }
+
+        const buildNode = (profile, isCurrentUser = false) => {
+            return `
+                <div class="tree-node ${isCurrentUser ? 'is-user' : ''}">
+                    <i class="fa-solid ${profile.profilePicUrl ? 'fa-user-check' : profile.avatar}"></i>
+                    <span class="tree-node-name">${profile.name}</span>
+                    <span class="tree-node-id">ID: ${profile.userId}</span>
                 </div>
-                <div class="team-member-level">${member.level}</div>
-            </div>`).join('');
+            `;
+        };
+
+        const buildBranch = (uplinerId) => {
+            let branchHTML = '';
+            const children = Object.values(profiles).filter(p => p.uplinerId === uplinerId);
+            if (children.length > 0) {
+                branchHTML += '<ul>';
+                children.forEach(childProfile => {
+                    branchHTML += '<li>';
+                    branchHTML += buildNode(childProfile);
+                    branchHTML += buildBranch(childProfile.userId); // Recursion
+                    branchHTML += '</li>';
+                });
+                branchHTML += '</ul>';
+            }
+            return branchHTML;
+        };
+
+        let treeHTML = `
+            <div class="network-tree">
+                <ul>
+                    <li>
+                        ${buildNode(currentUserProfile, true)}
+                        ${buildBranch(currentUserProfile.userId)}
+                    </li>
+                </ul>
+            </div>
+        `;
+        treeContainer.innerHTML = treeHTML;
     }
 
-    function renderInitialStarsPage() {
-        // This function is now just a placeholder for the buttons.
-        // The actual rendering logic is moved to the page-opening functions.
-    }
 
     function generateLargeStarsHTML(count, filledCount) {
         let starsHtml = '';
@@ -1414,10 +1553,15 @@
             const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
             showToast("Transaction sent! Confirming...", "info");
             await tx.wait();
-            markUserAsPaid(userAddress);
+            
+            // Pass referral ID when marking user as paid
+            markUserAsPaid(userAddress, referralId);
+            sessionStorage.removeItem('ztr_ref_id'); // Clean up session storage
+            
             showToast("Node Activated! Welcome to ZTR Premium!", "success");
             closeModal('paymentModal');
-            initConnection([userAddress]);
+            await initConnection([userAddress]); // Re-initialize to show dashboard
+
         } catch (e) { showToast("Transaction failed. Please try again.", "error"); } 
         finally { isProcessing = false; }
     });
@@ -1481,8 +1625,7 @@
             const pageId = btn.dataset.page;
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
-            if (pageId === 'team') renderTeamPage();
-            if (pageId === 'stars') renderInitialStarsPage();
+            if (pageId === 'team') renderNetworkTree();
         });
     });
 
@@ -1498,6 +1641,18 @@
     window.addEventListener('load', async () => {
         const ip = await getIP();
         document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
+        
+        // Check for referral link
+        const urlParams = new URLSearchParams(window.location.search);
+        const ref = urlParams.get('ref');
+        if (ref) {
+            referralId = parseInt(ref);
+            sessionStorage.setItem('ztr_ref_id', referralId); // Store in case of page reload
+            showToast(`Joining under sponsor ID: ${ref}`, 'info');
+        } else {
+            referralId = parseInt(sessionStorage.getItem('ztr_ref_id'));
+        }
+
         if (window.ethereum) {
             const acc = await window.ethereum.request({ method: 'eth_accounts' });
             if (acc.length > 0) await initConnection(acc);
