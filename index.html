@@ -1048,6 +1048,12 @@
     const JOINING_FEE_USDT = 0.10;
     const IMAGE_HOST_API_KEY = '31c324eeef3df98e593e1897b02cc37b';
     
+    // IMPORTANT SECURITY NOTICE:
+    // The 12-word secret phrase ("diet, vibrant, luggage, guard, lucky, load, urge, artefact, pave, impulse, toddler, response")
+    // is a private key and must NEVER be stored or used in frontend code.
+    // Including it here would grant anyone full control over the associated wallet.
+    // This is a major security vulnerability. Therefore, it has not been implemented.
+
     const LEVELS = [
         { id: 1, name: "Iron", price: 5, commission: 2, icon: "🛡️" },
         { id: 2, name: "Bronze", price: 10, commission: 4, icon: "🥉" },
