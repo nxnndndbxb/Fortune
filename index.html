@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ZTR Coin - Premium Blockchain Hub</title>
+    <title>ETC Coin - Premium Blockchain Hub</title>
     <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
@@ -13,28 +13,23 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <style>
         :root {
-            --primary: #00f2ff;
-            --primary-glow: rgba(0, 242, 255, 0.5);
-            --secondary: #7000ff;
-            --secondary-glow: rgba(112, 0, 255, 0.5);
-            --bg-deep: #050b18;
+            --primary: #00ff88;
+            --primary-glow: rgba(0, 255, 136, 0.5);
+            --secondary: #00aaff;
+            --secondary-glow: rgba(0, 170, 255, 0.5);
+            --bg-deep: #0a0e1a;
             --glass-bg: rgba(15, 23, 42, 0.7);
             --glass-border: rgba(255, 255, 255, 0.1);
             --text-main: #e2e8f0;
             --text-muted: #94a3b8;
             --success: #10b981;
             --gold: #ffb800;
-            --shine: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.15), transparent);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         
-        html, body {
-            overscroll-behavior: none;
-        }
-
         body {
-            background: radial-gradient(circle at top right, #0f172a, #050b18);
+            background: radial-gradient(circle at top right, #0f172a, #0a0e1a);
             color: var(--text-main);
             min-height: 100vh;
             padding-bottom: 90px;
@@ -45,8 +40,8 @@
             content: "";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-image: linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px), 
-                              linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+            background-image: linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px), 
+                              linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
             background-size: 30px 30px;
             z-index: -1;
         }
@@ -54,7 +49,6 @@
         .glass {
             background: var(--glass-bg);
             backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
             position: relative;
@@ -66,7 +60,7 @@
             position: absolute;
             top: -50%; left: -50%;
             width: 200%; height: 200%;
-            background: var(--shine);
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.15), transparent);
             transform: rotate(30deg);
             animation: shine 6s infinite;
             pointer-events: none;
@@ -86,7 +80,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: rgba(5, 11, 24, 0.8);
+            background: rgba(10, 14, 26, 0.8);
             border-bottom: 1px solid var(--glass-border);
             backdrop-filter: blur(10px);
         }
@@ -98,33 +92,15 @@
             background: linear-gradient(to right, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 15px var(--primary-glow);
         }
 
-        .ip-badge {
+        .ip-badge, .wallet-badge {
             font-size: 10px;
             padding: 5px 12px;
-            background: rgba(0, 242, 255, 0.1);
+            background: rgba(0, 255, 136, 0.1);
             border: 1px solid var(--primary-glow);
             border-radius: 50px;
             color: var(--primary);
-        }
-
-        .wallet-address-badge {
-            font-size: 10px;
-            padding: 5px 12px;
-            background: rgba(112, 0, 255, 0.2);
-            border: 1px solid var(--secondary-glow);
-            border-radius: 50px;
-            color: var(--text-main);
-            font-family: monospace;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .wallet-address-badge:hover {
-            background: rgba(112, 0, 255, 0.4);
-            transform: scale(1.02);
         }
 
         .container {
@@ -166,42 +142,6 @@
             color: var(--primary);
             text-shadow: 0 0 10px var(--primary-glow);
         }
-        
-        .node-button-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 25px;
-            perspective: 800px;
-        }
-        .node-button {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: linear-gradient(145deg, var(--secondary), var(--primary));
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            box-shadow: 0 10px 30px var(--secondary-glow), inset 0 0 15px rgba(255,255,255,0.2);
-            border: 3px solid var(--bg-deep);
-            color: white;
-            text-align: center;
-            animation: pulse 3s infinite;
-            transform-style: preserve-3d;
-        }
-        .node-button:hover {
-            transform: scale(1.05) rotateY(15deg);
-            box-shadow: 0 15px 40px var(--primary-glow), inset 0 0 20px rgba(255,255,255,0.3);
-            animation-play-state: paused;
-        }
-        .node-button i { font-size: 32px; margin-bottom: 8px; }
-        .node-button h3 { font-size: 16px; line-height: 1.2; margin: 0; }
-        .node-button small { font-size: 10px; color: rgba(255,255,255,0.8); }
-
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
         .btn {
             width: 100%;
@@ -217,26 +157,18 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            background: linear-gradient(135deg, var(--secondary), #4f00b3);
+            background: linear-gradient(135deg, var(--secondary), #0088cc);
             box-shadow: 0 4px 15px var(--secondary-glow);
         }
-        
-        .btn:disabled {
-            background: rgba(255,255,255,0.1);
-            color: var(--text-muted);
-            cursor: not-allowed;
-            box-shadow: none;
-            filter: grayscale(1);
-        }
 
-        .btn:hover:not(:disabled) {
+        .btn:hover {
             transform: scale(1.02);
             filter: brightness(1.2);
         }
-        
+
         .btn-success {
-            background: linear-gradient(135deg, #059669, #10b981);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            background: linear-gradient(135deg, #00aa88, var(--primary));
+            box-shadow: 0 4px 15px var(--primary-glow);
         }
 
         .bottom-nav {
@@ -245,7 +177,7 @@
             left: 15px;
             right: 15px;
             height: 70px;
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(10, 14, 26, 0.9);
             border: 1px solid var(--glass-border);
             border-radius: 25px;
             display: flex;
@@ -253,7 +185,6 @@
             align-items: center;
             backdrop-filter: blur(20px);
             z-index: 1000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .nav-item {
@@ -265,86 +196,46 @@
             gap: 4px;
             transition: 0.3s;
             cursor: pointer;
-            width: 100%;
-            height: 100%;
-            justify-content: center;
         }
 
         .nav-item i { font-size: 20px; }
-        
         .nav-item.active {
             color: var(--primary);
             text-shadow: 0 0 10px var(--primary-glow);
         }
 
-        .nav-item-special {
+        .level-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 15px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            width: 65px;
-            height: 65px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            color: white;
-            font-size: 28px;
+            gap: 15px;
+            transition: 0.3s;
             cursor: pointer;
-            transform: translateY(-20px);
-            border: 3px solid var(--bg-deep);
-            box-shadow: 0 0 20px var(--primary-glow);
-            transition: 0.3s ease;
-        }
-        .nav-item-special:hover {
-            transform: translateY(-20px) scale(1.1);
-            filter: brightness(1.2);
         }
 
-        .profile-header {
-            height: 150px;
-            border-radius: 24px;
-            margin-bottom: -50px;
-            overflow: hidden;
-            position: relative;
+        .level-card:hover {
+            background: rgba(255,255,255,0.07);
+            border-color: var(--primary);
         }
-        .profile-header .cover-photo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: brightness(0.7);
-        }
+
         .profile-avatar {
             width: 90px; height: 90px;
             border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 40px;
             border: 3px solid var(--bg-deep);
-            box-shadow: 0 0 20px rgba(0,0,0,0.7);
+            box-shadow: 0 0 20px var(--primary-glow);
             cursor: pointer;
-            position: relative;
-            background-color: var(--glass-bg);
-            overflow: hidden;
         }
-        .profile-avatar-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .profile-avatar:hover::after {
-            content: "\f040";
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-        
+
         .rank-badge {
             background: linear-gradient(90deg, var(--gold), #b48600);
             padding: 4px 15px;
@@ -352,16 +243,15 @@
             font-size: 12px;
             font-weight: bold;
             color: black;
-            box-shadow: 0 0 10px rgba(255, 184, 0, 0.4);
         }
 
         .gas-info {
-            background: rgba(255, 184, 0, 0.05);
-            border: 1px solid rgba(255, 184, 0, 0.2);
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid rgba(0, 255, 136, 0.2);
             border-radius: 12px;
             padding: 10px;
             font-size: 11px;
-            color: var(--gold);
+            color: var(--primary);
             text-align: center;
             margin: 15px 0;
         }
@@ -391,7 +281,6 @@
             border-radius: 30px;
             padding: 30px;
             text-align: center;
-            box-shadow: 0 0 40px var(--primary-glow);
         }
 
         .balance-stat {
@@ -401,342 +290,39 @@
             padding: 15px 10px;
             text-align: center;
         }
-
-        .invite-link-wrapper {
-            display: flex;
-            align-items: center;
+        
+        .wallet-address-card {
             background: rgba(0,0,0,0.3);
+            padding: 12px;
             border-radius: 15px;
-            border: 1px solid var(--glass-border);
-            padding: 5px;
-        }
-        .invite-link-wrapper i.fa-link {
-            padding: 0 15px;
-            color: var(--text-muted);
-        }
-        .invite-link-wrapper input {
-            flex-grow: 1;
-            background: transparent;
-            border: none;
-            color: var(--primary);
             font-family: monospace;
-            font-size: 12px;
-            outline: none;
-        }
-        .invite-link-wrapper button {
-            background: var(--primary);
-            color: var(--bg-deep);
-            border: none;
-            border-radius: 12px;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .invite-link-wrapper button:hover {
-            filter: brightness(1.2);
-        }
-        
-        .network-tree-container {
-            padding: 10px;
-            overflow-x: auto;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        
-        .simple-network-list {
-            list-style: none;
-            padding-left: 20px;
-        }
-        
-        .simple-network-list li {
-            margin: 10px 0;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            border-left: 3px solid var(--primary);
-        }
-        
-        .tree-node-simple {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .tree-node-simple i {
-            font-size: 20px;
+            font-size: 11px;
+            text-align: center;
             color: var(--primary);
-        }
-        
-        .tree-node-simple .tree-node-name {
-            font-weight: bold;
-        }
-        
-        .tree-node-simple .tree-node-id {
-            font-size: 10px;
-            color: var(--text-muted);
-            font-family: monospace;
-        }
-        
-        .tree-node-simple.is-user {
-            color: var(--primary);
-        }
-
-        .stars-page-button {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
             margin-bottom: 20px;
-            text-align: center;
+            border: 1px dashed var(--primary);
+            cursor: pointer;
+        }
+        
+        .avatar-option {
             cursor: pointer;
             transition: 0.3s;
-            height: 180px;
-        }
-        .stars-page-button i {
-            font-size: 40px;
-            margin-bottom: 15px;
-            transition: 0.3s;
-        }
-        .stars-page-button:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary) !important;
-        }
-        .stars-page-button:hover i {
-            transform: scale(1.1);
-            text-shadow: 0 0 20px var(--primary-glow);
-        }
-        
-        .stars-page-overlay {
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(circle at top, var(--bg-deep), #0f172a);
-            z-index: 6000;
-            transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            display: flex;
-            flex-direction: column;
-        }
-        .stars-page-overlay.active {
-            transform: translateY(0%);
-        }
-        .stars-page-header {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            background: rgba(5, 11, 24, 0.8);
-            border-bottom: 1px solid var(--glass-border);
-            flex-shrink: 0;
-        }
-        .stars-page-back-btn {
-            background: none; border: none; color: white; font-size: 20px; cursor: pointer;
-        }
-        .stars-page-header h2 {
-            flex-grow: 1; text-align: center; font-size: 18px; margin: 0;
-        }
-        .stars-page-content {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 30px;
-            text-align: center;
-        }
-        .stars-page-subtitle {
-            font-size: 13px; color: var(--text-muted); max-width: 300px; margin: 0 auto 30px;
-        }
-        .large-stars-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        .large-star-icon {
-            font-size: 50px;
-            transition: 0.5s ease-in-out;
-        }
-        .large-star-icon.empty {
-            color: transparent;
-            -webkit-text-stroke: 1.5px var(--glass-border);
-        }
-        .large-star-icon.filled {
-            color: var(--gold);
-            text-shadow: 0 0 25px rgba(255, 215, 0, 0.7);
-            transform: scale(1.1);
-        }
-
-        .salary-system-box {
-            background: rgba(0, 242, 255, 0.05);
-            border: 1px solid var(--primary-glow);
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            margin-top: 20px;
-        }
-        .salary-system-box h3 {
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
-        .salary-system-box p {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 15px;
-        }
-        .salary-amount {
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-            background: rgba(0,0,0,0.3);
             padding: 10px;
-            border-radius: 12px;
+            border-radius: 50%;
         }
+        .avatar-option:hover { color: var(--primary); transform: scale(1.1); }
         
-        .level-page-overlay {
+        #toast-container {
             position: fixed;
-            inset: 0;
-            background: radial-gradient(circle at top right, #0f172a, #050b18);
-            z-index: 5000;
-            transform: translateX(100%);
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            display: flex;
-            flex-direction: column;
-        }
-        .level-page-overlay.active {
-            transform: translateX(0%);
-        }
-        .level-page-header {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            background: rgba(5, 11, 24, 0.8);
-            border-bottom: 1px solid var(--glass-border);
-        }
-        .level-page-back-btn {
-            background: none; border: none; color: white; font-size: 20px; cursor: pointer;
-        }
-        .level-page-header h2 {
-            flex-grow: 1; text-align: center; font-size: 18px; margin: 0;
-        }
-        .level-swiper-container {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px 0;
-            overflow: hidden;
-            position: relative;
-        }
-        .levelSwiper {
-            width: 100%;
-            height: 100%;
-        }
-        .swiper-slide {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 85%;
-        }
-        .level-slide-card {
-            width: 100%;
-            height: 500px;
-            padding: 30px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            filter: grayscale(1) opacity(0.7);
-            transition: 0.4s;
-        }
-        .level-slide-card.unlocked {
-            filter: grayscale(0) opacity(1);
-            border: 2px solid var(--primary);
-            box-shadow: 0 0 35px var(--primary-glow);
-        }
-        .level-slide-card .level-icon {
-            font-size: 80px;
-            line-height: 1;
-            text-shadow: 0 0 20px rgba(0,0,0,0.5);
-            transition: 0.3s;
-        }
-        .level-slide-card.unlocked .level-icon {
-             transform: scale(1.1);
-        }
-        .level-slide-card .level-price {
-            font-size: 36px;
-            font-weight: 800;
-            color: var(--primary);
-            text-shadow: 0 0 10px var(--primary-glow);
-        }
-        .level-slide-card .level-info {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-        .swiper-button-next, .swiper-button-prev {
-            color: var(--primary) !important;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
         }
     </style>
 </head>
 <body>
 
-<div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
-
-<!-- LEVEL PAGE -->
-<div class="level-page-overlay" id="levelPageOverlay">
-    <div class="level-page-header">
-        <button class="level-page-back-btn" onclick="closeLevelPage()"><i class="fa-solid fa-arrow-left"></i></button>
-        <h2>Level Matrix</h2>
-        <div style="width:20px;"></div>
-    </div>
-    <div class="level-swiper-container">
-        <div class="swiper levelSwiper">
-            <div class="swiper-wrapper" id="levelSwiperWrapper">
-            </div>
-        </div>
-        <div class="swiper-button-prev"></div>
-        <div class="swiper-button-next"></div>
-    </div>
-</div>
-
-<!-- STARS PAGES -->
-<div class="stars-page-overlay" id="levelStarsPage">
-    <div class="stars-page-header">
-        <button class="stars-page-back-btn" onclick="closeStarsPages()"><i class="fa-solid fa-arrow-left"></i></button>
-        <h2>Level Achievement Stars</h2>
-        <div style="width:20px;"></div>
-    </div>
-    <div class="stars-page-content">
-        <p class="stars-page-subtitle">Each level you upgrade fills a star. Fill all stars to unlock a permanent salary.</p>
-        <div class="large-stars-container" id="levelStarsContainer">
-        </div>
-        <div class="salary-system-box hidden" id="levelSalarySystem">
-            <h3><i class="fa-solid fa-crown" style="color:var(--gold);"></i> Level Mastery Salary Unlocked!</h3>
-            <p>You have achieved the highest rank. As a reward, you will receive a monthly salary based on your total level investment.</p>
-            <div class="salary-amount" id="levelSalaryAmount"></div>
-        </div>
-    </div>
-</div>
-
-<div class="stars-page-overlay" id="joiningStarsPage">
-    <div class="stars-page-header">
-        <button class="stars-page-back-btn" onclick="closeStarsPages()"><i class="fa-solid fa-arrow-left"></i></button>
-        <h2>Network Invitation Stars</h2>
-        <div style="width:20px;"></div>
-    </div>
-    <div class="stars-page-content">
-        <p class="stars-page-subtitle">Each new member you invite fills a star. Fill all 10 stars to unlock a commission bonus.</p>
-        <div class="large-stars-container" id="joiningStarsContainer">
-        </div>
-        <div class="salary-system-box hidden" id="joiningSalarySystem">
-            <h3><i class="fa-solid fa-people-group" style="color:var(--primary);"></i> Network Leader Bonus Unlocked!</h3>
-            <p>You have successfully invited 10 members. You will now receive a permanent 10% bonus on all your future network commissions.</p>
-             <div class="salary-amount" id="joiningSalaryAmount">
-                +10% Network Commission
-            </div>
-        </div>
-    </div>
-</div>
-
+<div id="toast-container"></div>
 
 <!-- Modals -->
 <div class="modal-overlay" id="paymentModal">
@@ -744,10 +330,10 @@
         <i class="fa-solid fa-bolt" style="font-size: 50px; color: var(--primary);"></i>
         <h2 style="margin: 15px 0;">Activate Node</h2>
         <p style="color: var(--text-muted);">Joining Premium Network</p>
-        <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;">0.10 USDT</div>
-        <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: ~0.0005 BNB</div>
+        <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;">0.01 ETC</div>
+        <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: ~0.0003 ETC</div>
         <div style="display:flex; gap:10px;">
-            <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closeModal('paymentModal')">Cancel</button>
+            <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closePaymentModal()">Cancel</button>
             <button class="btn btn-success" id="confirmPaymentBtn">Confirm</button>
         </div>
     </div>
@@ -758,10 +344,10 @@
         <i class="fa-solid fa-up-long" style="font-size: 50px; color: var(--gold);"></i>
         <h2 style="margin: 15px 0;">Level Upgrade</h2>
         <p id="upgradeLevelName" style="color: var(--gold);">Level Name</p>
-        <div id="upgradeAmount" style="font-size: 32px; color: white; font-weight: 900; margin: 15px 0;">0 ZTR</div>
+        <div id="upgradeAmount" style="font-size: 32px; color: white; font-weight: 900; margin: 15px 0;">0 ETC</div>
         <div class="gas-info"><i class="fa-solid fa-chart-line"></i> New Commission: <span id="newCommission">0%</span></div>
         <div style="display:flex; gap:10px;">
-            <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closeModal('upgradeModal')">Back</button>
+            <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closeUpgradeModal()">Back</button>
             <button class="btn" id="confirmUpgradeBtn">Upgrade Now</button>
         </div>
     </div>
@@ -770,59 +356,60 @@
 <div class="modal-overlay" id="editProfileModal">
     <div class="modal-content glass">
         <h3>Edit Identity</h3>
-        <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Your User ID cannot be changed.</p>
-        <input type="file" id="profilePicInput" class="hidden" accept="image/*">
+        <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:20px 0;" id="avatarOptions">
+            <div class="avatar-option" data-avatar="fa-user-astronaut" style="font-size:30px;"><i class="fa-solid fa-user-astronaut"></i></div>
+            <div class="avatar-option" data-avatar="fa-user-ninja" style="font-size:30px;"><i class="fa-solid fa-user-ninja"></i></div>
+            <div class="avatar-option" data-avatar="fa-crown" style="font-size:30px;"><i class="fa-solid fa-crown"></i></div>
+            <div class="avatar-option" data-avatar="fa-dragon" style="font-size:30px;"><i class="fa-solid fa-dragon"></i></div>
+        </div>
         <input type="text" id="profileNameInput" placeholder="Username" style="width:100%; padding:15px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); border-radius:15px; color:white; margin-bottom:15px;">
         <button class="btn" id="saveProfileBtn">Save Update</button>
     </div>
 </div>
 
-
 <div class="navbar">
-    <div class="logo">ZTR PREMIUM</div>
+    <div class="logo">ETC PREMIUM</div>
     <div style="display:flex; align-items:center; gap:8px;">
         <div class="ip-badge" id="ipDisplay">Scanning IP...</div>
-        <div class="wallet-address-badge" id="walletAddressBadge" onclick="copyWalletAddress()" style="display: none;">
-            <i class="fa-solid fa-wallet"></i> <span id="walletAddressShort">Not Connected</span>
-        </div>
+        <div class="wallet-badge" id="walletStatusBadge">Not Connected</div>
     </div>
 </div>
 
 <div class="container">
+    <!-- State 1: Connect -->
     <div id="connectState">
         <div class="main-card glass">
             <div style="text-align:center;">
                 <div style="font-size:60px; color:var(--primary); margin-bottom:20px;"><i class="fa-solid fa-fingerprint"></i></div>
-                <h2 style="margin-bottom:10px;">Quantum Access</h2>
+                <h2 style="margin-bottom:10px;">ETC Quantum Access</h2>
                 <p style="color:var(--text-muted); font-size:14px; margin-bottom:30px;">Initialize your decentralized protocol</p>
                 <button id="connectBtn" class="btn"><i class="fa-solid fa-link"></i> CONNECT WALLET</button>
             </div>
         </div>
     </div>
 
+    <!-- State 2: Investment -->
     <div id="investmentState" class="hidden">
         <div class="main-card glass" style="text-align:center;">
             <span class="rank-badge">ENTRY NODE</span>
-            <h1 style="font-size:40px; margin:20px 0; color:var(--primary);">0.10 <span style="font-size:18px;">USDT</span></h1>
-            <div style="background: rgba(0,242,255,0.1); padding: 10px; border-radius: 12px; margin: 15px 0;">
-                <i class="fa-solid fa-wallet"></i> <span id="investmentWalletAddress">Loading...</span>
-            </div>
+            <h1 style="font-size:40px; margin:20px 0; color:var(--primary);">0.01 <span style="font-size:18px;">ETC</span></h1>
             <ul style="text-align:left; list-style:none; margin:20px 0; color:var(--text-muted); font-size:14px;">
                 <li style="margin-bottom:10px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> Permanent Protocol Access</li>
-                <li style="margin-bottom:10px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> ZTR Yield Generation</li>
+                <li style="margin-bottom:10px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> ETC Yield Generation</li>
                 <li style="margin-bottom:10px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> Multi-Level Rewards</li>
             </ul>
             <button id="investNowBtn" class="btn btn-success">ACTIVATE LIFETIME NODE</button>
         </div>
     </div>
 
+    <!-- State 3: Dashboard Content -->
     <div id="dashboardState" class="hidden">
         <div id="pageDashboard" class="page active">
             <div class="main-card glass">
                 <div class="swiper dashboardSwiper" style="border-radius:20px; height:160px; margin-bottom:20px;">
                     <div class="swiper-wrapper">
-                        <div class="swiper-slide"><div style="width:100%; height:100%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-size: 24px;">ZTR PREMIUM</div></div>
-                        <div class="swiper-slide"><div style="width:100%; height:100%; background: linear-gradient(135deg, var(--secondary), var(--primary)); display: flex; align-items: center; justify-content: center; font-size: 24px;">BLOCKCHAIN HUB</div></div>
+                        <div class="swiper-slide"><img src="https://iili.io/qP10OzX.jpg" style="width:100%; height:100%; object-fit:cover;"></div>
+                        <div class="swiper-slide"><img src="https://iili.io/qP10OzX.jpg" style="width:100%; height:100%; object-fit:cover;"></div>
                     </div>
                 </div>
                 
@@ -834,128 +421,119 @@
                 <div class="income-grid">
                     <div class="income-card glass">
                         <p style="font-size:11px; color:var(--text-muted);">Core Profit</p>
-                        <h3 id="profitIncome">0.00 ZTR</h3>
+                        <h3 id="profitIncome">0.00 ETC</h3>
                         <small style="color:var(--success);">≈ $<span id="profitUSD">0</span></small>
                     </div>
                     <div class="income-card glass">
                         <p style="font-size:11px; color:var(--text-muted);">Network Size</p>
-                        <h3 id="teamIncome" style="color:var(--text-main);">0</h3>
-                        <small id="teamCount">Members</small>
+                        <h3 id="teamIncome" style="color:var(--secondary);">0.00 ETC</h3>
+                        <small id="teamCount">0 Units</small>
                     </div>
                     <div class="income-card glass">
-                        <p style="font-size:11px; color:var(--text-muted);">Monthly Salary</p>
-                        <h3 id="salleryIncome" style="color:var(--gold);">0.00 ZTR</h3>
-                        <small>From Stars</small>
+                        <p style="font-size:11px; color:var(--text-muted);">Staking Yield</p>
+                        <h3 id="salleryIncome" style="color:var(--gold);">0.00 ETC</h3>
+                        <small>Monthly</small>
                     </div>
-                     <div class="income-card glass">
+                    <div class="income-card glass">
                         <p style="font-size:11px; color:var(--text-muted);">Current Node</p>
-                        <h3 id="levelIncome" style="font-size: 18px; color: var(--text-main);">Starter</h3>
-                        <small id="levelNameDisplay" style="visibility: hidden;">Phase 1</small>
+                        <h3 id="levelIncome">0.00 ETC</h3>
+                        <small id="levelNameDisplay">Phase 1</small>
                     </div>
-                </div>
-
-                <div class="node-button-container">
-                    <div class="node-button" onclick="openLevelPage()">
-                        <i class="fa-solid fa-layer-group"></i>
-                        <h3>Matrix</h3>
-                        <small>View Levels</small>
-                    </div>
-                </div>
-                
-                <div class="gas-info" style="margin-top: 15px;">
-                    <i class="fa-solid fa-wallet"></i> Wallet: <span id="dashboardWalletAddress">Not Connected</span>
                 </div>
             </div>
         </div>
 
-        <div id="pageTeam" class="page">
-             <div class="main-card glass">
-                <h3>Share Your Protocol Link</h3>
-                <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">
-                    Grow your network and increase your rewards with a unique invitation link.
-                </p>
-                <div class="invite-link-wrapper">
-                    <i class="fa-solid fa-link"></i>
-                    <input type="text" id="inviteLink" readonly value="Loading link...">
-                    <button id="copyInviteLinkBtn"><i class="fa-solid fa-copy"></i></button>
-                </div>
+        <div id="pageLevel" class="page">
+            <div class="main-card glass">
+                <h3>Upgrade Matrix</h3>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Elevate your level to boost yield percentages</p>
+                <div id="levelsList"></div>
             </div>
-            
-            <div class="main-card glass" style="margin-top:20px;">
-                <h3>Your Network Tree (<span id="teamPageTotalCount">0</span>)</h3>
-                <div id="networkTreeContainer" class="network-tree-container">
-                    <p style="text-align:center; color:var(--text-muted); font-size:13px;">Loading network data...</p>
+        </div>
+
+        <div id="pageTeam" class="page">
+            <div class="main-card glass">
+                <h3>Network Structure</h3>
+                <div style="background:rgba(0,0,0,0.3); border-radius:20px; padding:20px; margin-top:15px;">
+                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <span>Total Population</span>
+                        <span id="teamTotalCount" style="color:var(--primary); font-weight:bold;">0</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <span>Active Links</span>
+                        <span id="activeTeamCount" style="color:var(--success);">0</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; padding:10px 0;">
+                        <span>Your Protocol Fee</span>
+                        <span id="teamCommission" style="color:var(--gold);">0%</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div id="pageStars" class="page">
-            <div class="main-card glass stars-page-button" onclick="openLevelStarsPage()">
-                <i class="fa-solid fa-layer-group" style="color:var(--gold);"></i>
-                <h3>Level Achieve Stars</h3>
-                <p style="font-size:12px; color:var(--text-muted);">Track your upgrade progress and unlock mastery rewards.</p>
-            </div>
-            <div class="main-card glass stars-page-button" onclick="openJoiningStarsPage()">
-                <i class="fa-solid fa-users" style="color:var(--primary);"></i>
-                <h3>Network Joining Stars</h3>
-                <p style="font-size:12px; color:var(--text-muted);">Track your network growth and unlock leader bonuses.</p>
+            <div class="main-card glass" style="text-align:center;">
+                <h3>Network Trust Score</h3>
+                <div style="margin:25px 0;">
+                    <i class="fa-solid fa-star" style="color:var(--gold); font-size:30px;"></i>
+                    <i class="fa-solid fa-star" style="color:var(--gold); font-size:30px;"></i>
+                    <i class="fa-solid fa-star" style="color:var(--gold); font-size:30px;"></i>
+                    <i class="fa-solid fa-star" style="color:var(--gold); font-size:30px;"></i>
+                    <i class="fa-solid fa-star-half-stroke" style="color:var(--gold); font-size:30px;"></i>
+                </div>
+                <h1 style="font-size:48px;">4.9</h1>
+                <p style="color:var(--text-muted);">Protocol Reliability Rating</p>
             </div>
         </div>
 
         <div id="pageAssets" class="page">
-            <div class="main-card glass" style="padding:0; overflow: visible;">
-                 <div class="profile-header">
-                    <div style="width:100%; height:100%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-size: 48px;">ZTR</div>
+            <div class="main-card glass">
+                <div class="profile-avatar" id="profileAvatar" onclick="openEditProfile()">
+                    <i class="fa-solid fa-user-circle" id="avatarIcon"></i>
                 </div>
-                <div style="padding: 25px; padding-top: 0;">
-                    <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('profilePicInput').click()">
-                        <i class="fa-solid fa-user-circle" id="avatarIcon"></i>
-                        <img src="" alt="Profile Picture" id="profileAvatarImg" class="profile-avatar-img hidden">
-                    </div>
-                    <div style="text-align:center; margin-bottom:25px;">
-                        <h2 id="profileName">Genesis User</h2>
-                        <span style="font-size:12px; color:var(--primary);" id="userId">ID: ZTR-0000</span>
-                    </div>
-
-                    <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:15px; font-family:monospace; font-size:11px; text-align:center; color:var(--primary); margin-bottom:20px; border:1px dashed var(--primary); cursor:pointer;" id="walletAddressDisplay" onclick="copyWalletAddress()">
-                        0x...
-                    </div>
-
-                    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:25px;">
-                        <div class="balance-stat">
-                            <i class="fa-brands fa-bnb" style="color:#f3ba2f;"></i>
-                            <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statBNB">0.00</div>
-                            <div style="font-size:9px; color:var(--text-muted);">BNB</div>
-                        </div>
-                        <div class="balance-stat">
-                            <i class="fa-solid fa-dollar-sign" style="color:#26a17b;"></i>
-                            <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statUSDT">0.00</div>
-                            <div style="font-size:9px; color:var(--text-muted);">USDT</div>
-                        </div>
-                        <div class="balance-stat">
-                            <i class="fa-solid fa-coins" style="color:var(--primary);"></i>
-                            <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statZTR">0.00</div>
-                            <div style="font-size:9px; color:var(--text-muted);">ZTR</div>
-                        </div>
-                    </div>
-
-                    <div style="border-top:1px solid var(--glass-border); padding-top:20px;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
-                            <span style="color:var(--text-muted);"><i class="fa-solid fa-calendar"></i> Deployment</span>
-                            <span id="joinDate">--/--/--</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
-                            <span style="color:var(--text-muted);"><i class="fa-solid fa-chart-area"></i> Total Yield</span>
-                            <span id="totalEarningsStat" style="color:var(--success);">$0.00</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; font-size:14px;">
-                            <span style="color:var(--text-muted);"><i class="fa-solid fa-shield"></i> Level Status</span>
-                            <span id="userLevelStat" style="color:var(--primary);">Start</span>
-                        </div>
-                    </div>
-
-                    <button class="btn" onclick="openModal('editProfileModal')" style="margin-top:25px; background:rgba(255,255,255,0.05); box-shadow:none; border:1px solid var(--glass-border);">MODIFY IDENTITY</button>
+                <div style="text-align:center; margin-bottom:25px;">
+                    <h2 id="profileName">Genesis User</h2>
+                    <span style="font-size:12px; color:var(--primary);" id="userId">ID: ETC-0000</span>
                 </div>
+
+                <div class="wallet-address-card" id="walletAddressDisplay" onclick="copyWalletAddress()">
+                    0x...
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:25px;">
+                    <div class="balance-stat">
+                        <i class="fa-solid fa-coins" style="color:#00ff88;"></i>
+                        <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statETC">0.00</div>
+                        <div style="font-size:9px; color:var(--text-muted);">ETC</div>
+                    </div>
+                    <div class="balance-stat">
+                        <i class="fa-solid fa-dollar-sign" style="color:#26a17b;"></i>
+                        <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statUSDT">0.00</div>
+                        <div style="font-size:9px; color:var(--text-muted);">USDT</div>
+                    </div>
+                    <div class="balance-stat">
+                        <i class="fa-solid fa-chart-line" style="color:var(--primary);"></i>
+                        <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statZTR">0.00</div>
+                        <div style="font-size:9px; color:var(--text-muted);">ZTR</div>
+                    </div>
+                </div>
+
+                <div style="border-top:1px solid var(--glass-border); padding-top:20px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
+                        <span style="color:var(--text-muted);"><i class="fa-solid fa-calendar"></i> Deployment</span>
+                        <span id="joinDate">--/--/--</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
+                        <span style="color:var(--text-muted);"><i class="fa-solid fa-chart-area"></i> Total Yield</span>
+                        <span id="totalEarningsStat" style="color:var(--success);">$0.00</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:14px;">
+                        <span style="color:var(--text-muted);"><i class="fa-solid fa-shield"></i> Level Status</span>
+                        <span id="userLevelStat" style="color:var(--primary);">Start</span>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="openEditProfile()" style="margin-top:25px; background:rgba(255,255,255,0.05); box-shadow:none;">MODIFY IDENTITY</button>
             </div>
         </div>
     </div>
@@ -963,176 +541,95 @@
 
 <div class="bottom-nav" id="bottomNav" style="display: none;">
     <div class="nav-item active" data-page="dashboard"><i class="fa-solid fa-house-chimney-window"></i><span>Home</span></div>
+    <div class="nav-item" data-page="level"><i class="fa-solid fa-layer-group"></i><span>Level</span></div>
     <div class="nav-item" data-page="team"><i class="fa-solid fa-diagram-project"></i><span>Network</span></div>
-    <div class="nav-item-special" onclick="openLevelPage()"><i class="fa-solid fa-layer-group"></i></div>
-    <div class="nav-item" data-page="stars"><i class="fa-solid fa-star"></i><span>Stars</span></div>
+    <div class="nav-item" data-page="stars"><i class="fa-solid fa-award"></i><span>Rank</span></div>
     <div class="nav-item" data-page="assets"><i class="fa-solid fa-wallet"></i><span>Vault</span></div>
 </div>
 
 <script>
-    /* ========== CORE SYSTEM CONFIGURATION ========== */
-    const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
+    // ==========================================
+    // NEW CONFIGURATION - ETC NETWORK
+    // ==========================================
+    const ADMIN_WALLET = "0x6c0d4A870eB310914102E9cd1aA3694BD487abD1";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
-    const CHAIN_ID = "0x38";
+    const CHAIN_ID = "0x38"; // BSC Mainnet (USDT BEP-20)
     const CHAIN_ID_DECIMAL = 56;
-    const USDT_GAS_LIMIT = 100000; // Increased gas limit for USDT transfer
-    const JOINING_FEE_USDT = 0.10;
+    const USDT_GAS_LIMIT = 65000;
+    const JOINING_FEE_ETC = 0.01; // 0.01 ETC joining fee
     
+    // Level prices in ETC
     const LEVELS = [
-        { id: 1, name: "Iron", price: 5, commission: 2, icon: "🛡️" },
-        { id: 2, name: "Bronze", price: 10, commission: 4, icon: "🥉" },
-        { id: 3, name: "Silver", price: 15, commission: 6, icon: "🥈" },
-        { id: 4, name: "Gold", price: 20, commission: 8, icon: "🥇" },
-        { id: 5, name: "Platinum", price: 25, commission: 10, icon: "💎" },
-        { id: 6, name: "Emerald", price: 30, commission: 12, icon: "❇️" },
-        { id: 7, name: "Sapphire", price: 35, commission: 14, icon: "💠" },
-        { id: 8, name: "Ruby", price: 40, commission: 16, icon: "❤️" },
-        { id: 9, name: "Diamond", price: 45, commission: 18, icon: "💍" },
-        { id: 10, name: "Master", price: 50, commission: 25, icon: "👑" }
+        { id: 1, name: "Bronze", price: 5, commission: 2, color: "#cd7f32", icon: "🥉" },
+        { id: 2, name: "Silver", price: 15, commission: 5, color: "#c0c0c0", icon: "🥈" },
+        { id: 3, name: "Gold", price: 35, commission: 8, color: "#ffd700", icon: "🥇" },
+        { id: 4, name: "Platinum", price: 45, commission: 12, color: "#e5e4e2", icon: "💎" },
+        { id: 5, name: "Diamond", price: 65, commission: 15, color: "#b9f2ff", icon: "💠" },
+        { id: 6, name: "Crown", price: 80, commission: 20, color: "#ffd966", icon: "👑" },
+        { id: 7, name: "Legend", price: 100, commission: 25, color: "#ff6b6b", icon: "⭐" }
     ];
     
-    const USDT_ABI = [
-        "function balanceOf(address owner) view returns (uint256)", 
-        "function transfer(address to, uint256 amount) returns (bool)", 
-        "function decimals() view returns (uint8)"
-    ];
+    const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
     
     const STORAGE_KEYS = {
-        SESSION: 'ztr_premium_session', 
-        PAID_USERS: 'ztr_paid_users', 
-        ZTR_BALANCE: 'ztr_user_balance',
-        USER_LEVEL: 'ztr_user_level', 
-        TEAM_SIZE: 'ztr_team_size', 
-        SALLERY_EARNINGS: 'ztr_sallery_earnings',
-        TEAM_COMMISSION: 'ztr_team_commission', 
-        USER_PROFILES: 'ztr_user_profiles', 
-        USER_IDS: 'ztr_user_ids'
+        SESSION: 'etc_premium_session', 
+        PAID_USERS: 'etc_paid_users', 
+        ZTR_BALANCE: 'etc_user_balance',
+        USER_LEVEL: 'etc_user_level', 
+        TEAM_SIZE: 'etc_team_size', 
+        SALLERY_EARNINGS: 'etc_sallery_earnings',
+        TEAM_COMMISSION: 'etc_team_commission', 
+        USER_PROFILES: 'etc_user_profiles', 
+        USER_IDS: 'etc_user_ids'
     };
 
-    let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper, referralId = null, dashboardSwiper = null;
+    let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false;
 
     // UI ELEMENTS
-    const connectState = document.getElementById('connectState');
-    const investmentState = document.getElementById('investmentState');
-    const dashboardState = document.getElementById('dashboardState');
-    const bottomNav = document.getElementById('bottomNav');
-    const levelPageOverlay = document.getElementById('levelPageOverlay');
-    const levelStarsPage = document.getElementById('levelStarsPage');
-    const joiningStarsPage = document.getElementById('joiningStarsPage');
+    const connectState = document.getElementById('connectState'), investmentState = document.getElementById('investmentState'), dashboardState = document.getElementById('dashboardState');
+    const paymentModal = document.getElementById('paymentModal'), upgradeModal = document.getElementById('upgradeModal'), editProfileModal = document.getElementById('editProfileModal'), bottomNav = document.getElementById('bottomNav');
 
-    // ========== HELPER FUNCTIONS ==========
     function showToast(message, type = 'info') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
-        const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
-        toast.style.cssText = `background:#1f2937; color:white; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.3); animation:fadeIn 0.3s forwards; font-size:13px; display:flex; align-items:center; gap:10px; border-left: 5px solid ${bgColor};`;
-        const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-info-circle';
-        toast.innerHTML = `<i class="fa-solid ${icon}" style="color:${bgColor}"></i> ${message}`;
+        toast.style.cssText = `background:white; color:black; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.2); animation:fadeIn 0.3s forwards; font-size:13px; display:flex; align-items:center; gap:10px; border-left: 5px solid ${type === 'success' ? '#10b981' : '#ef4444'};`;
+        toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i> ${message}`;
         container.appendChild(toast);
-        setTimeout(() => { 
-            toast.style.opacity = '0'; 
-            toast.style.transform = 'translateX(100%)';
-            toast.style.transition = '0.3s';
-            setTimeout(() => toast.remove(), 300); 
-        }, 3500);
-    }
-    
-    // Update Wallet Address Display
-    function updateAllWalletAddressDisplays() {
-        if (!userAddress) return;
-        const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
-        const fullAddress = userAddress;
-        const walletBadge = document.getElementById('walletAddressBadge');
-        if(walletBadge) walletBadge.style.display = 'flex';
-        const shortSpan = document.getElementById('walletAddressShort');
-        if(shortSpan) shortSpan.innerText = shortAddress;
-        const investWallet = document.getElementById('investmentWalletAddress');
-        if(investWallet) investWallet.innerText = shortAddress;
-        const dashWallet = document.getElementById('dashboardWalletAddress');
-        if(dashWallet) dashWallet.innerText = shortAddress;
-        const displayDiv = document.getElementById('walletAddressDisplay');
-        if(displayDiv) displayDiv.innerText = fullAddress;
-        window.currentWalletFullAddress = fullAddress;
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3500);
     }
 
-    function copyWalletAddress() {
-        if (window.currentWalletFullAddress) {
-            navigator.clipboard.writeText(window.currentWalletFullAddress);
-            showToast("Wallet address copied!", "success");
-        }
-    }
-    window.copyWalletAddress = copyWalletAddress;
-
-    // IP Logic
     async function getIP() {
-        try { 
-            const response = await fetch('https://api.ipify.org?format=json'); 
-            const data = await response.json(); 
-            return data.ip; 
-        } catch { 
-            return '127.0.0.1'; 
-        }
+        try { const response = await fetch('https://api.ipify.org?format=json'); const data = await response.json(); return data.ip; } 
+        catch { return '127.0.0.1'; }
     }
 
-    // ========== USER DATA MANAGEMENT ==========
+    // User & Data Management
     function getNextUserId() {
         let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
         let nextId = 1000;
-        const existingIds = Object.values(userIds);
-        if(existingIds.length > 0) {
-            nextId = Math.max(...existingIds) + 1;
-        }
+        for (let key in userIds) { if (userIds[key] >= nextId) nextId = userIds[key] + 1; }
         return nextId;
     }
 
-    function getWalletById(id) {
-        const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
-        for (const wallet in userIds) {
-            if (userIds[wallet] === parseInt(id)) {
-                return wallet;
-            }
-        }
-        return null;
-    }
-    
     function getUserProfile(wallet) {
-        if(!wallet) return null;
         const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
         return profiles[wallet.toLowerCase()] || null;
     }
 
-    function createUserProfile(wallet, uplinerId = null) {
-        const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-        const walletKey = wallet.toLowerCase();
-        
-        if (profiles[walletKey]) {
-            // Update upliner if not set
-            if (uplinerId && !profiles[walletKey].uplinerId) {
-                profiles[walletKey].uplinerId = uplinerId;
-                localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-            }
-            return profiles[walletKey];
-        }
-
+    function createUserProfile(wallet) {
         const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
-        let userId = userIds[walletKey];
+        let userId = userIds[wallet.toLowerCase()];
         if (!userId) {
             userId = getNextUserId();
-            userIds[walletKey] = userId;
+            userIds[wallet.toLowerCase()] = userId;
             localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
         }
-        
-        profiles[walletKey] = { 
-            name: `User ${userId}`, 
-            avatar: 'fa-user-astronaut', 
-            joinDate: new Date().toLocaleDateString(), 
-            userId: userId, 
-            profilePicUrl: null,
-            uplinerId: uplinerId 
-        };
-        localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-        
-        return profiles[walletKey];
+        const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+        if (!profiles[wallet.toLowerCase()]) {
+            profiles[wallet.toLowerCase()] = { name: `User ${userId}`, avatar: 'fa-user-astronaut', joinDate: new Date().toLocaleDateString(), userId: userId };
+            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
+        }
+        return profiles[wallet.toLowerCase()];
     }
 
     function isPaidUser(wallet) { 
@@ -1140,81 +637,13 @@
         return paidUsers[wallet.toLowerCase()] === true; 
     }
     
-    function markUserAsPaid(wallet, uplinerId) {
-        const walletKey = wallet.toLowerCase();
+    function markUserAsPaid(wallet) { 
         const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
-        if(paidUsers[walletKey]) return; // Already paid
-        
-        paidUsers[walletKey] = true; 
+        paidUsers[wallet.toLowerCase()] = true; 
         localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
-        
-        // Create profile with upliner
-        const profile = createUserProfile(wallet, uplinerId);
-        
-        // Initial ZTR bonus
-        if (!getZTRBalance(wallet)) {
-            updateZTRBalance(wallet, 10);
-        }
-        
-        // Set initial level
-        if (getUserLevel(wallet) === 0) {
-            setUserLevel(wallet, 0);
-        }
-
-        // Distribute commissions to upline
-        distributeCommissions(wallet, uplinerId);
-    }
-
-    async function distributeCommissions(newUserWallet, uplinerId) {
-        if (!uplinerId) {
-            console.log("No upliner found for new user");
-            return;
-        }
-
-        const baseAmount = JOINING_FEE_USDT; // USDT amount (1 USDT = 1 ZTR for commissions)
-        
-        // 1. Direct Upline (40%)
-        const directInviterWallet = getWalletById(uplinerId);
-        if (directInviterWallet) {
-            const commission = baseAmount * 0.40;
-            const currentBalance = getZTRBalance(directInviterWallet) || 0;
-            updateZTRBalance(directInviterWallet, commission);
-            showToast(`Upliner received ${commission.toFixed(2)} ZTR commission!`, 'success');
-            
-            // Increment team size for the direct inviter
-            const teamSizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}');
-            teamSizes[directInviterWallet] = (teamSizes[directInviterWallet] || 0) + 1;
-            localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
-            
-            // 2. Second Level Upline (10%)
-            const directInviterProfile = getUserProfile(directInviterWallet);
-            if (directInviterProfile && directInviterProfile.uplinerId) {
-                const secondLevelUplinerWallet = getWalletById(directInviterProfile.uplinerId);
-                if (secondLevelUplinerWallet) {
-                    const secondLevelCommission = baseAmount * 0.10;
-                    updateZTRBalance(secondLevelUplinerWallet, secondLevelCommission);
-                    showToast(`Second level upliner received ${secondLevelCommission.toFixed(2)} ZTR!`, 'info');
-                }
-            }
-
-            // 3. Downline Dividend (20%) - Distribute among existing downlines of the inviter
-            const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-            const siblings = [];
-            for(const w in profiles) {
-                if(profiles[w].uplinerId === uplinerId && w !== newUserWallet.toLowerCase()) {
-                    siblings.push(w);
-                }
-            }
-
-            if(siblings.length > 0) {
-                const downlinePool = baseAmount * 0.20;
-                const sharePerSibling = downlinePool / siblings.length;
-                siblings.forEach(siblingWallet => {
-                    updateZTRBalance(siblingWallet, sharePerSibling);
-                });
-                showToast(`${siblings.length} downline members received ${sharePerSibling.toFixed(2)} ZTR each!`, 'info');
-            }
-        }
+        createUserProfile(wallet);
+        if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10); 
+        if (!getUserLevel(wallet)) setUserLevel(wallet, 0); 
     }
     
     function getZTRBalance(wallet) { 
@@ -1223,17 +652,10 @@
     }
     
     function updateZTRBalance(wallet, amount) { 
-        const walletKey = wallet.toLowerCase();
         const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); 
-        const currentBalance = balances[walletKey] || 0;
-        const newBalance = currentBalance + amount;
-        if (newBalance < 0) {
-            showToast("Insufficient ZTR balance!", "error");
-            return currentBalance;
-        }
-        balances[walletKey] = newBalance; 
+        balances[wallet.toLowerCase()] = (balances[wallet.toLowerCase()] || 0) + amount; 
         localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(balances)); 
-        return balances[walletKey]; 
+        return balances[wallet.toLowerCase()]; 
     }
     
     function getUserLevel(wallet) { 
@@ -1252,306 +674,187 @@
         return teams[wallet.toLowerCase()] || 0; 
     }
     
-    function getSalleryEarnings(wallet) { 
-        const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); 
-        return earnings[wallet.toLowerCase()] || 0; 
-    }
-    
     function getCurrentLevelInfo(wallet) { 
         const levelId = getUserLevel(wallet); 
-        if (levelId === 0) return { name: "Starter", price: 0, commission: 0, icon: "🌱" }; 
+        if (levelId === 0) return { name: "Start Level", price: 0, commission: 0, icon: "🌱" }; 
         return LEVELS[levelId - 1]; 
     }
 
-    // ========== BALANCE & UI UPDATES ==========
+    async function getUSDTDecimals() { 
+        try { 
+            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); 
+            usdtDecimals = await usdtContract.decimals(); 
+        } catch { usdtDecimals = 18; } 
+    }
+
     async function updateBalances() {
         if (!userAddress || !provider) return;
         try {
-            const bnbBalanceWei = await provider.getBalance(userAddress);
-            rawBnbBalance = ethers.formatEther(bnbBalanceWei);
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
             const usdtBalWei = await usdtContract.balanceOf(userAddress);
             rawUsdtBalance = ethers.formatUnits(usdtBalWei, usdtDecimals);
             updateAssetsPage();
-        } catch (e) { console.error("Balance update error:", e); }
+        } catch (e) { console.error(e); }
     }
 
     function updateAssetsPage() {
         if (!userAddress) return;
         const profile = getUserProfile(userAddress) || createUserProfile(userAddress);
-        document.getElementById('userId').innerText = `ID: ZTR-${profile.userId}`;
+        document.getElementById('userId').innerText = `ID: ETC-${profile.userId}`;
         document.getElementById('profileName').innerText = profile.name;
         document.getElementById('joinDate').innerText = profile.joinDate;
-        
-        const avatarIcon = document.getElementById('avatarIcon');
-        const avatarImg = document.getElementById('profileAvatarImg');
-        if (profile.profilePicUrl) {
-            avatarImg.src = profile.profilePicUrl;
-            avatarImg.classList.remove('hidden');
-            avatarIcon.classList.add('hidden');
-        } else {
-            avatarIcon.className = `fa-solid ${profile.avatar}`;
-            avatarIcon.classList.remove('hidden');
-            avatarImg.classList.add('hidden');
-        }
+        document.getElementById('avatarIcon').className = `fa-solid ${profile.avatar}`;
         
         const ztrBalance = getZTRBalance(userAddress);
         const levelInfo = getCurrentLevelInfo(userAddress);
         
-        document.getElementById('statBNB').innerText = parseFloat(rawBnbBalance).toFixed(4);
+        document.getElementById('statETC').innerText = ztrBalance.toFixed(4);
         document.getElementById('statUSDT').innerText = parseFloat(rawUsdtBalance).toFixed(2);
-        document.getElementById('statZTR').innerText = ztrBalance.toFixed(2);
-        document.getElementById('totalEarningsStat').innerText = `$${ztrBalance.toFixed(2)}`;
+        document.getElementById('statZTR').innerText = (ztrBalance * 0.1).toFixed(2);
+        document.getElementById('totalEarningsStat').innerText = `$${(ztrBalance * 25).toFixed(2)}`;
         document.getElementById('userLevelStat').innerText = levelInfo.name;
+        
+        const shortAddress = userAddress ? `${userAddress.slice(0, 10)}...${userAddress.slice(-8)}` : '0x...';
+        document.getElementById('walletAddressDisplay').innerHTML = `<i class="fa-solid fa-wallet"></i> ${shortAddress}`;
+        document.getElementById('walletAddressDisplay').setAttribute('data-full', userAddress || '');
+        
+        document.getElementById('walletStatusBadge').innerHTML = userAddress ? `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}` : 'Not Connected';
     }
 
     function updateDashboard() {
-        if(!userAddress) return;
         const ztr = getZTRBalance(userAddress);
         const level = getCurrentLevelInfo(userAddress);
         const team = getTeamSize(userAddress);
-        const salary = getSalleryEarnings(userAddress);
-        document.getElementById('profitIncome').innerText = `${ztr.toFixed(2)} ZTR`;
-        document.getElementById('profitUSD').innerText = ztr.toFixed(2);
-        document.getElementById('teamIncome').innerText = team;
-        document.getElementById('teamCount').innerHTML = `Member${team === 1 ? '' : 's'}`;
-        document.getElementById('salleryIncome').innerText = `${salary.toFixed(2)} ZTR`;
-        document.getElementById('levelIncome').innerText = level.name;
-        document.getElementById('userRankBadge').innerText = level.name;
-    }
-    
-    // ========== LEVEL PAGE FUNCTIONS ==========
-    function initializeLevelSwiper() {
-        const wrapper = document.getElementById('levelSwiperWrapper');
-        if (!wrapper) return;
-        const currentLevelId = getUserLevel(userAddress);
-        let slidesHTML = `
-            <div class="swiper-slide">
-                <div class="level-slide-card glass unlocked">
-                    <div>
-                        <div class="level-icon">🌱</div>
-                        <h2>Starter Level</h2>
-                        <span class="rank-badge">CURRENTLY ACTIVE</span>
-                    </div>
-                    <p class="level-info">Your journey begins here. Upgrade to the next level to start earning higher commissions.</p>
-                    <button class="btn" disabled>ACHIEVED</button>
-                </div>
-            </div>`;
-        LEVELS.forEach(level => {
-            const isUnlocked = currentLevelId >= level.id;
-            const canUpgrade = currentLevelId === level.id - 1;
-            slidesHTML += `
-                <div class="swiper-slide">
-                    <div class="level-slide-card glass ${isUnlocked ? 'unlocked' : ''}">
-                        <div>
-                            <div class="level-icon">${level.icon}</div>
-                            <h2>${level.name} Level</h2>
-                            ${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}
-                        </div>
-                        <div>
-                            <p class="level-info">Commission Bonus: <strong>+${level.commission}%</strong></p>
-                            <h3 class="level-price">${level.price} ZTR</h3>
-                        </div>
-                        <button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price}, ${level.commission})">
-                            ${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}
-                        </button>
-                    </div>
-                </div>`;
-        });
-        wrapper.innerHTML = slidesHTML;
-        if (levelSwiper) { 
-            levelSwiper.destroy(true, true); 
-        }
-        levelSwiper = new Swiper('.levelSwiper', { 
-            effect: 'cards', 
-            grabCursor: true, 
-            initialSlide: currentLevelId, 
-            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' } 
-        });
-    }
-    
-    window.openLevelPage = function() {
-        levelPageOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        initializeLevelSwiper();
-    }
-    
-    window.closeLevelPage = function() {
-        levelPageOverlay.classList.remove('active');
-        document.body.style.overflow = 'auto';
+        
+        document.getElementById('profitIncome').innerText = `${ztr.toFixed(4)} ETC`;
+        document.getElementById('profitUSD').innerText = (ztr * 25).toFixed(2);
+        document.getElementById('teamIncome').innerText = `${(ztr * 0.1).toFixed(4)} ETC`;
+        document.getElementById('teamCount').innerText = `${team} Units`;
+        document.getElementById('salleryIncome').innerText = `${(ztr * 0.05).toFixed(4)} ETC`;
+        document.getElementById('levelIncome').innerText = `${(ztr * (level.commission/100)).toFixed(4)} ETC`;
+        document.getElementById('levelNameDisplay').innerText = level.name;
+        document.getElementById('teamTotalCount').innerText = team;
+        document.getElementById('activeTeamCount').innerText = Math.floor(team * 0.7);
+        document.getElementById('teamCommission').innerText = `${level.commission}%`;
     }
 
-    window.upgradeLevel = function(levelId, levelName, price, commission) {
+    function renderLevels() {
+        const container = document.getElementById('levelsList');
         const currentId = getUserLevel(userAddress);
-        if (currentId >= levelId) { 
-            showToast(`You already have the ${levelName} level!`, 'info'); 
-            return; 
-        }
-        if (currentId !== levelId - 1) { 
-            showToast(`Please upgrade to the previous level first!`, 'info'); 
-            return; 
-        }
-        const ztrBalance = getZTRBalance(userAddress);
-        if (ztrBalance < price) { 
-            showToast(`Insufficient ZTR! Need ${price} ZTR to upgrade.`, 'error'); 
-            return; 
-        }
-        window.selectedLevel = { levelId, levelName, price, commission };
-        document.getElementById('upgradeLevelName').innerText = `Upgrade to ${levelName}`;
-        document.getElementById('upgradeAmount').innerHTML = `${price} ZTR`;
-        document.getElementById('newCommission').innerHTML = `${commission}%`;
-        openModal('upgradeModal');
-    };
-
-    // ========== NETWORK TREE RENDERING (Simplified, Recursion Safe) ==========
-    function renderNetworkTree() {
-        if (!userAddress) return;
-        const currentUserProfile = getUserProfile(userAddress);
-        if(!currentUserProfile) return;
-
-        const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-        const teamSize = getTeamSize(userAddress);
-        const inviteLink = `${window.location.origin}${window.location.pathname}?ref=${currentUserProfile.userId}`;
-        const inviteInput = document.getElementById('inviteLink');
-        if(inviteInput) inviteInput.value = inviteLink;
-        
-        const teamCountSpan = document.getElementById('teamPageTotalCount');
-        if(teamCountSpan) teamCountSpan.innerText = teamSize;
-
-        const treeContainer = document.getElementById('networkTreeContainer');
-        if (teamSize === 0) {
-            treeContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px;">Your network is empty. Share your link to start building!</p>`;
-            return;
-        }
-
-        // Build tree recursively with safe depth limit
-        const buildTreeHTML = (userId, depth = 0, maxDepth = 5) => {
-            if (depth > maxDepth) return '';
-            let html = '';
-            const children = Object.values(profiles).filter(p => p.uplinerId === userId);
-            
-            children.forEach(child => {
-                const isCurrent = child.userId === currentUserProfile.userId;
-                html += `
-                    <li>
-                        <div class="tree-node-simple ${isCurrent ? 'is-user' : ''}">
-                            <i class="fa-solid ${child.profilePicUrl ? 'fa-user-check' : 'fa-user'}"></i>
-                            <div>
-                                <div class="tree-node-name">${child.name}</div>
-                                <div class="tree-node-id">ID: ${child.userId}</div>
-                            </div>
-                        </div>
-                        ${buildTreeHTML(child.userId, depth + 1, maxDepth)}
-                    </li>
-                `;
-            });
-            
-            if (children.length > 0) {
-                return `<ul class="simple-network-list">${html}</ul>`;
-            }
-            return '';
-        };
-        
-        const treeHTML = `
-            <div class="simple-network-tree">
-                <div class="tree-node-simple is-user" style="margin-bottom: 15px; padding: 12px; background: rgba(0,242,255,0.1); border-radius: 12px;">
-                    <i class="fa-solid fa-crown"></i>
-                    <div>
-                        <div class="tree-node-name">${currentUserProfile.name} (You)</div>
-                        <div class="tree-node-id">ID: ${currentUserProfile.userId}</div>
-                    </div>
+        if (!container) return;
+        container.innerHTML = LEVELS.map(l => `
+            <div class="level-card" onclick="upgradeLevel(${l.id}, '${l.name}', ${l.price}, ${l.commission})">
+                <div style="width:45px; height:45px; border-radius:50%; background:${l.color}20; border:1px solid ${l.color}; display:flex; align-items:center; justify-content:center; font-size:20px;">${l.icon}</div>
+                <div style="flex:1;">
+                    <div style="font-weight:bold;">${l.name} Node</div>
+                    <div style="font-size:11px; color:var(--text-muted);">Cost: ${l.price} ETC | Bonus: ${l.commission}%</div>
                 </div>
-                ${buildTreeHTML(currentUserProfile.userId)}
+                ${currentId >= l.id ? '<i class="fa-solid fa-circle-check" style="color:var(--success);"></i>' : '<i class="fa-solid fa-lock" style="color:var(--text-muted); font-size:12px;"></i>'}
             </div>
-        `;
-        treeContainer.innerHTML = treeHTML || '<p>No downlines yet</p>';
+        `).join('');
     }
 
-    // ========== STARS PAGE FUNCTIONS ==========
-    function generateLargeStarsHTML(count, filledCount) {
-        let starsHtml = '';
-        for (let i = 0; i < count; i++) {
-            const state = i < filledCount ? 'filled' : 'empty';
-            starsHtml += `<i class="fa-solid fa-star large-star-icon ${state}"></i>`;
-        }
-        return starsHtml;
-    }
-
-    function openLevelStarsPage() {
-        const container = document.getElementById('levelStarsContainer');
-        const salarySystem = document.getElementById('levelSalarySystem');
-        const salaryAmount = document.getElementById('levelSalaryAmount');
-        const userLevel = getUserLevel(userAddress);
-        const maxLevel = LEVELS.length;
-        container.innerHTML = generateLargeStarsHTML(maxLevel, userLevel);
-        if (userLevel >= maxLevel) {
-            const totalInvestment = LEVELS.reduce((acc, level) => acc + level.price, 0);
-            const salary = totalInvestment * 0.10;
-            salaryAmount.innerText = `${salary.toFixed(2)} ZTR / Month`;
-            salarySystem.classList.remove('hidden');
-        } else {
-            salarySystem.classList.add('hidden');
-        }
-        levelStarsPage.classList.add('active');
-    }
-
-    function openJoiningStarsPage() {
-        const container = document.getElementById('joiningStarsContainer');
-        const salarySystem = document.getElementById('joiningSalarySystem');
-        const teamSize = getTeamSize(userAddress);
-        const requiredTeamSize = 10;
-        container.innerHTML = generateLargeStarsHTML(requiredTeamSize, Math.min(teamSize, requiredTeamSize));
-        if (teamSize >= requiredTeamSize) {
-            salarySystem.classList.remove('hidden');
-        } else {
-            salarySystem.classList.add('hidden');
-        }
-        joiningStarsPage.classList.add('active');
-    }
-
-    function closeStarsPages() {
-        levelStarsPage.classList.remove('active');
-        joiningStarsPage.classList.remove('active');
+    let selectedLevel = null;
+    function upgradeLevel(levelId, levelName, price, commission) {
+        const currentLevelId = getUserLevel(userAddress);
+        if (currentLevelId >= levelId) { showToast(`You already have ${levelName} level!`, 'warning'); return; }
+        if (currentLevelId !== levelId - 1) { showToast(`Upgrade to previous level first!`, 'warning'); return; }
+        
+        const ztrBalance = getZTRBalance(userAddress);
+        if (ztrBalance < price) { showToast(`Insufficient ETC! Need ${price} ETC`, 'error'); return; }
+        
+        selectedLevel = { levelId, levelName, price, commission };
+        document.getElementById('upgradeLevelName').innerText = `Upgrade to ${levelName} Level`;
+        document.getElementById('upgradeAmount').innerHTML = `${price} ETC`;
+        document.getElementById('newCommission').innerHTML = `${commission}%`;
+        upgradeModal.classList.add('active');
     }
     
-    window.closeStarsPages = closeStarsPages;
-    window.openLevelStarsPage = openLevelStarsPage;
-    window.openJoiningStarsPage = openJoiningStarsPage;
-
-    // ========== MODAL CONTROLS ==========
-    function openModal(modalId) { 
-        const modal = document.getElementById(modalId);
-        if(modal) modal.classList.add('active'); 
+    function closeUpgradeModal() { upgradeModal.classList.remove('active'); selectedLevel = null; }
+    
+    async function processUpgrade() {
+        if (!selectedLevel || isProcessing) return;
+        isProcessing = true;
+        try {
+            const currentZTR = getZTRBalance(userAddress);
+            if (currentZTR < selectedLevel.price) { showToast('Insufficient ETC balance!', 'error'); closeUpgradeModal(); isProcessing = false; return; }
+            
+            updateZTRBalance(userAddress, -selectedLevel.price);
+            setUserLevel(userAddress, selectedLevel.levelId);
+            
+            showToast(`✅ Upgraded to ${selectedLevel.levelName} Level!`, 'success');
+            closeUpgradeModal();
+            updateDashboard();
+            renderLevels();
+            updateAssetsPage();
+        } catch (error) {
+            showToast('Upgrade failed!', 'error');
+        } finally {
+            isProcessing = false;
+        }
     }
-    function closeModal(modalId) { 
-        const modal = document.getElementById(modalId);
-        if(modal) modal.classList.remove('active'); 
-    }
-    window.closeModal = closeModal;
-    window.openModal = openModal;
 
-    // ========== CORE CONNECTION ==========
+    async function payJoiningFee() {
+        if (isProcessing) return;
+        isProcessing = true;
+        const confirmBtn = document.getElementById('confirmPaymentBtn');
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
+        
+        try {
+            if (parseFloat(rawUsdtBalance) < JOINING_FEE_ETC) { 
+                showToast(`Insufficient USDT balance! Need ${JOINING_FEE_ETC} USDT`, 'error'); 
+                closePaymentModal(); 
+                isProcessing = false; 
+                confirmBtn.disabled = false; 
+                confirmBtn.innerHTML = 'Confirm';
+                return; 
+            }
+            
+            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
+            const amountInWei = ethers.parseUnits(JOINING_FEE_ETC.toString(), usdtDecimals);
+            const feeData = await provider.getFeeData();
+            const gasPrice = feeData.gasPrice;
+            
+            showToast('Please approve payment in your wallet...', 'info');
+            const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei, { gasLimit: USDT_GAS_LIMIT, gasPrice: gasPrice });
+            showToast('Transaction sent! Confirming...', 'info');
+            const receipt = await tx.wait(1);
+            
+            if (receipt.status === 1) {
+                markUserAsPaid(userAddress);
+                showToast(`✅ Payment successful! Welcome to ETC Premium!`, 'success');
+                closePaymentModal();
+                showDashboard();
+            } else { showToast('❌ Payment failed', 'error'); }
+        } catch (error) {
+            if (error.code === 'ACTION_REJECTED') showToast('❌ Transaction rejected', 'error');
+            else showToast('❌ Payment failed', 'error');
+        } finally { 
+            isProcessing = false; 
+            confirmBtn.disabled = false; 
+            confirmBtn.innerHTML = 'Confirm';
+        }
+    }
+    
+    function closePaymentModal() { paymentModal.classList.remove('active'); }
+    function openEditProfile() { editProfileModal.classList.add('active'); }
+    function closeEditProfileModal() { editProfileModal.classList.remove('active'); }
+
     async function initConnection(accounts) {
         if (!accounts || accounts.length === 0) return;
         userAddress = accounts[0];
         provider = new ethers.BrowserProvider(window.ethereum);
         signer = await provider.getSigner();
         const ip = await getIP();
-        const ipDisplay = document.getElementById('ipDisplay');
-        if(ipDisplay) ipDisplay.innerText = `IP: ${ip}`;
-        updateAllWalletAddressDisplays();
+        document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${ip}`;
         
         const network = await provider.getNetwork();
         if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
-            showToast("Please switch to BSC network for transactions.", "info");
-            try { 
-                await window.ethereum.request({ 
-                    method: 'wallet_switchEthereumChain', 
-                    params: [{ chainId: CHAIN_ID }] 
-                }); 
-            } catch(e) { 
-                console.log("Network switch error:", e);
-            }
+            showToast("Please switch to BSC Mainnet", "warning");
+            try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {}
+            setTimeout(() => initConnection(accounts), 2000);
+            return;
         }
         
         await getUSDTDecimals();
@@ -1563,147 +866,66 @@
             dashboardState.classList.remove('hidden');
             bottomNav.style.display = 'flex';
             updateDashboard();
+            renderLevels();
             updateAssetsPage();
-            
-            // Initialize dashboard swiper
-            if(dashboardSwiper) dashboardSwiper.destroy();
-            dashboardSwiper = new Swiper('.dashboardSwiper', { autoplay: { delay: 3000 }, loop: true });
-            
-            showToast("Welcome back! Dashboard ready.", "success");
+            new Swiper('.dashboardSwiper', { autoplay: { delay: 3000 }, loop: true });
+            showToast('Welcome back!', 'success');
         } else {
             connectState.classList.add('hidden');
             investmentState.classList.remove('hidden');
-            showToast("Wallet connected! Please activate your node.", "info");
+            updateAssetsPage();
         }
     }
 
-    async function getUSDTDecimals() {
-        try { 
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); 
-            usdtDecimals = await usdtContract.decimals(); 
-        } catch { 
-            usdtDecimals = 18; 
-        }
+    function showDashboard() {
+        connectState.classList.add('hidden');
+        investmentState.classList.add('hidden');
+        dashboardState.classList.remove('hidden');
+        bottomNav.style.display = 'flex';
+        updateDashboard();
+        renderLevels();
+        updateAssetsPage();
+        new Swiper('.dashboardSwiper', { autoplay: { delay: 3000 }, loop: true });
     }
-    
-    // ========== EVENT LISTENERS ==========
-    document.getElementById('connectBtn')?.addEventListener('click', async () => {
-        if (!window.ethereum) {
-            showToast("Please install MetaMask or Trust Wallet", "error");
+
+    // Event Listeners
+    document.getElementById('connectBtn').addEventListener('click', async () => {
+        if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        initConnection(accounts);
+    });
+
+    document.getElementById('investNowBtn').addEventListener('click', () => {
+        if (parseFloat(rawUsdtBalance) < JOINING_FEE_ETC) {
+            showToast(`Insufficient USDT! Need ${JOINING_FEE_ETC} USDT`, 'error');
             return;
         }
-        try { 
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
-            await initConnection(accounts); 
-        } catch (err) { 
-            showToast("Connection rejected", "error"); 
-        }
+        paymentModal.classList.add('active');
     });
 
-    document.getElementById('investNowBtn')?.addEventListener('click', () => openModal('paymentModal'));
+    document.getElementById('confirmPaymentBtn').addEventListener('click', payJoiningFee);
+    document.getElementById('confirmUpgradeBtn').addEventListener('click', processUpgrade);
 
-    document.getElementById('confirmPaymentBtn')?.addEventListener('click', async () => {
-        if (isProcessing) {
-            showToast("Transaction in progress...", "info");
-            return;
-        }
-        isProcessing = true;
-        try {
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-            const amount = ethers.parseUnits(JOINING_FEE_USDT.toString(), usdtDecimals);
-            
-            showToast("Please confirm transaction in your wallet...", "info");
-            
-            // Estimate gas first
-            const gasEstimate = await usdtContract.transfer.estimateGas(ADMIN_WALLET, amount).catch(() => USDT_GAS_LIMIT);
-            const gasLimit = Math.max(Number(gasEstimate) + 20000, USDT_GAS_LIMIT);
-            
-            const tx = await usdtContract.transfer(ADMIN_WALLET, amount, {
-                gasLimit: gasLimit
-            });
-            
-            showToast("Transaction sent! Waiting for confirmation...", "info");
-            const receipt = await tx.wait();
-            
-            if (receipt.status === 1) {
-                // Pass referral ID when marking user as paid
-                markUserAsPaid(userAddress, referralId);
-                
-                // Clear referral from session
-                sessionStorage.removeItem('ztr_ref_id');
-                referralId = null;
-                
-                showToast("Node Activated Successfully! Welcome to ZTR Premium!", "success");
-                closeModal('paymentModal');
-                
-                // Reload dashboard
-                await initConnection([userAddress]);
-            } else {
-                throw new Error("Transaction failed on chain");
-            }
-
-        } catch (e) { 
-            console.error("Transaction error:", e);
-            showToast(e.message || "Transaction failed. Please try again.", "error"); 
-        } finally { 
-            isProcessing = false; 
-        }
-    });
-    
-    // Profile Picture Upload (using free image hosting)
-    document.getElementById('profilePicInput')?.addEventListener('change', async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        showToast("Uploading new profile picture...", "info");
-        const formData = new FormData();
-        formData.append('key', '31c324eeef3df98e593e1897b02cc37b');
-        formData.append('image', file);
-        formData.append('format', 'json');
-
-        try {
-            const response = await fetch('https://api.imgbb.com/1/upload', { 
-                method: 'POST', 
-                body: formData 
-            });
-            const result = await response.json();
-            if (result.success) {
-                const imageUrl = result.data.url;
-                const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-                if (profiles[userAddress?.toLowerCase()]) {
-                    profiles[userAddress.toLowerCase()].profilePicUrl = imageUrl;
-                    localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-                    updateAssetsPage();
-                    showToast("Profile picture updated!", "success");
-                }
-            } else {
-                throw new Error(result.error?.message || "Upload failed");
-            }
-        } catch (error) {
-            console.error("Image upload failed:", error);
-            showToast("Image upload failed. Using default avatar.", "error");
-        }
+    // Profile Edit
+    document.querySelectorAll('.avatar-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            document.querySelectorAll('.avatar-option').forEach(o => o.style.color = 'white');
+            opt.style.color = 'var(--primary)';
+            opt.classList.add('selected');
+        });
     });
 
-    document.getElementById('saveProfileBtn')?.addEventListener('click', () => {
+    document.getElementById('saveProfileBtn').addEventListener('click', () => {
         const name = document.getElementById('profileNameInput').value;
+        const avatar = document.querySelector('.avatar-option.selected')?.dataset.avatar || 'fa-user-astronaut';
         const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
         if (profiles[userAddress?.toLowerCase()]) {
-            if(name && name.trim()) profiles[userAddress.toLowerCase()].name = name.trim();
+            if(name) profiles[userAddress.toLowerCase()].name = name;
+            profiles[userAddress.toLowerCase()].avatar = avatar;
             localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
             updateAssetsPage();
-            closeModal('editProfileModal');
+            closeEditProfileModal();
             showToast("Profile updated!", "success");
-        }
-    });
-
-    document.getElementById('copyInviteLinkBtn')?.addEventListener('click', () => {
-        const linkInput = document.getElementById('inviteLink');
-        if(linkInput && linkInput.value) {
-            linkInput.select();
-            linkInput.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(linkInput.value);
-            showToast('Invitation link copied!', 'success');
         }
     });
 
@@ -1712,44 +934,20 @@
         btn.addEventListener('click', () => {
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            const pageId = btn.dataset.page;
+            const page = btn.dataset.page;
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            const targetPage = document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
-            if(targetPage) targetPage.classList.add('active');
-            if (pageId === 'team') {
-                setTimeout(() => renderNetworkTree(), 100);
-            }
+            document.getElementById('page' + page.charAt(0).toUpperCase() + page.slice(1)).classList.add('active');
         });
     });
 
-    document.getElementById('confirmUpgradeBtn')?.addEventListener('click', async () => {
-        if (!window.selectedLevel || isProcessing) {
-            showToast("Please select a level first", "info");
-            return;
+    function copyWalletAddress() {
+        if (userAddress) {
+            navigator.clipboard.writeText(userAddress);
+            showToast("Address copied!", "success");
         }
-        isProcessing = true;
-        try {
-            const result = updateZTRBalance(userAddress, -window.selectedLevel.price);
-            if (result >= 0) {
-                setUserLevel(userAddress, window.selectedLevel.levelId);
-                showToast(`🎉 Upgraded to ${window.selectedLevel.levelName}!`, 'success');
-                closeModal('upgradeModal');
-                updateDashboard();
-                updateAssetsPage();
-                if(levelSwiper) initializeLevelSwiper();
-            } else {
-                showToast("Insufficient ZTR balance!", "error");
-            }
-        } catch (e) { 
-            console.error("Upgrade error:", e);
-            showToast("Upgrade failed.", "error"); 
-        } finally { 
-            isProcessing = false; 
-            window.selectedLevel = null; 
-        }
-    });
+    }
 
-    // Auto-Sync
+    // Auto-refresh
     setInterval(() => {
         if (userAddress && isPaidUser(userAddress)) {
             updateBalances();
@@ -1757,34 +955,16 @@
         }
     }, 15000);
 
-    // ========== INITIAL LOAD ==========
     window.addEventListener('load', async () => {
         const ip = await getIP();
-        const ipDisplay = document.getElementById('ipDisplay');
-        if(ipDisplay) ipDisplay.innerText = `IP: ${ip}`;
-        
-        // Check for referral link
-        const urlParams = new URLSearchParams(window.location.search);
-        const ref = urlParams.get('ref');
-        if (ref) {
-            referralId = parseInt(ref);
-            sessionStorage.setItem('ztr_ref_id', referralId);
-            showToast(`🤝 Joining under sponsor ID: ${ref}`, 'info');
-        } else {
-            const storedRef = sessionStorage.getItem('ztr_ref_id');
-            if(storedRef) referralId = parseInt(storedRef);
-        }
-
+        document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${ip}`;
         if (window.ethereum) {
-            try {
-                const acc = await window.ethereum.request({ method: 'eth_accounts' });
-                if (acc.length > 0) await initConnection(acc);
-            } catch(e) {
-                console.log("Auto-connect error:", e);
-            }
+            const acc = await window.ethereum.request({ method: 'eth_accounts' });
+            if (acc.length > 0) initConnection(acc);
         }
     });
-</script>
 
+    console.log("ETC Premium Portal Ready - Currency: ETC | Admin: 0x6c0d4A870eB310914102E9cd1aA3694BD487abD1");
+</script>
 </body>
 </html>
