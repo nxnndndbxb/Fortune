@@ -1039,7 +1039,7 @@
 </div>
 
 <script>
-    /* ========== WALLET SYSTEM (REPLACED) ========== */
+    /* ========== WALLET SYSTEM ========== */
     /* CORE SYSTEM CONFIGURATION */
     const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
@@ -1495,6 +1495,23 @@
         finally { isProcessing = false; window.selectedLevel = null; }
     });
 
+    // Function to show dashboard after payment
+    function showDashboardAfterPayment() {
+        connectState.classList.add('hidden');
+        investmentState.classList.add('hidden');
+        dashboardState.classList.remove('hidden');
+        bottomNav.style.display = 'flex';
+        updateDashboard();
+        updateAssetsPage();
+        // Initialize swiper if not already done
+        if (typeof dashboardSwiper === 'undefined' || !dashboardSwiper) {
+            window.dashboardSwiper = new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
+        }
+        // Refresh network tree if needed
+        renderNetworkTree();
+        showToast("Welcome to ZTR Premium Dashboard!", "success");
+    }
+
     // Core Connection
     async function initConnection(accounts) {
         if (!accounts || accounts.length === 0) return;
@@ -1512,14 +1529,7 @@
         await getUSDTDecimals();
         await updateBalances();
         if (isPaidUser(userAddress)) {
-            connectState.classList.add('hidden');
-            investmentState.classList.add('hidden');
-            dashboardState.classList.remove('hidden');
-            bottomNav.style.display = 'flex';
-            updateDashboard();
-            updateAssetsPage();
-            new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
-            showToast("Welcome back! Dashboard ready.", "success");
+            showDashboardAfterPayment();
         } else {
             connectState.classList.add('hidden');
             investmentState.classList.remove('hidden');
@@ -1544,6 +1554,10 @@
     document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
         if (isProcessing) return;
         isProcessing = true;
+        const confirmBtn = document.getElementById('confirmPaymentBtn');
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
+        
         try {
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
             const amount = ethers.parseUnits(JOINING_FEE_USDT.toString(), usdtDecimals);
@@ -1557,10 +1571,22 @@
             
             showToast("Node Activated! Welcome to ZTR Premium!", "success");
             closeModal('paymentModal');
-            await initConnection([userAddress]);
-
-        } catch (e) { showToast("Transaction failed. Please try again.", "error"); } 
-        finally { isProcessing = false; }
+            
+            // Auto redirect to dashboard without refresh
+            showDashboardAfterPayment();
+            
+            // Update balances after payment
+            await updateBalances();
+            updateDashboard();
+            renderNetworkTree();
+            
+        } catch (e) { 
+            showToast("Transaction failed. Please try again.", "error"); 
+        } finally { 
+            isProcessing = false;
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = 'Confirm';
+        }
     });
     
     // Profile Picture Upload
@@ -1626,7 +1652,7 @@
         });
     });
 
-    // Auto-Sync
+    // Auto-Sync (refresh data without disconnecting)
     setInterval(() => {
         if (userAddress && isPaidUser(userAddress)) {
             updateBalances();
@@ -1634,7 +1660,7 @@
         }
     }, 15000);
 
-    // Initial Load
+    // Initial Load - restore session automatically
     window.addEventListener('load', async () => {
         const ip = await getIP();
         document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
@@ -1646,15 +1672,30 @@
             sessionStorage.setItem('ztr_ref_id', referralId);
             showToast(`Joining under sponsor ID: ${ref}`, 'info');
         } else {
-            referralId = parseInt(sessionStorage.getItem('ztr_ref_id'));
+            const storedRef = sessionStorage.getItem('ztr_ref_id');
+            if (storedRef) referralId = parseInt(storedRef);
         }
 
+        // Auto restore session if wallet was previously connected
         if (window.ethereum) {
             const acc = await window.ethereum.request({ method: 'eth_accounts' });
-            if (acc.length > 0) await initConnection(acc);
+            if (acc.length > 0) {
+                await initConnection(acc);
+            }
         }
     });
 </script>
+
+<style>
+    /* Add spin animation for loading */
+    .spin {
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
 
 </body>
 </html>
