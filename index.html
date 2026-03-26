@@ -170,36 +170,42 @@
             text-shadow: 0 0 10px var(--primary-glow);
         }
         
-        .level-dashboard-button {
+        /* --- NEW: Circular Node Button --- */
+        .node-button-container {
             display: flex;
-            align-items: center;
             justify-content: center;
-            gap: 15px;
-            padding: 20px;
-            border-radius: 20px;
-            margin-top: 15px;
-            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
-            box-shadow: 0 8px 30px var(--secondary-glow);
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            align-items: center;
+            margin-top: 25px;
+            perspective: 800px;
+        }
+        .node-button {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, var(--secondary), var(--primary));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
-            transition: 0.3s ease;
-        }
-        .level-dashboard-button:hover {
-            transform: scale(1.03);
-            filter: brightness(1.2);
-        }
-        .level-dashboard-button i {
-            font-size: 30px;
-        }
-        .level-dashboard-button-text h3 {
-            font-size: 18px;
-            margin: 0;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px var(--secondary-glow), inset 0 0 15px rgba(255,255,255,0.2);
+            border: 3px solid var(--bg-deep);
             color: white;
+            text-align: center;
+            animation: pulse 3s infinite;
+            transform-style: preserve-3d;
         }
-         .level-dashboard-button-text small {
-            font-size: 12px;
-            color: rgba(255,255,255,0.8);
+        .node-button:hover {
+            transform: scale(1.05) rotateY(15deg);
+            box-shadow: 0 15px 40px var(--primary-glow), inset 0 0 20px rgba(255,255,255,0.3);
+            animation-play-state: paused;
         }
+        .node-button i { font-size: 32px; margin-bottom: 8px; }
+        .node-button h3 { font-size: 16px; line-height: 1.2; margin: 0; }
+        .node-button small { font-size: 10px; color: rgba(255,255,255,0.8); }
+
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
         /* Buttons */
         .btn {
@@ -282,7 +288,7 @@
             text-shadow: 0 0 10px var(--primary-glow);
         }
 
-        /* --- NEW: Special Nav Button --- */
+        /* --- EDITED: Special Nav Button --- */
         .nav-item-special {
             display: flex;
             align-items: center;
@@ -302,43 +308,57 @@
         .nav-item-special:hover {
             transform: translateY(-20px) scale(1.1);
             filter: brightness(1.2);
+            animation: pulse 1.5s infinite;
         }
 
-
-        /* Level Cards */
-        .level-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--glass-border);
-            border-radius: 18px;
-            padding: 15px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: 0.3s;
-            cursor: pointer;
+        /* --- EDITED: Profile Section --- */
+        .profile-header {
+            height: 150px;
+            border-radius: 24px;
+            margin-bottom: -50px;
+            overflow: hidden;
+            position: relative;
         }
-
-        .level-card:hover {
-            background: rgba(255,255,255,0.07);
-            border-color: var(--primary);
+        .profile-header .cover-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.7);
         }
-
-        /* Profile HUD */
         .profile-avatar {
             width: 90px; height: 90px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
             margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 40px;
             border: 3px solid var(--bg-deep);
-            box-shadow: 0 0 20px var(--primary-glow);
+            box-shadow: 0 0 20px rgba(0,0,0,0.7);
             cursor: pointer;
+            position: relative;
+            background-color: var(--glass-bg);
+            overflow: hidden;
         }
-
+        .profile-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-avatar:hover::after {
+            content: "\f040"; /* FontAwesome pencil icon */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
         .rank-badge {
             background: linear-gradient(90deg, var(--gold), #b48600);
             padding: 4px 15px;
@@ -398,24 +418,6 @@
             border-radius: 20px;
             padding: 15px 10px;
             text-align: center;
-        }
-
-        .avatar-option {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .avatar-option:hover, .avatar-option.selected {
-            background: var(--primary);
-            color: black;
-            transform: scale(1.1);
         }
 
         /* --- NEW STYLES FOR NETWORK PAGE --- */
@@ -499,7 +501,7 @@
             border: 1px solid var(--primary-glow);
         }
 
-        /* --- NEW STYLES FOR STARS PAGE --- */
+        /* --- EDITED STYLES FOR STARS PAGE --- */
         .stars-page-button {
             display: flex;
             flex-direction: column;
@@ -525,71 +527,66 @@
             transform: scale(1.1);
             text-shadow: 0 0 20px var(--primary-glow);
         }
-
-        .stars-modal {
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-        }
-        .stars-modal-content {
-            width: 100%;
-            max-width: 480px;
-            padding: 30px;
-            position: relative;
-            max-height: 90vh;
-            overflow-y: auto;
-            text-align: center;
-        }
-        .close-stars-modal {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid var(--glass-border);
-            color: white;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 16px;
-            z-index: 10;
-        }
-        .stars-modal-content h2 {
-            margin-bottom: 5px;
-        }
-        .stars-subtitle {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 30px;
-            max-width: 80%;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .stars-pyramid-container {
+        
+        /* --- NEW: Fullscreen Overlay for Stars --- */
+        .stars-page-overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at top, var(--bg-deep), #0f172a);
+            z-index: 6000;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 30px;
         }
-        .stars-row {
+        .stars-page-overlay.active {
+            transform: translateY(0%);
+        }
+        .stars-page-header {
             display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(5, 11, 24, 0.8);
+            border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0;
+        }
+        .stars-page-back-btn {
+            background: none; border: none; color: white; font-size: 20px; cursor: pointer;
+        }
+        .stars-page-header h2 {
+            flex-grow: 1; text-align: center; font-size: 18px; margin: 0;
+        }
+        .stars-page-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 30px;
+            text-align: center;
+        }
+        .stars-page-subtitle {
+            font-size: 13px; color: var(--text-muted); max-width: 300px; margin: 0 auto 30px;
+        }
+        .large-stars-container {
+            display: flex;
+            flex-wrap: wrap;
             justify-content: center;
-            gap: 15px;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 40px;
         }
-        .star-icon {
-            font-size: 32px;
-            transition: 0.4s ease-in-out;
+        .large-star-icon {
+            font-size: 50px;
+            transition: 0.5s ease-in-out;
         }
-        .star-icon.empty {
+        .large-star-icon.empty {
             color: transparent;
-            -webkit-text-stroke: 1px var(--glass-border);
+            -webkit-text-stroke: 1.5px var(--glass-border);
         }
-        .star-icon.filled {
+        .large-star-icon.filled {
             color: var(--gold);
-            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            text-shadow: 0 0 25px rgba(255, 215, 0, 0.7);
             transform: scale(1.1);
         }
+
         .salary-system-box {
             background: rgba(0, 242, 255, 0.05);
             border: 1px solid var(--primary-glow);
@@ -616,7 +613,7 @@
             border-radius: 12px;
         }
         
-        /* --- NEW STYLES FOR LEVEL PAGE OVERLAY --- */
+        /* --- EDITED: Level Page Overlay & Cards --- */
         .level-page-overlay {
             position: fixed;
             inset: 0;
@@ -664,7 +661,7 @@
         }
         .level-slide-card {
             width: 100%;
-            height: 480px;
+            height: 500px;
             padding: 30px;
             text-align: center;
             display: flex;
@@ -672,20 +669,27 @@
             justify-content: space-between;
             filter: grayscale(1) opacity(0.7);
             transition: 0.4s;
+            border-image: linear-gradient(145deg, var(--glass-border), transparent) 1;
         }
         .level-slide-card.unlocked {
             filter: grayscale(0) opacity(1);
-            border-color: var(--primary) !important;
-            box-shadow: 0 0 30px var(--primary-glow);
+            border-image: linear-gradient(145deg, var(--primary), var(--secondary)) 1;
+            box-shadow: 0 0 35px var(--primary-glow);
         }
         .level-slide-card .level-icon {
-            font-size: 60px;
+            font-size: 80px;
             line-height: 1;
+            text-shadow: 0 0 20px rgba(0,0,0,0.5);
+            transition: 0.3s;
+        }
+        .level-slide-card.unlocked .level-icon {
+             transform: scale(1.1);
         }
         .level-slide-card .level-price {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 800;
             color: var(--primary);
+            text-shadow: 0 0 10px var(--primary-glow);
         }
         .level-slide-card .level-info {
             font-size: 13px;
@@ -700,7 +704,7 @@
 
 <div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
 
-<!-- NEW LEVEL PAGE -->
+<!-- LEVEL PAGE -->
 <div class="level-page-overlay" id="levelPageOverlay">
     <div class="level-page-header">
         <button class="level-page-back-btn" onclick="closeLevelPage()"><i class="fa-solid fa-arrow-left"></i></button>
@@ -718,6 +722,48 @@
     </div>
 </div>
 
+<!-- STARS PAGES -->
+<div class="stars-page-overlay" id="levelStarsPage">
+    <div class="stars-page-header">
+        <button class="stars-page-back-btn" onclick="closeStarsPages()"><i class="fa-solid fa-arrow-left"></i></button>
+        <h2>Level Achievement Stars</h2>
+        <div style="width:20px;"></div>
+    </div>
+    <div class="stars-page-content">
+        <p class="stars-page-subtitle">Each level you upgrade fills a star. Fill all stars to unlock a permanent salary.</p>
+        <div class="large-stars-container" id="levelStarsContainer">
+            <!-- Big stars injected here -->
+        </div>
+        <div class="salary-system-box hidden" id="levelSalarySystem">
+            <h3><i class="fa-solid fa-crown" style="color:var(--gold);"></i> Level Mastery Salary Unlocked!</h3>
+            <p>You have achieved the highest rank. As a reward, you will receive a monthly salary based on your total level investment.</p>
+            <div class="salary-amount" id="levelSalaryAmount"></div>
+        </div>
+    </div>
+</div>
+
+<div class="stars-page-overlay" id="joiningStarsPage">
+    <div class="stars-page-header">
+        <button class="stars-page-back-btn" onclick="closeStarsPages()"><i class="fa-solid fa-arrow-left"></i></button>
+        <h2>Network Invitation Stars</h2>
+        <div style="width:20px;"></div>
+    </div>
+    <div class="stars-page-content">
+        <p class="stars-page-subtitle">Each new member you invite fills a star. Fill all 10 stars to unlock a commission bonus.</p>
+        <div class="large-stars-container" id="joiningStarsContainer">
+            <!-- Big stars injected here -->
+        </div>
+        <div class="salary-system-box hidden" id="joiningSalarySystem">
+            <h3><i class="fa-solid fa-people-group" style="color:var(--primary);"></i> Network Leader Bonus Unlocked!</h3>
+            <p>You have successfully invited 10 members. You will now receive a permanent 10% bonus on all your future network commissions.</p>
+             <div class="salary-amount" id="joiningSalaryAmount">
+                +10% Network Commission
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- Modals -->
 <div class="modal-overlay" id="paymentModal">
     <div class="modal-content glass">
@@ -727,7 +773,7 @@
         <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;">0.10 USDT</div>
         <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: 0.0003 BNB</div>
         <div style="display:flex; gap:10px;">
-            <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closePaymentModal()">Cancel</button>
+            <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closeModal('paymentModal')">Cancel</button>
             <button class="btn btn-success" id="confirmPaymentBtn">Confirm</button>
         </div>
     </div>
@@ -741,7 +787,7 @@
         <div id="upgradeAmount" style="font-size: 32px; color: white; font-weight: 900; margin: 15px 0;">0 ZTR</div>
         <div class="gas-info"><i class="fa-solid fa-chart-line"></i> New Commission: <span id="newCommission">0%</span></div>
         <div style="display:flex; gap:10px;">
-            <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closeUpgradeModal()">Back</button>
+            <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closeModal('upgradeModal')">Back</button>
             <button class="btn" id="confirmUpgradeBtn">Upgrade Now</button>
         </div>
     </div>
@@ -750,54 +796,13 @@
 <div class="modal-overlay" id="editProfileModal">
     <div class="modal-content glass">
         <h3>Edit Identity</h3>
-        <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:20px 0;" id="avatarOptions">
-            <div class="avatar-option" data-avatar="fa-user-astronaut"><i class="fa-solid fa-user-astronaut"></i></div>
-            <div class="avatar-option" data-avatar="fa-user-ninja"><i class="fa-solid fa-user-ninja"></i></div>
-            <div class="avatar-option" data-avatar="fa-crown"><i class="fa-solid fa-crown"></i></div>
-            <div class="avatar-option" data-avatar="fa-dragon"><i class="fa-solid fa-dragon"></i></div>
-            <div class="avatar-option" data-avatar="fa-rocket"><i class="fa-solid fa-rocket"></i></div>
-        </div>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">Your User ID cannot be changed.</p>
+        <input type="file" id="profilePicInput" class="hidden" accept="image/*">
         <input type="text" id="profileNameInput" placeholder="Username" style="width:100%; padding:15px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); border-radius:15px; color:white; margin-bottom:15px;">
         <button class="btn" id="saveProfileBtn">Save Update</button>
     </div>
 </div>
 
-<!-- NEW STARS MODALS -->
-<div class="modal-overlay stars-modal" id="levelStarsModal">
-    <div class="stars-modal-content glass">
-        <button class="close-stars-modal" onclick="closeStarsModal()"><i class="fa-solid fa-xmark"></i></button>
-        <h2>Level Achievement Stars</h2>
-        <p class="stars-subtitle">Each level you upgrade fills a star. Fill all stars to unlock a permanent salary.</p>
-        <div class="stars-pyramid-container" id="levelStarsContainer">
-            <!-- Stars injected by JS -->
-        </div>
-        <div class="salary-system-box hidden" id="levelSalarySystem">
-            <h3><i class="fa-solid fa-crown" style="color:var(--gold);"></i> Level Mastery Salary Unlocked!</h3>
-            <p>You have achieved the highest rank. As a reward, you will receive a monthly salary based on your total level investment.</p>
-            <div class="salary-amount" id="levelSalaryAmount">
-                <!-- Salary amount injected by JS -->
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal-overlay stars-modal" id="joiningStarsModal">
-    <div class="stars-modal-content glass">
-        <button class="close-stars-modal" onclick="closeStarsModal()"><i class="fa-solid fa-xmark"></i></button>
-        <h2>Network Invitation Stars</h2>
-        <p class="stars-subtitle">Each new member you invite fills a star. Fill all 10 stars to unlock a commission bonus.</p>
-        <div class="stars-pyramid-container" id="joiningStarsContainer">
-            <!-- Stars injected by JS -->
-        </div>
-        <div class="salary-system-box hidden" id="joiningSalarySystem">
-            <h3><i class="fa-solid fa-people-group" style="color:var(--primary);"></i> Network Leader Bonus Unlocked!</h3>
-            <p>You have successfully invited 10 members. You will now receive a permanent 10% bonus on all your future network commissions.</p>
-             <div class="salary-amount" id="joiningSalaryAmount">
-                +10% Network Commission
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="navbar">
     <div class="logo">ZTR PREMIUM</div>
@@ -855,7 +860,6 @@
                     <span class="rank-badge" id="userRankBadge">Verified Member</span>
                 </div>
 
-                <!-- EDITED: Simplified Income Grid -->
                 <div class="income-grid">
                     <div class="income-card glass">
                         <p style="font-size:11px; color:var(--text-muted);">Core Profit</p>
@@ -879,7 +883,14 @@
                     </div>
                 </div>
 
-                <!-- REMOVED: Level Dashboard Button was here -->
+                <!-- NEW: Node Button -->
+                <div class="node-button-container">
+                    <div class="node-button" onclick="openLevelPage()">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <h3>Matrix</h3>
+                        <small>View Levels</small>
+                    </div>
+                </div>
                 
                 <div class="gas-info" style="margin-top: 15px;">
                     <i class="fa-solid fa-wallet"></i> Wallet: <span id="dashboardWalletAddress">Not Connected</span>
@@ -887,12 +898,7 @@
             </div>
         </div>
 
-        <div id="pageLevel" class="page">
-             <!-- This page is now replaced by the full-screen overlay, triggered by nav button -->
-        </div>
-
         <div id="pageTeam" class="page">
-            <!-- NEW Network Page UI -->
             <div class="main-card glass">
                 <h3>Share Your Protocol Link</h3>
                 <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">
@@ -908,70 +914,83 @@
             <div class="main-card glass" style="margin-top:20px;">
                 <h3>Your Network (<span id="teamPageTotalCount">0</span>)</h3>
                 <div id="teamListContainer" class="team-list">
-                    <!-- Team members will be injected here by JavaScript -->
                     <p style="text-align:center; color:var(--text-muted); font-size:13px;">Loading network data...</p>
                 </div>
             </div>
         </div>
 
         <div id="pageStars" class="page">
-            <!-- Content will be injected by JavaScript -->
+            <div class="main-card glass stars-page-button" onclick="openLevelStarsPage()">
+                <i class="fa-solid fa-layer-group" style="color:var(--gold);"></i>
+                <h3>Level Achieve Stars</h3>
+                <p style="font-size:12px; color:var(--text-muted);">Track your upgrade progress and unlock mastery rewards.</p>
+            </div>
+            <div class="main-card glass stars-page-button" onclick="openJoiningStarsPage()">
+                <i class="fa-solid fa-users" style="color:var(--primary);"></i>
+                <h3>Network Joining Stars</h3>
+                <p style="font-size:12px; color:var(--text-muted);">Track your network growth and unlock leader bonuses.</p>
+            </div>
         </div>
 
         <div id="pageAssets" class="page">
-            <div class="main-card glass">
-                <div class="profile-avatar" id="profileAvatar" onclick="openEditProfile()">
-                    <i class="fa-solid fa-user-circle" id="avatarIcon"></i>
+            <div class="main-card glass" style="padding:0; overflow: visible;">
+                 <div class="profile-header">
+                    <img src="https://iili.io/qsZGN6P.jpg" class="cover-photo" alt="Cover Photo">
                 </div>
-                <div style="text-align:center; margin-bottom:25px;">
-                    <h2 id="profileName">Genesis User</h2>
-                    <span style="font-size:12px; color:var(--primary);" id="userId">ID: ZTR-0000</span>
-                </div>
+                <div style="padding: 25px; padding-top: 0;">
+                    <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('profilePicInput').click()">
+                        <i class="fa-solid fa-user-circle" id="avatarIcon"></i>
+                        <img src="" alt="Profile Picture" id="profileAvatarImg" class="profile-avatar-img hidden">
+                    </div>
+                    <div style="text-align:center; margin-bottom:25px;">
+                        <h2 id="profileName">Genesis User</h2>
+                        <span style="font-size:12px; color:var(--primary);" id="userId">ID: ZTR-0000</span>
+                    </div>
 
-                <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:15px; font-family:monospace; font-size:11px; text-align:center; color:var(--primary); margin-bottom:20px; border:1px dashed var(--primary); cursor:pointer;" id="walletAddressDisplay" onclick="copyWalletAddress()">
-                    0x...
-                </div>
+                    <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:15px; font-family:monospace; font-size:11px; text-align:center; color:var(--primary); margin-bottom:20px; border:1px dashed var(--primary); cursor:pointer;" id="walletAddressDisplay" onclick="copyWalletAddress()">
+                        0x...
+                    </div>
 
-                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:25px;">
-                    <div class="balance-stat">
-                        <i class="fa-brands fa-bnb" style="color:#f3ba2f;"></i>
-                        <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statBNB">0.00</div>
-                        <div style="font-size:9px; color:var(--text-muted);">BNB</div>
+                    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:25px;">
+                        <div class="balance-stat">
+                            <i class="fa-brands fa-bnb" style="color:#f3ba2f;"></i>
+                            <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statBNB">0.00</div>
+                            <div style="font-size:9px; color:var(--text-muted);">BNB</div>
+                        </div>
+                        <div class="balance-stat">
+                            <i class="fa-solid fa-dollar-sign" style="color:#26a17b;"></i>
+                            <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statUSDT">0.00</div>
+                            <div style="font-size:9px; color:var(--text-muted);">USDT</div>
+                        </div>
+                        <div class="balance-stat">
+                            <i class="fa-solid fa-coins" style="color:var(--primary);"></i>
+                            <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statZTR">0.00</div>
+                            <div style="font-size:9px; color:var(--text-muted);">ZTR</div>
+                        </div>
                     </div>
-                    <div class="balance-stat">
-                        <i class="fa-solid fa-dollar-sign" style="color:#26a17b;"></i>
-                        <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statUSDT">0.00</div>
-                        <div style="font-size:9px; color:var(--text-muted);">USDT</div>
-                    </div>
-                    <div class="balance-stat">
-                        <i class="fa-solid fa-coins" style="color:var(--primary);"></i>
-                        <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statZTR">0.00</div>
-                        <div style="font-size:9px; color:var(--text-muted);">ZTR</div>
-                    </div>
-                </div>
 
-                <div style="border-top:1px solid var(--glass-border); padding-top:20px;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
-                        <span style="color:var(--text-muted);"><i class="fa-solid fa-calendar"></i> Deployment</span>
-                        <span id="joinDate">--/--/--</span>
+                    <div style="border-top:1px solid var(--glass-border); padding-top:20px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
+                            <span style="color:var(--text-muted);"><i class="fa-solid fa-calendar"></i> Deployment</span>
+                            <span id="joinDate">--/--/--</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
+                            <span style="color:var(--text-muted);"><i class="fa-solid fa-chart-area"></i> Total Yield</span>
+                            <span id="totalEarningsStat" style="color:var(--success);">$0.00</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:14px;">
+                            <span style="color:var(--text-muted);"><i class="fa-solid fa-shield"></i> Level Status</span>
+                            <span id="userLevelStat" style="color:var(--primary);">Start</span>
+                        </div>
                     </div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
-                        <span style="color:var(--text-muted);"><i class="fa-solid fa-chart-area"></i> Total Yield</span>
-                        <span id="totalEarningsStat" style="color:var(--success);">$0.00</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; font-size:14px;">
-                        <span style="color:var(--text-muted);"><i class="fa-solid fa-shield"></i> Level Status</span>
-                        <span id="userLevelStat" style="color:var(--primary);">Start</span>
-                    </div>
-                </div>
 
-                <button class="btn" onclick="openEditProfile()" style="margin-top:25px; background:rgba(255,255,255,0.05); box-shadow:none; border:1px solid var(--glass-border);">MODIFY IDENTITY</button>
+                    <button class="btn" onclick="openModal('editProfileModal')" style="margin-top:25px; background:rgba(255,255,255,0.05); box-shadow:none; border:1px solid var(--glass-border);">MODIFY IDENTITY</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- EDITED: New Bottom Nav Structure -->
 <div class="bottom-nav" id="bottomNav" style="display: none;">
     <div class="nav-item active" data-page="dashboard"><i class="fa-solid fa-house-chimney-window"></i><span>Home</span></div>
     <div class="nav-item" data-page="team"><i class="fa-solid fa-diagram-project"></i><span>Network</span></div>
@@ -988,6 +1007,7 @@
     const CHAIN_ID_DECIMAL = 56;
     const USDT_GAS_LIMIT = 65000;
     const JOINING_FEE_USDT = 0.10;
+    const IMAGE_HOST_API_KEY = '31c324eeef3df98e593e1897b02cc37b';
     
     const LEVELS = [
         { id: 1, name: "Iron", price: 5, commission: 2, icon: "🛡️" },
@@ -1014,20 +1034,21 @@
 
     // UI ELEMENTS
     const connectState = document.getElementById('connectState'), investmentState = document.getElementById('investmentState'), dashboardState = document.getElementById('dashboardState');
-    const paymentModal = document.getElementById('paymentModal'), upgradeModal = document.getElementById('upgradeModal'), editProfileModal = document.getElementById('editProfileModal'), bottomNav = document.getElementById('bottomNav');
-    const levelStarsModal = document.getElementById('levelStarsModal'), joiningStarsModal = document.getElementById('joiningStarsModal');
+    const bottomNav = document.getElementById('bottomNav');
     const levelPageOverlay = document.getElementById('levelPageOverlay');
+    const levelStarsPage = document.getElementById('levelStarsPage');
+    const joiningStarsPage = document.getElementById('joiningStarsPage');
 
     // HELPER: Toasts
     function showToast(message, type = 'info') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
-        toast.style.cssText = `background:white; color:black; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.2); animation:fadeIn 0.3s forwards; font-size:13px; display:flex; align-items:center; gap:10px; border-left: 5px solid ${type === 'success' ? '#10b981' : '#ef4444'}`;
-        toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i> ${message}`;
+        toast.style.cssText = `background:white; color:black; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.2); animation:fadeIn 0.3s forwards; font-size:13px; display:flex; align-items:center; gap:10px; border-left: 5px solid ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'}`;
+        toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-info-circle'}"></i> ${message}`;
         container.appendChild(toast);
-        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3500);
+        setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
     }
-
+    
     // Update Wallet Address Display Everywhere
     function updateAllWalletAddressDisplays() {
         if (!userAddress) return;
@@ -1077,7 +1098,7 @@
         }
         const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
         if (!profiles[wallet.toLowerCase()]) {
-            profiles[wallet.toLowerCase()] = { name: `User ${userId}`, avatar: 'fa-user-astronaut', joinDate: new Date().toLocaleDateString(), userId: userId };
+            profiles[wallet.toLowerCase()] = { name: `User ${userId}`, avatar: 'fa-user-astronaut', joinDate: new Date().toLocaleDateString(), userId: userId, profilePicUrl: null };
             localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
         }
         return profiles[wallet.toLowerCase()];
@@ -1125,7 +1146,18 @@
         document.getElementById('userId').innerText = `ID: ZTR-${profile.userId}`;
         document.getElementById('profileName').innerText = profile.name;
         document.getElementById('joinDate').innerText = profile.joinDate;
-        document.getElementById('avatarIcon').className = `fa-solid ${profile.avatar}`;
+        
+        const avatarIcon = document.getElementById('avatarIcon');
+        const avatarImg = document.getElementById('profileAvatarImg');
+        if (profile.profilePicUrl) {
+            avatarImg.src = profile.profilePicUrl;
+            avatarImg.classList.remove('hidden');
+            avatarIcon.classList.add('hidden');
+        } else {
+            avatarIcon.className = `fa-solid ${profile.avatar}`;
+            avatarIcon.classList.remove('hidden');
+            avatarImg.classList.add('hidden');
+        }
         
         const ztrBalance = getZTRBalance(userAddress);
         const levelInfo = getCurrentLevelInfo(userAddress);
@@ -1137,41 +1169,26 @@
         document.getElementById('userLevelStat').innerText = levelInfo.name;
     }
 
-    // EDITED: Simplified Dashboard Update Function
     function updateDashboard() {
         const ztr = getZTRBalance(userAddress);
         const level = getCurrentLevelInfo(userAddress);
         const team = getTeamSize(userAddress);
         const salary = getSalleryEarnings(userAddress);
-        
-        // Core Profit
         document.getElementById('profitIncome').innerText = `${ztr.toFixed(2)} ZTR`;
         document.getElementById('profitUSD').innerText = ztr.toFixed(2);
-        
-        // Team Size
         document.getElementById('teamIncome').innerText = team;
         document.getElementById('teamCount').innerText = `Member${team === 1 ? '' : 's'}`;
-        
-        // Salary
         document.getElementById('salleryIncome').innerText = `${salary.toFixed(2)} ZTR`;
-        
-        // Level Name
         document.getElementById('levelIncome').innerText = level.name;
-        
-        // Rank Badge
         document.getElementById('userRankBadge').innerText = level.name;
     }
     
-    // --- NEW LEVEL PAGE FUNCTIONS ---
+    // --- LEVEL PAGE FUNCTIONS ---
     function initializeLevelSwiper() {
         const wrapper = document.getElementById('levelSwiperWrapper');
         if (!wrapper) return;
-        
         const currentLevelId = getUserLevel(userAddress);
-        let slidesHTML = '';
-
-        // Add Starter Level (Level 0)
-        slidesHTML += `
+        let slidesHTML = `
             <div class="swiper-slide">
                 <div class="level-slide-card glass unlocked">
                     <div>
@@ -1183,12 +1200,9 @@
                     <button class="btn" disabled>ACHIEVED</button>
                 </div>
             </div>`;
-        
-        // Add other levels
         LEVELS.forEach(level => {
             const isUnlocked = currentLevelId >= level.id;
             const canUpgrade = currentLevelId === level.id - 1;
-            
             slidesHTML += `
                 <div class="swiper-slide">
                     <div class="level-slide-card glass ${isUnlocked ? 'unlocked' : ''}">
@@ -1207,22 +1221,9 @@
                     </div>
                 </div>`;
         });
-        
         wrapper.innerHTML = slidesHTML;
-
-        if (levelSwiper) {
-            levelSwiper.destroy(true, true);
-        }
-
-        levelSwiper = new Swiper('.levelSwiper', {
-            effect: 'cards',
-            grabCursor: true,
-            initialSlide: currentLevelId,
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
-        });
+        if (levelSwiper) { levelSwiper.destroy(true, true); }
+        levelSwiper = new Swiper('.levelSwiper', { effect: 'cards', grabCursor: true, initialSlide: currentLevelId, navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' } });
     }
     
     window.openLevelPage = function() {
@@ -1237,7 +1238,7 @@
     }
 
 
-    // --- NEW FUNCTIONS FOR NETWORK & STARS PAGE ---
+    // --- NETWORK & STARS PAGE FUNCTIONS ---
     function generateMockTeamData(count) {
         const mockTeam = [];
         const levelNames = ["Starter", ...LEVELS.map(l => l.name)];
@@ -1245,12 +1246,7 @@
             const randomLevelIndex = Math.floor(Math.random() * levelNames.length);
             const joinDate = new Date();
             joinDate.setDate(joinDate.getDate() - Math.floor(Math.random() * 30));
-            mockTeam.push({
-                id: 1001 + i + Math.floor(Math.random() * 1000),
-                level: levelNames[randomLevelIndex],
-                joinDate: joinDate.toLocaleDateString(),
-                avatarIcon: ['fa-user-astronaut', 'fa-user-ninja', 'fa-user-secret', 'fa-user-tie'][Math.floor(Math.random() * 4)]
-            });
+            mockTeam.push({ id: 1001 + i + Math.floor(Math.random() * 1000), level: levelNames[randomLevelIndex], joinDate: joinDate.toLocaleDateString(), avatarIcon: ['fa-user-astronaut', 'fa-user-ninja', 'fa-user-secret', 'fa-user-tie'][Math.floor(Math.random() * 4)] });
         }
         return mockTeam;
     }
@@ -1259,19 +1255,10 @@
         if (!userAddress) return;
         const profile = getUserProfile(userAddress);
         const teamSize = getTeamSize(userAddress);
-        
-        const inviteLinkInput = document.getElementById('inviteLink');
-        const refLink = `${window.location.origin}${window.location.pathname}?ref=${profile.userId}`;
-        inviteLinkInput.value = refLink;
-
+        document.getElementById('inviteLink').value = `${window.location.origin}${window.location.pathname}?ref=${profile.userId}`;
         document.getElementById('teamPageTotalCount').innerText = teamSize;
-
         const teamListContainer = document.getElementById('teamListContainer');
-        if (teamSize === 0) {
-            teamListContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px;">Your network is empty. Share your link to start building!</p>`;
-            return;
-        }
-
+        if (teamSize === 0) { teamListContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px;">Your network is empty. Share your link to start building!</p>`; return; }
         const teamData = generateMockTeamData(teamSize);
         teamListContainer.innerHTML = teamData.map(member => `
             <div class="team-member-card">
@@ -1281,54 +1268,30 @@
                     <small>Joined: ${member.joinDate}</small>
                 </div>
                 <div class="team-member-level">${member.level}</div>
-            </div>
-        `).join('');
+            </div>`).join('');
     }
 
-    function renderStarsPage() {
-        const container = document.getElementById('pageStars');
-        container.innerHTML = `
-            <div class="main-card glass stars-page-button" onclick="openLevelStars()">
-                <i class="fa-solid fa-layer-group" style="color:var(--gold);"></i>
-                <h3>Level Achieve Stars</h3>
-                <p style="font-size:12px; color:var(--text-muted);">Track your upgrade progress and unlock mastery rewards.</p>
-            </div>
-            <div class="main-card glass stars-page-button" onclick="openJoiningStars()">
-                <i class="fa-solid fa-users" style="color:var(--primary);"></i>
-                <h3>Network Joining Stars</h3>
-                <p style="font-size:12px; color:var(--text-muted);">Track your network growth and unlock leader bonuses.</p>
-            </div>
-        `;
+    function renderInitialStarsPage() {
+        // This function is now just a placeholder for the buttons.
+        // The actual rendering logic is moved to the page-opening functions.
     }
 
-    function generatePyramidStarsHTML(count, filledCount) {
+    function generateLargeStarsHTML(count, filledCount) {
         let starsHtml = '';
-        const rows = [1, 2, 3, 4]; // 10 stars total
-        let starCounter = 0;
-        rows.forEach(numInRow => {
-            let rowHtml = '<div class="stars-row">';
-            for (let i = 0; i < numInRow; i++) {
-                if (starCounter < count) {
-                    const state = starCounter < filledCount ? 'filled' : 'empty';
-                    rowHtml += `<i class="fa-solid fa-star star-icon ${state}"></i>`;
-                    starCounter++;
-                }
-            }
-            rowHtml += '</div>';
-            starsHtml += rowHtml;
-        });
+        for (let i = 0; i < count; i++) {
+            const state = i < filledCount ? 'filled' : 'empty';
+            starsHtml += `<i class="fa-solid fa-star large-star-icon ${state}"></i>`;
+        }
         return starsHtml;
     }
 
-    function openLevelStars() {
+    function openLevelStarsPage() {
         const container = document.getElementById('levelStarsContainer');
         const salarySystem = document.getElementById('levelSalarySystem');
         const salaryAmount = document.getElementById('levelSalaryAmount');
         const userLevel = getUserLevel(userAddress);
         const maxLevel = LEVELS.length;
-
-        container.innerHTML = generatePyramidStarsHTML(maxLevel, userLevel);
-        
+        container.innerHTML = generateLargeStarsHTML(maxLevel, userLevel);
         if (userLevel >= maxLevel) {
             const totalInvestment = LEVELS.reduce((acc, level) => acc + level.price, 0);
             const salary = totalInvestment * 0.10;
@@ -1337,39 +1300,35 @@
         } else {
             salarySystem.classList.add('hidden');
         }
-        levelStarsModal.classList.add('active');
+        levelStarsPage.classList.add('active');
     }
 
-    function openJoiningStars() {
+    function openJoiningStarsPage() {
         const container = document.getElementById('joiningStarsContainer');
         const salarySystem = document.getElementById('joiningSalarySystem');
         const teamSize = getTeamSize(userAddress);
         const requiredTeamSize = 10;
-        
-        container.innerHTML = generatePyramidStarsHTML(requiredTeamSize, teamSize);
-        
+        container.innerHTML = generateLargeStarsHTML(requiredTeamSize, teamSize);
         if (teamSize >= requiredTeamSize) {
             salarySystem.classList.remove('hidden');
         } else {
             salarySystem.classList.add('hidden');
         }
-        joiningStarsModal.classList.add('active');
+        joiningStarsPage.classList.add('active');
     }
 
-    function closeStarsModal() {
-        levelStarsModal.classList.remove('active');
-        joiningStarsModal.classList.remove('active');
+    function closeStarsPages() {
+        levelStarsPage.classList.remove('active');
+        joiningStarsPage.classList.remove('active');
     }
 
     // Modal Controls
-    window.closePaymentModal = function() { paymentModal.classList.remove('active'); };
-    window.closeUpgradeModal = function() { upgradeModal.classList.remove('active'); };
-    window.openEditProfile = function() { editProfileModal.classList.add('active'); };
-    window.closeEditProfileModal = function() { editProfileModal.classList.remove('active'); };
+    function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+    function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
     window.copyWalletAddress = copyWalletAddress;
-    window.closeStarsModal = closeStarsModal;
-    window.openLevelStars = openLevelStars;
-    window.openJoiningStars = openJoiningStars;
+    window.closeStarsPages = closeStarsPages;
+    window.openLevelStarsPage = openLevelStarsPage;
+    window.openJoiningStarsPage = openJoiningStarsPage;
 
     window.upgradeLevel = function(levelId, levelName, price, commission) {
         const currentId = getUserLevel(userAddress);
@@ -1377,12 +1336,11 @@
         if (currentId !== levelId - 1) { showToast(`Upgrade to the previous level first!`, 'info'); return; }
         const ztrBalance = getZTRBalance(userAddress);
         if (ztrBalance < price) { showToast(`Insufficient ZTR. Need ${price} ZTR to upgrade.`, 'error'); return; }
-        
         window.selectedLevel = { levelId, levelName, price, commission };
         document.getElementById('upgradeLevelName').innerText = `Upgrade to ${levelName}`;
         document.getElementById('upgradeAmount').innerHTML = `${price} ZTR`;
         document.getElementById('newCommission').innerHTML = `${commission}%`;
-        upgradeModal.classList.add('active');
+        openModal('upgradeModal');
     };
 
     document.getElementById('confirmUpgradeBtn')?.addEventListener('click', async () => {
@@ -1391,10 +1349,10 @@
         try {
             updateZTRBalance(userAddress, -window.selectedLevel.price);
             setUserLevel(userAddress, window.selectedLevel.levelId);
-            showToast(`✅ Upgraded to ${window.selectedLevel.levelName}!`, 'success');
-            closeUpgradeModal();
+            showToast(`Upgraded to ${window.selectedLevel.levelName}!`, 'success');
+            closeModal('upgradeModal');
             updateDashboard();
-            initializeLevelSwiper(); // Re-render the level slider
+            initializeLevelSwiper();
             updateAssetsPage();
         } catch (e) { showToast("Upgrade failed.", "error"); }
         finally { isProcessing = false; window.selectedLevel = null; }
@@ -1408,24 +1366,21 @@
         signer = await provider.getSigner();
         const ip = await getIP();
         document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
-        
         updateAllWalletAddressDisplays();
-        
         const network = await provider.getNetwork();
         if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
             showToast("Please switch to BSC network.", "info");
             try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {}
         }
-        
         await getUSDTDecimals();
         await updateBalances();
-        
         if (isPaidUser(userAddress)) {
             connectState.classList.add('hidden');
             investmentState.classList.add('hidden');
             dashboardState.classList.remove('hidden');
             bottomNav.style.display = 'flex';
             updateDashboard();
+            updateAssetsPage(); // important for profile pic
             new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
             showToast("Welcome back! Dashboard ready.", "success");
         } else {
@@ -1436,26 +1391,18 @@
     }
 
     async function getUSDTDecimals() {
-        try {
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
-            usdtDecimals = await usdtContract.decimals();
-        } catch { usdtDecimals = 18; }
+        try { const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); usdtDecimals = await usdtContract.decimals(); } 
+        catch { usdtDecimals = 18; }
     }
-
-    // Event Listeners
+    
+    // --- EVENT LISTENERS ---
     document.getElementById('connectBtn').addEventListener('click', async () => {
         if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
-        try {
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            await initConnection(accounts);
-        } catch (err) {
-            showToast("Connection rejected", "error");
-        }
+        try { const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); await initConnection(accounts); } 
+        catch (err) { showToast("Connection rejected", "error"); }
     });
 
-    document.getElementById('investNowBtn').addEventListener('click', () => {
-        paymentModal.classList.add('active');
-    });
+    document.getElementById('investNowBtn').addEventListener('click', () => openModal('paymentModal'));
 
     document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
         if (isProcessing) return;
@@ -1468,34 +1415,52 @@
             showToast("Transaction sent! Confirming...", "info");
             await tx.wait();
             markUserAsPaid(userAddress);
-            showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
-            closePaymentModal();
+            showToast("Node Activated! Welcome to ZTR Premium!", "success");
+            closeModal('paymentModal');
             initConnection([userAddress]);
-        } catch (e) {
-            showToast("Transaction failed. Please try again.", "error");
-        } finally {
-            isProcessing = false;
-        }
+        } catch (e) { showToast("Transaction failed. Please try again.", "error"); } 
+        finally { isProcessing = false; }
     });
+    
+    // Profile Picture Upload
+    document.getElementById('profilePicInput').addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    document.querySelectorAll('.avatar-option').forEach(opt => {
-        opt.addEventListener('click', () => {
-            document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
-            opt.classList.add('selected');
-        });
+        showToast("Uploading new profile picture...", "info");
+        const formData = new FormData();
+        formData.append('key', IMAGE_HOST_API_KEY);
+        formData.append('image', file);
+
+        try {
+            const response = await fetch('https://freeimage.host/api/1/upload', { method: 'POST', body: formData });
+            const result = await response.json();
+            if (result.status_code === 200) {
+                const imageUrl = result.image.url;
+                const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+                if (profiles[userAddress?.toLowerCase()]) {
+                    profiles[userAddress.toLowerCase()].profilePicUrl = imageUrl;
+                    localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
+                    updateAssetsPage();
+                    showToast("Profile picture updated!", "success");
+                }
+            } else {
+                throw new Error(result.status_txt || "API Error");
+            }
+        } catch (error) {
+            console.error("Image upload failed:", error);
+            showToast("Image upload failed. Please try again.", "error");
+        }
     });
 
     document.getElementById('saveProfileBtn').addEventListener('click', () => {
         const name = document.getElementById('profileNameInput').value;
-        const selected = document.querySelector('.avatar-option.selected');
-        const avatar = selected?.dataset?.avatar || 'fa-user-astronaut';
         const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
         if (profiles[userAddress?.toLowerCase()]) {
             if(name) profiles[userAddress.toLowerCase()].name = name;
-            profiles[userAddress.toLowerCase()].avatar = avatar;
             localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
             updateAssetsPage();
-            closeEditProfileModal();
+            closeModal('editProfileModal');
             showToast("Profile updated!", "success");
         }
     });
@@ -1516,9 +1481,8 @@
             const pageId = btn.dataset.page;
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
-            
             if (pageId === 'team') renderTeamPage();
-            if (pageId === 'stars') renderStarsPage();
+            if (pageId === 'stars') renderInitialStarsPage();
         });
     });
 
@@ -1539,7 +1503,6 @@
             if (acc.length > 0) await initConnection(acc);
         }
     });
-
 </script>
 
 </body>
