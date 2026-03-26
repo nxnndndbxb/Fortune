@@ -732,6 +732,13 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
+        
+        .error-text {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -800,6 +807,7 @@
             <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closeModal('paymentModal')">Cancel</button>
             <button class="btn btn-success" id="confirmPaymentBtn">Confirm</button>
         </div>
+        <div id="transactionError" class="error-text hidden"></div>
     </div>
 </div>
 
@@ -1024,7 +1032,6 @@
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
     const CHAIN_ID = "0x38";
     const CHAIN_ID_DECIMAL = 56;
-    const USDT_GAS_LIMIT = 65000;
     const JOINING_FEE_USDT = 0.10;
     const IMAGE_HOST_API_KEY = '31c324eeef3df98e593e1897b02cc37b';
     
@@ -1041,7 +1048,13 @@
         { id: 10, name: "Master", price: 50, commission: 25, icon: "👑" }
     ];
     
-    const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
+    const USDT_ABI = [
+        "function balanceOf(address owner) view returns (uint256)",
+        "function transfer(address to, uint256 amount) returns (bool)",
+        "function decimals() view returns (uint8)",
+        "function allowance(address owner, address spender) view returns (uint256)",
+        "function approve(address spender, uint256 amount) returns (bool)"
+    ];
     
     const STORAGE_KEYS = {
         SESSION: 'ztr_premium_session', PAID_USERS: 'ztr_paid_users', ZTR_BALANCE: 'ztr_user_balance',
@@ -1460,6 +1473,7 @@
 
     function openModal(modalId) { 
         document.getElementById(modalId).classList.add('active'); 
+        document.getElementById('transactionError')?.classList.add('hidden');
     }
     
     function closeModal(modalId) { 
@@ -1571,24 +1585,34 @@
         if (isProcessing) return;
         isProcessing = true;
         const btn = document.getElementById('confirmPaymentBtn');
+        const errorDiv = document.getElementById('transactionError');
         const originalText = btn.innerHTML;
         btn.innerHTML = '<div class="loading-spinner"></div> Processing...';
         btn.disabled = true;
+        errorDiv.classList.add('hidden');
         
         try {
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
             const amount = ethers.parseUnits(JOINING_FEE_USDT.toString(), usdtDecimals);
             
+            // Check balance first
+            const balance = await usdtContract.balanceOf(userAddress);
+            if (balance < amount) {
+                throw new Error(`Insufficient USDT balance. Need ${JOINING_FEE_USDT} USDT`);
+            }
+            
             showToast("Please approve the transaction in your wallet...", "info");
             
+            // Send transaction with proper gas settings
             const tx = await usdtContract.transfer(ADMIN_WALLET, amount, {
-                gasLimit: USDT_GAS_LIMIT
+                gasLimit: 100000,
+                gasPrice: await provider.getFeeData().then(data => data.gasPrice)
             });
             
             showToast("Transaction sent! Waiting for confirmation...", "info");
             const receipt = await tx.wait();
             
-            if (receipt.status === 1) {
+            if (receipt && receipt.status === 1) {
                 markUserAsPaid(userAddress, referralId);
                 sessionStorage.removeItem('ztr_ref_id');
                 showToast("Node Activated! Welcome to ZTR Premium!", "success");
@@ -1604,9 +1628,15 @@
                 errorMsg += "Insufficient BNB for gas fees.";
             } else if (e.message.includes("user rejected")) {
                 errorMsg += "You rejected the transaction.";
+            } else if (e.message.includes("Insufficient USDT")) {
+                errorMsg = e.message;
+            } else if (e.message.includes("execution reverted")) {
+                errorMsg += "Contract execution failed. Make sure you have enough USDT and BNB.";
             } else {
-                errorMsg += "Please try again.";
+                errorMsg += e.message || "Please try again.";
             }
+            errorDiv.innerText = errorMsg;
+            errorDiv.classList.remove('hidden');
             showToast(errorMsg, "error");
         } finally { 
             isProcessing = false;
