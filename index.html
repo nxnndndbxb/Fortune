@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ZTR Coin - Premium Platform</title>
+    <title>ZTR Coin - Premium Blockchain Hub</title>
     <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
@@ -279,6 +279,22 @@
             margin: 15px 0;
         }
         
+        .plan-features {
+            list-style: none;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .plan-features li {
+            margin: 10px 0;
+            color: var(--text-muted);
+        }
+        
+        .plan-features li i {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+        
         .level-card {
             background: linear-gradient(135deg, rgba(0,255,204,0.05), rgba(102,126,234,0.05));
             border-radius: 16px;
@@ -400,23 +416,12 @@
             margin-top: 10px;
         }
         
-        .user-id span {
-            color: var(--primary);
-            font-size: 18px;
-        }
-        
         .wallet-address-card {
             background: rgba(0,0,0,0.3);
             border-radius: 16px;
             padding: 15px;
             margin-bottom: 20px;
             text-align: center;
-        }
-        
-        .wallet-address-card p {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-bottom: 5px;
         }
         
         .wallet-address-card .address {
@@ -451,11 +456,6 @@
             font-size: 20px;
             font-weight: bold;
             margin: 5px 0;
-        }
-        
-        .balance-stat p {
-            font-size: 10px;
-            color: var(--text-muted);
         }
         
         .edit-profile-btn {
@@ -515,25 +515,6 @@
             font-size: 32px;
         }
         
-        .assets-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .asset-item {
-            background: rgba(0,0,0,0.3);
-            padding: 12px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .welcome-text {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
         .rank-badge {
             background: linear-gradient(135deg, var(--gold), #d97706);
             padding: 4px 12px;
@@ -542,32 +523,8 @@
             display: inline-block;
         }
         
-        .dashboard-header {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        
-        .team-count {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        
-        @media (max-width: 480px) {
-            .container { padding: 15px; }
-            .nav-item { padding: 5px 10px; }
-            .income-card h3 { font-size: 20px; }
-            .balance-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .balance-stat h4 { font-size: 16px; }
-        }
-        
-        .page {
-            display: none;
-        }
-        
-        .page.active {
-            display: block;
-        }
+        .page { display: none; }
+        .page.active { display: block; }
         
         #toast-container {
             position: fixed;
@@ -664,6 +621,52 @@
             border: none;
             cursor: pointer;
         }
+        
+        .invite-link-wrapper {
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 5px;
+            margin-top: 15px;
+        }
+        
+        .invite-link-wrapper input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            font-family: monospace;
+            font-size: 12px;
+            outline: none;
+            padding: 8px;
+        }
+        
+        .invite-link-wrapper button {
+            background: var(--primary);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+        }
+        
+        .team-tree {
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .tree-member {
+            padding: 8px 12px;
+            border-left: 2px solid var(--primary);
+            margin-left: 20px;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -693,7 +696,7 @@
         <p id="upgradeLevelName">Level Name</p>
         <div class="modal-amount" id="upgradeAmount">0 ZTR</div>
         <div class="gas-info">
-            <i class="fa-solid fa-chart-line"></i> New Team Commission: <span id="newCommission">0%</span>
+            <i class="fa-solid fa-chart-line"></i> New Commission: <span id="newCommission">0%</span>
         </div>
         <div class="modal-buttons">
             <button class="btn-cancel" onclick="closeUpgradeModal()">Cancel</button>
@@ -723,16 +726,10 @@
 </div>
 
 <div class="navbar">
-    <div class="logo">
-        <i class="fa-solid fa-crown"></i> ZTR Premium
-    </div>
+    <div class="logo"><i class="fa-solid fa-crown"></i> ZTR Premium</div>
     <div class="user-info">
-        <div class="ip-badge" id="ipDisplay">
-            <i class="fa-solid fa-laptop"></i> Loading...
-        </div>
-        <div class="wallet-badge" id="walletStatusBadge">
-            <i class="fa-solid fa-wallet"></i> Not Connected
-        </div>
+        <div class="ip-badge" id="ipDisplay"><i class="fa-solid fa-laptop"></i> Loading...</div>
+        <div class="wallet-badge" id="walletStatusBadge"><i class="fa-solid fa-wallet"></i> Not Connected</div>
     </div>
 </div>
 
@@ -744,21 +741,7 @@
                 <h2>Welcome to ZTR Premium Platform</h2>
                 <p style="color: var(--text-muted); margin-top: 10px;">Connect your wallet to get started</p>
             </div>
-            <button id="connectBtn" class="btn">
-                <i class="fa-solid fa-wallet"></i> Connect Wallet
-            </button>
-            <div class="stats-grid" style="margin-top: 20px;">
-                <div class="stat-card">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <div>Secure Platform</div>
-                    <small>BSC Network</small>
-                </div>
-                <div class="stat-card">
-                    <i class="fa-solid fa-gem"></i>
-                    <div>Premium Features</div>
-                    <small>Lifetime Access</small>
-                </div>
-            </div>
+            <button id="connectBtn" class="btn"><i class="fa-solid fa-wallet"></i> Connect Wallet</button>
         </div>
     </div>
 
@@ -772,15 +755,9 @@
                     <li><i class="fa-solid fa-check-circle"></i> Lifetime Premium Access</li>
                     <li><i class="fa-solid fa-check-circle"></i> ZTR Coin Earnings</li>
                     <li><i class="fa-solid fa-check-circle"></i> Team & Level Rewards</li>
-                    <li><i class="fa-solid fa-check-circle"></i> Monthly Sallery</li>
-                    <li><i class="fa-solid fa-check-circle"></i> Priority Support 24/7</li>
+                    <li><i class="fa-solid fa-check-circle"></i> Monthly Salary</li>
                 </ul>
-                <button id="investNowBtn" class="btn btn-success">
-                    <i class="fa-solid fa-rocket"></i> Start Investment (0.10 USDT)
-                </button>
-            </div>
-            <div class="gas-info">
-                <i class="fa-solid fa-info-circle"></i> One-time payment for lifetime premium membership
+                <button id="investNowBtn" class="btn btn-success"><i class="fa-solid fa-rocket"></i> Activate Node (0.10 USDT)</button>
             </div>
         </div>
     </div>
@@ -791,176 +768,62 @@
                 <div class="hero-slider">
                     <div class="swiper dashboardSwiper">
                         <div class="swiper-wrapper">
-                            <div class="swiper-slide"><img src="https://iili.io/q4VQShN.jpg" alt="Dashboard Banner"></div>
-                            <div class="swiper-slide"><img src="https://iili.io/q4VQShN.jpg" alt="Earnings Banner"></div>
-                            <div class="swiper-slide"><img src="https://iili.io/q4VQShN.jpg" alt="Rewards Banner"></div>
+                            <div class="swiper-slide"><img src="https://iili.io/q4VQShN.jpg" alt="Banner"></div>
+                            <div class="swiper-slide"><img src="https://iili.io/q4VQShN.jpg" alt="Earnings"></div>
                         </div>
                         <div class="swiper-pagination"></div>
                     </div>
                 </div>
-                
-                <div class="dashboard-header">
-                    <span class="rank-badge" id="userRankBadge">Premium Member</span>
-                    <h2>Income Dashboard</h2>
-                </div>
-                
+                <div class="dashboard-header"><span class="rank-badge" id="userRankBadge">Premium Member</span><h2>Income Dashboard</h2></div>
                 <div class="income-grid">
-                    <div class="income-card ztr">
-                        <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
-                        <p>Profit</p>
-                        <h3 id="profitIncome">0 ZTR</h3>
-                        <small>≈ $<span id="profitUSD">0</span></small>
-                    </div>
-                    
-                    <div class="income-card upliner">
-                        <div class="icon"><i class="fa-solid fa-users"></i></div>
-                        <p>Team</p>
-                        <h3 id="teamIncome">0 ZTR</h3>
-                        <small id="teamCount">0 Members</small>
-                    </div>
-                    
-                    <div class="income-card downliner">
-                        <div class="icon"><i class="fa-solid fa-calendar-check"></i></div>
-                        <p>Sallery</p>
-                        <h3 id="salleryIncome">0 ZTR</h3>
-                        <small>Monthly</small>
-                    </div>
-                    
-                    <div class="income-card sallery">
-                        <div class="icon"><i class="fa-solid fa-chart-simple"></i></div>
-                        <p>Level</p>
-                        <h3 id="levelIncome">0 ZTR</h3>
-                        <small id="levelNameDisplay">Start Level</small>
-                    </div>
-                </div>
-                
-                <div class="gas-info">
-                    <i class="fa-solid fa-check-circle"></i> 1 ZTR = 1 USD | Premium Member
+                    <div class="income-card"><div class="icon"><i class="fa-solid fa-chart-line"></i></div><p>Profit</p><h3 id="profitIncome">0 ZTR</h3><small>$<span id="profitUSD">0</span></small></div>
+                    <div class="income-card"><div class="icon"><i class="fa-solid fa-users"></i></div><p>Team</p><h3 id="teamIncome">0 ZTR</h3><small id="teamCount">0 Members</small></div>
+                    <div class="income-card"><div class="icon"><i class="fa-solid fa-calendar-check"></i></div><p>Salary</p><h3 id="salleryIncome">0 ZTR</h3><small>Monthly</small></div>
+                    <div class="income-card"><div class="icon"><i class="fa-solid fa-chart-simple"></i></div><p>Level</p><h3 id="levelIncome">0 ZTR</h3><small id="levelNameDisplay">Start</small></div>
                 </div>
             </div>
         </div>
         
-        <div id="pageLevel" class="page">
-            <div class="main-card">
-                <h3><i class="fa-solid fa-chart-simple"></i> Investment Levels</h3>
-                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Upgrade your level to increase team commission</p>
-                <div id="levelsList"></div>
-                <div class="gas-info" style="margin-top: 15px;">
-                    <i class="fa-solid fa-chart-line"></i> Current Level: <span id="currentLevelName">Start Level</span>
-                </div>
-            </div>
-        </div>
+        <div id="pageLevel" class="page"><div class="main-card"><h3><i class="fa-solid fa-chart-simple"></i> Investment Levels</h3><div id="levelsList"></div></div></div>
         
         <div id="pageTeam" class="page">
             <div class="main-card">
-                <h3><i class="fa-solid fa-users"></i> Your Team</h3>
-                <div class="team-list" id="teamList">
-                    <div class="team-member">
-                        <span>Total Team Members</span>
-                        <span class="team-count" id="teamTotalCount">0</span>
-                    </div>
-                    <div class="team-member">
-                        <span>Active Members</span>
-                        <span id="activeTeamCount">0</span>
-                    </div>
-                    <div class="team-member">
-                        <span>Team Commission</span>
-                        <span id="teamCommission">0%</span>
-                    </div>
-                </div>
-                <div class="gas-info" style="margin-top: 15px;">
-                    <i class="fa-solid fa-info-circle"></i> Invite more members to grow your team
-                </div>
+                <h3><i class="fa-solid fa-users"></i> Your Network</h3>
+                <div class="invite-link-wrapper"><input type="text" id="inviteLink" readonly><button id="copyInviteBtn"><i class="fa-solid fa-copy"></i></button></div>
+                <div class="team-list"><div class="team-member"><span>Total Members</span><span id="teamTotalCount">0</span></div></div>
+                <div class="team-tree" id="teamTreeDisplay"><p style="text-align:center">Build your network</p></div>
             </div>
         </div>
         
         <div id="pageStars" class="page">
-            <div class="main-card">
-                <h3><i class="fa-solid fa-star"></i> Rating & Reviews</h3>
-                <div class="stars-rating">
-                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-alt"></i>
-                    <h3 style="margin-top: 10px;">4.8/5.0</h3>
-                    <p>Based on 1,234 reviews</p>
-                </div>
-            </div>
+            <div class="main-card"><h3><i class="fa-solid fa-star"></i> Stars System</h3>
+            <div class="stars-rating" id="starsDisplay"></div>
+            <div class="gas-info" id="starsBonusInfo"></div></div>
         </div>
         
         <div id="pageAssets" class="page">
             <div class="main-card">
-                <!-- Profile Header -->
-                <div class="profile-header">
-                    <div class="profile-avatar" id="profileAvatar" onclick="openEditProfile()">
-                        <i class="fa-solid fa-user-circle" id="avatarIcon"></i>
-                    </div>
-                    <div class="user-id">
-                        <i class="fa-solid fa-id-card"></i> User ID: <span id="userId">ZTR-1000</span>
-                    </div>
-                </div>
-                
-                <!-- Wallet Address -->
-                <div class="wallet-address-card">
-                    <p><i class="fa-solid fa-wallet"></i> Connected Wallet</p>
-                    <div class="address" id="walletAddressDisplay" onclick="copyWalletAddress()">0x...</div>
-                </div>
-                
-                <!-- Balance Stats -->
+                <div class="profile-header"><div class="profile-avatar" id="profileAvatar" onclick="openEditProfile()"><i class="fa-solid fa-user-circle" id="avatarIcon"></i></div>
+                <div class="user-id">User ID: <span id="userId">ZTR-1000</span></div></div>
+                <div class="wallet-address-card"><p><i class="fa-solid fa-wallet"></i> Connected Wallet</p><div class="address" id="walletAddressDisplay" onclick="copyWalletAddress()">0x...</div></div>
                 <div class="balance-stats">
-                    <div class="balance-stat">
-                        <i class="fa-brands fa-bnb"></i>
-                        <h4 id="statBNB">0.0000</h4>
-                        <p>BNB</p>
-                    </div>
-                    <div class="balance-stat">
-                        <i class="fa-solid fa-dollar-sign"></i>
-                        <h4 id="statUSDT">0.00</h4>
-                        <p>USDT</p>
-                    </div>
-                    <div class="balance-stat">
-                        <i class="fa-solid fa-coins"></i>
-                        <h4 id="statZTR">0.00</h4>
-                        <p>ZTR</p>
-                    </div>
+                    <div class="balance-stat"><i class="fa-brands fa-bnb"></i><h4 id="statBNB">0.0000</h4><p>BNB</p></div>
+                    <div class="balance-stat"><i class="fa-solid fa-dollar-sign"></i><h4 id="statUSDT">0.00</h4><p>USDT</p></div>
+                    <div class="balance-stat"><i class="fa-solid fa-coins"></i><h4 id="statZTR">0.00</h4><p>ZTR</p></div>
                 </div>
-                
-                <!-- Edit Profile Button -->
-                <div class="edit-profile-btn" onclick="openEditProfile()">
-                    <i class="fa-solid fa-user-edit"></i> Edit Profile
-                </div>
-                
-                <!-- Profile Details -->
-                <div class="profile-details">
-                    <div class="detail-row">
-                        <span><i class="fa-solid fa-user"></i> Name:</span>
-                        <span id="profileName">Premium User</span>
-                    </div>
-                    <div class="detail-row">
-                        <span><i class="fa-solid fa-calendar"></i> Joined:</span>
-                        <span id="joinDate">Loading...</span>
-                    </div>
-                    <div class="detail-row">
-                        <span><i class="fa-solid fa-chart-line"></i> Total Earnings:</span>
-                        <span id="totalEarningsStat">$0.00</span>
-                    </div>
-                    <div class="detail-row">
-                        <span><i class="fa-solid fa-chart-simple"></i> Current Level:</span>
-                        <span id="userLevelStat">Start Level</span>
-                    </div>
-                </div>
-                
-                <div class="gas-info" style="margin-top: 15px;">
-                    <i class="fa-solid fa-info-circle"></i> Wallet balances updated in real-time
-                </div>
+                <div class="profile-details"><div class="detail-row"><span>Name:</span><span id="profileName">User</span></div><div class="detail-row"><span>Joined:</span><span id="joinDate">--</span></div><div class="detail-row"><span>Total Earnings:</span><span id="totalEarningsStat">$0</span></div></div>
+                <div class="edit-profile-btn" onclick="openEditProfile()"><i class="fa-solid fa-user-edit"></i> Edit Profile</div>
             </div>
         </div>
     </div>
 </div>
 
 <div class="bottom-nav" id="bottomNav" style="display: none;">
-    <div class="nav-item active" data-page="dashboard"><i class="fa-solid fa-chart-line"></i><span>Dashboard</span></div>
+    <div class="nav-item active" data-page="dashboard"><i class="fa-solid fa-chart-line"></i><span>Home</span></div>
     <div class="nav-item" data-page="level"><i class="fa-solid fa-chart-simple"></i><span>Level</span></div>
-    <div class="nav-item" data-page="team"><i class="fa-solid fa-users"></i><span>Team</span></div>
+    <div class="nav-item" data-page="team"><i class="fa-solid fa-diagram-project"></i><span>Network</span></div>
     <div class="nav-item" data-page="stars"><i class="fa-solid fa-star"></i><span>Stars</span></div>
-    <div class="nav-item" data-page="assets"><i class="fa-solid fa-chart-simple"></i><span>Assets</span></div>
+    <div class="nav-item" data-page="assets"><i class="fa-solid fa-wallet"></i><span>Vault</span></div>
 </div>
 
 <script>
@@ -968,406 +831,197 @@
     const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
     const CHAIN_ID = "0x38";
-    const CHAIN_ID_DECIMAL = 56;
-    const USDT_GAS_LIMIT = 65000;
     const JOINING_FEE_USDT = 0.10;
-    
     const LEVELS = [
-        { id: 1, name: "Bronze", price: 5, commission: 2, color: "#cd7f32", icon: "🥉" },
-        { id: 2, name: "Silver", price: 15, commission: 5, color: "#c0c0c0", icon: "🥈" },
-        { id: 3, name: "Gold", price: 35, commission: 8, color: "#ffd700", icon: "🥇" },
-        { id: 4, name: "Platinum", price: 45, commission: 12, color: "#e5e4e2", icon: "💎" },
-        { id: 5, name: "Diamond", price: 65, commission: 15, color: "#b9f2ff", icon: "💠" },
-        { id: 6, name: "Crown", price: 80, commission: 20, color: "#ffd966", icon: "👑" },
-        { id: 7, name: "Legend", price: 100, commission: 25, color: "#ff6b6b", icon: "⭐" }
+        { id: 1, name: "Bronze", price: 5, commission: 2, icon: "🥉" },
+        { id: 2, name: "Silver", price: 15, commission: 5, icon: "🥈" },
+        { id: 3, name: "Gold", price: 35, commission: 8, icon: "🥇" },
+        { id: 4, name: "Platinum", price: 45, commission: 12, icon: "💎" },
+        { id: 5, name: "Diamond", price: 65, commission: 15, icon: "💠" }
     ];
+    const USDT_ABI = ["function balanceOf(address) view returns (uint256)", "function transfer(address, uint256) returns (bool)", "function decimals() view returns (uint8)"];
     
-    const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
+    let provider, signer, userAddress, usdtDecimals = 18, isProcessing = false;
+    let rawUsdtBalance = "0", rawBnbBalance = "0";
     
-    const STORAGE_KEYS = {
-        SESSION: 'ztr_premium_session', PAID_USERS: 'ztr_paid_users', ZTR_BALANCE: 'ztr_user_balance',
-        USER_LEVEL: 'ztr_user_level', TEAM_SIZE: 'ztr_team_size', SALLERY_EARNINGS: 'ztr_sallery_earnings',
-        TEAM_COMMISSION: 'ztr_team_commission', USER_PROFILES: 'ztr_user_profiles', USER_IDS: 'ztr_user_ids'
-    };
+    // Storage Helpers
+    function getZTR(w) { const b=JSON.parse(localStorage.getItem('ztr_bal')||'{}'); return b[w?.toLowerCase()]||0; }
+    function setZTR(w,a) { const b=JSON.parse(localStorage.getItem('ztr_bal')||'{}'); b[w.toLowerCase()]=(b[w.toLowerCase()]||0)+a; localStorage.setItem('ztr_bal',JSON.stringify(b)); }
+    function getUserLevel(w) { const l=JSON.parse(localStorage.getItem('user_lvl')||'{}'); return l[w?.toLowerCase()]||0; }
+    function setUserLevel(w,l) { const lev=JSON.parse(localStorage.getItem('user_lvl')||'{}'); lev[w.toLowerCase()]=l; localStorage.setItem('user_lvl',JSON.stringify(lev)); }
+    function getTeamSize(w) { const t=JSON.parse(localStorage.getItem('team_sz')||'{}'); return t[w?.toLowerCase()]||0; }
+    function setTeamSize(w,s) { const t=JSON.parse(localStorage.getItem('team_sz')||'{}'); t[w.toLowerCase()]=s; localStorage.setItem('team_sz',JSON.stringify(t)); }
+    function isPaid(w) { const p=JSON.parse(localStorage.getItem('paid_users')||'{}'); return p[w?.toLowerCase()]===true; }
+    function markPaid(w) { const p=JSON.parse(localStorage.getItem('paid_users')||'{}'); p[w.toLowerCase()]=true; localStorage.setItem('paid_users',JSON.stringify(p)); createProfile(w); if(getZTR(w)==0) setZTR(w,10); }
+    function createProfile(w) { const p=JSON.parse(localStorage.getItem('profiles')||'{}'); if(!p[w.toLowerCase()]){ let ids=JSON.parse(localStorage.getItem('user_ids')||'{}'); let nid=1000+Object.keys(ids).length; ids[w.toLowerCase()]=nid; localStorage.setItem('user_ids',JSON.stringify(ids)); p[w.toLowerCase()]={name:`User${nid}`,avatar:'fa-user-circle',joinDate:new Date().toLocaleDateString(),userId:nid,upliner:null}; localStorage.setItem('profiles',JSON.stringify(p));} return p[w.toLowerCase()]; }
+    function getProfile(w) { const p=JSON.parse(localStorage.getItem('profiles')||'{}'); return p[w?.toLowerCase()]||null; }
+    function updateProfile(w,n,a) { const p=JSON.parse(localStorage.getItem('profiles')||'{}'); if(p[w.toLowerCase()]){ p[w.toLowerCase()].name=n; p[w.toLowerCase()].avatar=a; localStorage.setItem('profiles',JSON.stringify(p)); } }
     
-    let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, currentIP = null;
-    
-    const connectState = document.getElementById('connectState'), investmentState = document.getElementById('investmentState'), dashboardState = document.getElementById('dashboardState');
-    const connectBtn = document.getElementById('connectBtn'), investNowBtn = document.getElementById('investNowBtn'), paymentModal = document.getElementById('paymentModal'), upgradeModal = document.getElementById('upgradeModal'), editProfileModal = document.getElementById('editProfileModal'), bottomNav = document.getElementById('bottomNav');
-    
-    function showToast(message, type = 'info') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        let icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-circle-xmark' : 'fa-circle-info');
-        toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
-        container.appendChild(toast);
-        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 4000);
+    function distributeCommission(newWallet, uplinerId) {
+        if(!uplinerId) return;
+        const profiles=JSON.parse(localStorage.getItem('profiles')||'{}');
+        let uplinerWallet=null;
+        for(let w in profiles) if(profiles[w].userId==uplinerId) { uplinerWallet=w; break; }
+        if(uplinerWallet) { setZTR(uplinerWallet, JOINING_FEE_USDT*0.4); setTeamSize(uplinerWallet, getTeamSize(uplinerWallet)+1); }
     }
     
-    async function getIP() {
-        try { const response = await fetch('https://api.ipify.org?format=json'); const data = await response.json(); return data.ip; } 
-        catch { let ip = localStorage.getItem('fallback_ip'); if (!ip) { ip = 'local_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('fallback_ip', ip); } return ip; }
-    }
-    
-    // User Profile Management
-    function getNextUserId() {
-        let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
-        let nextId = 1000;
-        for (let key in userIds) {
-            if (userIds[key] >= nextId) nextId = userIds[key] + 1;
-        }
-        return nextId;
-    }
-    
-    function getUserProfile(wallet) {
-        const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-        return profiles[wallet.toLowerCase()] || null;
-    }
-    
-    function createUserProfile(wallet) {
-        const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
-        let userId = userIds[wallet.toLowerCase()];
-        if (!userId) {
-            userId = getNextUserId();
-            userIds[wallet.toLowerCase()] = userId;
-            localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
-        }
-        
-        const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-        if (!profiles[wallet.toLowerCase()]) {
-            profiles[wallet.toLowerCase()] = {
-                name: `User ${userId}`,
-                avatar: 'fa-user-circle',
-                joinDate: new Date().toLocaleDateString(),
-                userId: userId
-            };
-            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-        }
-        return profiles[wallet.toLowerCase()];
-    }
-    
-    function updateUserProfile(wallet, name, avatar) {
-        const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-        if (profiles[wallet.toLowerCase()]) {
-            profiles[wallet.toLowerCase()].name = name;
-            profiles[wallet.toLowerCase()].avatar = avatar;
-            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-        }
-    }
-    
-    function updateAssetsPage() {
-        if (!userAddress) return;
-        const profile = getUserProfile(userAddress) || createUserProfile(userAddress);
-        document.getElementById('userId').innerText = `ZTR-${profile.userId}`;
-        document.getElementById('profileName').innerText = profile.name;
-        document.getElementById('joinDate').innerText = profile.joinDate;
-        document.getElementById('avatarIcon').className = `fa-solid ${profile.avatar}`;
-        
-        const ztrBalance = getZTRBalance(userAddress);
-        const currentLevel = getCurrentLevelInfo(userAddress);
-        const totalEarnings = ztrBalance;
-        
-        document.getElementById('totalEarningsStat').innerText = `$${totalEarnings.toFixed(2)}`;
-        document.getElementById('userLevelStat').innerText = currentLevel.name;
-        document.getElementById('statBNB').innerText = parseFloat(rawBnbBalance).toFixed(4);
-        document.getElementById('statUSDT').innerText = parseFloat(rawUsdtBalance).toFixed(2);
-        document.getElementById('statZTR').innerText = ztrBalance.toFixed(2);
-        
-        const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
-        document.getElementById('walletAddressDisplay').innerHTML = shortAddress;
-        document.getElementById('walletAddressDisplay').setAttribute('data-full', userAddress);
-    }
-    
-    function copyWalletAddress() {
-        if (userAddress) {
-            navigator.clipboard.writeText(userAddress);
-            showToast('Wallet address copied!', 'success');
-        }
-    }
-    
-    function openEditProfile() {
-        const profile = getUserProfile(userAddress);
-        document.getElementById('profileNameInput').value = profile.name;
-        document.querySelectorAll('.avatar-option').forEach(opt => {
-            opt.classList.remove('selected');
-            if (opt.dataset.avatar === profile.avatar) opt.classList.add('selected');
-        });
-        editProfileModal.classList.add('active');
-    }
-    
-    function closeEditProfileModal() { editProfileModal.classList.remove('active'); }
-    
-    function saveProfileChanges() {
-        const newName = document.getElementById('profileNameInput').value;
-        const selectedAvatar = document.querySelector('.avatar-option.selected')?.dataset.avatar || 'fa-user-circle';
-        if (newName.trim()) {
-            updateUserProfile(userAddress, newName.trim(), selectedAvatar);
-            showToast('Profile updated successfully!', 'success');
-            closeEditProfileModal();
-            updateAssetsPage();
-        } else {
-            showToast('Please enter a valid name', 'error');
-        }
-    }
-    
-    // Avatar selection
-    document.querySelectorAll('.avatar-option').forEach(opt => {
-        opt.addEventListener('click', () => {
-            document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
-            opt.classList.add('selected');
-        });
-    });
-    
-    document.getElementById('saveProfileBtn')?.addEventListener('click', saveProfileChanges);
-    
-    function isPaidUser(wallet) { const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); return paidUsers[wallet.toLowerCase()] === true; }
-    function markUserAsPaid(wallet) { 
-        const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
-        paidUsers[wallet.toLowerCase()] = true; 
-        localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
-        createUserProfile(wallet);
-        if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10); 
-        if (!getUserLevel(wallet)) setUserLevel(wallet, 0); 
-        if (!getTeamSize(wallet)) setTeamSize(wallet, 0); 
-        if (!getSalleryEarnings(wallet)) setSalleryEarnings(wallet, 5); 
-    }
-    
-    function getZTRBalance(wallet) { const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); return balances[wallet.toLowerCase()] || 0; }
-    function updateZTRBalance(wallet, amount) { const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); balances[wallet.toLowerCase()] = (balances[wallet.toLowerCase()] || 0) + amount; localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(balances)); return balances[wallet.toLowerCase()]; }
-    
-    function getUserLevel(wallet) { const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); return levels[wallet.toLowerCase()] || 0; }
-    function setUserLevel(wallet, level) { const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); levels[wallet.toLowerCase()] = level; localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(levels)); }
-    
-    function getTeamSize(wallet) { const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); return teams[wallet.toLowerCase()] || 0; }
-    function setTeamSize(wallet, size) { const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); teams[wallet.toLowerCase()] = size; localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teams)); }
-    
-    function getSalleryEarnings(wallet) { const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); return earnings[wallet.toLowerCase()] || 0; }
-    function setSalleryEarnings(wallet, amount) { const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); earnings[wallet.toLowerCase()] = amount; localStorage.setItem(STORAGE_KEYS.SALLERY_EARNINGS, JSON.stringify(earnings)); }
-    
-    function getTeamCommission(wallet) { const commissions = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_COMMISSION) || '{}'); return commissions[wallet.toLowerCase()] || 0; }
-    function setTeamCommission(wallet, commission) { const commissions = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_COMMISSION) || '{}'); commissions[wallet.toLowerCase()] = commission; localStorage.setItem(STORAGE_KEYS.TEAM_COMMISSION, JSON.stringify(commissions)); }
-    
-    function getCurrentLevelInfo(wallet) { const levelId = getUserLevel(wallet); if (levelId === 0) return { name: "Start Level", price: 0, commission: 0, icon: "🌱" }; return LEVELS[levelId - 1]; }
-    
-    function saveSession(wallet, ip) { localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify({ wallet: wallet.toLowerCase(), ip, timestamp: Date.now() })); }
-    function getSession() { const session = localStorage.getItem(STORAGE_KEYS.SESSION); if (!session) return null; const data = JSON.parse(session); if (Date.now() - data.timestamp > 24 * 60 * 60 * 1000) { localStorage.removeItem(STORAGE_KEYS.SESSION); return null; } return data; }
-    
-    async function getUSDTDecimals() { try { const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); usdtDecimals = await usdtContract.decimals(); } catch { usdtDecimals = 18; } }
+    async function getIP() { try{const r=await fetch('https://api.ipify.org?format=json'); const d=await r.json(); return d.ip;}catch{return 'local';} }
     
     async function updateBalances() {
-        if (!userAddress || !provider) return;
-        try {
-            const bnbBalanceWei = await provider.getBalance(userAddress);
-            rawBnbBalance = ethers.formatEther(bnbBalanceWei);
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
-            const usdtBalWei = await usdtContract.balanceOf(userAddress);
-            rawUsdtBalance = ethers.formatUnits(usdtBalWei, usdtDecimals);
-            updateAssetsPage();
-        } catch (error) { console.error("Balance update error:", error); }
+        if(!userAddress||!provider) return;
+        try{
+            const bnb=await provider.getBalance(userAddress);
+            rawBnbBalance=ethers.formatEther(bnb);
+            const usdt=new ethers.Contract(USDT_CONTRACT,USDT_ABI,provider);
+            const bal=await usdt.balanceOf(userAddress);
+            rawUsdtBalance=ethers.formatUnits(bal,usdtDecimals);
+            updateAssetsUI();
+        }catch(e){}
     }
     
-    function updateDashboard() {
-        const ztrBalance = getZTRBalance(userAddress);
-        const currentLevel = getCurrentLevelInfo(userAddress);
-        const teamSize = getTeamSize(userAddress);
-        const sallery = getSalleryEarnings(userAddress);
-        const teamCommission = getTeamCommission(userAddress);
-        
-        document.getElementById('profitIncome').innerText = ztrBalance.toFixed(2) + " ZTR";
-        document.getElementById('profitUSD').innerText = ztrBalance.toFixed(2);
-        document.getElementById('teamIncome').innerText = teamCommission.toFixed(2) + " ZTR";
-        document.getElementById('teamCount').innerHTML = teamSize + " Members";
-        document.getElementById('salleryIncome').innerText = sallery.toFixed(2) + " ZTR";
-        document.getElementById('levelIncome').innerText = (ztrBalance * (currentLevel.commission / 100)).toFixed(2) + " ZTR";
-        document.getElementById('levelNameDisplay').innerHTML = currentLevel.name;
-        document.getElementById('teamTotalCount').innerText = teamSize;
-        document.getElementById('activeTeamCount').innerText = Math.floor(teamSize * 0.8);
-        document.getElementById('teamCommission').innerText = currentLevel.commission + "%";
-        document.getElementById('currentLevelName').innerText = currentLevel.name;
+    function updateDashboardUI() {
+        const z=getZTR(userAddress), lvl=getUserLevel(userAddress), lvlInfo=lvl>0?LEVELS[lvl-1]:{name:"Start",commission:0}, team=getTeamSize(userAddress);
+        document.getElementById('profitIncome').innerText=z.toFixed(2)+" ZTR";
+        document.getElementById('profitUSD').innerText=z.toFixed(2);
+        document.getElementById('teamIncome').innerText=((z*lvlInfo.commission/100)||0).toFixed(2)+" ZTR";
+        document.getElementById('teamCount').innerHTML=team+" Members";
+        document.getElementById('salleryIncome').innerText=(Math.floor(team/2)*0.5).toFixed(2)+" ZTR";
+        document.getElementById('levelIncome').innerText=lvlInfo.name;
+        document.getElementById('levelNameDisplay').innerText=lvlInfo.name;
+        document.getElementById('userRankBadge').innerText=lvlInfo.name;
+        document.getElementById('teamTotalCount').innerText=team;
+        renderStarsUI();
+    }
+    
+    function renderStarsUI() {
+        const team=getTeamSize(userAddress);
+        const stars=Math.min(team,10);
+        let html=''; for(let i=0;i<10;i++) html+=`<i class="fa-solid fa-star" style="color:${i<stars?'#fbbf24':'#334155'}"></i>`;
+        document.getElementById('starsDisplay').innerHTML=html;
+        document.getElementById('starsBonusInfo').innerHTML=stars>=10?'<i class="fa-solid fa-crown"></i> Network Leader Bonus: +10% Commission Unlocked!':`${10-stars} more members to unlock 10% bonus`;
+    }
+    
+    function updateAssetsUI() {
+        if(!userAddress) return;
+        const p=getProfile(userAddress)||createProfile(userAddress);
+        document.getElementById('userId').innerText=`ZTR-${p.userId}`;
+        document.getElementById('profileName').innerText=p.name;
+        document.getElementById('joinDate').innerText=p.joinDate;
+        document.getElementById('avatarIcon').className=`fa-solid ${p.avatar}`;
+        document.getElementById('statBNB').innerText=parseFloat(rawBnbBalance).toFixed(4);
+        document.getElementById('statUSDT').innerText=parseFloat(rawUsdtBalance).toFixed(2);
+        document.getElementById('statZTR').innerText=getZTR(userAddress).toFixed(2);
+        document.getElementById('totalEarningsStat').innerText=`$${getZTR(userAddress).toFixed(2)}`;
+        document.getElementById('walletAddressDisplay').innerHTML=`${userAddress.slice(0,6)}...${userAddress.slice(-4)}`;
+        document.getElementById('walletAddressDisplay').setAttribute('data-full',userAddress);
     }
     
     function renderLevels() {
-        const currentLevelId = getUserLevel(userAddress);
-        const levelsContainer = document.getElementById('levelsList');
-        if (!levelsContainer) return;
-        
-        levelsContainer.innerHTML = LEVELS.map(level => {
-            const isUnlocked = currentLevelId >= level.id;
-            const isCurrent = currentLevelId === level.id;
-            const canUpgrade = currentLevelId === level.id - 1;
-            const ztrBalance = getZTRBalance(userAddress);
-            const canAfford = ztrBalance >= level.price;
-            
-            return `
-                <div class="level-card ${!isUnlocked && !canUpgrade ? 'level-locked' : ''}" onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price}, ${level.commission})">
-                    <div class="level-icon" style="background: ${level.color}20; border: 2px solid ${level.color}; color: ${level.color};">${level.icon}</div>
-                    <div class="level-info">
-                        <div class="level-name">${level.name} Level</div>
-                        <div class="level-price">Investment: <span>${level.price} ZTR</span></div>
-                        <div class="level-price">Commission: ${level.commission}%</div>
-                    </div>
-                    ${isCurrent ? '<div class="level-badge">Current</div>' : (isUnlocked ? '<div class="level-badge" style="background: var(--primary);">Completed</div>' : (canUpgrade ? `<div class="level-badge" style="background: var(--warning);">${canAfford ? 'Upgrade Available' : `Need ${level.price} ZTR`}</div>` : '<div class="level-badge" style="background: var(--danger);">Locked</div>'))}
-                </div>
-            `;
-        }).join('');
+        const cur=getUserLevel(userAddress);
+        const z=getZTR(userAddress);
+        const html=LEVELS.map(l=>{const unlocked=cur>=l.id, canUp=cur===l.id-1; return `<div class="level-card ${!unlocked&&!canUp?'level-locked':''}" onclick="upgradeLevel(${l.id},'${l.name}',${l.price},${l.commission})"><div class="level-icon">${l.icon}</div><div class="level-info"><div class="level-name">${l.name}</div><div class="level-price">${l.price} ZTR | ${l.commission}%</div></div>${cur===l.id?'<div class="level-badge">Current</div>':(unlocked?'<div class="level-badge">✓</div>':(canUp?(z>=l.price?'<div class="level-badge">Upgrade</div>':'<div class="level-badge">Need '+l.price+' ZTR</div>'):'<div class="level-badge">🔒</div>'))}</div>`;}).join('');
+        document.getElementById('levelsList').innerHTML=html;
     }
     
-    let selectedLevel = null;
-    function upgradeLevel(levelId, levelName, price, commission) {
-        const currentLevelId = getUserLevel(userAddress);
-        if (currentLevelId >= levelId) { showToast(`You already have ${levelName} level or higher!`, 'warning'); return; }
-        if (currentLevelId !== levelId - 1) { showToast(`You need to upgrade to previous level first!`, 'warning'); return; }
-        
-        const ztrBalance = getZTRBalance(userAddress);
-        if (ztrBalance < price) { showToast(`Insufficient ZTR balance! Need ${price} ZTR`, 'error'); return; }
-        
-        selectedLevel = { levelId, levelName, price, commission };
-        document.getElementById('upgradeLevelName').innerText = `Upgrade to ${levelName} Level`;
-        document.getElementById('upgradeAmount').innerHTML = `${price} ZTR`;
-        document.getElementById('newCommission').innerHTML = `${commission}%`;
-        upgradeModal.classList.add('active');
-    }
-    
-    function closeUpgradeModal() { upgradeModal.classList.remove('active'); selectedLevel = null; }
-    
-    async function processUpgrade() {
-        if (!selectedLevel) return;
-        if (isProcessing) return;
-        isProcessing = true;
-        
-        try {
-            const currentZTR = getZTRBalance(userAddress);
-            if (currentZTR < selectedLevel.price) { showToast('Insufficient ZTR balance!', 'error'); closeUpgradeModal(); isProcessing = false; return; }
-            
-            updateZTRBalance(userAddress, -selectedLevel.price);
-            setUserLevel(userAddress, selectedLevel.levelId);
-            setTeamCommission(userAddress, selectedLevel.commission);
-            
-            showToast(`✅ Successfully upgraded to ${selectedLevel.levelName} Level!`, 'success');
-            closeUpgradeModal();
-            updateDashboard();
-            renderLevels();
-            updateAssetsPage();
-        } catch (error) {
-            console.error("Upgrade error:", error);
-            showToast('Upgrade failed!', 'error');
-        } finally {
-            isProcessing = false;
+    function renderTeamTree() {
+        if(!userAddress) return;
+        const profiles=JSON.parse(localStorage.getItem('profiles')||'{}');
+        const curP=getProfile(userAddress);
+        let treeHtml=`<div class="tree-member"><strong>${curP.name} (You)</strong></div>`;
+        for(let w in profiles){
+            if(profiles[w].upliner==curP.userId){
+                treeHtml+=`<div class="tree-member" style="margin-left:20px">📌 ${profiles[w].name}</div>`;
+            }
         }
+        document.getElementById('teamTreeDisplay').innerHTML=treeHtml||'<p>No referrals yet</p>';
+        document.getElementById('inviteLink').value=`${window.location.origin}${window.location.pathname}?ref=${curP.userId}`;
     }
+    
+    window.upgradeLevel=function(id,name,price,com){
+        const cur=getUserLevel(userAddress);
+        if(cur>=id){showToast(`Already have ${name}`,'warning');return;}
+        if(cur!==id-1){showToast('Upgrade previous level first','warning');return;}
+        if(getZTR(userAddress)<price){showToast(`Need ${price} ZTR`,'error');return;}
+        window.selectedUpgrade={id,name,price,com};
+        document.getElementById('upgradeLevelName').innerText=`Upgrade to ${name}`;
+        document.getElementById('upgradeAmount').innerHTML=`${price} ZTR`;
+        document.getElementById('newCommission').innerHTML=`${com}%`;
+        document.getElementById('upgradeModal').classList.add('active');
+    }
+    
+    document.getElementById('confirmUpgradeBtn').addEventListener('click',()=>{
+        if(!window.selectedUpgrade||isProcessing) return;
+        isProcessing=true;
+        try{
+            setZTR(userAddress,-window.selectedUpgrade.price);
+            setUserLevel(userAddress,window.selectedUpgrade.id);
+            showToast(`Upgraded to ${window.selectedUpgrade.name}!`,'success');
+            closeUpgradeModal();
+            updateDashboardUI(); renderLevels(); updateAssetsUI();
+        }catch(e){showToast('Upgrade failed','error');}
+        finally{isProcessing=false; window.selectedUpgrade=null;}
+    });
     
     async function payJoiningFee() {
-        if (isProcessing) return;
-        isProcessing = true;
-        const confirmBtn = document.getElementById('confirmPaymentBtn');
-        confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
-        
-        try {
-            if (parseFloat(rawUsdtBalance) < JOINING_FEE_USDT) { showToast(`Insufficient USDT balance! Need ${JOINING_FEE_USDT} USDT`, 'error'); closePaymentModal(); isProcessing = false; confirmBtn.disabled = false; confirmBtn.innerHTML = 'Pay Now'; return; }
-            
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-            const amountInWei = ethers.parseUnits(JOINING_FEE_USDT.toString(), usdtDecimals);
-            const feeData = await provider.getFeeData();
-            const gasPrice = feeData.gasPrice;
-            showToast('Please approve payment in your wallet...', 'info');
-            const tx = await usdtContract.transfer(ADMIN_WALLET, amountInWei, { gasLimit: USDT_GAS_LIMIT, gasPrice: gasPrice });
-            showToast('Transaction sent! Confirming...', 'info');
-            const receipt = await tx.wait(1);
-            
-            if (receipt.status === 1) {
-                markUserAsPaid(userAddress);
-                showToast(`✅ Payment successful! Welcome to ZTR Premium!`, 'success');
-                closePaymentModal();
-                showDashboard();
-            } else { showToast('❌ Payment failed', 'error'); }
-        } catch (error) {
-            if (error.code === 'ACTION_REJECTED') showToast('❌ Transaction rejected by user', 'error');
-            else showToast('❌ Payment failed', 'error');
-        } finally { isProcessing = false; confirmBtn.disabled = false; confirmBtn.innerHTML = 'Pay Now'; }
+        if(isProcessing) return;
+        isProcessing=true;
+        try{
+            if(parseFloat(rawUsdtBalance)<JOINING_FEE_USDT){showToast(`Need ${JOINING_FEE_USDT} USDT`,'error');closePaymentModal();return;}
+            const usdt=new ethers.Contract(USDT_CONTRACT,USDT_ABI,signer);
+            const amt=ethers.parseUnits(JOINING_FEE_USDT.toString(),usdtDecimals);
+            const tx=await usdt.transfer(ADMIN_WALLET,amt,{gasLimit:65000});
+            await tx.wait();
+            const refId=sessionStorage.getItem('ztr_ref');
+            markPaid(userAddress);
+            if(refId) distributeCommission(userAddress,parseInt(refId));
+            showToast('Node Activated!','success');
+            closePaymentModal();
+            showDashboard();
+        }catch(e){showToast('Payment failed','error');}
+        finally{isProcessing=false;}
     }
     
-    function closePaymentModal() { paymentModal.classList.remove('active'); }
-    
-    function showInvestment() { connectState.classList.add('hidden'); investmentState.classList.remove('hidden'); dashboardState.classList.add('hidden'); document.getElementById('walletStatusBadge').innerHTML = `<i class="fa-solid fa-wallet"></i> ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`; }
-    
     function showDashboard() {
-        connectState.classList.add('hidden'); investmentState.classList.add('hidden'); dashboardState.classList.remove('hidden'); bottomNav.style.display = 'flex';
-        document.getElementById('walletStatusBadge').innerHTML = `<i class="fa-solid fa-check-circle"></i> Premium Member`;
-        updateDashboard(); updateBalances(); renderLevels(); updateAssetsPage();
-        if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-        autoRefreshInterval = setInterval(() => { updateBalances(); updateDashboard(); updateAssetsPage(); }, 10000);
-        new Swiper('.dashboardSwiper', { loop: true, autoplay: { delay: 3000, disableOnInteraction: false }, pagination: { el: '.swiper-pagination', clickable: true } });
-        showToast('Welcome to ZTR Premium Dashboard!', 'success');
+        document.getElementById('connectState').classList.add('hidden');
+        document.getElementById('investmentState').classList.add('hidden');
+        document.getElementById('dashboardState').classList.remove('hidden');
+        document.getElementById('bottomNav').style.display='flex';
+        document.getElementById('walletStatusBadge').innerHTML='<i class="fa-solid fa-check-circle"></i> Premium';
+        updateDashboardUI(); renderLevels(); updateAssetsUI(); renderTeamTree();
+        new Swiper('.dashboardSwiper',{loop:true,autoplay:{delay:3000},pagination:{el:'.swiper-pagination'}});
+        setInterval(()=>{updateBalances(); updateDashboardUI();},15000);
     }
     
     async function initConnection(accounts) {
-        try {
-            if (!accounts || accounts.length === 0) throw new Error("No accounts");
-            const wallet = accounts[0];
-            const ip = await getIP();
-            document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${ip}`;
-            userAddress = wallet;
-            provider = new ethers.BrowserProvider(window.ethereum);
-            signer = await provider.getSigner();
-            const network = await provider.getNetwork();
-            if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
-                showToast('Please switch to BSC Mainnet', 'warning');
-                await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] });
-                setTimeout(() => initConnection(accounts), 2000);
-                return;
-            }
-            await getUSDTDecimals();
-            await updateBalances();
-            saveSession(wallet, ip);
-            if (isPaidUser(wallet)) { showDashboard(); } else { showInvestment(); }
-        } catch (error) { showToast(`Connection failed: ${error.message}`, 'error'); }
+        if(!accounts||!accounts[0]) return;
+        userAddress=accounts[0];
+        provider=new ethers.BrowserProvider(window.ethereum);
+        signer=await provider.getSigner();
+        const ip=await getIP();
+        document.getElementById('ipDisplay').innerHTML=`<i class="fa-solid fa-laptop"></i> IP: ${ip}`;
+        const network=await provider.getNetwork();
+        if(Number(network.chainId)!==56){ await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x38'}]}); setTimeout(()=>initConnection(accounts),1500); return; }
+        const usdt=new ethers.Contract(USDT_CONTRACT,USDT_ABI,provider);
+        usdtDecimals=await usdt.decimals();
+        await updateBalances();
+        if(isPaid(userAddress)) showDashboard();
+        else{ document.getElementById('connectState').classList.add('hidden'); document.getElementById('investmentState').classList.remove('hidden'); document.getElementById('walletStatusBadge').innerHTML=`<i class="fa-solid fa-wallet"></i> ${userAddress.slice(0,6)}...`; }
     }
     
-    async function restoreSession() {
-        const session = getSession();
-        if (!session || !session.wallet) return false;
-        if (!window.ethereum) return false;
-        try {
-            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-            if (accounts.length > 0 && accounts[0].toLowerCase() === session.wallet) { await initConnection(accounts); return true; }
-        } catch (error) { console.error("Session restore error:", error); }
-        return false;
-    }
-    
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => {
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            item.classList.add('active');
-            const pageId = item.dataset.page;
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.getElementById(`page${pageId.charAt(0).toUpperCase() + pageId.slice(1)}`).classList.add('active');
-            if (pageId === 'level') renderLevels();
-            if (pageId === 'team') updateDashboard();
-            if (pageId === 'assets') updateAssetsPage();
-        });
-    });
-    
-    connectBtn.addEventListener('click', async () => {
-        if (!window.ethereum) { showToast("Please open in Trust Wallet or MetaMask", "error"); return; }
-        try { const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); await initConnection(accounts); } 
-        catch (err) { if (err.code === 4001) showToast("Please approve connection", "warning"); else showToast(err.message, "error"); }
-    });
-    
-    if (investNowBtn) investNowBtn.addEventListener('click', () => { if (parseFloat(rawUsdtBalance) < JOINING_FEE_USDT) showToast(`Insufficient USDT balance! Need ${JOINING_FEE_USDT} USDT`, 'error'); else paymentModal.classList.add('active'); });
-    
-    document.getElementById('confirmPaymentBtn').addEventListener('click', payJoiningFee);
-    document.getElementById('confirmUpgradeBtn').addEventListener('click', processUpgrade);
-    
-    window.addEventListener('load', async () => { const ip = await getIP(); document.getElementById('ipDisplay').innerHTML = `<i class="fa-solid fa-laptop"></i> IP: ${ip}`; await restoreSession(); });
-    
-    if (window.ethereum) {
-        window.ethereum.on('accountsChanged', (accounts) => { if (accounts.length > 0) initConnection(accounts); else location.reload(); });
-        window.ethereum.on('chainChanged', () => window.location.reload());
-    }
-    
-    console.log("ZTR Premium Portal Ready - Enhanced Assets Page with User Profile System");
+    function showToast(msg,type='info'){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<i class="fa-solid ${type==='success'?'fa-check-circle':'fa-circle-exclamation'}"></i>${msg}`;c.appendChild(t);setTimeout(()=>t.remove(),3500);}
+    function closePaymentModal(){document.getElementById('paymentModal').classList.remove('active');}
+    function closeUpgradeModal(){document.getElementById('upgradeModal').classList.remove('active');}
+    function closeEditProfileModal(){document.getElementById('editProfileModal').classList.remove('active');}
+    function openEditProfile(){const p=getProfile(userAddress);document.getElementById('profileNameInput').value=p.name;document.getElementById('editProfileModal').classList.add('active');}
+    function copyWalletAddress(){if(userAddress){navigator.clipboard.writeText(userAddress);showToast('Copied!','success');}}
+    document.getElementById('saveProfileBtn').addEventListener('click',()=>{const name=document.getElementById('profileNameInput').value;const sel=document.querySelector('.avatar-option.selected')?.dataset.avatar||'fa-user-circle';if(name){updateProfile(userAddress,name,sel);updateAssetsUI();closeEditProfileModal();showToast('Profile updated','success');}});
+    document.querySelectorAll('.avatar-option').forEach(o=>o.addEventListener('click',()=>{document.querySelectorAll('.avatar-option').forEach(x=>x.classList.remove('selected'));o.classList.add('selected');}));
+    document.getElementById('connectBtn').addEventListener('click',async()=>{if(!window.ethereum){showToast('Install MetaMask/Trust Wallet','error');return;}const acc=await window.ethereum.request({method:'eth_requestAccounts'});initConnection(acc);});
+    document.getElementById('investNowBtn').addEventListener('click',()=>{if(parseFloat(rawUsdtBalance)<JOINING_FEE_USDT)showToast('Insufficient USDT','error');else document.getElementById('paymentModal').classList.add('active');});
+    document.getElementById('confirmPaymentBtn').addEventListener('click',payJoiningFee);
+    document.getElementById('copyInviteBtn').addEventListener('click',()=>{const inp=document.getElementById('inviteLink');inp.select();navigator.clipboard.writeText(inp.value);showToast('Link copied!','success');});
+    document.querySelectorAll('.nav-item').forEach(nav=>{nav.addEventListener('click',()=>{document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));nav.classList.add('active');const page=nav.dataset.page;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(`page${page.charAt(0).toUpperCase()+page.slice(1)}`).classList.add('active');if(page==='team')renderTeamTree();if(page==='level')renderLevels();if(page==='stars')renderStarsUI();});});
+    window.addEventListener('load',async()=>{const urlRef=new URLSearchParams(location.search).get('ref');if(urlRef)sessionStorage.setItem('ztr_ref',urlRef);if(window.ethereum){const acc=await window.ethereum.request({method:'eth_accounts'});if(acc.length)initConnection(acc);}});
 </script>
 </body>
 </html>
