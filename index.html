@@ -466,27 +466,6 @@
             color: var(--gold);
         }
         
-        .invite-code-input-card {
-            background: rgba(0, 242, 255, 0.1);
-            border: 1px solid var(--primary);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .invite-code-input-card input {
-            width: 100%;
-            padding: 12px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            color: white;
-            text-align: center;
-            font-family: monospace;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        
         .network-tree-container {
             padding: 10px;
             overflow-x: auto;
@@ -824,14 +803,55 @@
             100% { border-color: var(--primary); box-shadow: 0 0 0 0 var(--primary-glow); }
         }
         
-        .profile-history-item {
-            background: rgba(255,255,255,0.05);
+        .profile-setup-modal {
+            max-width: 400px;
+            width: 90%;
+        }
+        .profile-setup-modal input, .profile-setup-modal .avatar-preview {
+            margin-bottom: 15px;
+        }
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            background: var(--glass-bg);
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: var(--primary);
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .invite-code-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .invite-code-input-group input {
+            flex: 1;
             padding: 12px;
             border-radius: 12px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            color: white;
+            font-family: monospace;
+        }
+        .invite-code-input-group button {
+            padding: 12px 20px;
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            color: var(--bg-deep);
+            font-weight: bold;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -900,16 +920,38 @@
     </div>
 </div>
 
-<!-- Modals -->
+<!-- Profile Setup Modal (First Time User) -->
+<div class="modal-overlay" id="profileSetupModal">
+    <div class="modal-content glass profile-setup-modal">
+        <i class="fa-solid fa-user-astronaut" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
+        <h2 style="margin-bottom: 15px;">Complete Your Profile</h2>
+        <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 20px;">Please setup your profile to continue</p>
+        
+        <div class="avatar-preview" id="avatarPreview" onclick="document.getElementById('setupProfilePic').click()">
+            <i class="fa-solid fa-user-circle" id="avatarPreviewIcon"></i>
+            <img id="avatarPreviewImg" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        <input type="file" id="setupProfilePic" class="hidden" accept="image/*">
+        
+        <input type="text" id="setupUsername" placeholder="Enter your username" style="width:100%; padding:12px; border-radius:12px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); color:white; margin-bottom:15px;">
+        
+        <div class="invite-code-input-group">
+            <input type="text" id="setupInviteCode" placeholder="Enter inviter's invitation code (optional)">
+            <button id="verifyInviteCodeBtn"><i class="fa-solid fa-check"></i> Verify</button>
+        </div>
+        <div id="inviterVerifyStatus" style="font-size: 11px; margin-bottom: 15px; text-align: left;"></div>
+        
+        <button class="btn btn-success" id="completeProfileBtn">Complete Setup</button>
+    </div>
+</div>
+
+<!-- Payment Modal -->
 <div class="modal-overlay" id="paymentModal">
     <div class="modal-content glass">
         <i class="fa-solid fa-bolt" style="font-size: 50px; color: var(--primary);"></i>
         <h2 style="margin: 15px 0;">Activate Node</h2>
-        <div id="inviterDisplayOnModal" class="inviter-info-card" style="margin-bottom: 15px;">
-            <i class="fa-solid fa-user-plus"></i> Invited By: <strong id="modalInviterId" style="color: var(--gold); font-size: 18px;">None</strong>
-        </div>
-        <div id="inviteCodeDisplayOnModal" class="invite-badge" style="margin-bottom: 15px;">
-            <i class="fa-solid fa-ticket"></i> Invitation Code: <span id="modalInviteCode">None</span>
+        <div id="inviterDisplayOnModal" class="invite-badge" style="margin-bottom: 15px;">
+            <i class="fa-solid fa-user-plus"></i> Invited By: <strong id="modalInviterId" style="color: var(--gold);">None</strong>
         </div>
         <p style="color: var(--text-muted);">Joining Premium Network</p>
         <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;">0.10 USDT</div>
@@ -917,19 +959,6 @@
         <div style="display:flex; gap:10px;">
             <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closeModal('paymentModal')">Cancel</button>
             <button class="btn btn-success" id="confirmPaymentBtn">Confirm</button>
-        </div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="inviteCodeModal">
-    <div class="modal-content glass">
-        <i class="fa-solid fa-ticket" style="font-size: 50px; color: var(--gold);"></i>
-        <h2 style="margin: 15px 0;">Enter Invitation Code</h2>
-        <p style="color: var(--text-muted); margin-bottom: 15px;">Enter the invitation code from your friend (Only one time)</p>
-        <input type="text" id="inviteCodeInputField" placeholder="Enter 8-digit code" maxlength="8" style="width:100%; padding:15px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); border-radius:15px; color:white; text-align:center; font-family:monospace; font-size:16px; margin-bottom:15px;">
-        <div style="display:flex; gap:10px;">
-            <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closeModal('inviteCodeModal')">Cancel</button>
-            <button class="btn btn-success" id="submitInviteCodeBtn">Submit Code</button>
         </div>
     </div>
 </div>
@@ -987,10 +1016,6 @@
             <div id="inviterInfoOnInvestPage" class="inviter-info-card hidden">
                 <h4><i class="fa-solid fa-user-plus"></i> Invited By</h4>
                 <p id="inviterUserIdDisplay">Loading...</p>
-                <small style="font-size: 11px; color: var(--text-muted);">You will get 10 ZTR bonus on activation!</small>
-            </div>
-            <div id="inviteCodeDisplayOnInvest" class="invite-badge hidden">
-                <i class="fa-solid fa-ticket"></i> Invitation Code: <span id="investInviteCode">None</span>
             </div>
             <span class="rank-badge">ENTRY NODE</span>
             <h1 style="font-size:40px; margin:20px 0; color:var(--primary);">0.10 <span style="font-size:18px;">USDT</span></h1>
@@ -1003,7 +1028,6 @@
                 <li style="margin-bottom:10px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> Multi-Level Rewards</li>
             </ul>
             <button id="investNowBtn" class="btn btn-success">ACTIVATE LIFETIME NODE</button>
-            <button id="addInviteCodeBtn" class="btn" style="margin-top: 10px; background:rgba(255,255,255,0.1);">+ Add Invitation Code</button>
         </div>
     </div>
 
@@ -1025,10 +1049,6 @@
 
                 <div id="inviterDisplayOnHome" class="invite-badge" style="margin: 10px 0;">
                     <i class="fa-solid fa-user-check"></i> Invited By: <span id="homeInviterId">None</span>
-                </div>
-                
-                <div id="inviteCodeDisplayOnHome" class="invite-badge" style="margin: 10px 0;">
-                    <i class="fa-solid fa-ticket"></i> Invitation Code: <span id="homeInviteCode">None</span>
                 </div>
 
                 <div class="income-grid">
@@ -1127,14 +1147,6 @@
                         <span style="font-size:12px; color:var(--primary);" id="userId">ID: ZTR-0000</span>
                         <div style="font-size:11px; color:var(--text-muted); margin-top:5px;" id="profileInviteCode"></div>
                     </div>
-                    
-                    <div class="invite-badge" style="margin-bottom: 15px;">
-                        <i class="fa-solid fa-user-check"></i> Invited By: <span id="profileInvitedBy">None</span>
-                    </div>
-                    
-                    <div class="invite-badge" style="margin-bottom: 15px;">
-                        <i class="fa-solid fa-ticket"></i> Used Invitation Code: <span id="profileUsedCode">None</span>
-                    </div>
 
                     <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:15px; font-family:monospace; font-size:11px; text-align:center; color:var(--primary); margin-bottom:20px; border:1px dashed var(--primary); cursor:pointer;" id="walletAddressDisplay" onclick="copyWalletAddress()">
                         0x...
@@ -1159,20 +1171,17 @@
                     </div>
 
                     <div style="border-top:1px solid var(--glass-border); padding-top:20px;">
-                        <h4 style="margin-bottom: 10px;">Profile History</h4>
-                        <div id="profileHistoryContainer">
-                            <div class="profile-history-item">
-                                <span><i class="fa-solid fa-calendar"></i> Joined</span>
-                                <span id="joinDate">--/--/--</span>
-                            </div>
-                            <div class="profile-history-item">
-                                <span><i class="fa-solid fa-chart-area"></i> Total Yield</span>
-                                <span id="totalEarningsStat" style="color:var(--success);">$0.00</span>
-                            </div>
-                            <div class="profile-history-item">
-                                <span><i class="fa-solid fa-shield"></i> Level Status</span>
-                                <span id="userLevelStat" style="color:var(--primary);">Start</span>
-                            </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
+                            <span style="color:var(--text-muted);"><i class="fa-solid fa-calendar"></i> Deployment</span>
+                            <span id="joinDate">--/--/--</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
+                            <span style="color:var(--text-muted);"><i class="fa-solid fa-chart-area"></i> Total Yield</span>
+                            <span id="totalEarningsStat" style="color:var(--success);">$0.00</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:14px;">
+                            <span style="color:var(--text-muted);"><i class="fa-solid fa-shield"></i> Level Status</span>
+                            <span id="userLevelStat" style="color:var(--primary);">Start</span>
                         </div>
                     </div>
 
@@ -1193,14 +1202,6 @@
 
 <script>
     (function() {
-        /* ============================================
-           ZTR COIN - COMPLETE INVITATION SYSTEM
-           Show invitation code on transaction page
-           Profile page with complete history
-           One-time invite code entry only
-           40% direct commission
-        ============================================ */
-        
         // CORE CONFIGURATION
         const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
         const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
@@ -1234,12 +1235,13 @@
             USER_IDS: 'ztr_user_ids',
             INVITE_CODES: 'ztr_invite_codes',
             INVITER_MAP: 'ztr_inviter_map',
-            USED_INVITE_CODE: 'ztr_used_invite_code',
-            CONNECTED_WALLET: 'ztr_connected_wallet'
+            CONNECTED_WALLET: 'ztr_connected_wallet',
+            USER_SETUP_COMPLETE: 'ztr_user_setup_complete'
         };
 
-        let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper, pendingInviterId = null;
-        let userInviteCode = null;
+        let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper;
+        let pendingInviterId = null;
+        let verifiedInviterId = null;
 
         // UI ELEMENTS
         const connectState = document.getElementById('connectState');
@@ -1250,6 +1252,7 @@
         const levelStarsPage = document.getElementById('levelStarsPage');
         const joiningStarsPage = document.getElementById('joiningStarsPage');
         const loadingOverlay = document.getElementById('loadingOverlay');
+        const profileSetupModal = document.getElementById('profileSetupModal');
 
         // ========== HELPER FUNCTIONS ==========
         function showToast(message, type = 'info') {
@@ -1325,15 +1328,6 @@
             }
             return null;
         }
-        
-        function getUserInviteCode(wallet) {
-            const usedCode = localStorage.getItem(STORAGE_KEYS.USED_INVITE_CODE + '_' + wallet.toLowerCase());
-            return usedCode;
-        }
-        
-        function setUserInviteCode(wallet, code) {
-            localStorage.setItem(STORAGE_KEYS.USED_INVITE_CODE + '_' + wallet.toLowerCase(), code);
-        }
 
         // ========== USER DATA MANAGEMENT ==========
         function getNextUserId() {
@@ -1362,7 +1356,7 @@
             return profiles[wallet.toLowerCase()] || null;
         }
 
-        function createUserProfile(wallet, inviterId = null, usedInviteCode = null) {
+        function createUserProfile(wallet, inviterId = null, username = null, profilePicUrl = null) {
             const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
             if (profiles[wallet.toLowerCase()]) return profiles[wallet.toLowerCase()];
 
@@ -1380,17 +1374,12 @@
                 localStorage.setItem(STORAGE_KEYS.INVITER_MAP, JSON.stringify(inviterMap));
             }
             
-            if (usedInviteCode) {
-                setUserInviteCode(wallet, usedInviteCode);
-            }
-            
             profiles[wallet.toLowerCase()] = { 
-                name: `User ${userId}`, 
+                name: username || `User ${userId}`, 
                 avatar: 'fa-user-astronaut', 
                 joinDate: new Date().toLocaleDateString(), 
                 userId: userId,
-                profilePicUrl: null,
-                usedInviteCode: usedInviteCode || null
+                profilePicUrl: profilePicUrl
             };
             localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
             
@@ -1409,17 +1398,23 @@
             return paidUsers[wallet.toLowerCase()] === true; 
         }
         
+        function isProfileComplete(wallet) {
+            const setupComplete = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE) || '{}');
+            return setupComplete[wallet.toLowerCase()] === true;
+        }
+        
+        function markProfileComplete(wallet) {
+            const setupComplete = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE) || '{}');
+            setupComplete[wallet.toLowerCase()] = true;
+            localStorage.setItem(STORAGE_KEYS.USER_SETUP_COMPLETE, JSON.stringify(setupComplete));
+        }
+        
         // ========== INVITATION SYSTEM - 40% DIRECT COMMISSION ==========
-        function markUserAsPaid(wallet, inviterUserId, usedInviteCode = null) {
+        function markUserAsPaid(wallet, inviterUserId) {
             const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
             paidUsers[wallet.toLowerCase()] = true; 
             localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
             
-            createUserProfile(wallet, inviterUserId, usedInviteCode);
-            
-            if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10);
-            if (!getUserLevel(wallet)) setUserLevel(wallet, 0);
-
             if (inviterUserId) {
                 distributeDirectCommission(wallet, inviterUserId);
             }
@@ -1497,15 +1492,10 @@
             const profile = getUserProfile(userAddress);
             if (!profile) return;
             const inviteCode = getUniqueInviteCode(userAddress);
-            const usedCode = getUserInviteCode(userAddress);
-            const inviterId = getInviterId(userAddress);
-            
             document.getElementById('userId').innerText = `ID: ZTR-${profile.userId}`;
             document.getElementById('profileName').innerText = profile.name;
             document.getElementById('joinDate').innerText = profile.joinDate;
             document.getElementById('profileInviteCode').innerHTML = `<i class="fa-solid fa-ticket"></i> Invite Code: ${inviteCode}`;
-            document.getElementById('profileInvitedBy').innerHTML = inviterId ? `ID: ZTR-${inviterId}` : 'None';
-            document.getElementById('profileUsedCode').innerHTML = usedCode || 'None';
             
             const avatarIcon = document.getElementById('avatarIcon');
             const avatarImg = document.getElementById('profileAvatarImg');
@@ -1535,10 +1525,6 @@
             const level = getCurrentLevelInfo(userAddress);
             const team = getTeamSize(userAddress);
             const salary = getSalleryEarnings(userAddress);
-            const inviterId = getInviterId(userAddress);
-            const usedCode = getUserInviteCode(userAddress);
-            const ownCode = getUniqueInviteCode(userAddress);
-            
             document.getElementById('profitIncome').innerText = `${ztr.toFixed(2)} ZTR`;
             document.getElementById('profitUSD').innerText = ztr.toFixed(2);
             document.getElementById('teamIncome').innerText = team;
@@ -1546,11 +1532,14 @@
             document.getElementById('salleryIncome').innerText = `${salary.toFixed(2)} ZTR`;
             document.getElementById('levelIncome').innerText = level.name;
             document.getElementById('userRankBadge').innerText = level.name;
-            document.getElementById('homeInviterId').innerText = inviterId ? `ID: ZTR-${inviterId}` : 'None';
-            document.getElementById('homeInviteCode').innerText = usedCode || 'None';
             
+            const inviterId = getInviterId(userAddress);
+            const homeInviterSpan = document.getElementById('homeInviterId');
             if (inviterId) {
+                homeInviterSpan.innerText = `ID: ZTR-${inviterId}`;
                 document.getElementById('inviterDisplayOnHome').classList.remove('hidden');
+            } else {
+                homeInviterSpan.innerText = 'None (First Member)';
             }
         }
         
@@ -1563,30 +1552,16 @@
                 const inviteLink = `${baseUrl}?invite=${inviteCode}`;
                 const inviteLinkInput = document.getElementById('inviteLink');
                 const inviteCodeInput = document.getElementById('inviteCodeInput');
-                if (inviteLinkInput) {
-                    inviteLinkInput.value = inviteLink;
-                }
-                if (inviteCodeInput) {
-                    inviteCodeInput.value = inviteCode;
-                }
+                if (inviteLinkInput) inviteLinkInput.value = inviteLink;
+                if (inviteCodeInput) inviteCodeInput.value = inviteCode;
             }
         }
         
-        function showInviterInfoOnPages(inviterUserId, usedInviteCode = null) {
+        function showInviterInfoOnPages(inviterUserId) {
             const inviterDisplayText = inviterUserId ? `ID: ZTR-${inviterUserId}` : 'None';
             document.getElementById('inviterUserIdDisplay').innerText = inviterDisplayText;
             document.getElementById('modalInviterId').innerText = inviterDisplayText;
             document.getElementById('homeInviterId').innerText = inviterDisplayText;
-            document.getElementById('profileInvitedBy').innerHTML = inviterDisplayText;
-            
-            if (usedInviteCode) {
-                document.getElementById('modalInviteCode').innerText = usedInviteCode;
-                document.getElementById('investInviteCode').innerText = usedInviteCode;
-                document.getElementById('homeInviteCode').innerText = usedInviteCode;
-                document.getElementById('profileUsedCode').innerHTML = usedInviteCode;
-                document.getElementById('inviteCodeDisplayOnInvest').classList.remove('hidden');
-                document.getElementById('inviteCodeDisplayOnModal').classList.remove('hidden');
-            }
             
             if (inviterUserId) {
                 document.getElementById('inviterInfoOnInvestPage').classList.remove('hidden');
@@ -1610,11 +1585,9 @@
                 new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
             }
             showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
-            sessionStorage.removeItem('ztr_pending_invite');
-            pendingInviterId = null;
         }
         
-        // ========== INVITATION LINK & NETWORK TREE ==========
+        // ========== RENDER NETWORK TREE ==========
         function renderNetworkTree() {
             if (!userAddress) return;
             const currentUserProfile = getUserProfile(userAddress);
@@ -1632,9 +1605,7 @@
                 const children = [];
                 for (const wallet in profiles) {
                     const inviterId = inviterMap[wallet];
-                    if (inviterId === userId) {
-                        children.push(profiles[wallet]);
-                    }
+                    if (inviterId === userId) children.push(profiles[wallet]);
                 }
                 return children;
             };
@@ -1662,11 +1633,6 @@
                 branchHTML += '</ul>';
                 return branchHTML;
             };
-            
-            if (teamSize === 0 && !getInviterId(userAddress)) {
-                treeContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px;">Your network is empty. Share your invitation code to start building!</p>`;
-                return;
-            }
             
             let treeHTML = `
                 <div class="network-tree">
@@ -1770,7 +1736,7 @@
                     </div>`;
             });
             wrapper.innerHTML = slidesHTML;
-            if (levelSwiper) { levelSwiper.destroy(true, true); }
+            if (levelSwiper) levelSwiper.destroy(true, true);
             levelSwiper = new Swiper('.levelSwiper', { effect: 'cards', grabCursor: true, initialSlide: currentLevelId, navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' } });
         }
         
@@ -1814,7 +1780,90 @@
             }
         }
 
-        // ========== WALLET CONNECTION WITH PERSISTENCE ==========
+        // ========== PROFILE SETUP FUNCTIONS ==========
+        let setupProfilePicData = null;
+        
+        document.getElementById('setupProfilePic').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            showToast("Uploading profile picture...", "info");
+            const formData = new FormData();
+            formData.append('key', IMAGE_HOST_API_KEY);
+            formData.append('image', file);
+            
+            try {
+                const response = await fetch('https://freeimage.host/api/1/upload', { method: 'POST', body: formData });
+                const result = await response.json();
+                if (result.status_code === 200) {
+                    setupProfilePicData = result.image.url;
+                    const previewImg = document.getElementById('avatarPreviewImg');
+                    const previewIcon = document.getElementById('avatarPreviewIcon');
+                    previewImg.src = setupProfilePicData;
+                    previewImg.style.display = 'block';
+                    previewIcon.style.display = 'none';
+                    showToast("Profile picture uploaded!", "success");
+                }
+            } catch (error) {
+                showToast("Upload failed", "error");
+            }
+        });
+        
+        document.getElementById('verifyInviteCodeBtn').addEventListener('click', () => {
+            const inviteCode = document.getElementById('setupInviteCode').value.trim().toUpperCase();
+            const statusDiv = document.getElementById('inviterVerifyStatus');
+            
+            if (!inviteCode) {
+                statusDiv.innerHTML = '<span style="color: var(--gold);">⚠️ No code entered. You can join without inviter.</span>';
+                verifiedInviterId = null;
+                return;
+            }
+            
+            const inviterWallet = getWalletByInviteCode(inviteCode);
+            if (inviterWallet) {
+                const inviterProfile = getUserProfile(inviterWallet);
+                if (inviterProfile) {
+                    verifiedInviterId = inviterProfile.userId;
+                    statusDiv.innerHTML = `<span style="color: var(--success);">✅ Verified! Inviter: ID: ZTR-${verifiedInviterId}</span>`;
+                    showToast(`Inviter found: ID: ZTR-${verifiedInviterId}`, 'success');
+                } else {
+                    statusDiv.innerHTML = '<span style="color: var(--gold);">⚠️ Inviter code not found. You can join without inviter.</span>';
+                    verifiedInviterId = null;
+                }
+            } else {
+                statusDiv.innerHTML = '<span style="color: var(--gold);">⚠️ Inviter code not found. You can join without inviter.</span>';
+                verifiedInviterId = null;
+            }
+        });
+        
+        document.getElementById('completeProfileBtn').addEventListener('click', async () => {
+            const username = document.getElementById('setupUsername').value.trim();
+            if (!username) {
+                showToast("Please enter a username", "error");
+                return;
+            }
+            
+            // Create user profile
+            createUserProfile(userAddress, verifiedInviterId, username, setupProfilePicData);
+            markProfileComplete(userAddress);
+            
+            // Give welcome bonus
+            updateZTRBalance(userAddress, 10);
+            
+            closeModal('profileSetupModal');
+            showToast("Profile setup complete! You received 10 ZTR bonus!", "success");
+            
+            // Show investment page
+            if (verifiedInviterId) {
+                showInviterInfoOnPages(verifiedInviterId);
+            }
+            connectState.classList.add('hidden');
+            investmentState.classList.remove('hidden');
+            updateAssetsPage();
+            updateInviteInfo();
+        });
+
+        // ========== WALLET CONNECTION ==========
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0) return false;
             userAddress = accounts[0];
@@ -1829,47 +1878,25 @@
             
             const network = await provider.getNetwork();
             if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
-                if (!isAutoReconnect) {
-                    showToast("Please switch to BSC network.", "info");
-                }
+                if (!isAutoReconnect) showToast("Please switch to BSC network.", "info");
                 try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {}
             }
             await getUSDTDecimals();
             await updateBalances();
             
-            // Check if user already has a used invite code (one-time only)
-            const existingUsedCode = getUserInviteCode(userAddress);
-            
-            if (!existingUsedCode && !isPaidUser(userAddress)) {
-                // Check for invitation from URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const inviteCodeFromUrl = urlParams.get('invite');
-                
-                if (inviteCodeFromUrl) {
-                    const inviterWallet = getWalletByInviteCode(inviteCodeFromUrl);
-                    if (inviterWallet && inviterWallet.toLowerCase() !== userAddress.toLowerCase()) {
-                        const inviterProfile = getUserProfile(inviterWallet);
-                        if (inviterProfile) {
-                            pendingInviterId = inviterProfile.userId;
-                            sessionStorage.setItem('ztr_pending_invite', pendingInviterId);
-                            sessionStorage.setItem('ztr_invite_code', inviteCodeFromUrl);
-                            showInviterInfoOnPages(pendingInviterId, inviteCodeFromUrl);
-                            showToast(`🎉 Invitation code detected! You were invited by ID: ZTR-${pendingInviterId}`, 'success');
-                        }
-                    }
-                }
-            } else if (existingUsedCode) {
-                // User already used a code, show it
-                const inviterWallet = getWalletByInviteCode(existingUsedCode);
-                if (inviterWallet) {
-                    const inviterProfile = getUserProfile(inviterWallet);
-                    if (inviterProfile) {
-                        pendingInviterId = inviterProfile.userId;
-                        showInviterInfoOnPages(pendingInviterId, existingUsedCode);
-                    }
-                }
+            // Check if user has completed profile setup
+            if (!isProfileComplete(userAddress)) {
+                // Show profile setup modal
+                connectState.classList.add('hidden');
+                investmentState.classList.add('hidden');
+                dashboardState.classList.add('hidden');
+                bottomNav.style.display = 'none';
+                openModal('profileSetupModal');
+                loadingOverlay.classList.add('hidden');
+                return true;
             }
             
+            // Check if user has paid
             if (isPaidUser(userAddress)) {
                 connectState.classList.add('hidden');
                 investmentState.classList.add('hidden');
@@ -1879,25 +1906,21 @@
                 updateAssetsPage();
                 renderNetworkTree();
                 updateInviteInfo();
-                if (!isAutoReconnect) {
-                    new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
-                }
-                if (!isAutoReconnect) {
-                    showToast("Welcome back! Dashboard ready.", "success");
-                }
+                if (!isAutoReconnect) new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
+                if (!isAutoReconnect) showToast("Welcome back! Dashboard ready.", "success");
             } else {
                 connectState.classList.add('hidden');
                 investmentState.classList.remove('hidden');
-                if (!isAutoReconnect) {
-                    showToast("Wallet connected! Please activate your node.", "info");
-                }
+                dashboardState.classList.add('hidden');
+                bottomNav.style.display = 'none';
+                if (!isAutoReconnect) showToast("Wallet connected! Please activate your node.", "info");
             }
             
             loadingOverlay.classList.add('hidden');
             return true;
         }
 
-        // ========== AUTO-RECONNECT FUNCTION ==========
+        // ========== AUTO-RECONNECT ==========
         async function autoReconnect() {
             const savedWallet = localStorage.getItem(STORAGE_KEYS.CONNECTED_WALLET);
             if (savedWallet && window.ethereum) {
@@ -1913,7 +1936,6 @@
                         loadingOverlay.classList.add('hidden');
                     }
                 } catch (error) {
-                    console.error("Auto-reconnect failed:", error);
                     loadingOverlay.classList.add('hidden');
                 }
             } else {
@@ -1934,58 +1956,7 @@
             }
         });
 
-        document.getElementById('investNowBtn').addEventListener('click', () => {
-            openModal('paymentModal');
-        });
-        
-        document.getElementById('addInviteCodeBtn').addEventListener('click', () => {
-            const existingCode = getUserInviteCode(userAddress);
-            if (existingCode) {
-                showToast("You have already used an invitation code! One time only.", "error");
-                return;
-            }
-            openModal('inviteCodeModal');
-        });
-        
-        document.getElementById('submitInviteCodeBtn').addEventListener('click', () => {
-            const inviteCodeInput = document.getElementById('inviteCodeInputField').value.toUpperCase().trim();
-            if (!inviteCodeInput || inviteCodeInput.length !== 8) {
-                showToast("Please enter a valid 8-digit invitation code!", "error");
-                return;
-            }
-            
-            const existingCode = getUserInviteCode(userAddress);
-            if (existingCode) {
-                showToast("You have already used an invitation code! One time only.", "error");
-                closeModal('inviteCodeModal');
-                return;
-            }
-            
-            const inviterWallet = getWalletByInviteCode(inviteCodeInput);
-            if (!inviterWallet) {
-                showToast("Invalid invitation code! Please check and try again.", "error");
-                return;
-            }
-            
-            if (inviterWallet.toLowerCase() === userAddress.toLowerCase()) {
-                showToast("You cannot use your own invitation code!", "error");
-                return;
-            }
-            
-            const inviterProfile = getUserProfile(inviterWallet);
-            if (inviterProfile) {
-                pendingInviterId = inviterProfile.userId;
-                sessionStorage.setItem('ztr_pending_invite', pendingInviterId);
-                sessionStorage.setItem('ztr_invite_code', inviteCodeInput);
-                setUserInviteCode(userAddress, inviteCodeInput);
-                showInviterInfoOnPages(pendingInviterId, inviteCodeInput);
-                showToast(`✅ Invitation code accepted! Invited by ID: ZTR-${pendingInviterId}`, 'success');
-                closeModal('inviteCodeModal');
-                document.getElementById('inviteCodeInputField').value = '';
-            } else {
-                showToast("Inviter not found!", "error");
-            }
-        });
+        document.getElementById('investNowBtn').addEventListener('click', () => openModal('paymentModal'));
 
         document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
             if (isProcessing) return;
@@ -2002,8 +1973,8 @@
                 showToast("Transaction sent! Confirming...", "info");
                 await tx.wait();
                 
-                const usedCode = getUserInviteCode(userAddress);
-                markUserAsPaid(userAddress, pendingInviterId, usedCode);
+                const inviterId = getInviterId(userAddress);
+                markUserAsPaid(userAddress, inviterId);
                 closeModal('paymentModal');
                 showDashboardAfterPayment();
                 await updateBalances();
@@ -2012,10 +1983,7 @@
                 renderNetworkTree();
                 updateInviteInfo();
                 
-                if (pendingInviterId) {
-                    showToast(`✅ You joined under ID: ZTR-${pendingInviterId}! They received 0.04 ZTR commission.`, 'success');
-                }
-                
+                if (inviterId) showToast(`✅ You joined under ID: ZTR-${inviterId}! They received 0.04 ZTR commission.`, 'success');
             } catch (e) { 
                 showToast("Transaction failed. Please try again.", "error"); 
             } finally { 
@@ -2025,16 +1993,14 @@
             }
         });
         
-        // Profile Picture Upload
+        // Profile Picture Upload for Edit
         document.getElementById('profilePicInput').addEventListener('change', async (event) => {
             const file = event.target.files[0];
             if (!file) return;
-
             showToast("Uploading new profile picture...", "info");
             const formData = new FormData();
             formData.append('key', IMAGE_HOST_API_KEY);
             formData.append('image', file);
-
             try {
                 const response = await fetch('https://freeimage.host/api/1/upload', { method: 'POST', body: formData });
                 const result = await response.json();
@@ -2047,12 +2013,9 @@
                         updateAssetsPage();
                         showToast("Profile picture updated!", "success");
                     }
-                } else {
-                    throw new Error(result.status_txt || "API Error");
                 }
             } catch (error) {
-                console.error("Image upload failed:", error);
-                showToast("Image upload failed. Please try again.", "error");
+                showToast("Upload failed", "error");
             }
         });
 
@@ -2071,7 +2034,6 @@
         document.getElementById('copyInviteLinkBtn').addEventListener('click', () => {
             const linkInput = document.getElementById('inviteLink');
             linkInput.select();
-            linkInput.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(linkInput.value);
             showToast('Invitation link copied!', 'success');
         });
@@ -2079,7 +2041,6 @@
         document.getElementById('copyInviteCodeBtn').addEventListener('click', () => {
             const codeInput = document.getElementById('inviteCodeInput');
             codeInput.select();
-            codeInput.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(codeInput.value);
             showToast('Invitation code copied!', 'success');
         });
@@ -2133,23 +2094,13 @@
                     location.reload();
                 }
             });
-            
-            window.ethereum.on('chainChanged', () => {
-                location.reload();
-            });
+            window.ethereum.on('chainChanged', () => location.reload());
         }
 
-        // ========== INITIAL LOAD WITH AUTO-RECONNECT ==========
+        // ========== INITIAL LOAD ==========
         window.addEventListener('load', async () => {
             const ip = await getIP();
             document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            const inviteCode = urlParams.get('invite');
-            if (inviteCode) {
-                sessionStorage.setItem('ztr_invite_code', inviteCode);
-            }
-            
             await autoReconnect();
         });
     })();
