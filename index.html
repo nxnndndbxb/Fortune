@@ -445,12 +445,13 @@
         }
         
         .inviter-info-card {
-            background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), rgba(112, 0, 255, 0.1));
-            border: 1px solid var(--primary);
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.2), rgba(112, 0, 255, 0.2));
+            border: 2px solid var(--primary);
             border-radius: 15px;
             padding: 15px;
             margin-bottom: 20px;
             text-align: center;
+            animation: pulse-border 1s ease-in-out;
         }
         
         .inviter-info-card h4 {
@@ -460,7 +461,7 @@
         }
         
         .inviter-info-card p {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
             color: var(--gold);
         }
@@ -873,8 +874,8 @@
     <div class="modal-content glass">
         <i class="fa-solid fa-bolt" style="font-size: 50px; color: var(--primary);"></i>
         <h2 style="margin: 15px 0;">Activate Node</h2>
-        <div id="inviterDisplayOnModal" class="invite-badge" style="margin-bottom: 15px;">
-            <i class="fa-solid fa-user-plus"></i> Invited by: <span id="modalInviterId">None</span>
+        <div id="inviterDisplayOnModal" class="inviter-info-card" style="margin-bottom: 15px;">
+            <i class="fa-solid fa-user-plus"></i> Invited By: <strong id="modalInviterId" style="color: var(--gold); font-size: 18px;">None</strong>
         </div>
         <p style="color: var(--text-muted);">Joining Premium Network</p>
         <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;">0.10 USDT</div>
@@ -939,6 +940,7 @@
             <div id="inviterInfoOnInvestPage" class="inviter-info-card hidden">
                 <h4><i class="fa-solid fa-user-plus"></i> Invited By</h4>
                 <p id="inviterUserIdDisplay">Loading...</p>
+                <small style="font-size: 11px; color: var(--text-muted);">You will get 10 ZTR bonus on activation!</small>
             </div>
             <span class="rank-badge">ENTRY NODE</span>
             <h1 style="font-size:40px; margin:20px 0; color:var(--primary);">0.10 <span style="font-size:18px;">USDT</span></h1>
@@ -1169,6 +1171,7 @@
         };
 
         let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper, pendingInviterId = null;
+        let invitationCodeFromURL = null;
 
         // UI ELEMENTS
         const connectState = document.getElementById('connectState');
@@ -1481,6 +1484,22 @@
             }
         }
         
+        function showInviterInfoOnPages(inviterUserId) {
+            const inviterDisplayText = inviterUserId ? `ID: ZTR-${inviterUserId}` : 'None';
+            document.getElementById('inviterUserIdDisplay').innerText = inviterDisplayText;
+            document.getElementById('modalInviterId').innerText = inviterDisplayText;
+            document.getElementById('homeInviterId').innerText = inviterDisplayText;
+            
+            if (inviterUserId) {
+                document.getElementById('inviterInfoOnInvestPage').classList.remove('hidden');
+                document.getElementById('inviterDisplayOnModal').classList.remove('hidden');
+                document.getElementById('inviterDisplayOnHome').classList.remove('hidden');
+            } else {
+                document.getElementById('inviterInfoOnInvestPage').classList.add('hidden');
+                document.getElementById('inviterDisplayOnHome').classList.add('hidden');
+            }
+        }
+        
         function showDashboardAfterPayment() {
             connectState.classList.add('hidden');
             investmentState.classList.add('hidden');
@@ -1735,38 +1754,37 @@
             await getUSDTDecimals();
             await updateBalances();
             
-            // Check for pending invitation from URL
+            // Check for invitation from URL (most important part)
             const urlParams = new URLSearchParams(window.location.search);
-            const inviteCode = urlParams.get('invite');
+            const inviteCodeFromUrl = urlParams.get('invite');
             
-            if (inviteCode && !isPaidUser(userAddress)) {
-                const inviterWallet = getWalletByInviteCode(inviteCode);
+            if (inviteCodeFromUrl && !isPaidUser(userAddress)) {
+                console.log("Invitation code found in URL:", inviteCodeFromUrl);
+                const inviterWallet = getWalletByInviteCode(inviteCodeFromUrl);
                 if (inviterWallet) {
                     const inviterProfile = getUserProfile(inviterWallet);
                     if (inviterProfile) {
                         pendingInviterId = inviterProfile.userId;
                         sessionStorage.setItem('ztr_pending_invite', pendingInviterId);
-                        sessionStorage.setItem('ztr_invite_code', inviteCode);
+                        sessionStorage.setItem('ztr_invite_code', inviteCodeFromUrl);
                         
-                        // Show inviter info on investment page
-                        document.getElementById('inviterUserIdDisplay').innerText = `ID: ZTR-${pendingInviterId}`;
-                        document.getElementById('inviterInfoOnInvestPage').classList.remove('hidden');
-                        document.getElementById('modalInviterId').innerText = `ID: ZTR-${pendingInviterId}`;
+                        // Show inviter info on all relevant pages
+                        showInviterInfoOnPages(pendingInviterId);
                         showToast(`🎉 You were invited by User ID: ZTR-${pendingInviterId}!`, 'success');
                         
-                        // Highlight the invitation code in network page when they join
+                        // Highlight the invitation code in network page
                         setTimeout(() => {
                             highlightInviteCode();
                         }, 1000);
                     }
+                } else {
+                    console.log("Inviter not found for code:", inviteCodeFromUrl);
                 }
             } else {
                 const storedInvite = sessionStorage.getItem('ztr_pending_invite');
                 if (storedInvite && !isPaidUser(userAddress)) {
                     pendingInviterId = parseInt(storedInvite);
-                    document.getElementById('inviterUserIdDisplay').innerText = `ID: ZTR-${pendingInviterId}`;
-                    document.getElementById('inviterInfoOnInvestPage').classList.remove('hidden');
-                    document.getElementById('modalInviterId').innerText = `ID: ZTR-${pendingInviterId}`;
+                    showInviterInfoOnPages(pendingInviterId);
                 }
             }
             
@@ -1834,7 +1852,10 @@
             }
         });
 
-        document.getElementById('investNowBtn').addEventListener('click', () => openModal('paymentModal'));
+        document.getElementById('investNowBtn').addEventListener('click', () => {
+            // Show modal with inviter info
+            openModal('paymentModal');
+        });
 
         document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
             if (isProcessing) return;
@@ -1998,6 +2019,7 @@
             const inviteCode = urlParams.get('invite');
             if (inviteCode) {
                 sessionStorage.setItem('ztr_invite_code', inviteCode);
+                invitationCodeFromURL = inviteCode;
                 console.log('Invitation code detected:', inviteCode);
             }
             
