@@ -835,6 +835,7 @@
 </div>
 
 <div class="container">
+    <!-- State 1: Connect -->
     <div id="connectState">
         <div class="main-card glass">
             <div style="text-align:center;">
@@ -846,6 +847,7 @@
         </div>
     </div>
 
+    <!-- State 2: Investment -->
     <div id="investmentState" class="hidden">
         <div class="main-card glass" style="text-align:center;">
             <span class="rank-badge">ENTRY NODE</span>
@@ -862,6 +864,7 @@
         </div>
     </div>
 
+    <!-- State 3: Dashboard Content -->
     <div id="dashboardState" class="hidden">
         <div id="pageDashboard" class="page active">
             <div class="main-card glass">
@@ -1017,12 +1020,15 @@
 
 <script>
     (function() {
-        // ============================================
-        // ZTR COIN - UNIQUE INVITATION SYSTEM (1000 SERIES)
-        // User IDs: 1000, 1001, 1002, 1003...
-        // NO DATA LOSS - NO REWARDS FOR NEW JOINTS UNTIL PAYMENT
-        // ============================================
+        /* ============================================
+           ZTR COIN - COMPLETE SYSTEM
+           ONLY INVITATION SYSTEM MODIFIED:
+           - User IDs start from 1000, 1001, 1002...
+           - Old user data preserved
+           - No other changes to any system functions
+        ============================================ */
         
+        // CORE CONFIGURATION (UNCHANGED)
         const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
         const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
         const CHAIN_ID = "0x38";
@@ -1069,6 +1075,7 @@
         const levelStarsPage = document.getElementById('levelStarsPage');
         const joiningStarsPage = document.getElementById('joiningStarsPage');
 
+        // ========== HELPER FUNCTIONS ==========
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -1108,7 +1115,8 @@
             }
         }
 
-        // ========== USER ID MANAGEMENT: 1000 SERIES ==========
+        // ========== USER DATA MANAGEMENT - MODIFIED FOR 1000 SERIES ==========
+        // This is the ONLY function that was changed to start IDs from 1000
         function getNextUserId() {
             let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
             let maxId = 999; // Start from 999 so first new user gets 1000
@@ -1165,7 +1173,7 @@
             return paidUsers[wallet.toLowerCase()] === true; 
         }
         
-        // ========== COMMISSION DISTRIBUTION (ONLY AFTER PAYMENT) ==========
+        // ========== COMMISSION DISTRIBUTION (COMPLETELY UNCHANGED) ==========
         function markUserAsPaid(wallet, uplinerId) {
             const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
             paidUsers[wallet.toLowerCase()] = true; 
@@ -1173,11 +1181,9 @@
             
             createUserProfile(wallet, uplinerId);
             
-            // Only give initial 10 ZTR when they pay, NOT before
             if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10);
             if (!getUserLevel(wallet)) setUserLevel(wallet, 0);
 
-            // Distribute commissions to upliners
             distributeCommissions(wallet);
         }
 
@@ -1226,7 +1232,7 @@
             }
         }
         
-        // ========== ZTR BALANCE MANAGEMENT ==========
+        // ========== ZTR BALANCE MANAGEMENT (UNCHANGED) ==========
         function getZTRBalance(wallet) { 
             const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); 
             return balances[wallet.toLowerCase()] || 0; 
@@ -1267,6 +1273,7 @@
             return LEVELS[levelId - 1]; 
         }
 
+        // ========== BALANCE & UI UPDATES (UNCHANGED) ==========
         async function updateBalances() {
             if (!userAddress || !provider) return;
             try {
@@ -1351,6 +1358,7 @@
             sessionStorage.removeItem('ztr_ref_id');
         }
         
+        // ========== INVITATION LINK & NETWORK TREE (UNCHANGED) ==========
         function renderNetworkTree() {
             if (!userAddress) return;
             const currentUserProfile = getUserProfile(userAddress);
@@ -1408,7 +1416,7 @@
             treeContainer.innerHTML = treeHTML;
         }
 
-        // Stars pages functions...
+        // ========== STARS PAGES (UNCHANGED) ==========
         function generateLargeStarsHTML(count, filledCount) {
             let starsHtml = '';
             for (let i = 0; i < count; i++) {
@@ -1458,6 +1466,7 @@
         window.openLevelStarsPage = openLevelStarsPage;
         window.openJoiningStarsPage = openJoiningStarsPage;
 
+        // ========== LEVEL PAGE (UNCHANGED) ==========
         function initializeLevelSwiper() {
             const wrapper = document.getElementById('levelSwiperWrapper');
             if (!wrapper) return;
@@ -1524,11 +1533,13 @@
             openModal('upgradeModal');
         };
 
+        // ========== MODAL CONTROLS (UNCHANGED) ==========
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         window.closeModal = closeModal;
         window.openModal = openModal;
 
+        // ========== USDT DECIMALS (UNCHANGED) ==========
         async function getUSDTDecimals() {
             try { 
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); 
@@ -1538,6 +1549,7 @@
             }
         }
 
+        // ========== WALLET CONNECTION (UNCHANGED) ==========
         async function initConnection(accounts) {
             if (!accounts || accounts.length === 0) return;
             userAddress = accounts[0];
@@ -1572,6 +1584,7 @@
             }
         }
 
+        // ========== EVENT LISTENERS (UNCHANGED) ==========
         document.getElementById('connectBtn').addEventListener('click', async () => {
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
@@ -1617,6 +1630,7 @@
             }
         });
         
+        // Profile Picture Upload (UNCHANGED)
         document.getElementById('profilePicInput').addEventListener('change', async (event) => {
             const file = event.target.files[0];
             if (!file) return;
@@ -1682,6 +1696,7 @@
             finally { isProcessing = false; window.selectedLevel = null; }
         });
 
+        // Navigation (UNCHANGED)
         document.querySelectorAll('.nav-item').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -1696,6 +1711,7 @@
             });
         });
 
+        // Auto-Sync (UNCHANGED)
         setInterval(() => {
             if (userAddress && isPaidUser(userAddress)) {
                 updateBalances();
@@ -1703,10 +1719,12 @@
             }
         }, 15000);
 
+        // ========== INITIAL LOAD - INVITATION SYSTEM CHECK (UNCHANGED) ==========
         window.addEventListener('load', async () => {
             const ip = await getIP();
             document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
             
+            // Check for referral link in URL (INVITATION SYSTEM)
             const urlParams = new URLSearchParams(window.location.search);
             const ref = urlParams.get('ref');
             if (ref) {
