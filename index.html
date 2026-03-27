@@ -1013,18 +1013,12 @@
 <script>
     (function() {
         /* ============================================
-           ZTR COIN - COMPLETE SYSTEM
-           CHANGES APPLIED:
-           1. Old users data cleared on load
-           2. No welcome bonus for new users (0 ZTR)
-           3. Unique invitation codes (User IDs)
-           4. IP detector removed
-           5. Redirect after payment fixed
+           ZTR COIN - PERSISTENT USER DATA SYSTEM
+           - No localStorage.clear() on load (preserves user data)
+           - Auto-reconnect wallet on page refresh
+           - No welcome bonus for new users (0 ZTR)
+           - All data persists across refreshes
         ============================================ */
-        
-        // CLEAR ALL OLD USER DATA ON LOAD
-        localStorage.clear();
-        sessionStorage.clear();
         
         // CORE CONFIGURATION
         const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
@@ -1063,7 +1057,7 @@
             COMMISSION_HISTORY: 'ztr_commission_history'
         };
 
-        let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper, referralId = null;
+        let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper;
 
         // UI ELEMENTS
         const connectState = document.getElementById('connectState');
@@ -1104,7 +1098,7 @@
         }
         window.copyWalletAddress = copyWalletAddress;
 
-        // ========== USER DATA MANAGEMENT ==========
+        // ========== USER DATA MANAGEMENT (PERSISTENT) ==========
         function getNextUserId() {
             let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
             let nextId = 1000;
@@ -1173,32 +1167,45 @@
             return paidUsers[wallet.toLowerCase()] === true; 
         }
         
-        // ========== INVITATION SYSTEM - COMMISSION DISTRIBUTION ==========
-        // NO WELCOME BONUS FOR NEW USERS
         function markUserAsPaid(wallet, uplinerId) {
             const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
             paidUsers[wallet.toLowerCase()] = true; 
             localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
             
-            // Create profile with upliner
-            createUserProfile(wallet, uplinerId);
+            // Create profile with upliner if not exists
+            const existingProfile = getUserProfile(wallet);
+            if (!existingProfile) {
+                createUserProfile(wallet, uplinerId);
+            } else if (uplinerId && !existingProfile.uplinerId) {
+                existingProfile.uplinerId = uplinerId;
+                const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+                profiles[wallet.toLowerCase()] = existingProfile;
+                localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
+                // Update team size
+                const uplinerWallet = getWalletById(uplinerId);
+                if (uplinerWallet) {
+                    const teamSizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}');
+                    teamSizes[uplinerWallet] = (teamSizes[uplinerWallet] || 0) + 1;
+                    localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
+                }
+            }
             
             // Initialize ZTR balance for new user - NO WELCOME BONUS (starts at 0)
             const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}');
-            if (!balances[wallet.toLowerCase()]) {
+            if (balances[wallet.toLowerCase()] === undefined) {
                 balances[wallet.toLowerCase()] = 0;
                 localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(balances));
             }
             
             // Initialize level
             const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}');
-            if (!levels[wallet.toLowerCase()]) {
+            if (levels[wallet.toLowerCase()] === undefined) {
                 levels[wallet.toLowerCase()] = 0;
                 localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(levels));
             }
 
-            // Distribute commissions to upliners
-            if (uplinerId) {
+            // Distribute commissions to upliners (only if this is a new payment and upliner exists)
+            if (uplinerId && !existingProfile) {
                 distributeCommissions(wallet, uplinerId);
             }
         }
@@ -1376,20 +1383,16 @@
         }
         
         function showDashboardAfterPayment() {
-            // Hide connect and investment states
             connectState.classList.add('hidden');
             investmentState.classList.add('hidden');
-            // Show dashboard
             dashboardState.classList.remove('hidden');
             bottomNav.style.display = 'flex';
             
-            // Update all data
             updateDashboard();
             updateAssetsPage();
             renderNetworkTree();
             updateInviteLink();
             
-            // Initialize swiper if not already
             if (typeof window.dashboardSwiper === 'undefined') {
                 window.dashboardSwiper = new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
             }
@@ -1589,7 +1592,7 @@
             }
         }
 
-        // ========== WALLET CONNECTION ==========
+        // ========== WALLET CONNECTION & AUTO-RECONNECT ==========
         async function initConnection(accounts) {
             if (!accounts || accounts.length === 0) return;
             userAddress = accounts[0];
@@ -1605,7 +1608,6 @@
             await updateBalances();
             
             if (isPaidUser(userAddress)) {
-                // User is already paid - show dashboard directly
                 connectState.classList.add('hidden');
                 investmentState.classList.add('hidden');
                 dashboardState.classList.remove('hidden');
@@ -1619,7 +1621,6 @@
                 }
                 showToast("Welcome back! Dashboard ready.", "success");
             } else {
-                // New user - show investment state
                 connectState.classList.add('hidden');
                 investmentState.classList.remove('hidden');
                 showToast("Wallet connected! Please activate your node.", "info");
@@ -1654,18 +1655,12 @@
                 showToast("Transaction sent! Confirming...", "info");
                 await tx.wait();
                 
-                // Get referral ID from session storage
                 let uplinerId = sessionStorage.getItem('ztr_ref_id');
-                if (uplinerId) {
-                    uplinerId = parseInt(uplinerId);
-                }
+                if (uplinerId) uplinerId = parseInt(uplinerId);
                 
                 markUserAsPaid(userAddress, uplinerId);
                 closeModal('paymentModal');
-                
-                // Force redirect to dashboard
                 showDashboardAfterPayment();
-                
                 await updateBalances();
                 updateDashboard();
                 updateAssetsPage();
@@ -1771,26 +1766,27 @@
             }
         }, 15000);
 
-        // ========== INITIAL LOAD - INVITATION SYSTEM CHECK ==========
+        // ========== INITIAL LOAD - AUTO-RECONNECT & PERSISTENT DATA ==========
         window.addEventListener('load', async () => {
             // Check for referral link in URL (INVITATION SYSTEM)
             const urlParams = new URLSearchParams(window.location.search);
             const ref = urlParams.get('ref');
             if (ref) {
                 const refId = parseInt(ref);
-                referralId = refId;
-                sessionStorage.setItem('ztr_ref_id', referralId);
+                sessionStorage.setItem('ztr_ref_id', refId);
                 showToast(`Joining under sponsor ID: ${ref}`, 'info');
-            } else {
-                const storedRef = sessionStorage.getItem('ztr_ref_id');
-                if (storedRef) {
-                    referralId = parseInt(storedRef);
-                }
             }
 
+            // Auto-reconnect: Check if wallet is already connected
             if (window.ethereum) {
-                const acc = await window.ethereum.request({ method: 'eth_accounts' });
-                if (acc.length > 0) await initConnection(acc);
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts && accounts.length > 0) {
+                        await initConnection(accounts);
+                    }
+                } catch (e) {
+                    console.log("Auto-reconnect failed, user needs to connect manually");
+                }
             }
         });
     })();
