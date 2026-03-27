@@ -1021,7 +1021,7 @@
 <script>
     (function() {
         /* ============================================
-           ZTR COIN - COMPLETE SYSTEM (FIXED INVITATION)
+           ZTR COIN - COMPLETE SYSTEM
            INVITATION SYSTEM FULLY INTACT
            NO DATA LOSS FOR EXISTING USERS
         ============================================ */
@@ -1331,30 +1331,45 @@
             document.getElementById('userRankBadge').innerText = level.name;
         }
         
-        // ========== INVITATION LINK & NETWORK TREE ==========
         function updateInviteLink() {
             if (!userAddress) return;
             const profile = getUserProfile(userAddress);
-            if (!profile || !profile.userId) return;
-            
-            const baseUrl = window.location.origin + window.location.pathname;
-            const inviteLink = `${baseUrl}?ref=${profile.userId}`;
-            const inviteLinkInput = document.getElementById('inviteLink');
-            if (inviteLinkInput) {
-                inviteLinkInput.value = inviteLink;
+            if (profile && profile.userId) {
+                const baseUrl = window.location.origin + window.location.pathname;
+                const inviteLink = `${baseUrl}?ref=${profile.userId}`;
+                const inviteLinkInput = document.getElementById('inviteLink');
+                if (inviteLinkInput) {
+                    inviteLinkInput.value = inviteLink;
+                }
             }
         }
         
+        function showDashboardAfterPayment() {
+            connectState.classList.add('hidden');
+            investmentState.classList.add('hidden');
+            dashboardState.classList.remove('hidden');
+            bottomNav.style.display = 'flex';
+            
+            updateDashboard();
+            updateAssetsPage();
+            renderNetworkTree();
+            updateInviteLink();
+            
+            new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
+            showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
+            sessionStorage.removeItem('ztr_ref_id');
+        }
+        
+        // ========== INVITATION LINK & NETWORK TREE ==========
         function renderNetworkTree() {
             if (!userAddress) return;
             const currentUserProfile = getUserProfile(userAddress);
             if(!currentUserProfile) return;
 
-            // Update invite link first
-            updateInviteLink();
-
             const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
             const teamSize = getTeamSize(userAddress);
+            
+            updateInviteLink();
             
             document.getElementById('teamPageTotalCount').innerText = teamSize;
 
@@ -1402,22 +1417,7 @@
             `;
             treeContainer.innerHTML = treeHTML;
         }
-        
-        function showDashboardAfterPayment() {
-            connectState.classList.add('hidden');
-            investmentState.classList.add('hidden');
-            dashboardState.classList.remove('hidden');
-            bottomNav.style.display = 'flex';
-            
-            updateDashboard();
-            updateAssetsPage();
-            renderNetworkTree(); // This will now update both tree and invite link
-            
-            new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
-            showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
-            sessionStorage.removeItem('ztr_ref_id');
-        }
-        
+
         // ========== STARS PAGES ==========
         function generateLargeStarsHTML(count, filledCount) {
             let starsHtml = '';
@@ -1575,7 +1575,8 @@
                 bottomNav.style.display = 'flex';
                 updateDashboard();
                 updateAssetsPage();
-                renderNetworkTree(); // This will update invite link for existing users
+                renderNetworkTree();
+                updateInviteLink();
                 new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
                 showToast("Welcome back! Dashboard ready.", "success");
             } else {
@@ -1620,6 +1621,7 @@
                 updateDashboard();
                 updateAssetsPage();
                 renderNetworkTree();
+                updateInviteLink();
                 
             } catch (e) { 
                 showToast("Transaction failed. Please try again.", "error"); 
@@ -1704,7 +1706,10 @@
                 const pageId = btn.dataset.page;
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                 document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
-                if (pageId === 'team') renderNetworkTree();
+                if (pageId === 'team') {
+                    renderNetworkTree();
+                    updateInviteLink();
+                }
             });
         });
 
