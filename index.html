@@ -101,15 +101,6 @@
             text-shadow: 0 0 15px var(--primary-glow);
         }
 
-        .ip-badge {
-            font-size: 10px;
-            padding: 5px 12px;
-            background: rgba(0, 242, 255, 0.1);
-            border: 1px solid var(--primary-glow);
-            border-radius: 50px;
-            color: var(--primary);
-        }
-
         .wallet-address-badge {
             font-size: 10px;
             padding: 5px 12px;
@@ -829,7 +820,6 @@
 <div class="navbar">
     <div class="logo">ZTR PREMIUM</div>
     <div style="display:flex; align-items:center; gap:8px;">
-        <div class="ip-badge" id="ipDisplay">Scanning IP...</div>
         <div class="wallet-address-badge" id="walletAddressBadge" onclick="copyWalletAddress()" style="display: none;">
             <i class="fa-solid fa-wallet"></i> <span id="walletAddressShort">Not Connected</span>
         </div>
@@ -1023,9 +1013,16 @@
 <script>
     (function() {
         /* ============================================
-           ZTR COIN - COMPLETE SYSTEM FIXED
-           INVITATION SYSTEM FULLY WORKING
+           ZTR COIN - COMPLETE SYSTEM
+           - NO WELCOME BONUS
+           - UNIQUE INVITATION CODES
+           - NO IP DETECTOR
+           - OLD DATA CLEARED
         ============================================ */
+        
+        // CLEAR ALL OLD USER DATA ON LOAD
+        localStorage.clear();
+        sessionStorage.clear();
         
         // CORE CONFIGURATION
         const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
@@ -1105,16 +1102,6 @@
         }
         window.copyWalletAddress = copyWalletAddress;
 
-        async function getIP() {
-            try { 
-                const response = await fetch('https://api.ipify.org?format=json'); 
-                const data = await response.json(); 
-                return data.ip; 
-            } catch { 
-                return '127.0.0.1'; 
-            }
-        }
-
         // ========== USER DATA MANAGEMENT ==========
         function getNextUserId() {
             let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
@@ -1185,6 +1172,7 @@
         }
         
         // ========== INVITATION SYSTEM - COMMISSION DISTRIBUTION ==========
+        // NO WELCOME BONUS - Users only earn from commissions
         function markUserAsPaid(wallet, uplinerId) {
             const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
             paidUsers[wallet.toLowerCase()] = true; 
@@ -1193,10 +1181,10 @@
             // Create profile with upliner
             createUserProfile(wallet, uplinerId);
             
-            // Initialize ZTR balance for new user (10 ZTR as welcome bonus)
+            // Initialize ZTR balance for new user (START WITH 0 - NO WELCOME BONUS)
             const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}');
             if (!balances[wallet.toLowerCase()]) {
-                balances[wallet.toLowerCase()] = 10;
+                balances[wallet.toLowerCase()] = 0;
                 localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(balances));
             }
             
@@ -1596,8 +1584,6 @@
             userAddress = accounts[0];
             provider = new ethers.BrowserProvider(window.ethereum);
             signer = await provider.getSigner();
-            const ip = await getIP();
-            document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
             updateAllWalletAddressDisplays();
             const network = await provider.getNetwork();
             if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
@@ -1769,9 +1755,6 @@
 
         // ========== INITIAL LOAD - INVITATION SYSTEM CHECK ==========
         window.addEventListener('load', async () => {
-            const ip = await getIP();
-            document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
-            
             // Check for referral link in URL (INVITATION SYSTEM)
             const urlParams = new URLSearchParams(window.location.search);
             const ref = urlParams.get('ref');
