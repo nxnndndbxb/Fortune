@@ -762,9 +762,41 @@
             font-weight: bold;
             color: var(--primary);
         }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(5, 11, 24, 0.95);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: 0.3s;
+        }
+        .loading-overlay.hidden {
+            display: none;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--glass-border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Connecting to blockchain...</p>
+</div>
 
 <div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
 
@@ -1082,22 +1114,16 @@
 <script>
     (function() {
         /* ============================================
-           ZTR COIN - UPDATED INVITATION SYSTEM
-           Unique invitation codes per user
-           40% direct commission only
-           Fresh start - all old data cleared
+           ZTR COIN - PERSISTENT WALLET CONNECTION
+           No data loss on refresh
+           Auto-reconnect functionality
         ============================================ */
-        
-        // CLEAR ALL OLD DATA - FRESH START
-        localStorage.clear();
-        sessionStorage.clear();
         
         // CORE CONFIGURATION
         const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
         const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
         const CHAIN_ID = "0x38";
         const CHAIN_ID_DECIMAL = 56;
-        const USDT_GAS_LIMIT = 65000;
         const JOINING_FEE_USDT = 0.10;
         const IMAGE_HOST_API_KEY = '31c324eeef3df98e593e1897b02cc37b';
         
@@ -1123,11 +1149,11 @@
             USER_LEVEL: 'ztr_user_level', 
             TEAM_SIZE: 'ztr_team_size', 
             SALLERY_EARNINGS: 'ztr_sallery_earnings',
-            TEAM_COMMISSION: 'ztr_team_commission', 
             USER_PROFILES: 'ztr_user_profiles', 
             USER_IDS: 'ztr_user_ids',
             INVITE_CODES: 'ztr_invite_codes',
-            INVITER_MAP: 'ztr_inviter_map'
+            INVITER_MAP: 'ztr_inviter_map',
+            CONNECTED_WALLET: 'ztr_connected_wallet'
         };
 
         let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper, pendingInviterId = null;
@@ -1140,6 +1166,7 @@
         const levelPageOverlay = document.getElementById('levelPageOverlay');
         const levelStarsPage = document.getElementById('levelStarsPage');
         const joiningStarsPage = document.getElementById('joiningStarsPage');
+        const loadingOverlay = document.getElementById('loadingOverlay');
 
         // ========== HELPER FUNCTIONS ==========
         function showToast(message, type = 'info') {
@@ -1197,7 +1224,6 @@
                 return inviteCodes[wallet.toLowerCase()];
             }
             let newCode = generateUniqueInviteCode();
-            // Ensure uniqueness
             const existingCodes = Object.values(inviteCodes);
             while (existingCodes.includes(newCode)) {
                 newCode = generateUniqueInviteCode();
@@ -1238,11 +1264,6 @@
             return null;
         }
         
-        function getUserIdByWallet(wallet) {
-            const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
-            return userIds[wallet.toLowerCase()] || null;
-        }
-        
         function getUserProfile(wallet) {
             if(!wallet) return null;
             const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
@@ -1261,7 +1282,6 @@
                 localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
             }
             
-            // Store inviter relationship
             if (inviterId) {
                 const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
                 inviterMap[wallet.toLowerCase()] = inviterId;
@@ -1277,7 +1297,6 @@
             };
             localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
             
-            // Generate unique invite code for this user
             getUniqueInviteCode(wallet);
             
             return profiles[wallet.toLowerCase()];
@@ -1304,7 +1323,6 @@
             if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10);
             if (!getUserLevel(wallet)) setUserLevel(wallet, 0);
 
-            // Distribute 40% commission to direct inviter
             if (inviterUserId) {
                 distributeDirectCommission(wallet, inviterUserId);
             }
@@ -1317,7 +1335,6 @@
                 updateZTRBalance(inviterWallet, commission);
                 showToast(`Inviter (ID: ${inviterUserId}) received ${commission.toFixed(2)} ZTR commission!`, 'success');
                 
-                // Update team size for inviter
                 const teamSizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}');
                 teamSizes[inviterWallet] = (teamSizes[inviterWallet] || 0) + 1;
                 localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
@@ -1380,7 +1397,8 @@
 
         function updateAssetsPage() {
             if (!userAddress) return;
-            const profile = getUserProfile(userAddress) || createUserProfile(userAddress);
+            const profile = getUserProfile(userAddress);
+            if (!profile) return;
             const inviteCode = getUniqueInviteCode(userAddress);
             document.getElementById('userId').innerText = `ID: ZTR-${profile.userId}`;
             document.getElementById('profileName').innerText = profile.name;
@@ -1410,6 +1428,7 @@
         }
 
         function updateDashboard() {
+            if (!userAddress) return;
             const ztr = getZTRBalance(userAddress);
             const level = getCurrentLevelInfo(userAddress);
             const team = getTeamSize(userAddress);
@@ -1422,7 +1441,6 @@
             document.getElementById('levelIncome').innerText = level.name;
             document.getElementById('userRankBadge').innerText = level.name;
             
-            // Show inviter on home page
             const inviterId = getInviterId(userAddress);
             const homeInviterSpan = document.getElementById('homeInviterId');
             if (inviterId) {
@@ -1462,7 +1480,9 @@
             renderNetworkTree();
             updateInviteInfo();
             
-            new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
+            if (typeof Swiper !== 'undefined') {
+                new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
+            }
             showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
             sessionStorage.removeItem('ztr_pending_invite');
             pendingInviterId = null;
@@ -1482,7 +1502,6 @@
 
             const treeContainer = document.getElementById('networkTreeContainer');
             
-            // Build tree structure based on inviter relationships
             const getChildren = (userId) => {
                 const children = [];
                 for (const wallet in profiles) {
@@ -1669,47 +1688,55 @@
             }
         }
 
-        // ========== WALLET CONNECTION ==========
-        async function initConnection(accounts) {
-            if (!accounts || accounts.length === 0) return;
+        // ========== WALLET CONNECTION WITH PERSISTENCE ==========
+        async function initConnection(accounts, isAutoReconnect = false) {
+            if (!accounts || accounts.length === 0) return false;
             userAddress = accounts[0];
+            
+            // Save connected wallet to localStorage
+            localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, userAddress);
+            
             provider = new ethers.BrowserProvider(window.ethereum);
             signer = await provider.getSigner();
             const ip = await getIP();
             document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
             updateAllWalletAddressDisplays();
+            
             const network = await provider.getNetwork();
             if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
-                showToast("Please switch to BSC network.", "info");
+                if (!isAutoReconnect) {
+                    showToast("Please switch to BSC network.", "info");
+                }
                 try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {}
             }
             await getUSDTDecimals();
             await updateBalances();
             
-            // Check for pending invitation from URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const inviteCode = urlParams.get('invite');
-            if (inviteCode && !isPaidUser(userAddress)) {
-                const inviterWallet = getWalletByInviteCode(inviteCode);
-                if (inviterWallet) {
-                    const inviterProfile = getUserProfile(inviterWallet);
-                    if (inviterProfile) {
-                        pendingInviterId = inviterProfile.userId;
-                        sessionStorage.setItem('ztr_pending_invite', pendingInviterId);
-                        // Show inviter info on investment page
+            // Check for pending invitation from URL (only on first connection)
+            if (!isAutoReconnect) {
+                const urlParams = new URLSearchParams(window.location.search);
+                const inviteCode = urlParams.get('invite');
+                if (inviteCode && !isPaidUser(userAddress)) {
+                    const inviterWallet = getWalletByInviteCode(inviteCode);
+                    if (inviterWallet) {
+                        const inviterProfile = getUserProfile(inviterWallet);
+                        if (inviterProfile) {
+                            pendingInviterId = inviterProfile.userId;
+                            sessionStorage.setItem('ztr_pending_invite', pendingInviterId);
+                            document.getElementById('inviterUserIdDisplay').innerText = `ID: ZTR-${pendingInviterId}`;
+                            document.getElementById('inviterInfoOnInvestPage').classList.remove('hidden');
+                            document.getElementById('modalInviterId').innerText = `ID: ZTR-${pendingInviterId}`;
+                            showToast(`You were invited by User ID: ZTR-${pendingInviterId}!`, 'success');
+                        }
+                    }
+                } else {
+                    const storedInvite = sessionStorage.getItem('ztr_pending_invite');
+                    if (storedInvite && !isPaidUser(userAddress)) {
+                        pendingInviterId = parseInt(storedInvite);
                         document.getElementById('inviterUserIdDisplay').innerText = `ID: ZTR-${pendingInviterId}`;
                         document.getElementById('inviterInfoOnInvestPage').classList.remove('hidden');
                         document.getElementById('modalInviterId').innerText = `ID: ZTR-${pendingInviterId}`;
-                        showToast(`You were invited by User ID: ZTR-${pendingInviterId}!`, 'success');
                     }
-                }
-            } else {
-                const storedInvite = sessionStorage.getItem('ztr_pending_invite');
-                if (storedInvite) {
-                    pendingInviterId = parseInt(storedInvite);
-                    document.getElementById('inviterUserIdDisplay').innerText = `ID: ZTR-${pendingInviterId}`;
-                    document.getElementById('inviterInfoOnInvestPage').classList.remove('hidden');
-                    document.getElementById('modalInviterId').innerText = `ID: ZTR-${pendingInviterId}`;
                 }
             }
             
@@ -1722,12 +1749,46 @@
                 updateAssetsPage();
                 renderNetworkTree();
                 updateInviteInfo();
-                new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
-                showToast("Welcome back! Dashboard ready.", "success");
+                if (!isAutoReconnect) {
+                    new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
+                }
+                if (!isAutoReconnect) {
+                    showToast("Welcome back! Dashboard ready.", "success");
+                }
             } else {
                 connectState.classList.add('hidden');
                 investmentState.classList.remove('hidden');
-                showToast("Wallet connected! Please activate your node.", "info");
+                if (!isAutoReconnect) {
+                    showToast("Wallet connected! Please activate your node.", "info");
+                }
+            }
+            
+            loadingOverlay.classList.add('hidden');
+            return true;
+        }
+
+        // ========== AUTO-RECONNECT FUNCTION ==========
+        async function autoReconnect() {
+            const savedWallet = localStorage.getItem(STORAGE_KEYS.CONNECTED_WALLET);
+            if (savedWallet && window.ethereum) {
+                loadingOverlay.classList.remove('hidden');
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0 && accounts[0].toLowerCase() === savedWallet.toLowerCase()) {
+                        await initConnection(accounts, true);
+                    } else if (accounts.length > 0) {
+                        // Different wallet is connected, update saved wallet
+                        localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
+                        await initConnection(accounts, true);
+                    } else {
+                        loadingOverlay.classList.add('hidden');
+                    }
+                } catch (error) {
+                    console.error("Auto-reconnect failed:", error);
+                    loadingOverlay.classList.add('hidden');
+                }
+            } else {
+                loadingOverlay.classList.add('hidden');
             }
         }
 
@@ -1735,10 +1796,12 @@
         document.getElementById('connectBtn').addEventListener('click', async () => {
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
+                loadingOverlay.classList.remove('hidden');
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
-                await initConnection(accounts); 
+                await initConnection(accounts, false); 
             } catch (err) { 
-                showToast("Connection rejected", "error"); 
+                showToast("Connection rejected", "error");
+                loadingOverlay.classList.add('hidden');
             }
         });
 
@@ -1874,22 +1937,38 @@
             }
         }, 15000);
 
-        // ========== INITIAL LOAD ==========
+        // Listen for account changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', async (accounts) => {
+                if (accounts.length > 0) {
+                    localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
+                    await initConnection(accounts, true);
+                } else {
+                    // User disconnected
+                    localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
+                    location.reload();
+                }
+            });
+            
+            window.ethereum.on('chainChanged', () => {
+                location.reload();
+            });
+        }
+
+        // ========== INITIAL LOAD WITH AUTO-RECONNECT ==========
         window.addEventListener('load', async () => {
             const ip = await getIP();
             document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
             
-            // Check URL for invite code
+            // Check URL for invite code (only if not paid)
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCode = urlParams.get('invite');
             if (inviteCode) {
                 sessionStorage.setItem('ztr_pending_invite_code', inviteCode);
             }
-
-            if (window.ethereum) {
-                const acc = await window.ethereum.request({ method: 'eth_accounts' });
-                if (acc.length > 0) await initConnection(acc);
-            }
+            
+            // Auto-reconnect if wallet was previously connected
+            await autoReconnect();
         });
     })();
 </script>
