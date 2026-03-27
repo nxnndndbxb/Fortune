@@ -888,7 +888,7 @@
                     </div>
                     <div class="income-card glass">
                         <p style="font-size:11px; color:var(--text-muted);">Network Size</p>
-                        <h3 id="teamIncome">0</h3>
+                        <h3 id="teamIncome" style="color:var(--text-main);">0</h3>
                         <small id="teamCount">Members</small>
                     </div>
                     <div class="income-card glass">
@@ -911,6 +911,19 @@
                     </div>
                 </div>
                 
+                <!-- === EDITED CODE: INVITER INFO DISPLAY === -->
+                <div id="inviterInfo" class="hidden" style="display: flex; align-items: center; gap: 12px; margin-top: 20px; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 12px; border: 1px solid var(--glass-border);">
+                    <div id="inviterAvatarContainer" style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--glass-bg); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <img id="inviterAvatarImg" src="" class="hidden" style="width: 100%; height: 100%; object-fit: cover;">
+                        <i id="inviterAvatarIcon" class="fa-solid fa-user-secret" style="font-size: 20px; color: var(--text-muted);"></i>
+                    </div>
+                    <div>
+                        <span style="font-size: 11px; color: var(--text-muted);">Sponsored By</span>
+                        <div id="inviterNameAndId" style="font-size: 13px; font-weight: bold; color: var(--primary);">Loading...</div>
+                    </div>
+                </div>
+                <!-- === END OF EDITED CODE === -->
+
                 <div class="gas-info" style="margin-top: 15px;">
                     <i class="fa-solid fa-wallet"></i> Wallet: <span id="dashboardWalletAddress">Not Connected</span>
                 </div>
@@ -1022,13 +1035,11 @@
     (function() {
         /* ============================================
            ZTR COIN - COMPLETE SYSTEM
-           ONLY INVITATION SYSTEM MODIFIED:
-           - User IDs start from 1000, 1001, 1002...
-           - Old user data preserved
-           - No other changes to any system functions
+           INVITATION SYSTEM FULLY INTACT
+           NO DATA LOSS FOR EXISTING USERS
         ============================================ */
         
-        // CORE CONFIGURATION (UNCHANGED)
+        // CORE CONFIGURATION
         const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
         const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
         const CHAIN_ID = "0x38";
@@ -1115,16 +1126,15 @@
             }
         }
 
-        // ========== USER DATA MANAGEMENT - MODIFIED FOR 1000 SERIES ==========
-        // This is the ONLY function that was changed to start IDs from 1000
+        // ========== USER DATA MANAGEMENT (PRESERVES OLD DATA) ==========
         function getNextUserId() {
             let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
-            let maxId = 999; // Start from 999 so first new user gets 1000
-            for (let wallet in userIds) {
-                let id = userIds[wallet];
-                if (id > maxId) maxId = id;
+            let nextId = 1000;
+            const existingIds = Object.values(userIds);
+            if(existingIds.length > 0) {
+                nextId = Math.max(...existingIds) + 1;
             }
-            return maxId + 1;
+            return nextId;
         }
 
         function getWalletById(id) {
@@ -1173,7 +1183,7 @@
             return paidUsers[wallet.toLowerCase()] === true; 
         }
         
-        // ========== COMMISSION DISTRIBUTION (COMPLETELY UNCHANGED) ==========
+        // ========== INVITATION SYSTEM - COMMISSION DISTRIBUTION ==========
         function markUserAsPaid(wallet, uplinerId) {
             const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
             paidUsers[wallet.toLowerCase()] = true; 
@@ -1184,6 +1194,7 @@
             if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10);
             if (!getUserLevel(wallet)) setUserLevel(wallet, 0);
 
+            // Distribute commissions to upliners
             distributeCommissions(wallet);
         }
 
@@ -1193,16 +1204,19 @@
 
             const baseAmount = JOINING_FEE_USDT;
 
+            // ===== LEVEL 1: DIRECT UPLINER (40% Commission) =====
             const directInviterWallet = getWalletById(newUserProfile.uplinerId);
             if (directInviterWallet) {
                 const commission = baseAmount * 0.40;
                 updateZTRBalance(directInviterWallet, commission);
                 showToast(`Upliner received ${commission.toFixed(2)} ZTR commission!`, 'success');
                 
+                // Update team size for direct upliner
                 const teamSizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}');
                 teamSizes[directInviterWallet] = (teamSizes[directInviterWallet] || 0) + 1;
                 localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
                 
+                // ===== LEVEL 2: SECOND LEVEL UPLINER (10% Commission) =====
                 const directInviterProfile = getUserProfile(directInviterWallet);
                 if (directInviterProfile && directInviterProfile.uplinerId) {
                     const secondLevelUplinerWallet = getWalletById(directInviterProfile.uplinerId);
@@ -1213,6 +1227,7 @@
                     }
                 }
 
+                // ===== DOWNLINE POOL: SAME LEVEL MEMBERS (20% Split) =====
                 const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
                 const siblings = [];
                 for(const walletKey in profiles) {
@@ -1232,7 +1247,7 @@
             }
         }
         
-        // ========== ZTR BALANCE MANAGEMENT (UNCHANGED) ==========
+        // ========== ZTR BALANCE MANAGEMENT ==========
         function getZTRBalance(wallet) { 
             const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); 
             return balances[wallet.toLowerCase()] || 0; 
@@ -1273,7 +1288,7 @@
             return LEVELS[levelId - 1]; 
         }
 
-        // ========== BALANCE & UI UPDATES (UNCHANGED) ==========
+        // ========== BALANCE & UI UPDATES ==========
         async function updateBalances() {
             if (!userAddress || !provider) return;
             try {
@@ -1289,7 +1304,7 @@
         function updateAssetsPage() {
             if (!userAddress) return;
             const profile = getUserProfile(userAddress) || createUserProfile(userAddress);
-            document.getElementById('userId').innerText = `ID: ${profile.userId}`;
+            document.getElementById('userId').innerText = `ID: ZTR-${profile.userId}`;
             document.getElementById('profileName').innerText = profile.name;
             document.getElementById('joinDate').innerText = profile.joinDate;
             
@@ -1342,6 +1357,41 @@
             }
         }
         
+        // === NEW FUNCTION: DISPLAY INVITER INFO ===
+        function displayInviterInfo() {
+            if (!userAddress) return;
+            const currentUserProfile = getUserProfile(userAddress);
+            if (!currentUserProfile || !currentUserProfile.uplinerId) {
+                return; // User has no upliner, do nothing.
+            }
+
+            const inviterWallet = getWalletById(currentUserProfile.uplinerId);
+            if (!inviterWallet) return;
+            
+            const inviterProfile = getUserProfile(inviterWallet);
+            if (!inviterProfile) return;
+
+            const inviterInfoContainer = document.getElementById('inviterInfo');
+            const inviterImg = document.getElementById('inviterAvatarImg');
+            const inviterIcon = document.getElementById('inviterAvatarIcon');
+            const inviterNameAndId = document.getElementById('inviterNameAndId');
+
+            inviterNameAndId.innerText = `${inviterProfile.name} (ID: ${inviterProfile.userId})`;
+
+            if (inviterProfile.profilePicUrl) {
+                inviterImg.src = inviterProfile.profilePicUrl;
+                inviterImg.classList.remove('hidden');
+                inviterIcon.classList.add('hidden');
+            } else {
+                inviterIcon.className = `fa-solid ${inviterProfile.avatar}`;
+                inviterIcon.classList.remove('hidden');
+                inviterImg.classList.add('hidden');
+            }
+
+            inviterInfoContainer.classList.remove('hidden');
+        }
+        // === END OF NEW FUNCTION ===
+
         function showDashboardAfterPayment() {
             connectState.classList.add('hidden');
             investmentState.classList.add('hidden');
@@ -1352,13 +1402,14 @@
             updateAssetsPage();
             renderNetworkTree();
             updateInviteLink();
+            displayInviterInfo(); // Call the new function here
             
             new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
             showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
             sessionStorage.removeItem('ztr_ref_id');
         }
         
-        // ========== INVITATION LINK & NETWORK TREE (UNCHANGED) ==========
+        // ========== INVITATION LINK & NETWORK TREE ==========
         function renderNetworkTree() {
             if (!userAddress) return;
             const currentUserProfile = getUserProfile(userAddress);
@@ -1416,7 +1467,7 @@
             treeContainer.innerHTML = treeHTML;
         }
 
-        // ========== STARS PAGES (UNCHANGED) ==========
+        // ========== STARS PAGES ==========
         function generateLargeStarsHTML(count, filledCount) {
             let starsHtml = '';
             for (let i = 0; i < count; i++) {
@@ -1466,7 +1517,7 @@
         window.openLevelStarsPage = openLevelStarsPage;
         window.openJoiningStarsPage = openJoiningStarsPage;
 
-        // ========== LEVEL PAGE (UNCHANGED) ==========
+        // ========== LEVEL PAGE ==========
         function initializeLevelSwiper() {
             const wrapper = document.getElementById('levelSwiperWrapper');
             if (!wrapper) return;
@@ -1533,13 +1584,13 @@
             openModal('upgradeModal');
         };
 
-        // ========== MODAL CONTROLS (UNCHANGED) ==========
+        // ========== MODAL CONTROLS ==========
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         window.closeModal = closeModal;
         window.openModal = openModal;
 
-        // ========== USDT DECIMALS (UNCHANGED) ==========
+        // ========== USDT DECIMALS ==========
         async function getUSDTDecimals() {
             try { 
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); 
@@ -1549,7 +1600,7 @@
             }
         }
 
-        // ========== WALLET CONNECTION (UNCHANGED) ==========
+        // ========== WALLET CONNECTION ==========
         async function initConnection(accounts) {
             if (!accounts || accounts.length === 0) return;
             userAddress = accounts[0];
@@ -1575,6 +1626,7 @@
                 updateAssetsPage();
                 renderNetworkTree();
                 updateInviteLink();
+                displayInviterInfo(); // Call the new function here for returning users
                 new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
                 showToast("Welcome back! Dashboard ready.", "success");
             } else {
@@ -1584,7 +1636,7 @@
             }
         }
 
-        // ========== EVENT LISTENERS (UNCHANGED) ==========
+        // ========== EVENT LISTENERS ==========
         document.getElementById('connectBtn').addEventListener('click', async () => {
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
@@ -1630,7 +1682,7 @@
             }
         });
         
-        // Profile Picture Upload (UNCHANGED)
+        // Profile Picture Upload
         document.getElementById('profilePicInput').addEventListener('change', async (event) => {
             const file = event.target.files[0];
             if (!file) return;
@@ -1696,7 +1748,7 @@
             finally { isProcessing = false; window.selectedLevel = null; }
         });
 
-        // Navigation (UNCHANGED)
+        // Navigation
         document.querySelectorAll('.nav-item').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -1711,7 +1763,7 @@
             });
         });
 
-        // Auto-Sync (UNCHANGED)
+        // Auto-Sync
         setInterval(() => {
             if (userAddress && isPaidUser(userAddress)) {
                 updateBalances();
@@ -1719,7 +1771,7 @@
             }
         }, 15000);
 
-        // ========== INITIAL LOAD - INVITATION SYSTEM CHECK (UNCHANGED) ==========
+        // ========== INITIAL LOAD - INVITATION SYSTEM CHECK ==========
         window.addEventListener('load', async () => {
             const ip = await getIP();
             document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
