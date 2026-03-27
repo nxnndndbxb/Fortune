@@ -835,7 +835,6 @@
 </div>
 
 <div class="container">
-    <!-- State 1: Connect -->
     <div id="connectState">
         <div class="main-card glass">
             <div style="text-align:center;">
@@ -847,7 +846,6 @@
         </div>
     </div>
 
-    <!-- State 2: Investment -->
     <div id="investmentState" class="hidden">
         <div class="main-card glass" style="text-align:center;">
             <span class="rank-badge">ENTRY NODE</span>
@@ -864,7 +862,6 @@
         </div>
     </div>
 
-    <!-- State 3: Dashboard Content -->
     <div id="dashboardState" class="hidden">
         <div id="pageDashboard" class="page active">
             <div class="main-card glass">
@@ -888,7 +885,7 @@
                     </div>
                     <div class="income-card glass">
                         <p style="font-size:11px; color:var(--text-muted);">Network Size</p>
-                        <h3 id="teamIncome" style="color:var(--text-main);">0</h3>
+                        <h3 id="teamIncome">0</h3>
                         <small id="teamCount">Members</small>
                     </div>
                     <div class="income-card glass">
@@ -921,7 +918,7 @@
              <div class="main-card glass">
                 <h3>Share Your Protocol Link</h3>
                 <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">
-                    Grow your network and increase your rewards with a unique invitation code.
+                    Grow your network and increase your rewards with a unique invitation link.
                 </p>
                 <div class="invite-link-wrapper">
                     <i class="fa-solid fa-link"></i>
@@ -1020,7 +1017,12 @@
 
 <script>
     (function() {
-        // CORE CONFIGURATION
+        // ============================================
+        // ZTR COIN - UNIQUE INVITATION SYSTEM (1000 SERIES)
+        // User IDs: 1000, 1001, 1002, 1003...
+        // NO DATA LOSS - NO REWARDS FOR NEW JOINTS UNTIL PAYMENT
+        // ============================================
+        
         const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
         const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
         const CHAIN_ID = "0x38";
@@ -1058,7 +1060,15 @@
 
         let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper, referralId = null;
 
-        // Helper functions
+        // UI ELEMENTS
+        const connectState = document.getElementById('connectState');
+        const investmentState = document.getElementById('investmentState');
+        const dashboardState = document.getElementById('dashboardState');
+        const bottomNav = document.getElementById('bottomNav');
+        const levelPageOverlay = document.getElementById('levelPageOverlay');
+        const levelStarsPage = document.getElementById('levelStarsPage');
+        const joiningStarsPage = document.getElementById('joiningStarsPage');
+
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -1098,14 +1108,14 @@
             }
         }
 
-        // Generate sequential user ID starting from 1000
+        // ========== USER ID MANAGEMENT: 1000 SERIES ==========
         function getNextUserId() {
             let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
-            let maxId = 999; // Start from 1000
+            let maxId = 999; // Start from 999 so first new user gets 1000
             for (let wallet in userIds) {
-                if (userIds[wallet] > maxId) maxId = userIds[wallet];
+                let id = userIds[wallet];
+                if (id > maxId) maxId = id;
             }
-            if (maxId < 1000) maxId = 999;
             return maxId + 1;
         }
 
@@ -1155,7 +1165,7 @@
             return paidUsers[wallet.toLowerCase()] === true; 
         }
         
-        // No rewards for new users - balance remains zero
+        // ========== COMMISSION DISTRIBUTION (ONLY AFTER PAYMENT) ==========
         function markUserAsPaid(wallet, uplinerId) {
             const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
             paidUsers[wallet.toLowerCase()] = true; 
@@ -1163,10 +1173,60 @@
             
             createUserProfile(wallet, uplinerId);
             
-            // NO rewards for new user - balance stays 0
+            // Only give initial 10 ZTR when they pay, NOT before
+            if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10);
             if (!getUserLevel(wallet)) setUserLevel(wallet, 0);
+
+            // Distribute commissions to upliners
+            distributeCommissions(wallet);
         }
 
+        async function distributeCommissions(newUserWallet) {
+            const newUserProfile = getUserProfile(newUserWallet);
+            if (!newUserProfile || !newUserProfile.uplinerId) return;
+
+            const baseAmount = JOINING_FEE_USDT;
+
+            const directInviterWallet = getWalletById(newUserProfile.uplinerId);
+            if (directInviterWallet) {
+                const commission = baseAmount * 0.40;
+                updateZTRBalance(directInviterWallet, commission);
+                showToast(`Upliner received ${commission.toFixed(2)} ZTR commission!`, 'success');
+                
+                const teamSizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}');
+                teamSizes[directInviterWallet] = (teamSizes[directInviterWallet] || 0) + 1;
+                localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
+                
+                const directInviterProfile = getUserProfile(directInviterWallet);
+                if (directInviterProfile && directInviterProfile.uplinerId) {
+                    const secondLevelUplinerWallet = getWalletById(directInviterProfile.uplinerId);
+                    if (secondLevelUplinerWallet) {
+                        const secondLevelCommission = baseAmount * 0.10;
+                        updateZTRBalance(secondLevelUplinerWallet, secondLevelCommission);
+                        showToast(`Second level upliner received ${secondLevelCommission.toFixed(2)} ZTR commission!`, 'success');
+                    }
+                }
+
+                const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+                const siblings = [];
+                for(const walletKey in profiles) {
+                    if(profiles[walletKey].uplinerId === newUserProfile.uplinerId && walletKey !== newUserWallet.toLowerCase()) {
+                        siblings.push(walletKey);
+                    }
+                }
+
+                if(siblings.length > 0) {
+                    const downlinePool = baseAmount * 0.20;
+                    const sharePerSibling = downlinePool / siblings.length;
+                    siblings.forEach(siblingWallet => {
+                        updateZTRBalance(siblingWallet, sharePerSibling);
+                        showToast(`Sibling member received ${sharePerSibling.toFixed(2)} ZTR commission!`, 'success');
+                    });
+                }
+            }
+        }
+        
+        // ========== ZTR BALANCE MANAGEMENT ==========
         function getZTRBalance(wallet) { 
             const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); 
             return balances[wallet.toLowerCase()] || 0; 
@@ -1196,6 +1256,11 @@
             return teams[wallet.toLowerCase()] || 0; 
         }
         
+        function getSalleryEarnings(wallet) { 
+            const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); 
+            return earnings[wallet.toLowerCase()] || 0; 
+        }
+        
         function getCurrentLevelInfo(wallet) { 
             const levelId = getUserLevel(wallet); 
             if (levelId === 0) return { name: "Starter", price: 0, commission: 0, icon: "🌱" }; 
@@ -1217,7 +1282,7 @@
         function updateAssetsPage() {
             if (!userAddress) return;
             const profile = getUserProfile(userAddress) || createUserProfile(userAddress);
-            document.getElementById('userId').innerText = `ID: ZTR-${profile.userId}`;
+            document.getElementById('userId').innerText = `ID: ${profile.userId}`;
             document.getElementById('profileName').innerText = profile.name;
             document.getElementById('joinDate').innerText = profile.joinDate;
             
@@ -1247,11 +1312,12 @@
             const ztr = getZTRBalance(userAddress);
             const level = getCurrentLevelInfo(userAddress);
             const team = getTeamSize(userAddress);
+            const salary = getSalleryEarnings(userAddress);
             document.getElementById('profitIncome').innerText = `${ztr.toFixed(2)} ZTR`;
             document.getElementById('profitUSD').innerText = ztr.toFixed(2);
             document.getElementById('teamIncome').innerText = team;
             document.getElementById('teamCount').innerText = `Member${team === 1 ? '' : 's'}`;
-            document.getElementById('salleryIncome').innerText = `0.00 ZTR`;
+            document.getElementById('salleryIncome').innerText = `${salary.toFixed(2)} ZTR`;
             document.getElementById('levelIncome').innerText = level.name;
             document.getElementById('userRankBadge').innerText = level.name;
         }
@@ -1267,6 +1333,22 @@
                     inviteLinkInput.value = inviteLink;
                 }
             }
+        }
+        
+        function showDashboardAfterPayment() {
+            connectState.classList.add('hidden');
+            investmentState.classList.add('hidden');
+            dashboardState.classList.remove('hidden');
+            bottomNav.style.display = 'flex';
+            
+            updateDashboard();
+            updateAssetsPage();
+            renderNetworkTree();
+            updateInviteLink();
+            
+            new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
+            showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
+            sessionStorage.removeItem('ztr_ref_id');
         }
         
         function renderNetworkTree() {
@@ -1326,23 +1408,7 @@
             treeContainer.innerHTML = treeHTML;
         }
 
-        function showDashboardAfterPayment() {
-            connectState.classList.add('hidden');
-            investmentState.classList.add('hidden');
-            dashboardState.classList.remove('hidden');
-            bottomNav.style.display = 'flex';
-            
-            updateDashboard();
-            updateAssetsPage();
-            renderNetworkTree();
-            updateInviteLink();
-            
-            new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
-            showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
-            sessionStorage.removeItem('ztr_ref_id');
-        }
-        
-        // Stars pages
+        // Stars pages functions...
         function generateLargeStarsHTML(count, filledCount) {
             let starsHtml = '';
             for (let i = 0; i < count; i++) {
@@ -1392,7 +1458,6 @@
         window.openLevelStarsPage = openLevelStarsPage;
         window.openJoiningStarsPage = openJoiningStarsPage;
 
-        // Level page
         function initializeLevelSwiper() {
             const wrapper = document.getElementById('levelSwiperWrapper');
             if (!wrapper) return;
@@ -1507,7 +1572,6 @@
             }
         }
 
-        // Event Listeners
         document.getElementById('connectBtn').addEventListener('click', async () => {
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
@@ -1651,7 +1715,9 @@
                 showToast(`Joining under sponsor ID: ${ref}`, 'info');
             } else {
                 const storedRef = sessionStorage.getItem('ztr_ref_id');
-                if (storedRef) referralId = parseInt(storedRef);
+                if (storedRef) {
+                    referralId = parseInt(storedRef);
+                }
             }
 
             if (window.ethereum) {
