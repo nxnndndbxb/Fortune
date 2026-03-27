@@ -466,6 +466,27 @@
             color: var(--gold);
         }
         
+        .invite-code-input-card {
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .invite-code-input-card input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: white;
+            text-align: center;
+            font-family: monospace;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
         .network-tree-container {
             padding: 10px;
             overflow-x: auto;
@@ -802,6 +823,16 @@
             50% { border-color: var(--gold); box-shadow: 0 0 20px 5px var(--primary-glow); }
             100% { border-color: var(--primary); box-shadow: 0 0 0 0 var(--primary-glow); }
         }
+        
+        .profile-history-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -877,12 +908,28 @@
         <div id="inviterDisplayOnModal" class="inviter-info-card" style="margin-bottom: 15px;">
             <i class="fa-solid fa-user-plus"></i> Invited By: <strong id="modalInviterId" style="color: var(--gold); font-size: 18px;">None</strong>
         </div>
+        <div id="inviteCodeDisplayOnModal" class="invite-badge" style="margin-bottom: 15px;">
+            <i class="fa-solid fa-ticket"></i> Invitation Code: <span id="modalInviteCode">None</span>
+        </div>
         <p style="color: var(--text-muted);">Joining Premium Network</p>
         <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;">0.10 USDT</div>
         <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: 0.0003 BNB</div>
         <div style="display:flex; gap:10px;">
             <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closeModal('paymentModal')">Cancel</button>
             <button class="btn btn-success" id="confirmPaymentBtn">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="inviteCodeModal">
+    <div class="modal-content glass">
+        <i class="fa-solid fa-ticket" style="font-size: 50px; color: var(--gold);"></i>
+        <h2 style="margin: 15px 0;">Enter Invitation Code</h2>
+        <p style="color: var(--text-muted); margin-bottom: 15px;">Enter the invitation code from your friend (Only one time)</p>
+        <input type="text" id="inviteCodeInputField" placeholder="Enter 8-digit code" maxlength="8" style="width:100%; padding:15px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); border-radius:15px; color:white; text-align:center; font-family:monospace; font-size:16px; margin-bottom:15px;">
+        <div style="display:flex; gap:10px;">
+            <button class="btn" style="background:rgba(255,255,255,0.1); box-shadow:none;" onclick="closeModal('inviteCodeModal')">Cancel</button>
+            <button class="btn btn-success" id="submitInviteCodeBtn">Submit Code</button>
         </div>
     </div>
 </div>
@@ -942,6 +989,9 @@
                 <p id="inviterUserIdDisplay">Loading...</p>
                 <small style="font-size: 11px; color: var(--text-muted);">You will get 10 ZTR bonus on activation!</small>
             </div>
+            <div id="inviteCodeDisplayOnInvest" class="invite-badge hidden">
+                <i class="fa-solid fa-ticket"></i> Invitation Code: <span id="investInviteCode">None</span>
+            </div>
             <span class="rank-badge">ENTRY NODE</span>
             <h1 style="font-size:40px; margin:20px 0; color:var(--primary);">0.10 <span style="font-size:18px;">USDT</span></h1>
             <div style="background: rgba(0,242,255,0.1); padding: 10px; border-radius: 12px; margin: 15px 0;">
@@ -953,6 +1003,7 @@
                 <li style="margin-bottom:10px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> Multi-Level Rewards</li>
             </ul>
             <button id="investNowBtn" class="btn btn-success">ACTIVATE LIFETIME NODE</button>
+            <button id="addInviteCodeBtn" class="btn" style="margin-top: 10px; background:rgba(255,255,255,0.1);">+ Add Invitation Code</button>
         </div>
     </div>
 
@@ -974,6 +1025,10 @@
 
                 <div id="inviterDisplayOnHome" class="invite-badge" style="margin: 10px 0;">
                     <i class="fa-solid fa-user-check"></i> Invited By: <span id="homeInviterId">None</span>
+                </div>
+                
+                <div id="inviteCodeDisplayOnHome" class="invite-badge" style="margin: 10px 0;">
+                    <i class="fa-solid fa-ticket"></i> Invitation Code: <span id="homeInviteCode">None</span>
                 </div>
 
                 <div class="income-grid">
@@ -1072,6 +1127,14 @@
                         <span style="font-size:12px; color:var(--primary);" id="userId">ID: ZTR-0000</span>
                         <div style="font-size:11px; color:var(--text-muted); margin-top:5px;" id="profileInviteCode"></div>
                     </div>
+                    
+                    <div class="invite-badge" style="margin-bottom: 15px;">
+                        <i class="fa-solid fa-user-check"></i> Invited By: <span id="profileInvitedBy">None</span>
+                    </div>
+                    
+                    <div class="invite-badge" style="margin-bottom: 15px;">
+                        <i class="fa-solid fa-ticket"></i> Used Invitation Code: <span id="profileUsedCode">None</span>
+                    </div>
 
                     <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:15px; font-family:monospace; font-size:11px; text-align:center; color:var(--primary); margin-bottom:20px; border:1px dashed var(--primary); cursor:pointer;" id="walletAddressDisplay" onclick="copyWalletAddress()">
                         0x...
@@ -1096,17 +1159,20 @@
                     </div>
 
                     <div style="border-top:1px solid var(--glass-border); padding-top:20px;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
-                            <span style="color:var(--text-muted);"><i class="fa-solid fa-calendar"></i> Deployment</span>
-                            <span id="joinDate">--/--/--</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
-                            <span style="color:var(--text-muted);"><i class="fa-solid fa-chart-area"></i> Total Yield</span>
-                            <span id="totalEarningsStat" style="color:var(--success);">$0.00</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; font-size:14px;">
-                            <span style="color:var(--text-muted);"><i class="fa-solid fa-shield"></i> Level Status</span>
-                            <span id="userLevelStat" style="color:var(--primary);">Start</span>
+                        <h4 style="margin-bottom: 10px;">Profile History</h4>
+                        <div id="profileHistoryContainer">
+                            <div class="profile-history-item">
+                                <span><i class="fa-solid fa-calendar"></i> Joined</span>
+                                <span id="joinDate">--/--/--</span>
+                            </div>
+                            <div class="profile-history-item">
+                                <span><i class="fa-solid fa-chart-area"></i> Total Yield</span>
+                                <span id="totalEarningsStat" style="color:var(--success);">$0.00</span>
+                            </div>
+                            <div class="profile-history-item">
+                                <span><i class="fa-solid fa-shield"></i> Level Status</span>
+                                <span id="userLevelStat" style="color:var(--primary);">Start</span>
+                            </div>
                         </div>
                     </div>
 
@@ -1128,10 +1194,11 @@
 <script>
     (function() {
         /* ============================================
-           ZTR COIN - WORKING INVITATION SYSTEM
-           Auto-fill invitation code from URL
-           Show inviter info on transaction page
-           40% direct commission only
+           ZTR COIN - COMPLETE INVITATION SYSTEM
+           Show invitation code on transaction page
+           Profile page with complete history
+           One-time invite code entry only
+           40% direct commission
         ============================================ */
         
         // CORE CONFIGURATION
@@ -1167,11 +1234,12 @@
             USER_IDS: 'ztr_user_ids',
             INVITE_CODES: 'ztr_invite_codes',
             INVITER_MAP: 'ztr_inviter_map',
+            USED_INVITE_CODE: 'ztr_used_invite_code',
             CONNECTED_WALLET: 'ztr_connected_wallet'
         };
 
         let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper, pendingInviterId = null;
-        let invitationCodeFromURL = null;
+        let userInviteCode = null;
 
         // UI ELEMENTS
         const connectState = document.getElementById('connectState');
@@ -1257,6 +1325,15 @@
             }
             return null;
         }
+        
+        function getUserInviteCode(wallet) {
+            const usedCode = localStorage.getItem(STORAGE_KEYS.USED_INVITE_CODE + '_' + wallet.toLowerCase());
+            return usedCode;
+        }
+        
+        function setUserInviteCode(wallet, code) {
+            localStorage.setItem(STORAGE_KEYS.USED_INVITE_CODE + '_' + wallet.toLowerCase(), code);
+        }
 
         // ========== USER DATA MANAGEMENT ==========
         function getNextUserId() {
@@ -1285,7 +1362,7 @@
             return profiles[wallet.toLowerCase()] || null;
         }
 
-        function createUserProfile(wallet, inviterId = null) {
+        function createUserProfile(wallet, inviterId = null, usedInviteCode = null) {
             const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
             if (profiles[wallet.toLowerCase()]) return profiles[wallet.toLowerCase()];
 
@@ -1303,12 +1380,17 @@
                 localStorage.setItem(STORAGE_KEYS.INVITER_MAP, JSON.stringify(inviterMap));
             }
             
+            if (usedInviteCode) {
+                setUserInviteCode(wallet, usedInviteCode);
+            }
+            
             profiles[wallet.toLowerCase()] = { 
                 name: `User ${userId}`, 
                 avatar: 'fa-user-astronaut', 
                 joinDate: new Date().toLocaleDateString(), 
                 userId: userId,
-                profilePicUrl: null
+                profilePicUrl: null,
+                usedInviteCode: usedInviteCode || null
             };
             localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
             
@@ -1328,12 +1410,12 @@
         }
         
         // ========== INVITATION SYSTEM - 40% DIRECT COMMISSION ==========
-        function markUserAsPaid(wallet, inviterUserId) {
+        function markUserAsPaid(wallet, inviterUserId, usedInviteCode = null) {
             const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
             paidUsers[wallet.toLowerCase()] = true; 
             localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
             
-            createUserProfile(wallet, inviterUserId);
+            createUserProfile(wallet, inviterUserId, usedInviteCode);
             
             if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10);
             if (!getUserLevel(wallet)) setUserLevel(wallet, 0);
@@ -1415,10 +1497,15 @@
             const profile = getUserProfile(userAddress);
             if (!profile) return;
             const inviteCode = getUniqueInviteCode(userAddress);
+            const usedCode = getUserInviteCode(userAddress);
+            const inviterId = getInviterId(userAddress);
+            
             document.getElementById('userId').innerText = `ID: ZTR-${profile.userId}`;
             document.getElementById('profileName').innerText = profile.name;
             document.getElementById('joinDate').innerText = profile.joinDate;
             document.getElementById('profileInviteCode').innerHTML = `<i class="fa-solid fa-ticket"></i> Invite Code: ${inviteCode}`;
+            document.getElementById('profileInvitedBy').innerHTML = inviterId ? `ID: ZTR-${inviterId}` : 'None';
+            document.getElementById('profileUsedCode').innerHTML = usedCode || 'None';
             
             const avatarIcon = document.getElementById('avatarIcon');
             const avatarImg = document.getElementById('profileAvatarImg');
@@ -1448,6 +1535,10 @@
             const level = getCurrentLevelInfo(userAddress);
             const team = getTeamSize(userAddress);
             const salary = getSalleryEarnings(userAddress);
+            const inviterId = getInviterId(userAddress);
+            const usedCode = getUserInviteCode(userAddress);
+            const ownCode = getUniqueInviteCode(userAddress);
+            
             document.getElementById('profitIncome').innerText = `${ztr.toFixed(2)} ZTR`;
             document.getElementById('profitUSD').innerText = ztr.toFixed(2);
             document.getElementById('teamIncome').innerText = team;
@@ -1455,14 +1546,11 @@
             document.getElementById('salleryIncome').innerText = `${salary.toFixed(2)} ZTR`;
             document.getElementById('levelIncome').innerText = level.name;
             document.getElementById('userRankBadge').innerText = level.name;
+            document.getElementById('homeInviterId').innerText = inviterId ? `ID: ZTR-${inviterId}` : 'None';
+            document.getElementById('homeInviteCode').innerText = usedCode || 'None';
             
-            const inviterId = getInviterId(userAddress);
-            const homeInviterSpan = document.getElementById('homeInviterId');
             if (inviterId) {
-                homeInviterSpan.innerText = `ID: ZTR-${inviterId}`;
                 document.getElementById('inviterDisplayOnHome').classList.remove('hidden');
-            } else {
-                homeInviterSpan.innerText = 'None (First Member)';
             }
         }
         
@@ -1484,19 +1572,26 @@
             }
         }
         
-        function showInviterInfoOnPages(inviterUserId) {
+        function showInviterInfoOnPages(inviterUserId, usedInviteCode = null) {
             const inviterDisplayText = inviterUserId ? `ID: ZTR-${inviterUserId}` : 'None';
             document.getElementById('inviterUserIdDisplay').innerText = inviterDisplayText;
             document.getElementById('modalInviterId').innerText = inviterDisplayText;
             document.getElementById('homeInviterId').innerText = inviterDisplayText;
+            document.getElementById('profileInvitedBy').innerHTML = inviterDisplayText;
+            
+            if (usedInviteCode) {
+                document.getElementById('modalInviteCode').innerText = usedInviteCode;
+                document.getElementById('investInviteCode').innerText = usedInviteCode;
+                document.getElementById('homeInviteCode').innerText = usedInviteCode;
+                document.getElementById('profileUsedCode').innerHTML = usedInviteCode;
+                document.getElementById('inviteCodeDisplayOnInvest').classList.remove('hidden');
+                document.getElementById('inviteCodeDisplayOnModal').classList.remove('hidden');
+            }
             
             if (inviterUserId) {
                 document.getElementById('inviterInfoOnInvestPage').classList.remove('hidden');
                 document.getElementById('inviterDisplayOnModal').classList.remove('hidden');
                 document.getElementById('inviterDisplayOnHome').classList.remove('hidden');
-            } else {
-                document.getElementById('inviterInfoOnInvestPage').classList.add('hidden');
-                document.getElementById('inviterDisplayOnHome').classList.add('hidden');
             }
         }
         
@@ -1516,7 +1611,6 @@
             }
             showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
             sessionStorage.removeItem('ztr_pending_invite');
-            sessionStorage.removeItem('ztr_invite_code');
             pendingInviterId = null;
         }
         
@@ -1720,17 +1814,6 @@
             }
         }
 
-        // ========== HIGHLIGHT INVITATION CODE ==========
-        function highlightInviteCode() {
-            const wrapper = document.getElementById('inviteCodeWrapper');
-            if (wrapper) {
-                wrapper.classList.add('invite-code-highlight');
-                setTimeout(() => {
-                    wrapper.classList.remove('invite-code-highlight');
-                }, 2000);
-            }
-        }
-
         // ========== WALLET CONNECTION WITH PERSISTENCE ==========
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0) return false;
@@ -1754,37 +1837,36 @@
             await getUSDTDecimals();
             await updateBalances();
             
-            // Check for invitation from URL (most important part)
-            const urlParams = new URLSearchParams(window.location.search);
-            const inviteCodeFromUrl = urlParams.get('invite');
+            // Check if user already has a used invite code (one-time only)
+            const existingUsedCode = getUserInviteCode(userAddress);
             
-            if (inviteCodeFromUrl && !isPaidUser(userAddress)) {
-                console.log("Invitation code found in URL:", inviteCodeFromUrl);
-                const inviterWallet = getWalletByInviteCode(inviteCodeFromUrl);
+            if (!existingUsedCode && !isPaidUser(userAddress)) {
+                // Check for invitation from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const inviteCodeFromUrl = urlParams.get('invite');
+                
+                if (inviteCodeFromUrl) {
+                    const inviterWallet = getWalletByInviteCode(inviteCodeFromUrl);
+                    if (inviterWallet && inviterWallet.toLowerCase() !== userAddress.toLowerCase()) {
+                        const inviterProfile = getUserProfile(inviterWallet);
+                        if (inviterProfile) {
+                            pendingInviterId = inviterProfile.userId;
+                            sessionStorage.setItem('ztr_pending_invite', pendingInviterId);
+                            sessionStorage.setItem('ztr_invite_code', inviteCodeFromUrl);
+                            showInviterInfoOnPages(pendingInviterId, inviteCodeFromUrl);
+                            showToast(`🎉 Invitation code detected! You were invited by ID: ZTR-${pendingInviterId}`, 'success');
+                        }
+                    }
+                }
+            } else if (existingUsedCode) {
+                // User already used a code, show it
+                const inviterWallet = getWalletByInviteCode(existingUsedCode);
                 if (inviterWallet) {
                     const inviterProfile = getUserProfile(inviterWallet);
                     if (inviterProfile) {
                         pendingInviterId = inviterProfile.userId;
-                        sessionStorage.setItem('ztr_pending_invite', pendingInviterId);
-                        sessionStorage.setItem('ztr_invite_code', inviteCodeFromUrl);
-                        
-                        // Show inviter info on all relevant pages
-                        showInviterInfoOnPages(pendingInviterId);
-                        showToast(`🎉 You were invited by User ID: ZTR-${pendingInviterId}!`, 'success');
-                        
-                        // Highlight the invitation code in network page
-                        setTimeout(() => {
-                            highlightInviteCode();
-                        }, 1000);
+                        showInviterInfoOnPages(pendingInviterId, existingUsedCode);
                     }
-                } else {
-                    console.log("Inviter not found for code:", inviteCodeFromUrl);
-                }
-            } else {
-                const storedInvite = sessionStorage.getItem('ztr_pending_invite');
-                if (storedInvite && !isPaidUser(userAddress)) {
-                    pendingInviterId = parseInt(storedInvite);
-                    showInviterInfoOnPages(pendingInviterId);
                 }
             }
             
@@ -1853,8 +1935,56 @@
         });
 
         document.getElementById('investNowBtn').addEventListener('click', () => {
-            // Show modal with inviter info
             openModal('paymentModal');
+        });
+        
+        document.getElementById('addInviteCodeBtn').addEventListener('click', () => {
+            const existingCode = getUserInviteCode(userAddress);
+            if (existingCode) {
+                showToast("You have already used an invitation code! One time only.", "error");
+                return;
+            }
+            openModal('inviteCodeModal');
+        });
+        
+        document.getElementById('submitInviteCodeBtn').addEventListener('click', () => {
+            const inviteCodeInput = document.getElementById('inviteCodeInputField').value.toUpperCase().trim();
+            if (!inviteCodeInput || inviteCodeInput.length !== 8) {
+                showToast("Please enter a valid 8-digit invitation code!", "error");
+                return;
+            }
+            
+            const existingCode = getUserInviteCode(userAddress);
+            if (existingCode) {
+                showToast("You have already used an invitation code! One time only.", "error");
+                closeModal('inviteCodeModal');
+                return;
+            }
+            
+            const inviterWallet = getWalletByInviteCode(inviteCodeInput);
+            if (!inviterWallet) {
+                showToast("Invalid invitation code! Please check and try again.", "error");
+                return;
+            }
+            
+            if (inviterWallet.toLowerCase() === userAddress.toLowerCase()) {
+                showToast("You cannot use your own invitation code!", "error");
+                return;
+            }
+            
+            const inviterProfile = getUserProfile(inviterWallet);
+            if (inviterProfile) {
+                pendingInviterId = inviterProfile.userId;
+                sessionStorage.setItem('ztr_pending_invite', pendingInviterId);
+                sessionStorage.setItem('ztr_invite_code', inviteCodeInput);
+                setUserInviteCode(userAddress, inviteCodeInput);
+                showInviterInfoOnPages(pendingInviterId, inviteCodeInput);
+                showToast(`✅ Invitation code accepted! Invited by ID: ZTR-${pendingInviterId}`, 'success');
+                closeModal('inviteCodeModal');
+                document.getElementById('inviteCodeInputField').value = '';
+            } else {
+                showToast("Inviter not found!", "error");
+            }
         });
 
         document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
@@ -1872,7 +2002,8 @@
                 showToast("Transaction sent! Confirming...", "info");
                 await tx.wait();
                 
-                markUserAsPaid(userAddress, pendingInviterId);
+                const usedCode = getUserInviteCode(userAddress);
+                markUserAsPaid(userAddress, pendingInviterId, usedCode);
                 closeModal('paymentModal');
                 showDashboardAfterPayment();
                 await updateBalances();
@@ -1881,7 +2012,6 @@
                 renderNetworkTree();
                 updateInviteInfo();
                 
-                // Show success message with inviter info if any
                 if (pendingInviterId) {
                     showToast(`✅ You joined under ID: ZTR-${pendingInviterId}! They received 0.04 ZTR commission.`, 'success');
                 }
@@ -2014,16 +2144,12 @@
             const ip = await getIP();
             document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
             
-            // Check URL for invite code and store it
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCode = urlParams.get('invite');
             if (inviteCode) {
                 sessionStorage.setItem('ztr_invite_code', inviteCode);
-                invitationCodeFromURL = inviteCode;
-                console.log('Invitation code detected:', inviteCode);
             }
             
-            // Auto-reconnect if wallet was previously connected
             await autoReconnect();
         });
     })();
