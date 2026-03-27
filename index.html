@@ -921,7 +921,7 @@
              <div class="main-card glass">
                 <h3>Share Your Protocol Link</h3>
                 <p style="font-size:12px; color:var(--text-muted); margin-bottom:20px;">
-                    Grow your network and increase your rewards with a unique invitation link.
+                    Grow your network and increase your rewards with a unique invitation code.
                 </p>
                 <div class="invite-link-wrapper">
                     <i class="fa-solid fa-link"></i>
@@ -1020,12 +1020,6 @@
 
 <script>
     (function() {
-        /* ============================================
-           ZTR COIN - COMPLETE SYSTEM
-           INVITATION SYSTEM FULLY INTACT
-           NO DATA LOSS FOR EXISTING USERS
-        ============================================ */
-        
         // CORE CONFIGURATION
         const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
         const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
@@ -1064,16 +1058,7 @@
 
         let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper, referralId = null;
 
-        // UI ELEMENTS
-        const connectState = document.getElementById('connectState');
-        const investmentState = document.getElementById('investmentState');
-        const dashboardState = document.getElementById('dashboardState');
-        const bottomNav = document.getElementById('bottomNav');
-        const levelPageOverlay = document.getElementById('levelPageOverlay');
-        const levelStarsPage = document.getElementById('levelStarsPage');
-        const joiningStarsPage = document.getElementById('joiningStarsPage');
-
-        // ========== HELPER FUNCTIONS ==========
+        // Helper functions
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -1113,15 +1098,15 @@
             }
         }
 
-        // ========== USER DATA MANAGEMENT (PRESERVES OLD DATA) ==========
+        // Generate sequential user ID starting from 1000
         function getNextUserId() {
             let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
-            let nextId = 1000;
-            const existingIds = Object.values(userIds);
-            if(existingIds.length > 0) {
-                nextId = Math.max(...existingIds) + 1;
+            let maxId = 999; // Start from 1000
+            for (let wallet in userIds) {
+                if (userIds[wallet] > maxId) maxId = userIds[wallet];
             }
-            return nextId;
+            if (maxId < 1000) maxId = 999;
+            return maxId + 1;
         }
 
         function getWalletById(id) {
@@ -1170,7 +1155,7 @@
             return paidUsers[wallet.toLowerCase()] === true; 
         }
         
-        // ========== INVITATION SYSTEM - COMMISSION DISTRIBUTION ==========
+        // No rewards for new users - balance remains zero
         function markUserAsPaid(wallet, uplinerId) {
             const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
             paidUsers[wallet.toLowerCase()] = true; 
@@ -1178,63 +1163,10 @@
             
             createUserProfile(wallet, uplinerId);
             
-            if (!getZTRBalance(wallet)) updateZTRBalance(wallet, 10);
+            // NO rewards for new user - balance stays 0
             if (!getUserLevel(wallet)) setUserLevel(wallet, 0);
-
-            // Distribute commissions to upliners
-            distributeCommissions(wallet);
         }
 
-        async function distributeCommissions(newUserWallet) {
-            const newUserProfile = getUserProfile(newUserWallet);
-            if (!newUserProfile || !newUserProfile.uplinerId) return;
-
-            const baseAmount = JOINING_FEE_USDT;
-
-            // ===== LEVEL 1: DIRECT UPLINER (40% Commission) =====
-            const directInviterWallet = getWalletById(newUserProfile.uplinerId);
-            if (directInviterWallet) {
-                const commission = baseAmount * 0.40;
-                updateZTRBalance(directInviterWallet, commission);
-                showToast(`Upliner received ${commission.toFixed(2)} ZTR commission!`, 'success');
-                
-                // Update team size for direct upliner
-                const teamSizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}');
-                teamSizes[directInviterWallet] = (teamSizes[directInviterWallet] || 0) + 1;
-                localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
-                
-                // ===== LEVEL 2: SECOND LEVEL UPLINER (10% Commission) =====
-                const directInviterProfile = getUserProfile(directInviterWallet);
-                if (directInviterProfile && directInviterProfile.uplinerId) {
-                    const secondLevelUplinerWallet = getWalletById(directInviterProfile.uplinerId);
-                    if (secondLevelUplinerWallet) {
-                        const secondLevelCommission = baseAmount * 0.10;
-                        updateZTRBalance(secondLevelUplinerWallet, secondLevelCommission);
-                        showToast(`Second level upliner received ${secondLevelCommission.toFixed(2)} ZTR commission!`, 'success');
-                    }
-                }
-
-                // ===== DOWNLINE POOL: SAME LEVEL MEMBERS (20% Split) =====
-                const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-                const siblings = [];
-                for(const walletKey in profiles) {
-                    if(profiles[walletKey].uplinerId === newUserProfile.uplinerId && walletKey !== newUserWallet.toLowerCase()) {
-                        siblings.push(walletKey);
-                    }
-                }
-
-                if(siblings.length > 0) {
-                    const downlinePool = baseAmount * 0.20;
-                    const sharePerSibling = downlinePool / siblings.length;
-                    siblings.forEach(siblingWallet => {
-                        updateZTRBalance(siblingWallet, sharePerSibling);
-                        showToast(`Sibling member received ${sharePerSibling.toFixed(2)} ZTR commission!`, 'success');
-                    });
-                }
-            }
-        }
-        
-        // ========== ZTR BALANCE MANAGEMENT ==========
         function getZTRBalance(wallet) { 
             const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); 
             return balances[wallet.toLowerCase()] || 0; 
@@ -1264,18 +1196,12 @@
             return teams[wallet.toLowerCase()] || 0; 
         }
         
-        function getSalleryEarnings(wallet) { 
-            const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); 
-            return earnings[wallet.toLowerCase()] || 0; 
-        }
-        
         function getCurrentLevelInfo(wallet) { 
             const levelId = getUserLevel(wallet); 
             if (levelId === 0) return { name: "Starter", price: 0, commission: 0, icon: "🌱" }; 
             return LEVELS[levelId - 1]; 
         }
 
-        // ========== BALANCE & UI UPDATES ==========
         async function updateBalances() {
             if (!userAddress || !provider) return;
             try {
@@ -1321,12 +1247,11 @@
             const ztr = getZTRBalance(userAddress);
             const level = getCurrentLevelInfo(userAddress);
             const team = getTeamSize(userAddress);
-            const salary = getSalleryEarnings(userAddress);
             document.getElementById('profitIncome').innerText = `${ztr.toFixed(2)} ZTR`;
             document.getElementById('profitUSD').innerText = ztr.toFixed(2);
             document.getElementById('teamIncome').innerText = team;
             document.getElementById('teamCount').innerText = `Member${team === 1 ? '' : 's'}`;
-            document.getElementById('salleryIncome').innerText = `${salary.toFixed(2)} ZTR`;
+            document.getElementById('salleryIncome').innerText = `0.00 ZTR`;
             document.getElementById('levelIncome').innerText = level.name;
             document.getElementById('userRankBadge').innerText = level.name;
         }
@@ -1344,23 +1269,6 @@
             }
         }
         
-        function showDashboardAfterPayment() {
-            connectState.classList.add('hidden');
-            investmentState.classList.add('hidden');
-            dashboardState.classList.remove('hidden');
-            bottomNav.style.display = 'flex';
-            
-            updateDashboard();
-            updateAssetsPage();
-            renderNetworkTree();
-            updateInviteLink();
-            
-            new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
-            showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
-            sessionStorage.removeItem('ztr_ref_id');
-        }
-        
-        // ========== INVITATION LINK & NETWORK TREE ==========
         function renderNetworkTree() {
             if (!userAddress) return;
             const currentUserProfile = getUserProfile(userAddress);
@@ -1418,7 +1326,23 @@
             treeContainer.innerHTML = treeHTML;
         }
 
-        // ========== STARS PAGES ==========
+        function showDashboardAfterPayment() {
+            connectState.classList.add('hidden');
+            investmentState.classList.add('hidden');
+            dashboardState.classList.remove('hidden');
+            bottomNav.style.display = 'flex';
+            
+            updateDashboard();
+            updateAssetsPage();
+            renderNetworkTree();
+            updateInviteLink();
+            
+            new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
+            showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
+            sessionStorage.removeItem('ztr_ref_id');
+        }
+        
+        // Stars pages
         function generateLargeStarsHTML(count, filledCount) {
             let starsHtml = '';
             for (let i = 0; i < count; i++) {
@@ -1468,7 +1392,7 @@
         window.openLevelStarsPage = openLevelStarsPage;
         window.openJoiningStarsPage = openJoiningStarsPage;
 
-        // ========== LEVEL PAGE ==========
+        // Level page
         function initializeLevelSwiper() {
             const wrapper = document.getElementById('levelSwiperWrapper');
             if (!wrapper) return;
@@ -1535,13 +1459,11 @@
             openModal('upgradeModal');
         };
 
-        // ========== MODAL CONTROLS ==========
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         window.closeModal = closeModal;
         window.openModal = openModal;
 
-        // ========== USDT DECIMALS ==========
         async function getUSDTDecimals() {
             try { 
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); 
@@ -1551,7 +1473,6 @@
             }
         }
 
-        // ========== WALLET CONNECTION ==========
         async function initConnection(accounts) {
             if (!accounts || accounts.length === 0) return;
             userAddress = accounts[0];
@@ -1586,7 +1507,7 @@
             }
         }
 
-        // ========== EVENT LISTENERS ==========
+        // Event Listeners
         document.getElementById('connectBtn').addEventListener('click', async () => {
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
@@ -1632,7 +1553,6 @@
             }
         });
         
-        // Profile Picture Upload
         document.getElementById('profilePicInput').addEventListener('change', async (event) => {
             const file = event.target.files[0];
             if (!file) return;
@@ -1698,7 +1618,6 @@
             finally { isProcessing = false; window.selectedLevel = null; }
         });
 
-        // Navigation
         document.querySelectorAll('.nav-item').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -1713,7 +1632,6 @@
             });
         });
 
-        // Auto-Sync
         setInterval(() => {
             if (userAddress && isPaidUser(userAddress)) {
                 updateBalances();
@@ -1721,12 +1639,10 @@
             }
         }, 15000);
 
-        // ========== INITIAL LOAD - INVITATION SYSTEM CHECK ==========
         window.addEventListener('load', async () => {
             const ip = await getIP();
             document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
             
-            // Check for referral link in URL (INVITATION SYSTEM)
             const urlParams = new URLSearchParams(window.location.search);
             const ref = urlParams.get('ref');
             if (ref) {
@@ -1735,9 +1651,7 @@
                 showToast(`Joining under sponsor ID: ${ref}`, 'info');
             } else {
                 const storedRef = sessionStorage.getItem('ztr_ref_id');
-                if (storedRef) {
-                    referralId = parseInt(storedRef);
-                }
+                if (storedRef) referralId = parseInt(storedRef);
             }
 
             if (window.ethereum) {
