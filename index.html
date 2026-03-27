@@ -789,6 +789,18 @@
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
         }
+        
+        .invite-code-highlight {
+            background: rgba(0, 242, 255, 0.3);
+            border: 2px solid var(--primary);
+            animation: pulse-border 1s ease-in-out;
+        }
+        
+        @keyframes pulse-border {
+            0% { border-color: var(--primary); box-shadow: 0 0 0 0 var(--primary-glow); }
+            50% { border-color: var(--gold); box-shadow: 0 0 20px 5px var(--primary-glow); }
+            100% { border-color: var(--primary); box-shadow: 0 0 0 0 var(--primary-glow); }
+        }
     </style>
 </head>
 <body>
@@ -1005,7 +1017,7 @@
                 <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">
                     Share this unique code with friends to invite them!
                 </p>
-                <div class="invite-code-wrapper">
+                <div class="invite-code-wrapper" id="inviteCodeWrapper">
                     <i class="fa-solid fa-ticket"></i>
                     <input type="text" id="inviteCodeInput" readonly value="Loading...">
                     <button id="copyInviteCodeBtn"><i class="fa-solid fa-copy"></i></button>
@@ -1114,9 +1126,10 @@
 <script>
     (function() {
         /* ============================================
-           ZTR COIN - PERSISTENT WALLET CONNECTION
-           No data loss on refresh
-           Auto-reconnect functionality
+           ZTR COIN - WORKING INVITATION SYSTEM
+           Auto-fill invitation code from URL
+           Show inviter info on transaction page
+           40% direct commission only
         ============================================ */
         
         // CORE CONFIGURATION
@@ -1143,7 +1156,6 @@
         const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
         
         const STORAGE_KEYS = {
-            SESSION: 'ztr_premium_session', 
             PAID_USERS: 'ztr_paid_users', 
             ZTR_BALANCE: 'ztr_user_balance',
             USER_LEVEL: 'ztr_user_level', 
@@ -1156,7 +1168,7 @@
             CONNECTED_WALLET: 'ztr_connected_wallet'
         };
 
-        let provider, signer, userAddress, autoRefreshInterval, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper, pendingInviterId = null;
+        let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper, pendingInviterId = null;
 
         // UI ELEMENTS
         const connectState = document.getElementById('connectState');
@@ -1333,7 +1345,7 @@
             if (inviterWallet) {
                 const commission = JOINING_FEE_USDT * 0.40;
                 updateZTRBalance(inviterWallet, commission);
-                showToast(`Inviter (ID: ${inviterUserId}) received ${commission.toFixed(2)} ZTR commission!`, 'success');
+                showToast(`Inviter (ID: ZTR-${inviterUserId}) received ${commission.toFixed(2)} ZTR commission!`, 'success');
                 
                 const teamSizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}');
                 teamSizes[inviterWallet] = (teamSizes[inviterWallet] || 0) + 1;
@@ -1485,6 +1497,7 @@
             }
             showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
             sessionStorage.removeItem('ztr_pending_invite');
+            sessionStorage.removeItem('ztr_invite_code');
             pendingInviterId = null;
         }
         
@@ -1688,12 +1701,22 @@
             }
         }
 
+        // ========== HIGHLIGHT INVITATION CODE ==========
+        function highlightInviteCode() {
+            const wrapper = document.getElementById('inviteCodeWrapper');
+            if (wrapper) {
+                wrapper.classList.add('invite-code-highlight');
+                setTimeout(() => {
+                    wrapper.classList.remove('invite-code-highlight');
+                }, 2000);
+            }
+        }
+
         // ========== WALLET CONNECTION WITH PERSISTENCE ==========
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0) return false;
             userAddress = accounts[0];
             
-            // Save connected wallet to localStorage
             localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, userAddress);
             
             provider = new ethers.BrowserProvider(window.ethereum);
@@ -1712,31 +1735,38 @@
             await getUSDTDecimals();
             await updateBalances();
             
-            // Check for pending invitation from URL (only on first connection)
-            if (!isAutoReconnect) {
-                const urlParams = new URLSearchParams(window.location.search);
-                const inviteCode = urlParams.get('invite');
-                if (inviteCode && !isPaidUser(userAddress)) {
-                    const inviterWallet = getWalletByInviteCode(inviteCode);
-                    if (inviterWallet) {
-                        const inviterProfile = getUserProfile(inviterWallet);
-                        if (inviterProfile) {
-                            pendingInviterId = inviterProfile.userId;
-                            sessionStorage.setItem('ztr_pending_invite', pendingInviterId);
-                            document.getElementById('inviterUserIdDisplay').innerText = `ID: ZTR-${pendingInviterId}`;
-                            document.getElementById('inviterInfoOnInvestPage').classList.remove('hidden');
-                            document.getElementById('modalInviterId').innerText = `ID: ZTR-${pendingInviterId}`;
-                            showToast(`You were invited by User ID: ZTR-${pendingInviterId}!`, 'success');
-                        }
-                    }
-                } else {
-                    const storedInvite = sessionStorage.getItem('ztr_pending_invite');
-                    if (storedInvite && !isPaidUser(userAddress)) {
-                        pendingInviterId = parseInt(storedInvite);
+            // Check for pending invitation from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const inviteCode = urlParams.get('invite');
+            
+            if (inviteCode && !isPaidUser(userAddress)) {
+                const inviterWallet = getWalletByInviteCode(inviteCode);
+                if (inviterWallet) {
+                    const inviterProfile = getUserProfile(inviterWallet);
+                    if (inviterProfile) {
+                        pendingInviterId = inviterProfile.userId;
+                        sessionStorage.setItem('ztr_pending_invite', pendingInviterId);
+                        sessionStorage.setItem('ztr_invite_code', inviteCode);
+                        
+                        // Show inviter info on investment page
                         document.getElementById('inviterUserIdDisplay').innerText = `ID: ZTR-${pendingInviterId}`;
                         document.getElementById('inviterInfoOnInvestPage').classList.remove('hidden');
                         document.getElementById('modalInviterId').innerText = `ID: ZTR-${pendingInviterId}`;
+                        showToast(`🎉 You were invited by User ID: ZTR-${pendingInviterId}!`, 'success');
+                        
+                        // Highlight the invitation code in network page when they join
+                        setTimeout(() => {
+                            highlightInviteCode();
+                        }, 1000);
                     }
+                }
+            } else {
+                const storedInvite = sessionStorage.getItem('ztr_pending_invite');
+                if (storedInvite && !isPaidUser(userAddress)) {
+                    pendingInviterId = parseInt(storedInvite);
+                    document.getElementById('inviterUserIdDisplay').innerText = `ID: ZTR-${pendingInviterId}`;
+                    document.getElementById('inviterInfoOnInvestPage').classList.remove('hidden');
+                    document.getElementById('modalInviterId').innerText = `ID: ZTR-${pendingInviterId}`;
                 }
             }
             
@@ -1777,7 +1807,6 @@
                     if (accounts.length > 0 && accounts[0].toLowerCase() === savedWallet.toLowerCase()) {
                         await initConnection(accounts, true);
                     } else if (accounts.length > 0) {
-                        // Different wallet is connected, update saved wallet
                         localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
                         await initConnection(accounts, true);
                     } else {
@@ -1830,6 +1859,11 @@
                 updateAssetsPage();
                 renderNetworkTree();
                 updateInviteInfo();
+                
+                // Show success message with inviter info if any
+                if (pendingInviterId) {
+                    showToast(`✅ You joined under ID: ZTR-${pendingInviterId}! They received 0.04 ZTR commission.`, 'success');
+                }
                 
             } catch (e) { 
                 showToast("Transaction failed. Please try again.", "error"); 
@@ -1944,7 +1978,6 @@
                     localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
                     await initConnection(accounts, true);
                 } else {
-                    // User disconnected
                     localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
                     location.reload();
                 }
@@ -1960,11 +1993,12 @@
             const ip = await getIP();
             document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
             
-            // Check URL for invite code (only if not paid)
+            // Check URL for invite code and store it
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCode = urlParams.get('invite');
             if (inviteCode) {
-                sessionStorage.setItem('ztr_pending_invite_code', inviteCode);
+                sessionStorage.setItem('ztr_invite_code', inviteCode);
+                console.log('Invitation code detected:', inviteCode);
             }
             
             // Auto-reconnect if wallet was previously connected
