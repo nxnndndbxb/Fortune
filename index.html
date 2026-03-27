@@ -1021,7 +1021,7 @@
 <script>
     (function() {
         /* ============================================
-           ZTR COIN - COMPLETE SYSTEM
+           ZTR COIN - COMPLETE SYSTEM (FIXED INVITATION)
            INVITATION SYSTEM FULLY INTACT
            NO DATA LOSS FOR EXISTING USERS
         ============================================ */
@@ -1331,33 +1331,31 @@
             document.getElementById('userRankBadge').innerText = level.name;
         }
         
-        function showDashboardAfterPayment() {
-            connectState.classList.add('hidden');
-            investmentState.classList.add('hidden');
-            dashboardState.classList.remove('hidden');
-            bottomNav.style.display = 'flex';
+        // ========== INVITATION LINK & NETWORK TREE ==========
+        function updateInviteLink() {
+            if (!userAddress) return;
+            const profile = getUserProfile(userAddress);
+            if (!profile || !profile.userId) return;
             
-            updateDashboard();
-            updateAssetsPage();
-            renderNetworkTree();
-            
-            new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
-            showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
-            sessionStorage.removeItem('ztr_ref_id');
+            const baseUrl = window.location.origin + window.location.pathname;
+            const inviteLink = `${baseUrl}?ref=${profile.userId}`;
+            const inviteLinkInput = document.getElementById('inviteLink');
+            if (inviteLinkInput) {
+                inviteLinkInput.value = inviteLink;
+            }
         }
         
-        // ========== INVITATION LINK & NETWORK TREE ==========
         function renderNetworkTree() {
             if (!userAddress) return;
             const currentUserProfile = getUserProfile(userAddress);
             if(!currentUserProfile) return;
 
+            // Update invite link first
+            updateInviteLink();
+
             const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
             const teamSize = getTeamSize(userAddress);
-
-            // Generate invitation link with user's unique ID
-            const inviteLink = `${window.location.origin}${window.location.pathname}?ref=${currentUserProfile.userId}`;
-            document.getElementById('inviteLink').value = inviteLink;
+            
             document.getElementById('teamPageTotalCount').innerText = teamSize;
 
             const treeContainer = document.getElementById('networkTreeContainer');
@@ -1404,7 +1402,22 @@
             `;
             treeContainer.innerHTML = treeHTML;
         }
-
+        
+        function showDashboardAfterPayment() {
+            connectState.classList.add('hidden');
+            investmentState.classList.add('hidden');
+            dashboardState.classList.remove('hidden');
+            bottomNav.style.display = 'flex';
+            
+            updateDashboard();
+            updateAssetsPage();
+            renderNetworkTree(); // This will now update both tree and invite link
+            
+            new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
+            showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
+            sessionStorage.removeItem('ztr_ref_id');
+        }
+        
         // ========== STARS PAGES ==========
         function generateLargeStarsHTML(count, filledCount) {
             let starsHtml = '';
@@ -1562,7 +1575,7 @@
                 bottomNav.style.display = 'flex';
                 updateDashboard();
                 updateAssetsPage();
-                renderNetworkTree();
+                renderNetworkTree(); // This will update invite link for existing users
                 new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
                 showToast("Welcome back! Dashboard ready.", "success");
             } else {
