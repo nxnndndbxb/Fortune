@@ -899,18 +899,6 @@
             outline: none;
             border-color: var(--primary) !important;
         }
-        
-        .status-success {
-            color: var(--success);
-        }
-        
-        .status-info {
-            color: var(--gold);
-        }
-        
-        .status-error {
-            color: #ef4444;
-        }
     </style>
 </head>
 <body>
@@ -1986,19 +1974,18 @@
             }
         });
         
-        // IMPROVED: Better invitation code verification with cleaner messages
         document.getElementById('verifyInviteCodeBtn').addEventListener('click', () => {
             const inviteCode = document.getElementById('setupInviteCode').value.trim().toUpperCase();
             const statusDiv = document.getElementById('inviterVerifyStatus');
             
             if (!inviteCode) {
-                statusDiv.innerHTML = '<span class="status-info">ℹ️ No code entered. You can join without an inviter.</span>';
+                statusDiv.innerHTML = '<span style="color: var(--gold);">⚠️ No code entered. You can join without inviter.</span>';
                 verifiedInviterId = null;
                 return;
             }
             
             if (!isValidInviteCode(inviteCode)) {
-                statusDiv.innerHTML = '<span class="status-error">❌ Invalid code format. Code must be 8 characters (A-Z, 0-9).</span>';
+                statusDiv.innerHTML = '<span style="color: var(--gold);">⚠️ Invalid code format. Code must be 8 characters (A-Z, 0-9).</span>';
                 verifiedInviterId = null;
                 return;
             }
@@ -2008,14 +1995,14 @@
                 const inviterProfile = getUserProfile(inviterWallet);
                 if (inviterProfile) {
                     verifiedInviterId = inviterProfile.userId;
-                    statusDiv.innerHTML = `<span class="status-success">✅ Verified! You are invited by ID: ZTR-${verifiedInviterId}</span>`;
+                    statusDiv.innerHTML = `<span style="color: var(--success);">✅ Verified! Inviter: ID: ZTR-${verifiedInviterId}</span>`;
                     showToast(`Inviter found: ID: ZTR-${verifiedInviterId}`, 'success');
                 } else {
-                    statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter code not found. You can join without an inviter.</span>';
+                    statusDiv.innerHTML = '<span style="color: var(--gold);">⚠️ Inviter code not found. You can join without inviter.</span>';
                     verifiedInviterId = null;
                 }
             } else {
-                statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter code not found. You can join without an inviter.</span>';
+                statusDiv.innerHTML = '<span style="color: var(--gold);">⚠️ Inviter code not found. You can join without inviter.</span>';
                 verifiedInviterId = null;
             }
         });
