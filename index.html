@@ -31,23 +31,27 @@
         
         html, body {
             overscroll-behavior: none;
+            height: 100%;
         }
 
         body {
-            background: radial-gradient(circle at top right, #0f172a, #050b18);
+            background: url('https://iili.io/qmuYshF.jpg') no-repeat center center fixed;
+            background-size: cover;
             color: var(--text-main);
             min-height: 100vh;
             padding-bottom: 90px;
             overflow-x: hidden;
+            position: relative;
         }
 
         body::before {
             content: "";
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px), 
-                              linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(5, 11, 24, 0.85), rgba(5, 11, 24, 0.75));
             z-index: -1;
         }
 
@@ -86,7 +90,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: rgba(5, 11, 24, 0.8);
+            background: rgba(5, 11, 24, 0.9);
             border-bottom: 1px solid var(--glass-border);
             backdrop-filter: blur(10px);
         }
@@ -466,7 +470,6 @@
             color: var(--gold);
         }
         
-        /* Beautiful Tree Styles */
         .network-tree-container {
             padding: 20px;
             overflow-x: auto;
@@ -498,7 +501,6 @@
             transition: all 0.5s;
         }
         
-        /* Connecting lines */
         .tree li::before, .tree li::after {
             content: '';
             position: absolute;
@@ -1287,6 +1289,22 @@
 
 <script>
     (function() {
+        // SECURITY: Validate and sanitize inputs
+        function sanitizeInput(input) {
+            if (!input) return '';
+            return input.replace(/[<>]/g, '').trim();
+        }
+        
+        // SECURITY: Validate wallet address
+        function isValidWalletAddress(address) {
+            return /^0x[a-fA-F0-9]{40}$/.test(address);
+        }
+        
+        // SECURITY: Validate invite code
+        function isValidInviteCode(code) {
+            return /^[A-Z0-9]{8}$/.test(code);
+        }
+        
         // CORE CONFIGURATION
         const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
         const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
@@ -1343,7 +1361,7 @@
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.style.cssText = `background:white; color:black; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.2); animation:fadeIn 0.3s forwards; font-size:13px; display:flex; align-items:center; gap:10px; border-left: 5px solid ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'}`;
-            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-info-circle'}"></i> ${message}`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-info-circle'}"></i> ${sanitizeInput(message)}`;
             container.appendChild(toast);
             setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
         }
@@ -1361,7 +1379,7 @@
         }
 
         function copyWalletAddress() {
-            if (window.currentWalletFullAddress) {
+            if (window.currentWalletFullAddress && isValidWalletAddress(window.currentWalletFullAddress)) {
                 navigator.clipboard.writeText(window.currentWalletFullAddress);
                 showToast("Wallet address copied!", "success");
             }
@@ -1389,6 +1407,7 @@
         }
         
         function getUniqueInviteCode(wallet) {
+            if (!wallet || !isValidWalletAddress(wallet)) return null;
             const inviteCodes = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITE_CODES) || '{}');
             if (inviteCodes[wallet.toLowerCase()]) {
                 return inviteCodes[wallet.toLowerCase()];
@@ -1404,6 +1423,7 @@
         }
         
         function getWalletByInviteCode(inviteCode) {
+            if (!inviteCode || !isValidInviteCode(inviteCode)) return null;
             const inviteCodes = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITE_CODES) || '{}');
             for (const wallet in inviteCodes) {
                 if (inviteCodes[wallet] === inviteCode) {
@@ -1425,6 +1445,7 @@
         }
 
         function getWalletById(id) {
+            if (!id) return null;
             const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
             for (const wallet in userIds) {
                 if (userIds[wallet] === parseInt(id)) {
@@ -1435,12 +1456,13 @@
         }
         
         function getUserProfile(wallet) {
-            if(!wallet) return null;
+            if(!wallet || !isValidWalletAddress(wallet)) return null;
             const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
             return profiles[wallet.toLowerCase()] || null;
         }
 
         function createUserProfile(wallet, inviterId = null, username = null, profilePicUrl = null) {
+            if (!wallet || !isValidWalletAddress(wallet)) return null;
             const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
             if (profiles[wallet.toLowerCase()]) return profiles[wallet.toLowerCase()];
 
@@ -1459,11 +1481,11 @@
             }
             
             profiles[wallet.toLowerCase()] = { 
-                name: username || `User ${userId}`, 
+                name: username ? sanitizeInput(username) : `User ${userId}`, 
                 avatar: 'fa-user-astronaut', 
                 joinDate: new Date().toLocaleDateString(), 
                 userId: userId,
-                profilePicUrl: profilePicUrl
+                profilePicUrl: profilePicUrl ? sanitizeInput(profilePicUrl) : null
             };
             localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
             
@@ -1473,11 +1495,13 @@
         }
         
         function getInviterId(wallet) {
+            if (!wallet || !isValidWalletAddress(wallet)) return null;
             const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
             return inviterMap[wallet.toLowerCase()] || null;
         }
         
         function getUplinerId(userId) {
+            if (!userId) return null;
             const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
             for (const wallet in inviterMap) {
                 if (inviterMap[wallet] === userId) {
@@ -1489,6 +1513,7 @@
         }
         
         function getDirectMembers(userId) {
+            if (!userId) return [];
             const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
             const members = [];
             for (const wallet in inviterMap) {
@@ -1499,29 +1524,21 @@
             }
             return members;
         }
-        
-        function getAllDownlineMembers(userId, level = 1) {
-            const members = [];
-            const directMembers = getDirectMembers(userId);
-            directMembers.forEach(member => {
-                members.push({ ...member, level: level });
-                const downline = getAllDownlineMembers(member.userId, level + 1);
-                members.push(...downline);
-            });
-            return members;
-        }
 
         function isPaidUser(wallet) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return false;
             const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
             return paidUsers[wallet.toLowerCase()] === true; 
         }
         
         function isProfileComplete(wallet) {
+            if (!wallet || !isValidWalletAddress(wallet)) return false;
             const setupComplete = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE) || '{}');
             return setupComplete[wallet.toLowerCase()] === true;
         }
         
         function markProfileComplete(wallet) {
+            if (!wallet || !isValidWalletAddress(wallet)) return;
             const setupComplete = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE) || '{}');
             setupComplete[wallet.toLowerCase()] = true;
             localStorage.setItem(STORAGE_KEYS.USER_SETUP_COMPLETE, JSON.stringify(setupComplete));
@@ -1529,6 +1546,7 @@
         
         // ========== INVITATION SYSTEM - 40% DIRECT, 10% UPLINER, 20% DOWNLINE POOL ==========
         function markUserAsPaid(wallet, inviterUserId) {
+            if (!wallet || !isValidWalletAddress(wallet)) return;
             const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
             paidUsers[wallet.toLowerCase()] = true; 
             localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
@@ -1543,7 +1561,7 @@
             
             // 1. Direct Inviter gets 40%
             const inviterWallet = getWalletById(inviterUserId);
-            if (inviterWallet) {
+            if (inviterWallet && isValidWalletAddress(inviterWallet)) {
                 const directCommission = baseAmount * 0.40;
                 updateZTRBalance(inviterWallet, directCommission);
                 showToast(`Direct Inviter (ID: ZTR-${inviterUserId}) received ${directCommission.toFixed(2)} ZTR!`, 'success');
@@ -1559,7 +1577,7 @@
                     const uplinerId = getUplinerId(inviterProfile.userId);
                     if (uplinerId) {
                         const uplinerWallet = getWalletById(uplinerId);
-                        if (uplinerWallet) {
+                        if (uplinerWallet && isValidWalletAddress(uplinerWallet)) {
                             const uplinerCommission = baseAmount * 0.10;
                             updateZTRBalance(uplinerWallet, uplinerCommission);
                             showToast(`Upliner (ID: ZTR-${uplinerId}) received ${uplinerCommission.toFixed(2)} ZTR!`, 'success');
@@ -1574,7 +1592,7 @@
                     const sharePerMember = downlinePool / directMembers.length;
                     directMembers.forEach(member => {
                         const memberWallet = getWalletById(member.userId);
-                        if (memberWallet && memberWallet !== newUserWallet.toLowerCase()) {
+                        if (memberWallet && isValidWalletAddress(memberWallet) && memberWallet !== newUserWallet.toLowerCase()) {
                             updateZTRBalance(memberWallet, sharePerMember);
                             showToast(`Existing member (ID: ZTR-${member.userId}) received ${sharePerMember.toFixed(2)} ZTR from downline pool!`, 'success');
                         }
@@ -1585,35 +1603,41 @@
         
         // ========== ZTR BALANCE MANAGEMENT ==========
         function getZTRBalance(wallet) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); 
             return balances[wallet.toLowerCase()] || 0; 
         }
         
         function updateZTRBalance(wallet, amount) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); 
             const currentBalance = balances[wallet.toLowerCase()] || 0;
-            balances[wallet.toLowerCase()] = currentBalance + amount; 
+            balances[wallet.toLowerCase()] = Math.max(0, currentBalance + amount); 
             localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(balances)); 
             return balances[wallet.toLowerCase()]; 
         }
         
         function getUserLevel(wallet) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); 
             return levels[wallet.toLowerCase()] || 0; 
         }
         
         function setUserLevel(wallet, level) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return;
             const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); 
             levels[wallet.toLowerCase()] = level; 
             localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(levels)); 
         }
         
         function getTeamSize(wallet) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); 
             return teams[wallet.toLowerCase()] || 0; 
         }
         
         function getSalleryEarnings(wallet) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); 
             return earnings[wallet.toLowerCase()] || 0; 
         }
@@ -1626,7 +1650,7 @@
 
         // ========== BALANCE & UI UPDATES ==========
         async function updateBalances() {
-            if (!userAddress || !provider) return;
+            if (!userAddress || !provider || !isValidWalletAddress(userAddress)) return;
             try {
                 const bnbBalanceWei = await provider.getBalance(userAddress);
                 rawBnbBalance = ethers.formatEther(bnbBalanceWei);
@@ -1776,7 +1800,7 @@
                         <div class="tree-node-avatar">
                             ${avatarHtml}
                         </div>
-                        <div class="tree-node-name">${profile.name}</div>
+                        <div class="tree-node-name">${sanitizeInput(profile.name)}</div>
                         <div class="tree-node-id">ID: ${profile.userId}</div>
                         <div class="tree-node-level">
                             <i class="fa-solid fa-crown" style="font-size: 8px;"></i> ${levelName}
@@ -2003,8 +2027,14 @@
                 return;
             }
             
+            if (!isValidInviteCode(inviteCode)) {
+                statusDiv.innerHTML = '<span style="color: var(--gold);">⚠️ Invalid code format. Code must be 8 characters (A-Z, 0-9).</span>';
+                verifiedInviterId = null;
+                return;
+            }
+            
             const inviterWallet = getWalletByInviteCode(inviteCode);
-            if (inviterWallet) {
+            if (inviterWallet && isValidWalletAddress(inviterWallet)) {
                 const inviterProfile = getUserProfile(inviterWallet);
                 if (inviterProfile) {
                     verifiedInviterId = inviterProfile.userId;
@@ -2027,7 +2057,13 @@
                 return;
             }
             
-            createUserProfile(userAddress, verifiedInviterId, username, setupProfilePicData);
+            const sanitizedUsername = sanitizeInput(username);
+            if (sanitizedUsername.length < 3) {
+                showToast("Username must be at least 3 characters", "error");
+                return;
+            }
+            
+            createUserProfile(userAddress, verifiedInviterId, sanitizedUsername, setupProfilePicData);
             markProfileComplete(userAddress);
             updateZTRBalance(userAddress, 10);
             
@@ -2047,6 +2083,10 @@
         // ========== WALLET CONNECTION ==========
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0) return false;
+            if (!isValidWalletAddress(accounts[0])) {
+                showToast("Invalid wallet address", "error");
+                return false;
+            }
             userAddress = accounts[0];
             
             localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, userAddress);
@@ -2054,7 +2094,7 @@
             provider = new ethers.BrowserProvider(window.ethereum);
             signer = await provider.getSigner();
             const ip = await getIP();
-            document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
+            document.getElementById('ipDisplay').innerText = `IP: ${sanitizeInput(ip)}`;
             updateAllWalletAddressDisplays();
             
             const network = await provider.getNetwork();
@@ -2068,7 +2108,7 @@
             // Check for invitation from URL
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCodeFromUrl = urlParams.get('invite');
-            if (inviteCodeFromUrl && !isProfileComplete(userAddress)) {
+            if (inviteCodeFromUrl && isValidInviteCode(inviteCodeFromUrl) && !isProfileComplete(userAddress)) {
                 document.getElementById('setupInviteCode').value = inviteCodeFromUrl;
                 setTimeout(() => {
                     document.getElementById('verifyInviteCodeBtn').click();
@@ -2111,19 +2151,20 @@
         // ========== AUTO-RECONNECT ==========
         async function autoReconnect() {
             const savedWallet = localStorage.getItem(STORAGE_KEYS.CONNECTED_WALLET);
-            if (savedWallet && window.ethereum) {
+            if (savedWallet && isValidWalletAddress(savedWallet) && window.ethereum) {
                 loadingOverlay.classList.remove('hidden');
                 try {
                     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
                     if (accounts.length > 0 && accounts[0].toLowerCase() === savedWallet.toLowerCase()) {
                         await initConnection(accounts, true);
-                    } else if (accounts.length > 0) {
+                    } else if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
                         localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
                         await initConnection(accounts, true);
                     } else {
                         loadingOverlay.classList.add('hidden');
                     }
                 } catch (error) {
+                    console.error("Auto-reconnect failed:", error);
                     loadingOverlay.classList.add('hidden');
                 }
             } else {
@@ -2213,7 +2254,7 @@
             const name = document.getElementById('profileNameInput').value;
             const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
             if (profiles[userAddress?.toLowerCase()]) {
-                if(name) profiles[userAddress.toLowerCase()].name = name;
+                if(name) profiles[userAddress.toLowerCase()].name = sanitizeInput(name);
                 localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
                 updateAssetsPage();
                 renderBeautifulTree();
@@ -2274,7 +2315,7 @@
 
         if (window.ethereum) {
             window.ethereum.on('accountsChanged', async (accounts) => {
-                if (accounts.length > 0) {
+                if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
                     localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
                     await initConnection(accounts, true);
                 } else {
@@ -2287,7 +2328,7 @@
 
         window.addEventListener('load', async () => {
             const ip = await getIP();
-            document.getElementById('ipDisplay').innerText = `IP: ${ip}`;
+            document.getElementById('ipDisplay').innerText = `IP: ${sanitizeInput(ip)}`;
             await autoReconnect();
         });
     })();
