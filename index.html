@@ -466,90 +466,165 @@
             color: var(--gold);
         }
         
+        /* Beautiful Tree Styles */
         .network-tree-container {
-            padding: 10px;
+            padding: 20px;
             overflow-x: auto;
-            max-height: 500px;
-            overflow-y: auto;
+            min-height: 400px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
         }
-        .network-tree, .network-tree ul {
+        
+        .tree {
             position: relative;
-            padding: 1em 0;
-            white-space: nowrap;
-            margin: 0 auto;
-            text-align: center;
-        }
-        .network-tree ul { padding-top: 20px; }
-        .network-tree li {
             display: inline-block;
-            vertical-align: top;
+            min-width: 100%;
+        }
+        
+        .tree ul {
+            padding-top: 20px;
+            position: relative;
+            transition: all 0.5s;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .tree li {
+            float: left;
             text-align: center;
             list-style-type: none;
             position: relative;
-            padding: 1em .5em 0 .5em;
+            padding: 20px 10px 0 10px;
+            transition: all 0.5s;
         }
-        .network-tree li::before, .network-tree li::after {
+        
+        /* Connecting lines */
+        .tree li::before, .tree li::after {
             content: '';
             position: absolute;
             top: 0;
             right: 50%;
-            border-top: 2px solid var(--glass-border);
+            border-top: 2px solid var(--primary);
             width: 50%;
-            height: 1em;
+            height: 20px;
         }
-        .network-tree li::after {
+        
+        .tree li::after {
             right: auto;
             left: 50%;
-            border-left: 2px solid var(--glass-border);
+            border-left: 2px solid var(--primary);
         }
-        .network-tree li:only-child::after, .network-tree li:only-child::before { display: none; }
-        .network-tree li:only-child { padding-top: 0; }
-        .network-tree li:first-child::before, .network-tree li:last-child::after { border: 0 none; }
-        .network-tree li:last-child::before {
-            border-right: 2px solid var(--glass-border);
-            border-radius: 0 8px 0 0;
+        
+        .tree li:only-child::after, .tree li:only-child::before {
+            display: none;
         }
-        .network-tree li:first-child::after {
-            border-radius: 8px 0 0 0;
+        
+        .tree li:only-child {
+            padding-top: 0;
         }
-        .network-tree ul ul::before {
+        
+        .tree li:first-child::before, .tree li:last-child::after {
+            border: 0 none;
+        }
+        
+        .tree li:last-child::before {
+            border-right: 2px solid var(--primary);
+            border-radius: 0 5px 0 0;
+        }
+        
+        .tree li:first-child::after {
+            border-radius: 5px 0 0 0;
+        }
+        
+        .tree ul ul::before {
             content: '';
             position: absolute;
             top: 0;
             left: 50%;
-            border-left: 2px solid var(--glass-border);
+            border-left: 2px solid var(--primary);
             width: 0;
             height: 20px;
         }
-        .network-tree li .tree-node {
+        
+        .tree-node-card {
             border: 1px solid var(--glass-border);
-            padding: 12px 15px;
+            padding: 15px;
             text-decoration: none;
             color: var(--text-main);
-            font-size: 11px;
+            font-size: 12px;
             display: inline-block;
-            border-radius: 12px;
-            min-width: 120px;
-            background: rgba(15, 23, 42, 0.8);
-            transition: .3s;
+            border-radius: 16px;
+            min-width: 140px;
+            background: rgba(15, 23, 42, 0.9);
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
         }
-        .network-tree li .tree-node:hover,
-        .network-tree li .tree-node:hover+ul li .tree-node {
-            background: rgba(0, 242, 255, 0.1);
+        
+        .tree-node-card:hover {
+            transform: translateY(-5px);
             border-color: var(--primary);
+            box-shadow: 0 5px 20px var(--primary-glow);
+        }
+        
+        .tree-node-card.is-user {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: var(--bg-deep);
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+        
+        .tree-node-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            background: var(--glass-bg);
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .tree-node-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .tree-node-avatar i {
+            font-size: 24px;
             color: var(--primary);
         }
-        .tree-node i { margin-right: 8px; }
-        .tree-node-name { display: block; font-weight: bold; margin-bottom: 3px; }
-        .tree-node-id { font-family: monospace; color: var(--text-muted); font-size: 10px; }
-        .network-tree .tree-node.is-user {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border-color: var(--bg-deep);
-            box-shadow: 0 0 15px var(--primary-glow);
+        
+        .tree-node-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 13px;
         }
-        .network-tree .tree-node.is-user .tree-node-id { color: rgba(255,255,255,0.8); }
-
+        
+        .tree-node-id {
+            font-family: monospace;
+            color: var(--text-muted);
+            font-size: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .tree-node-level {
+            display: inline-block;
+            background: rgba(0, 242, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+        
+        .level-0 .tree-node-card { border-left: 4px solid var(--gold); }
+        .level-1 .tree-node-card { border-left: 4px solid var(--primary); }
+        .level-2 .tree-node-card { border-left: 4px solid var(--success); }
+        .level-3 .tree-node-card { border-left: 4px solid #ff6b6b; }
+        
         .stars-page-button {
             display: flex;
             flex-direction: column;
@@ -1122,9 +1197,9 @@
             </div>
             
             <div class="main-card glass" style="margin-top:20px;">
-                <h3>Your Network Tree (<span id="teamPageTotalCount">0</span>)</h3>
+                <h3>Your Network Tree - Beautiful Hierarchy (<span id="teamPageTotalCount">0</span> members)</h3>
                 <div id="networkTreeContainer" class="network-tree-container">
-                    <p style="text-align:center; color:var(--text-muted); font-size:13px;">Loading network data...</p>
+                    <p style="text-align:center; color:var(--text-muted); font-size:13px;">Loading network tree...</p>
                 </div>
             </div>
         </div>
@@ -1218,7 +1293,7 @@
         const CHAIN_ID = "0x38";
         const CHAIN_ID_DECIMAL = 56;
         const JOINING_FEE_USDT = 0.10;
-        const IMAGE_HOST_API_KEY = '31c324eeef3df98e593e1897b02cc37b';
+        const IMAGE_HOST_API_KEY = '5f4240b4c2aac947e10bb8cf49954bd2';
         
         const LEVELS = [
             { id: 1, name: "Iron", price: 5, commission: 2, icon: "🛡️" },
@@ -1422,6 +1497,17 @@
                     if (profile) members.push(profile);
                 }
             }
+            return members;
+        }
+        
+        function getAllDownlineMembers(userId, level = 1) {
+            const members = [];
+            const directMembers = getDirectMembers(userId);
+            directMembers.forEach(member => {
+                members.push({ ...member, level: level });
+                const downline = getAllDownlineMembers(member.userId, level + 1);
+                members.push(...downline);
+            });
             return members;
         }
 
@@ -1640,7 +1726,7 @@
             
             updateDashboard();
             updateAssetsPage();
-            renderNetworkTree();
+            renderBeautifulTree();
             updateInviteInfo();
             
             if (typeof Swiper !== 'undefined') {
@@ -1649,8 +1735,8 @@
             showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
         }
         
-        // ========== RENDER NETWORK TREE (HIERARCHICAL) ==========
-        function renderNetworkTree() {
+        // ========== BEAUTIFUL TREE RENDER FUNCTION ==========
+        function renderBeautifulTree() {
             if (!userAddress) return;
             const currentUserProfile = getUserProfile(userAddress);
             if(!currentUserProfile) return;
@@ -1660,7 +1746,6 @@
             const teamSize = getTeamSize(userAddress);
             
             document.getElementById('teamPageTotalCount').innerText = teamSize;
-
             const treeContainer = document.getElementById('networkTreeContainer');
             
             const getChildren = (userId) => {
@@ -1674,42 +1759,70 @@
                 return children;
             };
             
-            const buildNodeHTML = (profile, level = 0, isCurrentUser = false) => {
-                const marginLeft = level > 0 ? `style="margin-left: ${level * 20}px;"` : '';
+            const getUserLevelName = (wallet) => {
+                const levelId = getUserLevel(wallet);
+                if (levelId === 0) return "Starter";
+                return LEVELS[levelId - 1]?.name || "Starter";
+            };
+            
+            const buildNodeHTML = (profile, isCurrentUser = false, level = 0) => {
+                const levelName = getUserLevelName(getWalletById(profile.userId));
+                const avatarHtml = profile.profilePicUrl 
+                    ? `<img src="${profile.profilePicUrl}" alt="${profile.name}">` 
+                    : `<i class="fa-solid fa-user-astronaut"></i>`;
+                
                 return `
-                    <div class="tree-node ${isCurrentUser ? 'is-user' : ''}" ${marginLeft}>
-                        <i class="fa-solid ${profile.profilePicUrl ? 'fa-user-check' : 'fa-user-astronaut'}"></i>
-                        <span class="tree-node-name">${profile.name}</span>
-                        <span class="tree-node-id">ID: ${profile.userId}</span>
-                        ${level === 1 ? '<small style="color: var(--success);">(Direct Member)</small>' : ''}
-                        ${level === 2 ? '<small style="color: var(--gold);">(Indirect Member)</small>' : ''}
+                    <div class="tree-node-card ${isCurrentUser ? 'is-user' : ''}">
+                        <div class="tree-node-avatar">
+                            ${avatarHtml}
+                        </div>
+                        <div class="tree-node-name">${profile.name}</div>
+                        <div class="tree-node-id">ID: ${profile.userId}</div>
+                        <div class="tree-node-level">
+                            <i class="fa-solid fa-crown" style="font-size: 8px;"></i> ${levelName}
+                        </div>
+                        ${level > 0 ? `<div class="tree-node-level" style="background: rgba(0,242,255,0.1);"><i class="fa-solid fa-level-down-alt"></i> Level ${level}</div>` : ''}
                     </div>
                 `;
             };
             
-            const buildBranch = (userId, level = 1) => {
+            const buildTree = (userId, level = 1) => {
                 const children = getChildren(userId);
                 if (children.length === 0) return '';
-                let branchHTML = '<div class="tree-branch" style="margin-left: 20px;">';
+                
+                let childrenHTML = '';
                 children.forEach(child => {
-                    branchHTML += buildNodeHTML(child, level);
-                    branchHTML += buildBranch(child.userId, level + 1);
+                    const childLevel = level;
+                    childrenHTML += `
+                        <li class="level-${childLevel}">
+                            ${buildNodeHTML(child, false, childLevel)}
+                            ${buildTree(child.userId, level + 1)}
+                        </li>
+                    `;
                 });
-                branchHTML += '</div>';
-                return branchHTML;
+                
+                return `<ul>${childrenHTML}</ul>`;
             };
             
             let treeHTML = `
-                <div class="network-tree">
-                    <div class="tree-root">
-                        ${buildNodeHTML(currentUserProfile, 0, true)}
-                        ${buildBranch(currentUserProfile.userId, 1)}
-                    </div>
+                <div class="tree">
+                    <ul>
+                        <li class="level-0">
+                            ${buildNodeHTML(currentUserProfile, true, 0)}
+                            ${buildTree(currentUserProfile.userId, 1)}
+                        </li>
+                    </ul>
                 </div>
             `;
             
             if (teamSize === 0 && !getInviterId(userAddress)) {
-                treeContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px;">Your network is empty. Share your invitation code to start building!</p>`;
+                treeContainer.innerHTML = `
+                    <div style="text-align:center; padding: 40px;">
+                        <i class="fa-solid fa-tree" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i>
+                        <p style="color: var(--text-muted);">Your network is empty.</p>
+                        <p style="color: var(--text-muted); font-size: 12px;">Share your invitation code to start building your tree!</p>
+                    </div>
+                `;
                 return;
             }
             
@@ -1871,7 +1984,7 @@
                     previewImg.src = setupProfilePicData;
                     previewImg.style.display = 'block';
                     previewIcon.style.display = 'none';
-                    showToast("Profile picture uploaded!", "success");
+                    showToast("Profile picture uploaded successfully!", "success");
                 } else {
                     throw new Error(result.status_txt || "Upload failed");
                 }
@@ -1979,7 +2092,7 @@
                 bottomNav.style.display = 'flex';
                 updateDashboard();
                 updateAssetsPage();
-                renderNetworkTree();
+                renderBeautifulTree();
                 updateInviteInfo();
                 if (!isAutoReconnect) new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
                 if (!isAutoReconnect) showToast("Welcome back! Dashboard ready.", "success");
@@ -2055,7 +2168,7 @@
                 await updateBalances();
                 updateDashboard();
                 updateAssetsPage();
-                renderNetworkTree();
+                renderBeautifulTree();
                 updateInviteInfo();
                 
                 if (inviterId) showToast(`✅ You joined under ID: ZTR-${inviterId}!`, 'success');
@@ -2085,11 +2198,14 @@
                         profiles[userAddress.toLowerCase()].profilePicUrl = imageUrl;
                         localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
                         updateAssetsPage();
-                        showToast("Profile picture updated!", "success");
+                        renderBeautifulTree();
+                        showToast("Profile picture updated successfully!", "success");
                     }
+                } else {
+                    throw new Error("Upload failed");
                 }
             } catch (error) {
-                showToast("Upload failed", "error");
+                showToast("Upload failed, please try again", "error");
             }
         });
 
@@ -2100,6 +2216,7 @@
                 if(name) profiles[userAddress.toLowerCase()].name = name;
                 localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
                 updateAssetsPage();
+                renderBeautifulTree();
                 closeModal('editProfileModal');
                 showToast("Profile updated!", "success");
             }
@@ -2142,7 +2259,7 @@
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                 document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
                 if (pageId === 'team') {
-                    renderNetworkTree();
+                    renderBeautifulTree();
                     updateInviteInfo();
                 }
             });
