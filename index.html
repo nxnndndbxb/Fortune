@@ -899,6 +899,23 @@
             outline: none;
             border-color: var(--primary) !important;
         }
+        
+        .status-success {
+            color: var(--success);
+        }
+        
+        .status-info {
+            color: var(--gold);
+        }
+        
+        .status-error {
+            color: #ef4444;
+        }
+        
+        .level-upgrade-modal {
+            max-width: 400px;
+            width: 90%;
+        }
     </style>
 </head>
 <body>
@@ -964,12 +981,27 @@
     </div>
 </div>
 
-<!-- Profile Setup Modal (First Time User) -->
+<!-- Payment Modal (Initial Activation) -->
+<div class="modal-overlay" id="paymentModal">
+    <div class="modal-content">
+        <i class="fa-solid fa-bolt" style="font-size: 50px; color: var(--primary);"></i>
+        <h2 style="margin: 15px 0;">Activate Node</h2>
+        <p style="color: rgba(255,255,255,0.7);">Joining Premium Network</p>
+        <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;">0.10 USDT</div>
+        <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: 0.0003 BNB</div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('paymentModal')">Cancel</button>
+            <button class="btn btn-success" id="confirmPaymentBtn">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Profile Setup Modal (After Payment) -->
 <div class="modal-overlay" id="profileSetupModal">
     <div class="modal-content glass profile-setup-modal">
         <i class="fa-solid fa-user-astronaut" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
         <h2 style="margin-bottom: 15px;">Complete Your Profile</h2>
-        <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 20px;">Please setup your profile to continue</p>
+        <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 20px;">Your payment was successful! Please setup your profile to continue</p>
         
         <div class="avatar-preview" id="avatarPreview" onclick="document.getElementById('setupProfilePic').click()">
             <i class="fa-solid fa-user-circle" id="avatarPreviewIcon"></i>
@@ -996,21 +1028,23 @@
     </div>
 </div>
 
-<!-- Payment Modal -->
-<div class="modal-overlay" id="paymentModal">
-    <div class="modal-content">
-        <i class="fa-solid fa-bolt" style="font-size: 50px; color: var(--primary);"></i>
-        <h2 style="margin: 15px 0;">Activate Node</h2>
-        <p style="color: rgba(255,255,255,0.7);">Joining Premium Network</p>
-        <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;">0.10 USDT</div>
-        <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: 0.0003 BNB</div>
-        <div style="display:flex; gap:10px;">
-            <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('paymentModal')">Cancel</button>
-            <button class="btn btn-success" id="confirmPaymentBtn">Confirm</button>
+<!-- Level Upgrade Payment Modal -->
+<div class="modal-overlay" id="levelUpgradePaymentModal">
+    <div class="modal-content level-upgrade-modal">
+        <i class="fa-solid fa-up-long" style="font-size: 50px; color: var(--gold);"></i>
+        <h2 style="margin: 15px 0;">Level Upgrade</h2>
+        <p id="levelUpgradeName" style="color: var(--gold); font-size: 20px; font-weight: bold;">Level Name</p>
+        <p style="color: rgba(255,255,255,0.7); margin-top: 10px;">Upgrade your node to unlock higher commissions</p>
+        <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;" id="levelUpgradeAmount">0 ZTR</div>
+        <div class="gas-info"><i class="fa-solid fa-chart-line"></i> New Commission: <span id="levelUpgradeCommission">0%</span></div>
+        <div style="display:flex; gap:10px; margin-top: 15px;">
+            <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('levelUpgradePaymentModal')">Cancel</button>
+            <button class="btn btn-success" id="confirmLevelUpgradePaymentBtn">Pay & Upgrade</button>
         </div>
     </div>
 </div>
 
+<!-- Upgrade Modal (Old - Keep for fallback) -->
 <div class="modal-overlay" id="upgradeModal">
     <div class="modal-content">
         <i class="fa-solid fa-up-long" style="font-size: 50px; color: var(--gold);"></i>
@@ -1058,7 +1092,7 @@
         </div>
     </div>
 
-    <!-- State 2: Investment -->
+    <!-- State 2: Investment (Payment First) -->
     <div id="investmentState" class="hidden">
         <div class="main-card" style="text-align:center;">
             <div id="inviterInfoOnInvestPage" class="inviter-info-card hidden">
@@ -1075,7 +1109,7 @@
                 <li style="margin-bottom:10px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> ZTR Yield Generation</li>
                 <li style="margin-bottom:10px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> Multi-Level Rewards</li>
             </ul>
-            <button id="investNowBtn" class="btn btn-success">ACTIVATE LIFETIME NODE</button>
+            <button id="investNowBtn" class="btn btn-success">PAY & ACTIVATE NODE</button>
         </div>
     </div>
 
@@ -1300,11 +1334,13 @@
             INVITE_CODES: 'ztr_invite_codes',
             INVITER_MAP: 'ztr_inviter_map',
             CONNECTED_WALLET: 'ztr_connected_wallet',
-            USER_SETUP_COMPLETE: 'ztr_user_setup_complete'
+            USER_SETUP_COMPLETE: 'ztr_user_setup_complete',
+            PENDING_UPGRADE: 'ztr_pending_upgrade'
         };
 
         let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper;
         let verifiedInviterId = null;
+        let pendingLevelUpgrade = null;
 
         // UI ELEMENTS
         const connectState = document.getElementById('connectState');
@@ -1316,6 +1352,7 @@
         const joiningStarsPage = document.getElementById('joiningStarsPage');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const profileSetupModal = document.getElementById('profileSetupModal');
+        const levelUpgradePaymentModal = document.getElementById('levelUpgradePaymentModal');
 
         // ========== HELPER FUNCTIONS ==========
         function showToast(message, type = 'info') {
@@ -1860,7 +1897,7 @@
         window.openLevelStarsPage = openLevelStarsPage;
         window.openJoiningStarsPage = openJoiningStarsPage;
 
-        // ========== LEVEL PAGE ==========
+        // ========== LEVEL PAGE WITH TRANSACTION ==========
         function initializeLevelSwiper() {
             const wrapper = document.getElementById('levelSwiperWrapper');
             if (!wrapper) return;
@@ -1892,7 +1929,7 @@
                                 <p class="level-info">Commission Bonus: <strong>+${level.commission}%</strong></p>
                                 <h3 class="level-price">${level.price} ZTR</h3>
                             </div>
-                            <button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price}, ${level.commission})">
+                            <button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="requestLevelUpgrade(${level.id}, '${level.name}', ${level.price}, ${level.commission})">
                                 ${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}
                             </button>
                         </div>
@@ -1902,6 +1939,72 @@
             if (levelSwiper) levelSwiper.destroy(true, true);
             levelSwiper = new Swiper('.levelSwiper', { effect: 'cards', grabCursor: true, initialSlide: currentLevelId, navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' } });
         }
+        
+        // Request level upgrade - opens payment modal
+        window.requestLevelUpgrade = function(levelId, levelName, price, commission) {
+            const currentId = getUserLevel(userAddress);
+            if (currentId >= levelId) { 
+                showToast(`You already have the ${levelName} level!`, 'info'); 
+                return; 
+            }
+            if (currentId !== levelId - 1) { 
+                showToast(`Upgrade to the previous level first!`, 'info'); 
+                return; 
+            }
+            
+            // Store pending upgrade info
+            pendingLevelUpgrade = { levelId, levelName, price, commission };
+            
+            // Show payment modal
+            document.getElementById('levelUpgradeName').innerText = `Upgrade to ${levelName}`;
+            document.getElementById('levelUpgradeAmount').innerHTML = `${price} ZTR`;
+            document.getElementById('levelUpgradeCommission').innerHTML = `${commission}%`;
+            openModal('levelUpgradePaymentModal');
+        };
+        
+        // Handle level upgrade payment
+        document.getElementById('confirmLevelUpgradePaymentBtn').addEventListener('click', async () => {
+            if (!pendingLevelUpgrade || isProcessing) return;
+            isProcessing = true;
+            const confirmBtn = document.getElementById('confirmLevelUpgradePaymentBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
+            
+            try {
+                // Transfer ZTR to admin wallet (simulate payment)
+                // In a real scenario, you would use a ZTR token contract
+                // For demo, we'll deduct from balance and add to admin
+                const amount = pendingLevelUpgrade.price;
+                const currentBalance = getZTRBalance(userAddress);
+                
+                if (currentBalance < amount) {
+                    showToast(`Insufficient ZTR balance! Need ${amount} ZTR to upgrade.`, 'error');
+                    return;
+                }
+                
+                // Deduct from user
+                updateZTRBalance(userAddress, -amount);
+                // Add to admin (simulated)
+                updateZTRBalance(ADMIN_WALLET, amount);
+                
+                // Upgrade level
+                setUserLevel(userAddress, pendingLevelUpgrade.levelId);
+                showToast(`✅ Upgraded to ${pendingLevelUpgrade.levelName}!`, 'success');
+                
+                closeModal('levelUpgradePaymentModal');
+                updateDashboard();
+                initializeLevelSwiper();
+                updateAssetsPage();
+                
+                pendingLevelUpgrade = null;
+            } catch (e) { 
+                showToast("Upgrade failed. Please try again.", "error"); 
+            } finally { 
+                isProcessing = false; 
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = 'Pay & Upgrade';
+            }
+        });
         
         window.openLevelPage = function() {
             levelPageOverlay.classList.add('active');
@@ -1913,19 +2016,6 @@
             levelPageOverlay.classList.remove('active');
             document.body.style.overflow = 'auto';
         }
-
-        window.upgradeLevel = function(levelId, levelName, price, commission) {
-            const currentId = getUserLevel(userAddress);
-            if (currentId >= levelId) { showToast(`You already have the ${levelName} level!`, 'info'); return; }
-            if (currentId !== levelId - 1) { showToast(`Upgrade to the previous level first!`, 'info'); return; }
-            const ztrBalance = getZTRBalance(userAddress);
-            if (ztrBalance < price) { showToast(`Insufficient ZTR. Need ${price} ZTR to upgrade.`, 'error'); return; }
-            window.selectedLevel = { levelId, levelName, price, commission };
-            document.getElementById('upgradeLevelName').innerText = `Upgrade to ${levelName}`;
-            document.getElementById('upgradeAmount').innerHTML = `${price} ZTR`;
-            document.getElementById('newCommission').innerHTML = `${commission}%`;
-            openModal('upgradeModal');
-        };
 
         // ========== MODAL CONTROLS ==========
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
@@ -1979,13 +2069,13 @@
             const statusDiv = document.getElementById('inviterVerifyStatus');
             
             if (!inviteCode) {
-                statusDiv.innerHTML = '<span style="color: var(--gold);">⚠️ No code entered. You can join without inviter.</span>';
+                statusDiv.innerHTML = '<span class="status-info">ℹ️ No code entered. You can join without an inviter.</span>';
                 verifiedInviterId = null;
                 return;
             }
             
             if (!isValidInviteCode(inviteCode)) {
-                statusDiv.innerHTML = '<span style="color: var(--gold);">⚠️ Invalid code format. Code must be 8 characters (A-Z, 0-9).</span>';
+                statusDiv.innerHTML = '<span class="status-error">❌ Invalid code format. Code must be 8 characters (A-Z, 0-9).</span>';
                 verifiedInviterId = null;
                 return;
             }
@@ -1995,14 +2085,14 @@
                 const inviterProfile = getUserProfile(inviterWallet);
                 if (inviterProfile) {
                     verifiedInviterId = inviterProfile.userId;
-                    statusDiv.innerHTML = `<span style="color: var(--success);">✅ Verified! Inviter: ID: ZTR-${verifiedInviterId}</span>`;
+                    statusDiv.innerHTML = `<span class="status-success">✅ Verified! You are invited by ID: ZTR-${verifiedInviterId}</span>`;
                     showToast(`Inviter found: ID: ZTR-${verifiedInviterId}`, 'success');
                 } else {
-                    statusDiv.innerHTML = '<span style="color: var(--gold);">⚠️ Inviter code not found. You can join without inviter.</span>';
+                    statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter code not found. You can join without an inviter.</span>';
                     verifiedInviterId = null;
                 }
             } else {
-                statusDiv.innerHTML = '<span style="color: var(--gold);">⚠️ Inviter code not found. You can join without inviter.</span>';
+                statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter code not found. You can join without an inviter.</span>';
                 verifiedInviterId = null;
             }
         });
@@ -2071,7 +2161,20 @@
                 }, 500);
             }
             
-            if (!isProfileComplete(userAddress)) {
+            // Check if user has completed payment but not profile
+            const hasPaid = isPaidUser(userAddress);
+            const hasProfile = isProfileComplete(userAddress);
+            
+            if (!hasPaid && !hasProfile) {
+                // New user - show payment first
+                connectState.classList.add('hidden');
+                investmentState.classList.remove('hidden');
+                dashboardState.classList.add('hidden');
+                bottomNav.style.display = 'none';
+                loadingOverlay.classList.add('hidden');
+                return true;
+            } else if (hasPaid && !hasProfile) {
+                // User paid but profile not complete - show profile setup
                 connectState.classList.add('hidden');
                 investmentState.classList.add('hidden');
                 dashboardState.classList.add('hidden');
@@ -2079,9 +2182,8 @@
                 openModal('profileSetupModal');
                 loadingOverlay.classList.add('hidden');
                 return true;
-            }
-            
-            if (isPaidUser(userAddress)) {
+            } else if (hasPaid && hasProfile) {
+                // Full user - show dashboard
                 connectState.classList.add('hidden');
                 investmentState.classList.add('hidden');
                 dashboardState.classList.remove('hidden');
@@ -2092,16 +2194,17 @@
                 updateInviteInfo();
                 if (!isAutoReconnect) new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
                 if (!isAutoReconnect) showToast("Welcome back! Dashboard ready.", "success");
+                loadingOverlay.classList.add('hidden');
+                return true;
             } else {
+                // Not paid - show payment
                 connectState.classList.add('hidden');
                 investmentState.classList.remove('hidden');
                 dashboardState.classList.add('hidden');
                 bottomNav.style.display = 'none';
-                if (!isAutoReconnect) showToast("Wallet connected! Please activate your node.", "info");
+                loadingOverlay.classList.add('hidden');
+                return true;
             }
-            
-            loadingOverlay.classList.add('hidden');
-            return true;
         }
 
         // ========== AUTO-RECONNECT ==========
@@ -2158,17 +2261,16 @@
                 showToast("Transaction sent! Confirming...", "info");
                 await tx.wait();
                 
-                const inviterId = getInviterId(userAddress);
-                markUserAsPaid(userAddress, inviterId);
+                // Mark user as paid
+                markUserAsPaid(userAddress, verifiedInviterId);
                 closeModal('paymentModal');
-                showDashboardAfterPayment();
-                await updateBalances();
-                updateDashboard();
-                updateAssetsPage();
-                renderBeautifulTree();
-                updateInviteInfo();
                 
-                if (inviterId) showToast(`✅ You joined under ID: ZTR-${inviterId}!`, 'success');
+                // Show profile setup modal after payment
+                openModal('profileSetupModal');
+                
+                // Clear the investment state
+                investmentState.classList.add('hidden');
+                
             } catch (e) { 
                 showToast("Transaction failed. Please try again.", "error"); 
             } finally { 
@@ -2233,6 +2335,7 @@
             showToast('Invitation code copied!', 'success');
         });
 
+        // Keep old upgrade button for fallback
         document.getElementById('confirmUpgradeBtn')?.addEventListener('click', async () => {
             if (!window.selectedLevel || isProcessing) return;
             isProcessing = true;
@@ -2263,7 +2366,7 @@
         });
 
         setInterval(() => {
-            if (userAddress && isPaidUser(userAddress)) {
+            if (userAddress && isPaidUser(userAddress) && isProfileComplete(userAddress)) {
                 updateBalances();
                 updateDashboard();
             }
