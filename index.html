@@ -1320,6 +1320,7 @@
         let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper;
         let verifiedInviterId = null;
         let pendingLevelUpgrade = null;
+        let isWalletConnected = false;
 
         // UI ELEMENTS
         const connectState = document.getElementById('connectState');
@@ -2192,11 +2193,18 @@
 
         // ========== EVENT LISTENERS ==========
         document.getElementById('connectBtn').addEventListener('click', async () => {
+            if (isWalletConnected) {
+                showToast("Wallet already connected!", "info");
+                return;
+            }
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
                 loadingOverlay.classList.remove('hidden');
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
-                await initConnection(accounts, false); 
+                if (accounts && accounts.length > 0) {
+                    isWalletConnected = true;
+                    await initConnection(accounts, false); 
+                }
             } catch (err) { 
                 showToast("Connection rejected", "error");
                 loadingOverlay.classList.add('hidden');
@@ -2323,6 +2331,7 @@
                     await initConnection(accounts, true);
                 } else {
                     localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
+                    isWalletConnected = false;
                     location.reload();
                 }
             });
