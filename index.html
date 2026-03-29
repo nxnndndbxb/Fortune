@@ -915,7 +915,7 @@
 </head>
 <body>
 
-<div id="loadingOverlay" class="loading-overlay">
+<div id="loadingOverlay" class="loading-overlay hidden">
     <div class="spinner"></div>
     <p>Connecting to blockchain...</p>
 </div>
@@ -2040,12 +2040,13 @@
             }
         });
         
+        // FIXED: Invitation code verification with proper messages - only show error when code is entered and invalid
         document.getElementById('verifyInviteCodeBtn').addEventListener('click', () => {
             const inviteCode = document.getElementById('setupInviteCode').value.trim().toUpperCase();
             const statusDiv = document.getElementById('inviterVerifyStatus');
             
             if (!inviteCode) {
-                statusDiv.innerHTML = '<span class="status-info">ℹ️ No code entered. You can join without an inviter.</span>';
+                statusDiv.innerHTML = '';
                 verifiedInviterId = null;
                 return;
             }
@@ -2064,11 +2065,11 @@
                     statusDiv.innerHTML = `<span class="status-success">✅ Verified! You are invited by ID: ZTR-${verifiedInviterId}</span>`;
                     showToast(`Inviter found: ID: ZTR-${verifiedInviterId}`, 'success');
                 } else {
-                    statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter code not found. You can join without an inviter.</span>';
+                    statusDiv.innerHTML = '<span class="status-error">❌ Inviter code not found. Please check and try again.</span>';
                     verifiedInviterId = null;
                 }
             } else {
-                statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter code not found. You can join without an inviter.</span>';
+                statusDiv.innerHTML = '<span class="status-error">❌ Inviter code not found. Please check and try again.</span>';
                 verifiedInviterId = null;
             }
         });
@@ -2103,7 +2104,7 @@
             updateInviteInfo();
         });
 
-        // ========== WALLET CONNECTION WITH PERSISTENCE ==========
+        // ========== WALLET CONNECTION WITH PERSISTENCE (NO LOADING ON CONNECT) ==========
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0) return false;
             if (!isValidWalletAddress(accounts[0])) {
@@ -2147,7 +2148,6 @@
                 dashboardState.classList.add('hidden');
                 bottomNav.style.display = 'none';
                 openModal('profileSetupModal');
-                loadingOverlay.classList.add('hidden');
                 return true;
             }
             
@@ -2174,7 +2174,6 @@
                 }
             }
             
-            loadingOverlay.classList.add('hidden');
             return true;
         }
 
@@ -2185,7 +2184,6 @@
             
             // Only attempt auto-reconnect if there's a saved wallet and session is active
             if (savedWallet && isValidWalletAddress(savedWallet) && sessionActive === 'true' && window.ethereum) {
-                loadingOverlay.classList.remove('hidden');
                 try {
                     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
                     if (accounts.length > 0 && accounts[0].toLowerCase() === savedWallet.toLowerCase()) {
@@ -2194,16 +2192,10 @@
                         // Different wallet is connected, update saved wallet
                         localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
                         await initConnection(accounts, true);
-                    } else {
-                        // No accounts connected, keep loading overlay hidden
-                        loadingOverlay.classList.add('hidden');
                     }
                 } catch (error) {
                     console.error("Auto-reconnect failed:", error);
-                    loadingOverlay.classList.add('hidden');
                 }
-            } else {
-                loadingOverlay.classList.add('hidden');
             }
         }
 
@@ -2211,12 +2203,10 @@
         document.getElementById('connectBtn').addEventListener('click', async () => {
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
-                loadingOverlay.classList.remove('hidden');
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
                 await initConnection(accounts, false); 
             } catch (err) { 
                 showToast("Connection rejected", "error");
-                loadingOverlay.classList.add('hidden');
             }
         });
 
