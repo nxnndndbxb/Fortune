@@ -889,6 +889,65 @@
             font-weight: bold;
         }
         
+        /* Profile Picture Gallery Styles */
+        .profile-pic-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .gallery-item {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            overflow: hidden;
+            background: rgba(0,0,0,0.5);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .gallery-item:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+        }
+        
+        .gallery-item.selected {
+            border-color: var(--gold);
+            box-shadow: 0 0 15px var(--gold);
+        }
+        
+        .profile-pic-option {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .profile-pic-option button {
+            flex: 1;
+            padding: 10px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .profile-pic-option button:hover {
+            background: var(--primary);
+            color: black;
+        }
+        
         input, textarea {
             background: rgba(0,0,0,0.5) !important;
             border: 1px solid rgba(255,255,255,0.2) !important;
@@ -983,10 +1042,20 @@
         <h2 style="margin-bottom: 15px;">Complete Your Profile</h2>
         <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 20px;">Please setup your profile to continue</p>
         
-        <div class="avatar-preview" id="avatarPreview" onclick="document.getElementById('setupProfilePic').click()">
+        <div class="avatar-preview" id="avatarPreview" onclick="openProfilePicSelector()">
             <i class="fa-solid fa-user-circle" id="avatarPreviewIcon"></i>
             <img id="avatarPreviewImg" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
         </div>
+        
+        <div class="profile-pic-option">
+            <button onclick="toggleGallery()"><i class="fa-solid fa-images"></i> Choose from Gallery</button>
+            <button onclick="uploadCustomPic()"><i class="fa-solid fa-upload"></i> Upload Custom</button>
+        </div>
+        
+        <div id="profilePicGallery" style="display: none;">
+            <div class="profile-pic-gallery" id="avatarGallery"></div>
+        </div>
+        
         <input type="file" id="setupProfilePic" class="hidden" accept="image/*">
         
         <input type="text" id="setupUsername" placeholder="Enter your username" style="width:100%; padding:12px; border-radius:12px; margin-bottom:15px;">
@@ -1005,6 +1074,32 @@
         </div>
         
         <button class="btn btn-success" id="completeProfileBtn">Complete Setup</button>
+    </div>
+</div>
+
+<!-- Edit Profile Modal with Gallery -->
+<div class="modal-overlay" id="editProfileModal">
+    <div class="modal-content">
+        <h3>Edit Identity</h3>
+        <p style="font-size:12px; color: rgba(255,255,255,0.7); margin-bottom:20px;">Your User ID cannot be changed.</p>
+        
+        <div class="avatar-preview" id="editAvatarPreview" onclick="openEditProfilePicSelector()" style="margin-bottom: 15px;">
+            <i class="fa-solid fa-user-circle" id="editAvatarIcon"></i>
+            <img src="" alt="Profile Picture" id="editAvatarImg" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        
+        <div class="profile-pic-option">
+            <button onclick="toggleEditGallery()"><i class="fa-solid fa-images"></i> Choose from Gallery</button>
+            <button onclick="uploadEditCustomPic()"><i class="fa-solid fa-upload"></i> Upload Custom</button>
+        </div>
+        
+        <div id="editProfilePicGallery" style="display: none;">
+            <div class="profile-pic-gallery" id="editAvatarGallery"></div>
+        </div>
+        
+        <input type="file" id="profilePicInput" class="hidden" accept="image/*">
+        <input type="text" id="profileNameInput" placeholder="Username" style="width:100%; padding:15px; border-radius:15px; margin-bottom:15px;">
+        <button class="btn" id="saveProfileBtn">Save Update</button>
     </div>
 </div>
 
@@ -1036,16 +1131,6 @@
             <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('levelUpgradePaymentModal')">Cancel</button>
             <button class="btn btn-success" id="confirmLevelUpgradeBtn">Pay & Upgrade</button>
         </div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="editProfileModal">
-    <div class="modal-content">
-        <h3>Edit Identity</h3>
-        <p style="font-size:12px; color: rgba(255,255,255,0.7); margin-bottom:20px;">Your User ID cannot be changed.</p>
-        <input type="file" id="profilePicInput" class="hidden" accept="image/*">
-        <input type="text" id="profileNameInput" placeholder="Username" style="width:100%; padding:15px; border-radius:15px; margin-bottom:15px;">
-        <button class="btn" id="saveProfileBtn">Save Update</button>
     </div>
 </div>
 
@@ -1200,7 +1285,7 @@
                     <img src="https://iili.io/qsZGN6P.jpg" class="cover-photo" alt="Cover Photo">
                 </div>
                 <div style="padding: 25px; padding-top: 0;">
-                    <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('profilePicInput').click()">
+                    <div class="profile-avatar" id="profileAvatar" onclick="openEditProfileModalWithGallery()">
                         <i class="fa-solid fa-user-circle" id="avatarIcon"></i>
                         <img src="" alt="Profile Picture" id="profileAvatarImg" class="profile-avatar-img hidden">
                     </div>
@@ -1247,7 +1332,7 @@
                         </div>
                     </div>
 
-                    <button class="btn" onclick="openModal('editProfileModal')" style="margin-top:25px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">MODIFY IDENTITY</button>
+                    <button class="btn" onclick="openEditProfileModalWithGallery()" style="margin-top:25px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">MODIFY IDENTITY</button>
                 </div>
             </div>
         </div>
@@ -1264,6 +1349,19 @@
 
 <script>
     (function() {
+        // Blockchain-themed profile pictures gallery
+        const PROFILE_PICS = [
+            'https://iili.io/3ZQ7WJp.png',
+            'https://iili.io/3ZQ7gGv.png',
+            'https://iili.io/3ZQ7nDf.png',
+            'https://iili.io/3ZQ7RjV.png',
+            'https://iili.io/3ZQ7qSa.png',
+            'https://iili.io/3ZQ7p0X.png',
+            'https://iili.io/3ZQ7l8N.png',
+            'https://iili.io/3ZQ7kFv.png',
+            'https://iili.io/3ZQ7jYs.png'
+        ];
+        
         // SECURITY: Validate and sanitize inputs
         function sanitizeInput(input) {
             if (!input) return '';
@@ -1322,6 +1420,7 @@
         let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper;
         let verifiedInviterId = null;
         let pendingLevelUpgrade = null;
+        let selectedProfilePic = null;
 
         // UI ELEMENTS
         const connectState = document.getElementById('connectState');
@@ -1333,8 +1432,108 @@
         const joiningStarsPage = document.getElementById('joiningStarsPage');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const profileSetupModal = document.getElementById('profileSetupModal');
+        const editProfileModal = document.getElementById('editProfileModal');
 
-        // ========== INVITATION CODE FUNCTIONS (FIXED) ==========
+        // ========== PROFILE PICTURE GALLERY FUNCTIONS ==========
+        function renderGallery(containerId, onSelect) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            let galleryHTML = '';
+            PROFILE_PICS.forEach((pic, index) => {
+                galleryHTML += `
+                    <div class="gallery-item" onclick="selectProfilePic('${pic}', '${containerId}', ${index})">
+                        <img src="${pic}" alt="Profile ${index + 1}">
+                    </div>
+                `;
+            });
+            container.innerHTML = galleryHTML;
+        }
+        
+        window.selectProfilePic = function(picUrl, containerId, index) {
+            selectedProfilePic = picUrl;
+            
+            // Update preview in setup modal
+            const setupPreviewImg = document.getElementById('avatarPreviewImg');
+            const setupPreviewIcon = document.getElementById('avatarPreviewIcon');
+            if (setupPreviewImg && setupPreviewIcon) {
+                setupPreviewImg.src = picUrl;
+                setupPreviewImg.style.display = 'block';
+                setupPreviewIcon.style.display = 'none';
+            }
+            
+            // Update preview in edit modal
+            const editPreviewImg = document.getElementById('editAvatarImg');
+            const editPreviewIcon = document.getElementById('editAvatarIcon');
+            if (editPreviewImg && editPreviewIcon) {
+                editPreviewImg.src = picUrl;
+                editPreviewImg.style.display = 'block';
+                editPreviewIcon.style.display = 'none';
+            }
+            
+            // Highlight selected
+            document.querySelectorAll(`#${containerId} .gallery-item`).forEach(item => {
+                item.classList.remove('selected');
+            });
+            const selectedItem = document.querySelector(`#${containerId} .gallery-item:nth-child(${index + 1})`);
+            if (selectedItem) selectedItem.classList.add('selected');
+            
+            showToast("Profile picture selected!", "success");
+        };
+        
+        window.toggleGallery = function() {
+            const gallery = document.getElementById('profilePicGallery');
+            if (gallery) {
+                gallery.style.display = gallery.style.display === 'none' ? 'block' : 'none';
+                if (gallery.style.display === 'block') {
+                    renderGallery('avatarGallery', null);
+                }
+            }
+        };
+        
+        window.toggleEditGallery = function() {
+            const gallery = document.getElementById('editProfilePicGallery');
+            if (gallery) {
+                gallery.style.display = gallery.style.display === 'none' ? 'block' : 'none';
+                if (gallery.style.display === 'block') {
+                    renderGallery('editAvatarGallery', null);
+                }
+            }
+        };
+        
+        window.openProfilePicSelector = function() {
+            toggleGallery();
+        };
+        
+        window.openEditProfilePicSelector = function() {
+            toggleEditGallery();
+        };
+        
+        window.uploadCustomPic = function() {
+            document.getElementById('setupProfilePic').click();
+        };
+        
+        window.uploadEditCustomPic = function() {
+            document.getElementById('profilePicInput').click();
+        };
+        
+        window.openEditProfileModalWithGallery = function() {
+            // Load current profile pic into edit modal
+            const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+            if (profiles[userAddress?.toLowerCase()] && profiles[userAddress.toLowerCase()].profilePicUrl) {
+                const editPreviewImg = document.getElementById('editAvatarImg');
+                const editPreviewIcon = document.getElementById('editAvatarIcon');
+                if (editPreviewImg && editPreviewIcon) {
+                    editPreviewImg.src = profiles[userAddress.toLowerCase()].profilePicUrl;
+                    editPreviewImg.style.display = 'block';
+                    editPreviewIcon.style.display = 'none';
+                }
+            }
+            document.getElementById('profileNameInput').value = profiles[userAddress?.toLowerCase()]?.name || '';
+            openModal('editProfileModal');
+        };
+        
+        // ========== INVITATION CODE FUNCTIONS ==========
         
         // Generate unique invitation code
         function generateUniqueInviteCode() {
@@ -1529,7 +1728,7 @@
             localStorage.setItem(STORAGE_KEYS.USER_SETUP_COMPLETE, JSON.stringify(setupComplete));
         }
         
-        // ========== INVITATION SYSTEM - 40% DIRECT, 10% UPLINER, 20% DOWNLINE POOL ==========
+        // ========== INVITATION SYSTEM ==========
         function markUserAsPaid(wallet, inviterUserId) {
             if (!wallet || !isValidWalletAddress(wallet)) return;
             const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
@@ -2073,6 +2272,7 @@
                 const result = await response.json();
                 if (result.status_code === 200) {
                     setupProfilePicData = result.image.url;
+                    selectedProfilePic = setupProfilePicData;
                     const previewImg = document.getElementById('avatarPreviewImg');
                     const previewIcon = document.getElementById('avatarPreviewIcon');
                     previewImg.src = setupProfilePicData;
@@ -2081,6 +2281,36 @@
                     showToast("Profile picture uploaded successfully!", "success");
                 } else {
                     throw new Error(result.status_txt || "Upload failed");
+                }
+            } catch (error) {
+                showToast("Upload failed, please try again", "error");
+            }
+        });
+        
+        document.getElementById('profilePicInput').addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            showToast("Uploading new profile picture...", "info");
+            const formData = new FormData();
+            formData.append('key', IMAGE_HOST_API_KEY);
+            formData.append('image', file);
+            try {
+                const response = await fetch('https://freeimage.host/api/1/upload', { method: 'POST', body: formData });
+                const result = await response.json();
+                if (result.status_code === 200) {
+                    const imageUrl = result.image.url;
+                    selectedProfilePic = imageUrl;
+                    const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+                    if (profiles[userAddress?.toLowerCase()]) {
+                        profiles[userAddress.toLowerCase()].profilePicUrl = imageUrl;
+                        localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
+                        updateAssetsPage();
+                        renderBeautifulTree();
+                        showToast("Profile picture updated successfully!", "success");
+                        closeModal('editProfileModal');
+                    }
+                } else {
+                    throw new Error("Upload failed");
                 }
             } catch (error) {
                 showToast("Upload failed, please try again", "error");
@@ -2156,7 +2386,7 @@
                 }
             }
             
-            createUserProfile(userAddress, verifiedInviterId, sanitizedUsername, setupProfilePicData);
+            createUserProfile(userAddress, verifiedInviterId, sanitizedUsername, selectedProfilePic || setupProfilePicData);
             markProfileComplete(userAddress);
             updateZTRBalance(userAddress, 10);
             
@@ -2174,6 +2404,20 @@
             investmentState.classList.remove('hidden');
             updateAssetsPage();
             updateInviteInfo();
+        });
+
+        document.getElementById('saveProfileBtn').addEventListener('click', () => {
+            const name = document.getElementById('profileNameInput').value;
+            const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+            if (profiles[userAddress?.toLowerCase()]) {
+                if(name) profiles[userAddress.toLowerCase()].name = sanitizeInput(name);
+                if(selectedProfilePic) profiles[userAddress.toLowerCase()].profilePicUrl = selectedProfilePic;
+                localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
+                updateAssetsPage();
+                renderBeautifulTree();
+                closeModal('editProfileModal');
+                showToast("Profile updated!", "success");
+            }
         });
 
         // ========== WALLET CONNECTION WITH PERSISTENCE ==========
@@ -2330,47 +2574,6 @@
                 isProcessing = false; 
                 confirmBtn.disabled = false;
                 confirmBtn.innerHTML = 'Confirm';
-            }
-        });
-        
-        document.getElementById('profilePicInput').addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            showToast("Uploading new profile picture...", "info");
-            const formData = new FormData();
-            formData.append('key', IMAGE_HOST_API_KEY);
-            formData.append('image', file);
-            try {
-                const response = await fetch('https://freeimage.host/api/1/upload', { method: 'POST', body: formData });
-                const result = await response.json();
-                if (result.status_code === 200) {
-                    const imageUrl = result.image.url;
-                    const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-                    if (profiles[userAddress?.toLowerCase()]) {
-                        profiles[userAddress.toLowerCase()].profilePicUrl = imageUrl;
-                        localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-                        updateAssetsPage();
-                        renderBeautifulTree();
-                        showToast("Profile picture updated successfully!", "success");
-                    }
-                } else {
-                    throw new Error("Upload failed");
-                }
-            } catch (error) {
-                showToast("Upload failed, please try again", "error");
-            }
-        });
-
-        document.getElementById('saveProfileBtn').addEventListener('click', () => {
-            const name = document.getElementById('profileNameInput').value;
-            const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-            if (profiles[userAddress?.toLowerCase()]) {
-                if(name) profiles[userAddress.toLowerCase()].name = sanitizeInput(name);
-                localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-                updateAssetsPage();
-                renderBeautifulTree();
-                closeModal('editProfileModal');
-                showToast("Profile updated!", "success");
             }
         });
 
