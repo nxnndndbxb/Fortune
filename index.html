@@ -1264,23 +1264,19 @@
 
 <script>
     (function() {
-        // SECURITY: Validate and sanitize inputs
         function sanitizeInput(input) {
             if (!input) return '';
             return input.replace(/[<>]/g, '').trim();
         }
         
-        // SECURITY: Validate wallet address
         function isValidWalletAddress(address) {
             return /^0x[a-fA-F0-9]{40}$/.test(address);
         }
         
-        // SECURITY: Validate invite code
         function isValidInviteCode(code) {
             return /^[A-Z0-9]{8}$/.test(code);
         }
         
-        // CORE CONFIGURATION
         const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
         const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
         const CHAIN_ID = "0x38";
@@ -1322,7 +1318,6 @@
         let verifiedInviterId = null;
         let pendingLevelUpgrade = null;
 
-        // UI ELEMENTS
         const connectState = document.getElementById('connectState');
         const investmentState = document.getElementById('investmentState');
         const dashboardState = document.getElementById('dashboardState');
@@ -1333,7 +1328,6 @@
         const loadingOverlay = document.getElementById('loadingOverlay');
         const profileSetupModal = document.getElementById('profileSetupModal');
 
-        // ========== HELPER FUNCTIONS ==========
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -1355,13 +1349,12 @@
             window.currentWalletFullAddress = fullAddress;
         }
 
-        function copyWalletAddress() {
+        window.copyWalletAddress = function() {
             if (window.currentWalletFullAddress && isValidWalletAddress(window.currentWalletFullAddress)) {
                 navigator.clipboard.writeText(window.currentWalletFullAddress);
                 showToast("Wallet address copied!", "success");
             }
-        }
-        window.copyWalletAddress = copyWalletAddress;
+        };
 
         async function getIP() {
             try { 
@@ -1373,27 +1366,20 @@
             }
         }
         
-        // ========== INVITATION CODE GENERATION ==========
         function generateUniqueInviteCode() {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = '';
-            for (let i = 0; i < 8; i++) {
-                code += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
+            for (let i = 0; i < 8; i++) code += characters.charAt(Math.floor(Math.random() * characters.length));
             return code;
         }
         
         function getUniqueInviteCode(wallet) {
             if (!wallet || !isValidWalletAddress(wallet)) return null;
             const inviteCodes = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITE_CODES) || '{}');
-            if (inviteCodes[wallet.toLowerCase()]) {
-                return inviteCodes[wallet.toLowerCase()];
-            }
+            if (inviteCodes[wallet.toLowerCase()]) return inviteCodes[wallet.toLowerCase()];
             let newCode = generateUniqueInviteCode();
             const existingCodes = Object.values(inviteCodes);
-            while (existingCodes.includes(newCode)) {
-                newCode = generateUniqueInviteCode();
-            }
+            while (existingCodes.includes(newCode)) newCode = generateUniqueInviteCode();
             inviteCodes[wallet.toLowerCase()] = newCode;
             localStorage.setItem(STORAGE_KEYS.INVITE_CODES, JSON.stringify(inviteCodes));
             return newCode;
@@ -1402,33 +1388,22 @@
         function getWalletByInviteCode(inviteCode) {
             if (!inviteCode || !isValidInviteCode(inviteCode)) return null;
             const inviteCodes = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITE_CODES) || '{}');
-            for (const wallet in inviteCodes) {
-                if (inviteCodes[wallet] === inviteCode) {
-                    return wallet;
-                }
-            }
+            for (const wallet in inviteCodes) if (inviteCodes[wallet] === inviteCode) return wallet;
             return null;
         }
 
-        // ========== USER DATA MANAGEMENT ==========
         function getNextUserId() {
             let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
             let nextId = 1000;
             const existingIds = Object.values(userIds);
-            if(existingIds.length > 0) {
-                nextId = Math.max(...existingIds) + 1;
-            }
+            if(existingIds.length > 0) nextId = Math.max(...existingIds) + 1;
             return nextId;
         }
 
         function getWalletById(id) {
             if (!id) return null;
             const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
-            for (const wallet in userIds) {
-                if (userIds[wallet] === parseInt(id)) {
-                    return wallet;
-                }
-            }
+            for (const wallet in userIds) if (userIds[wallet] === parseInt(id)) return wallet;
             return null;
         }
         
@@ -1465,9 +1440,7 @@
                 profilePicUrl: profilePicUrl ? sanitizeInput(profilePicUrl) : null
             };
             localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-            
             getUniqueInviteCode(wallet);
-            
             return profiles[wallet.toLowerCase()];
         }
         
@@ -1480,12 +1453,7 @@
         function getUplinerId(userId) {
             if (!userId) return null;
             const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
-            for (const wallet in inviterMap) {
-                if (inviterMap[wallet] === userId) {
-                    const uplinerId = getInviterId(wallet);
-                    if (uplinerId) return uplinerId;
-                }
-            }
+            for (const wallet in inviterMap) if (inviterMap[wallet] === userId) return getInviterId(wallet);
             return null;
         }
         
@@ -1493,12 +1461,7 @@
             if (!userId) return [];
             const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
             const members = [];
-            for (const wallet in inviterMap) {
-                if (inviterMap[wallet] === userId) {
-                    const profile = getUserProfile(wallet);
-                    if (profile) members.push(profile);
-                }
-            }
+            for (const wallet in inviterMap) if (inviterMap[wallet] === userId) { const profile = getUserProfile(wallet); if (profile) members.push(profile); }
             return members;
         }
 
@@ -1521,31 +1484,24 @@
             localStorage.setItem(STORAGE_KEYS.USER_SETUP_COMPLETE, JSON.stringify(setupComplete));
         }
         
-        // ========== INVITATION SYSTEM - 40% DIRECT, 10% UPLINER, 20% DOWNLINE POOL ==========
         function markUserAsPaid(wallet, inviterUserId) {
             if (!wallet || !isValidWalletAddress(wallet)) return;
             const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
             paidUsers[wallet.toLowerCase()] = true; 
             localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
-            
-            if (inviterUserId) {
-                distributeMultiLevelCommission(wallet, inviterUserId);
-            }
+            if (inviterUserId) distributeMultiLevelCommission(wallet, inviterUserId);
         }
 
         async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
             const baseAmount = JOINING_FEE_USDT;
-            
             const inviterWallet = getWalletById(inviterUserId);
             if (inviterWallet && isValidWalletAddress(inviterWallet)) {
                 const directCommission = baseAmount * 0.40;
                 updateZTRBalance(inviterWallet, directCommission);
                 showToast(`Direct Inviter (ID: ZTR-${inviterUserId}) received ${directCommission.toFixed(2)} ZTR!`, 'success');
-                
                 const teamSizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}');
                 teamSizes[inviterWallet] = (teamSizes[inviterWallet] || 0) + 1;
                 localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
-                
                 const inviterProfile = getUserProfile(inviterWallet);
                 if (inviterProfile && inviterProfile.userId) {
                     const uplinerId = getUplinerId(inviterProfile.userId);
@@ -1558,7 +1514,6 @@
                         }
                     }
                 }
-                
                 const directMembers = getDirectMembers(inviterUserId);
                 if (directMembers.length > 0) {
                     const downlinePool = baseAmount * 0.20;
@@ -1574,7 +1529,6 @@
             }
         }
         
-        // ========== ZTR BALANCE MANAGEMENT ==========
         function getZTRBalance(wallet) { 
             if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); 
@@ -1621,7 +1575,6 @@
             return LEVELS[levelId - 1]; 
         }
 
-        // ========== BALANCE & UI UPDATES ==========
         async function updateBalances() {
             if (!userAddress || !provider || !isValidWalletAddress(userAddress)) return;
             try {
@@ -1643,10 +1596,9 @@
             document.getElementById('profileName').innerText = profile.name;
             document.getElementById('joinDate').innerText = profile.joinDate;
             document.getElementById('profileInviteCode').innerHTML = `<i class="fa-solid fa-ticket"></i> Invite Code: ${inviteCode}`;
-            
             const avatarIcon = document.getElementById('avatarIcon');
             const avatarImg = document.getElementById('profileAvatarImg');
-            if (profile.profilePicUrl) {
+            if (profile.profilePicUrl && profile.profilePicUrl.trim() !== "") {
                 avatarImg.src = profile.profilePicUrl;
                 avatarImg.classList.remove('hidden');
                 avatarIcon.classList.add('hidden');
@@ -1655,10 +1607,8 @@
                 avatarIcon.classList.remove('hidden');
                 avatarImg.classList.add('hidden');
             }
-            
             const ztrBalance = getZTRBalance(userAddress);
             const levelInfo = getCurrentLevelInfo(userAddress);
-            
             document.getElementById('statBNB').innerText = parseFloat(rawBnbBalance).toFixed(4);
             document.getElementById('statUSDT').innerText = parseFloat(rawUsdtBalance).toFixed(2);
             document.getElementById('statZTR').innerText = ztrBalance.toFixed(2);
@@ -1679,7 +1629,6 @@
             document.getElementById('salleryIncome').innerText = `${salary.toFixed(2)} ZTR`;
             document.getElementById('levelIncome').innerText = level.name;
             document.getElementById('userRankBadge').innerText = level.name;
-            
             const inviterId = getInviterId(userAddress);
             const homeInviterSpan = document.getElementById('homeInviterId');
             if (inviterId) {
@@ -1708,7 +1657,6 @@
             const inviterDisplayText = inviterUserId ? `ID: ZTR-${inviterUserId}` : 'None';
             document.getElementById('inviterUserIdDisplay').innerText = inviterDisplayText;
             document.getElementById('homeInviterId').innerText = inviterDisplayText;
-            
             if (inviterUserId) {
                 document.getElementById('inviterInfoOnInvestPage').classList.remove('hidden');
                 document.getElementById('inviterDisplayOnHome').classList.remove('hidden');
@@ -1720,307 +1668,122 @@
             investmentState.classList.add('hidden');
             dashboardState.classList.remove('hidden');
             bottomNav.style.display = 'flex';
-            
             updateDashboard();
             updateAssetsPage();
             renderBeautifulTree();
             updateInviteInfo();
-            
-            if (typeof Swiper !== 'undefined') {
-                new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
-            }
+            if (typeof Swiper !== 'undefined') new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
             showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
-            
-            // Save session active flag
             localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
         }
         
-        // ========== BEAUTIFUL TREE RENDER FUNCTION ==========
         function renderBeautifulTree() {
             if (!userAddress) return;
             const currentUserProfile = getUserProfile(userAddress);
             if(!currentUserProfile) return;
-
             const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
             const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
             const teamSize = getTeamSize(userAddress);
-            
             document.getElementById('teamPageTotalCount').innerText = teamSize;
             const treeContainer = document.getElementById('networkTreeContainer');
-            
             const getChildren = (userId) => {
                 const children = [];
-                for (const wallet in profiles) {
-                    const inviterId = inviterMap[wallet];
-                    if (inviterId === userId) {
-                        children.push(profiles[wallet]);
-                    }
-                }
+                for (const wallet in profiles) if (inviterMap[wallet] === userId) children.push(profiles[wallet]);
                 return children;
             };
-            
-            const getUserLevelName = (wallet) => {
-                const levelId = getUserLevel(wallet);
-                if (levelId === 0) return "Starter";
-                return LEVELS[levelId - 1]?.name || "Starter";
-            };
-            
+            const getUserLevelName = (wallet) => { const levelId = getUserLevel(wallet); if (levelId === 0) return "Starter"; return LEVELS[levelId-1]?.name || "Starter"; };
             const buildNodeHTML = (profile, isCurrentUser = false, level = 0) => {
                 const levelName = getUserLevelName(getWalletById(profile.userId));
-                const avatarHtml = profile.profilePicUrl 
-                    ? `<img src="${profile.profilePicUrl}" alt="${profile.name}">` 
-                    : `<i class="fa-solid fa-user-astronaut"></i>`;
-                
-                return `
-                    <div class="tree-node-card ${isCurrentUser ? 'is-user' : ''}">
-                        <div class="tree-node-avatar">
-                            ${avatarHtml}
-                        </div>
-                        <div class="tree-node-name">${sanitizeInput(profile.name)}</div>
-                        <div class="tree-node-id">ID: ${profile.userId}</div>
-                        <div class="tree-node-level">
-                            <i class="fa-solid fa-crown" style="font-size: 8px;"></i> ${levelName}
-                        </div>
-                        ${level > 0 ? `<div class="tree-node-level" style="background: rgba(0,242,255,0.2);"><i class="fa-solid fa-level-down-alt"></i> Level ${level}</div>` : ''}
-                    </div>
-                `;
+                const avatarHtml = profile.profilePicUrl ? `<img src="${profile.profilePicUrl}" alt="${profile.name}">` : `<i class="fa-solid fa-user-astronaut"></i>`;
+                return `<div class="tree-node-card ${isCurrentUser ? 'is-user' : ''}"><div class="tree-node-avatar">${avatarHtml}</div><div class="tree-node-name">${sanitizeInput(profile.name)}</div><div class="tree-node-id">ID: ${profile.userId}</div><div class="tree-node-level"><i class="fa-solid fa-crown" style="font-size: 8px;"></i> ${levelName}</div>${level > 0 ? `<div class="tree-node-level" style="background: rgba(0,242,255,0.2);"><i class="fa-solid fa-level-down-alt"></i> Level ${level}</div>` : ''}</div>`;
             };
-            
             const buildTree = (userId, level = 1) => {
                 const children = getChildren(userId);
                 if (children.length === 0) return '';
-                
                 let childrenHTML = '';
-                children.forEach(child => {
-                    const childLevel = level;
-                    childrenHTML += `
-                        <li class="level-${childLevel}">
-                            ${buildNodeHTML(child, false, childLevel)}
-                            ${buildTree(child.userId, level + 1)}
-                        </li>
-                    `;
-                });
-                
+                children.forEach(child => { childrenHTML += `<li class="level-${level}">${buildNodeHTML(child, false, level)}${buildTree(child.userId, level + 1)}</li>`; });
                 return `<ul>${childrenHTML}</ul>`;
             };
-            
-            let treeHTML = `
-                <div class="tree">
-                    <ul>
-                        <li class="level-0">
-                            ${buildNodeHTML(currentUserProfile, true, 0)}
-                            ${buildTree(currentUserProfile.userId, 1)}
-                        </li>
-                    </ul>
-                </div>
-            `;
-            
-            if (teamSize === 0 && !getInviterId(userAddress)) {
-                treeContainer.innerHTML = `
-                    <div style="text-align:center; padding: 40px;">
-                        <i class="fa-solid fa-tree" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i>
-                        <p style="color: rgba(255,255,255,0.7);">Your network is empty.</p>
-                        <p style="color: rgba(255,255,255,0.7); font-size: 12px;">Share your invitation code to start building your tree!</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            treeContainer.innerHTML = treeHTML;
+            let treeHTML = `<div class="tree"><ul><li class="level-0">${buildNodeHTML(currentUserProfile, true, 0)}${buildTree(currentUserProfile.userId, 1)}</li></ul></div>`;
+            if (teamSize === 0 && !getInviterId(userAddress)) treeContainer.innerHTML = `<div style="text-align:center; padding: 40px;"><i class="fa-solid fa-tree" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i><p style="color: rgba(255,255,255,0.7);">Your network is empty.</p><p style="color: rgba(255,255,255,0.7); font-size: 12px;">Share your invitation code to start building your tree!</p></div>`;
+            else treeContainer.innerHTML = treeHTML;
         }
 
-        // ========== STARS PAGES ==========
         function generateLargeStarsHTML(count, filledCount) {
             let starsHtml = '';
-            for (let i = 0; i < count; i++) {
-                const state = i < filledCount ? 'filled' : 'empty';
-                starsHtml += `<i class="fa-solid fa-star large-star-icon ${state}"></i>`;
-            }
+            for (let i = 0; i < count; i++) starsHtml += `<i class="fa-solid fa-star large-star-icon ${i < filledCount ? 'filled' : 'empty'}"></i>`;
             return starsHtml;
         }
 
-        function openLevelStarsPage() {
+        window.openLevelStarsPage = function() {
             const container = document.getElementById('levelStarsContainer');
             const salarySystem = document.getElementById('levelSalarySystem');
             const salaryAmount = document.getElementById('levelSalaryAmount');
             const userLevel = getUserLevel(userAddress);
             const maxLevel = LEVELS.length;
             container.innerHTML = generateLargeStarsHTML(maxLevel, userLevel);
-            if (userLevel >= maxLevel) {
-                const totalInvestment = LEVELS.reduce((acc, level) => acc + level.price, 0);
-                const salary = totalInvestment * 0.10;
-                salaryAmount.innerText = `${salary.toFixed(2)} ZTR / Month`;
-                salarySystem.classList.remove('hidden');
-            } else {
-                salarySystem.classList.add('hidden');
-            }
+            if (userLevel >= maxLevel) { const totalInvestment = LEVELS.reduce((acc, level) => acc + level.price, 0); const salary = totalInvestment * 0.10; salaryAmount.innerText = `${salary.toFixed(2)} ZTR / Month`; salarySystem.classList.remove('hidden'); }
+            else salarySystem.classList.add('hidden');
             levelStarsPage.classList.add('active');
-        }
+        };
 
-        function openJoiningStarsPage() {
+        window.openJoiningStarsPage = function() {
             const container = document.getElementById('joiningStarsContainer');
             const salarySystem = document.getElementById('joiningSalarySystem');
             const teamSize = getTeamSize(userAddress);
             const requiredTeamSize = 10;
             container.innerHTML = generateLargeStarsHTML(requiredTeamSize, teamSize);
-            if (teamSize >= requiredTeamSize) {
-                salarySystem.classList.remove('hidden');
-            } else {
-                salarySystem.classList.add('hidden');
-            }
+            if (teamSize >= requiredTeamSize) salarySystem.classList.remove('hidden');
+            else salarySystem.classList.add('hidden');
             joiningStarsPage.classList.add('active');
-        }
+        };
 
-        function closeStarsPages() {
-            levelStarsPage.classList.remove('active');
-            joiningStarsPage.classList.remove('active');
-        }
-        window.closeStarsPages = closeStarsPages;
-        window.openLevelStarsPage = openLevelStarsPage;
-        window.openJoiningStarsPage = openJoiningStarsPage;
-
-        // ========== LEVEL PAGE ==========
+        window.closeStarsPages = function() { levelStarsPage.classList.remove('active'); joiningStarsPage.classList.remove('active'); };
+        
         function initializeLevelSwiper() {
             const wrapper = document.getElementById('levelSwiperWrapper');
             if (!wrapper) return;
             const currentLevelId = getUserLevel(userAddress);
-            let slidesHTML = `
-                <div class="swiper-slide">
-                    <div class="level-slide-card unlocked">
-                        <div>
-                            <div class="level-icon">🌱</div>
-                            <h2>Starter Level</h2>
-                            <span class="rank-badge">CURRENTLY ACTIVE</span>
-                        </div>
-                        <p class="level-info">Your journey begins here. Upgrade to the next level to start earning higher commissions.</p>
-                        <button class="btn" disabled>ACHIEVED</button>
-                    </div>
-                </div>`;
+            let slidesHTML = `<div class="swiper-slide"><div class="level-slide-card unlocked"><div><div class="level-icon">🌱</div><h2>Starter Level</h2><span class="rank-badge">CURRENTLY ACTIVE</span></div><p class="level-info">Your journey begins here. Upgrade to the next level to start earning higher commissions.</p><button class="btn" disabled>ACHIEVED</button></div></div>`;
             LEVELS.forEach(level => {
                 const isUnlocked = currentLevelId >= level.id;
                 const canUpgrade = currentLevelId === level.id - 1;
-                slidesHTML += `
-                    <div class="swiper-slide">
-                        <div class="level-slide-card ${isUnlocked ? 'unlocked' : ''}">
-                            <div>
-                                <div class="level-icon">${level.icon}</div>
-                                <h2>${level.name} Level</h2>
-                                ${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}
-                            </div>
-                            <div>
-                                <p class="level-info">Commission Bonus: <strong>+${level.commission}%</strong></p>
-                                <h3 class="level-price">${level.price} USDT</h3>
-                            </div>
-                            <button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price}, ${level.commission})">
-                                ${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}
-                            </button>
-                        </div>
-                    </div>`;
+                slidesHTML += `<div class="swiper-slide"><div class="level-slide-card ${isUnlocked ? 'unlocked' : ''}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} Level</h2>${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}</div><div><p class="level-info">Commission Bonus: <strong>+${level.commission}%</strong></p><h3 class="level-price">${level.price} USDT</h3></div><button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price}, ${level.commission})">${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}</button></div></div>`;
             });
             wrapper.innerHTML = slidesHTML;
             if (levelSwiper) levelSwiper.destroy(true, true);
             levelSwiper = new Swiper('.levelSwiper', { effect: 'cards', grabCursor: true, initialSlide: currentLevelId, navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' } });
         }
         
-        window.openLevelPage = function() {
-            levelPageOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            initializeLevelSwiper();
-        }
-        
-        window.closeLevelPage = function() {
-            levelPageOverlay.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
+        window.openLevelPage = function() { levelPageOverlay.classList.add('active'); document.body.style.overflow = 'hidden'; initializeLevelSwiper(); };
+        window.closeLevelPage = function() { levelPageOverlay.classList.remove('active'); document.body.style.overflow = 'auto'; };
 
-        // Level upgrade function - opens payment modal for USDT transaction
         window.upgradeLevel = function(levelId, levelName, price, commission) {
             const currentId = getUserLevel(userAddress);
-            if (currentId >= levelId) { 
-                showToast(`You already have the ${levelName} level!`, 'info'); 
-                return; 
-            }
-            if (currentId !== levelId - 1) { 
-                showToast(`Upgrade to the previous level first!`, 'info'); 
-                return; 
-            }
-            
-            // Store pending upgrade details
+            if (currentId >= levelId) { showToast(`You already have the ${levelName} level!`, 'info'); return; }
+            if (currentId !== levelId - 1) { showToast(`Upgrade to the previous level first!`, 'info'); return; }
             pendingLevelUpgrade = { levelId, levelName, price, commission };
-            
-            // Show payment modal for level upgrade
             document.getElementById('upgradeLevelNameDisplay').innerText = `Upgrade to ${levelName}`;
             document.getElementById('levelUpgradeAmount').innerHTML = `${price} USDT`;
             document.getElementById('levelUpgradeCommission').innerHTML = `${commission}%`;
             openModal('levelUpgradePaymentModal');
         };
 
-        // ========== USDT TRANSACTION FOR LEVEL UPGRADE ==========
-        document.getElementById('confirmLevelUpgradeBtn').addEventListener('click', async () => {
-            if (isProcessing || !pendingLevelUpgrade) return;
-            isProcessing = true;
-            const confirmBtn = document.getElementById('confirmLevelUpgradeBtn');
-            confirmBtn.disabled = true;
-            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
-            
-            try {
-                const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-                const amount = ethers.parseUnits(pendingLevelUpgrade.price.toString(), usdtDecimals);
-                
-                showToast("Waiting for approval...", "info");
-                const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
-                showToast("Transaction sent! Confirming...", "info");
-                await tx.wait();
-                
-                // Transaction successful - update user level
-                setUserLevel(userAddress, pendingLevelUpgrade.levelId);
-                showToast(`✅ Successfully upgraded to ${pendingLevelUpgrade.levelName}!`, 'success');
-                
-                closeModal('levelUpgradePaymentModal');
-                updateDashboard();
-                initializeLevelSwiper();
-                updateAssetsPage();
-                renderBeautifulTree();
-                
-            } catch (e) { 
-                console.error("Level upgrade failed:", e);
-                showToast("Transaction failed. Please try again.", "error"); 
-            } finally { 
-                isProcessing = false; 
-                confirmBtn.disabled = false;
-                confirmBtn.innerHTML = 'Pay & Upgrade';
-                pendingLevelUpgrade = null;
-            }
-        });
-
-        // ========== MODAL CONTROLS ==========
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         window.closeModal = closeModal;
         window.openModal = openModal;
 
-        // ========== USDT DECIMALS ==========
-        async function getUSDTDecimals() {
-            try { 
-                const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); 
-                usdtDecimals = await usdtContract.decimals(); 
-            } catch { 
-                usdtDecimals = 18; 
-            }
-        }
+        async function getUSDTDecimals() { try { const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); usdtDecimals = await usdtContract.decimals(); } catch { usdtDecimals = 18; } }
 
-        // ========== PROFILE SETUP FUNCTIONS ==========
         let setupProfilePicData = null;
-        
         document.getElementById('setupProfilePic').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            
             showToast("Uploading profile picture...", "info");
             const formData = new FormData();
             formData.append('key', IMAGE_HOST_API_KEY);
             formData.append('image', file);
-            
             try {
                 const response = await fetch('https://freeimage.host/api/1/upload', { method: 'POST', body: formData });
                 const result = await response.json();
@@ -2032,125 +1795,69 @@
                     previewImg.style.display = 'block';
                     previewIcon.style.display = 'none';
                     showToast("Profile picture uploaded successfully!", "success");
-                } else {
-                    throw new Error(result.status_txt || "Upload failed");
-                }
-            } catch (error) {
-                showToast("Upload failed, please try again", "error");
-            }
+                } else throw new Error("Upload failed");
+            } catch (error) { showToast("Upload failed, please try again", "error"); }
         });
         
-        // FIXED: Invitation code verification with proper messages - only show error when code is entered and invalid
         document.getElementById('verifyInviteCodeBtn').addEventListener('click', () => {
             const inviteCode = document.getElementById('setupInviteCode').value.trim().toUpperCase();
             const statusDiv = document.getElementById('inviterVerifyStatus');
-            
-            if (!inviteCode) {
-                statusDiv.innerHTML = '';
-                verifiedInviterId = null;
-                return;
-            }
-            
-            if (!isValidInviteCode(inviteCode)) {
-                statusDiv.innerHTML = '<span class="status-error">❌ Invalid code format. Code must be 8 characters (A-Z, 0-9).</span>';
-                verifiedInviterId = null;
-                return;
-            }
-            
+            if (!inviteCode) { statusDiv.innerHTML = '<span class="status-info">ℹ️ No code entered. You can join without an inviter.</span>'; verifiedInviterId = null; return; }
+            if (!isValidInviteCode(inviteCode)) { statusDiv.innerHTML = '<span class="status-error">❌ Invalid code format. Code must be 8 characters (A-Z, 0-9).</span>'; verifiedInviterId = null; return; }
             const inviterWallet = getWalletByInviteCode(inviteCode);
             if (inviterWallet && isValidWalletAddress(inviterWallet)) {
                 const inviterProfile = getUserProfile(inviterWallet);
-                if (inviterProfile) {
-                    verifiedInviterId = inviterProfile.userId;
-                    statusDiv.innerHTML = `<span class="status-success">✅ Verified! You are invited by ID: ZTR-${verifiedInviterId}</span>`;
-                    showToast(`Inviter found: ID: ZTR-${verifiedInviterId}`, 'success');
-                } else {
-                    statusDiv.innerHTML = '<span class="status-error">❌ Inviter code not found. Please check and try again.</span>';
-                    verifiedInviterId = null;
-                }
-            } else {
-                statusDiv.innerHTML = '<span class="status-error">❌ Inviter code not found. Please check and try again.</span>';
-                verifiedInviterId = null;
-            }
+                if (inviterProfile) { verifiedInviterId = inviterProfile.userId; statusDiv.innerHTML = `<span class="status-success">✅ Verified! You are invited by ID: ZTR-${verifiedInviterId}</span>`; showToast(`Inviter found: ID: ZTR-${verifiedInviterId}`, 'success'); }
+                else { statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter code not found. You can join without an inviter.</span>'; verifiedInviterId = null; }
+            } else { statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter code not found. You can join without an inviter.</span>'; verifiedInviterId = null; }
         });
         
         document.getElementById('completeProfileBtn').addEventListener('click', async () => {
             const username = document.getElementById('setupUsername').value.trim();
-            if (!username) {
-                showToast("Please enter a username", "error");
-                return;
-            }
-            
-            const sanitizedUsername = sanitizeInput(username);
-            if (sanitizedUsername.length < 3) {
-                showToast("Username must be at least 3 characters", "error");
-                return;
-            }
-            
-            createUserProfile(userAddress, verifiedInviterId, sanitizedUsername, setupProfilePicData);
+            if (!username) { showToast("Please enter a username", "error"); return; }
+            if (sanitizeInput(username).length < 3) { showToast("Username must be at least 3 characters", "error"); return; }
+            createUserProfile(userAddress, verifiedInviterId, username, setupProfilePicData);
             markProfileComplete(userAddress);
             updateZTRBalance(userAddress, 10);
-            
             closeModal('profileSetupModal');
             showToast("Profile setup complete! You received 10 ZTR bonus!", "success");
-            
-            if (verifiedInviterId) {
-                showInviterInfoOnPages(verifiedInviterId);
-                showToast(`🎉 You joined using invitation from ID: ZTR-${verifiedInviterId}!`, 'success');
-            }
+            if (verifiedInviterId) { showInviterInfoOnPages(verifiedInviterId); showToast(`🎉 You joined using invitation from ID: ZTR-${verifiedInviterId}!`, 'success'); }
             connectState.classList.add('hidden');
             investmentState.classList.remove('hidden');
             updateAssetsPage();
             updateInviteInfo();
         });
 
-        // ========== WALLET CONNECTION WITH PERSISTENCE (NO LOADING ON CONNECT) ==========
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0) return false;
-            if (!isValidWalletAddress(accounts[0])) {
-                showToast("Invalid wallet address", "error");
-                return false;
-            }
+            if (!isValidWalletAddress(accounts[0])) { showToast("Invalid wallet address", "error"); return false; }
             userAddress = accounts[0];
-            
-            // Store connected wallet in localStorage
             localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, userAddress);
             localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
-            
             provider = new ethers.BrowserProvider(window.ethereum);
             signer = await provider.getSigner();
             const ip = await getIP();
             document.getElementById('ipDisplay').innerText = `IP: ${sanitizeInput(ip)}`;
             updateAllWalletAddressDisplays();
-            
             const network = await provider.getNetwork();
-            if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
-                if (!isAutoReconnect) showToast("Please switch to BSC network.", "info");
-                try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {}
-            }
+            if (Number(network.chainId) !== CHAIN_ID_DECIMAL) { if (!isAutoReconnect) showToast("Please switch to BSC network.", "info"); try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {} }
             await getUSDTDecimals();
             await updateBalances();
-            
-            // Check for invitation from URL
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCodeFromUrl = urlParams.get('invite');
             if (inviteCodeFromUrl && isValidInviteCode(inviteCodeFromUrl) && !isProfileComplete(userAddress)) {
                 document.getElementById('setupInviteCode').value = inviteCodeFromUrl;
-                setTimeout(() => {
-                    document.getElementById('verifyInviteCodeBtn').click();
-                }, 500);
+                setTimeout(() => { document.getElementById('verifyInviteCodeBtn').click(); }, 500);
             }
-            
-            // Determine which screen to show based on user state
             if (!isProfileComplete(userAddress)) {
                 connectState.classList.add('hidden');
                 investmentState.classList.add('hidden');
                 dashboardState.classList.add('hidden');
                 bottomNav.style.display = 'none';
                 openModal('profileSetupModal');
+                loadingOverlay.classList.add('hidden');
                 return true;
             }
-            
             if (isPaidUser(userAddress)) {
                 connectState.classList.add('hidden');
                 investmentState.classList.add('hidden');
@@ -2160,65 +1867,51 @@
                 updateAssetsPage();
                 renderBeautifulTree();
                 updateInviteInfo();
-                if (!isAutoReconnect) {
-                    new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
-                    showToast("Welcome back! Dashboard ready.", "success");
-                }
+                if (!isAutoReconnect) { new Swiper('.dashboardSwiper', { autoplay: true, loop: true }); showToast("Welcome back! Dashboard ready.", "success"); }
             } else {
                 connectState.classList.add('hidden');
                 investmentState.classList.remove('hidden');
                 dashboardState.classList.add('hidden');
                 bottomNav.style.display = 'none';
-                if (!isAutoReconnect) {
-                    showToast("Wallet connected! Please activate your node.", "info");
-                }
+                if (!isAutoReconnect) showToast("Wallet connected! Please activate your node.", "info");
             }
-            
+            loadingOverlay.classList.add('hidden');
             return true;
         }
 
-        // ========== AUTO-RECONNECT WITH SESSION PERSISTENCE ==========
         async function autoReconnect() {
             const savedWallet = localStorage.getItem(STORAGE_KEYS.CONNECTED_WALLET);
             const sessionActive = localStorage.getItem(STORAGE_KEYS.SESSION_ACTIVE);
-            
-            // Only attempt auto-reconnect if there's a saved wallet and session is active
             if (savedWallet && isValidWalletAddress(savedWallet) && sessionActive === 'true' && window.ethereum) {
+                loadingOverlay.classList.remove('hidden');
                 try {
                     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                    if (accounts.length > 0 && accounts[0].toLowerCase() === savedWallet.toLowerCase()) {
-                        await initConnection(accounts, true);
-                    } else if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
-                        // Different wallet is connected, update saved wallet
-                        localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
-                        await initConnection(accounts, true);
-                    }
-                } catch (error) {
-                    console.error("Auto-reconnect failed:", error);
-                }
-            }
+                    if (accounts.length > 0 && accounts[0].toLowerCase() === savedWallet.toLowerCase()) await initConnection(accounts, true);
+                    else if (accounts.length > 0 && isValidWalletAddress(accounts[0])) { localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]); await initConnection(accounts, true); }
+                    else loadingOverlay.classList.add('hidden');
+                } catch (error) { console.error("Auto-reconnect failed:", error); loadingOverlay.classList.add('hidden'); }
+            } else loadingOverlay.classList.add('hidden');
         }
 
-        // ========== EVENT LISTENERS ==========
         document.getElementById('connectBtn').addEventListener('click', async () => {
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
+                loadingOverlay.classList.remove('hidden');
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
                 await initConnection(accounts, false); 
             } catch (err) { 
                 showToast("Connection rejected", "error");
+                loadingOverlay.classList.add('hidden');
             }
         });
 
         document.getElementById('investNowBtn').addEventListener('click', () => openModal('paymentModal'));
-
         document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
             if (isProcessing) return;
             isProcessing = true;
             const confirmBtn = document.getElementById('confirmPaymentBtn');
             confirmBtn.disabled = true;
             confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
-            
             try {
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
                 const amount = ethers.parseUnits(JOINING_FEE_USDT.toString(), usdtDecimals);
@@ -2226,7 +1919,6 @@
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
                 showToast("Transaction sent! Confirming...", "info");
                 await tx.wait();
-                
                 const inviterId = getInviterId(userAddress);
                 markUserAsPaid(userAddress, inviterId);
                 closeModal('paymentModal');
@@ -2236,15 +1928,33 @@
                 updateAssetsPage();
                 renderBeautifulTree();
                 updateInviteInfo();
-                
                 if (inviterId) showToast(`✅ You joined under ID: ZTR-${inviterId}!`, 'success');
-            } catch (e) { 
-                showToast("Transaction failed. Please try again.", "error"); 
-            } finally { 
-                isProcessing = false; 
-                confirmBtn.disabled = false;
-                confirmBtn.innerHTML = 'Confirm';
-            }
+            } catch (e) { showToast("Transaction failed. Please try again.", "error"); } 
+            finally { isProcessing = false; confirmBtn.disabled = false; confirmBtn.innerHTML = 'Confirm'; }
+        });
+        
+        document.getElementById('confirmLevelUpgradeBtn').addEventListener('click', async () => {
+            if (isProcessing || !pendingLevelUpgrade) return;
+            isProcessing = true;
+            const confirmBtn = document.getElementById('confirmLevelUpgradeBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
+            try {
+                const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
+                const amount = ethers.parseUnits(pendingLevelUpgrade.price.toString(), usdtDecimals);
+                showToast("Waiting for approval...", "info");
+                const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
+                showToast("Transaction sent! Confirming...", "info");
+                await tx.wait();
+                setUserLevel(userAddress, pendingLevelUpgrade.levelId);
+                showToast(`✅ Successfully upgraded to ${pendingLevelUpgrade.levelName}!`, 'success');
+                closeModal('levelUpgradePaymentModal');
+                updateDashboard();
+                initializeLevelSwiper();
+                updateAssetsPage();
+                renderBeautifulTree();
+            } catch (e) { console.error("Level upgrade failed:", e); showToast("Transaction failed. Please try again.", "error"); } 
+            finally { isProcessing = false; confirmBtn.disabled = false; confirmBtn.innerHTML = 'Pay & Upgrade'; pendingLevelUpgrade = null; }
         });
         
         document.getElementById('profilePicInput').addEventListener('change', async (event) => {
@@ -2267,12 +1977,8 @@
                         renderBeautifulTree();
                         showToast("Profile picture updated successfully!", "success");
                     }
-                } else {
-                    throw new Error("Upload failed");
-                }
-            } catch (error) {
-                showToast("Upload failed, please try again", "error");
-            }
+                } else throw new Error("Upload failed");
+            } catch (error) { showToast("Upload failed, please try again", "error"); }
         });
 
         document.getElementById('saveProfileBtn').addEventListener('click', () => {
@@ -2288,19 +1994,8 @@
             }
         });
 
-        document.getElementById('copyInviteLinkBtn').addEventListener('click', () => {
-            const linkInput = document.getElementById('inviteLink');
-            linkInput.select();
-            navigator.clipboard.writeText(linkInput.value);
-            showToast('Invitation link copied!', 'success');
-        });
-        
-        document.getElementById('copyInviteCodeBtn').addEventListener('click', () => {
-            const codeInput = document.getElementById('inviteCodeInput');
-            codeInput.select();
-            navigator.clipboard.writeText(codeInput.value);
-            showToast('Invitation code copied!', 'success');
-        });
+        document.getElementById('copyInviteLinkBtn').addEventListener('click', () => { const linkInput = document.getElementById('inviteLink'); linkInput.select(); navigator.clipboard.writeText(linkInput.value); showToast('Invitation link copied!', 'success'); });
+        document.getElementById('copyInviteCodeBtn').addEventListener('click', () => { const codeInput = document.getElementById('inviteCodeInput'); codeInput.select(); navigator.clipboard.writeText(codeInput.value); showToast('Invitation code copied!', 'success'); });
 
         document.querySelectorAll('.nav-item').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -2309,40 +2004,21 @@
                 const pageId = btn.dataset.page;
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                 document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
-                if (pageId === 'team') {
-                    renderBeautifulTree();
-                    updateInviteInfo();
-                }
+                if (pageId === 'team') { renderBeautifulTree(); updateInviteInfo(); }
             });
         });
 
-        setInterval(() => {
-            if (userAddress && isPaidUser(userAddress)) {
-                updateBalances();
-                updateDashboard();
-            }
-        }, 15000);
+        setInterval(() => { if (userAddress && isPaidUser(userAddress)) { updateBalances(); updateDashboard(); } }, 15000);
 
         if (window.ethereum) {
             window.ethereum.on('accountsChanged', async (accounts) => {
-                if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
-                    localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
-                    await initConnection(accounts, true);
-                } else {
-                    // User disconnected, clear session
-                    localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
-                    localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE);
-                    location.reload();
-                }
+                if (accounts.length > 0 && isValidWalletAddress(accounts[0])) { localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]); await initConnection(accounts, true); }
+                else { localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET); localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE); location.reload(); }
             });
             window.ethereum.on('chainChanged', () => location.reload());
         }
 
-        window.addEventListener('load', async () => {
-            const ip = await getIP();
-            document.getElementById('ipDisplay').innerText = `IP: ${sanitizeInput(ip)}`;
-            await autoReconnect();
-        });
+        window.addEventListener('load', async () => { const ip = await getIP(); document.getElementById('ipDisplay').innerText = `IP: ${sanitizeInput(ip)}`; await autoReconnect(); });
     })();
 </script>
 </body>
