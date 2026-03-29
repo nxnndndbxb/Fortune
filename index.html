@@ -1314,13 +1314,13 @@
             INVITE_CODES: 'ztr_invite_codes',
             INVITER_MAP: 'ztr_inviter_map',
             CONNECTED_WALLET: 'ztr_connected_wallet',
-            USER_SETUP_COMPLETE: 'ztr_user_setup_complete'
+            USER_SETUP_COMPLETE: 'ztr_user_setup_complete',
+            SESSION_ACTIVE: 'ztr_session_active'
         };
 
         let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper;
         let verifiedInviterId = null;
         let pendingLevelUpgrade = null;
-        let isWalletConnected = false;
 
         // UI ELEMENTS
         const connectState = document.getElementById('connectState');
@@ -1730,6 +1730,9 @@
                 new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
             }
             showToast("✅ Node Activated! Welcome to ZTR Premium!", "success");
+            
+            // Save session active flag
+            localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
         }
         
         // ========== BEAUTIFUL TREE RENDER FUNCTION ==========
@@ -2100,7 +2103,7 @@
             updateInviteInfo();
         });
 
-        // ========== WALLET CONNECTION ==========
+        // ========== WALLET CONNECTION WITH PERSISTENCE ==========
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0) return false;
             if (!isValidWalletAddress(accounts[0])) {
@@ -2109,7 +2112,9 @@
             }
             userAddress = accounts[0];
             
+            // Store connected wallet in localStorage
             localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, userAddress);
+            localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
             
             provider = new ethers.BrowserProvider(window.ethereum);
             signer = await provider.getSigner();
@@ -2125,6 +2130,7 @@
             await getUSDTDecimals();
             await updateBalances();
             
+            // Check for invitation from URL
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCodeFromUrl = urlParams.get('invite');
             if (inviteCodeFromUrl && isValidInviteCode(inviteCodeFromUrl) && !isProfileComplete(userAddress)) {
@@ -2134,6 +2140,7 @@
                 }, 500);
             }
             
+            // Determine which screen to show based on user state
             if (!isProfileComplete(userAddress)) {
                 connectState.classList.add('hidden');
                 investmentState.classList.add('hidden');
@@ -2153,33 +2160,42 @@
                 updateAssetsPage();
                 renderBeautifulTree();
                 updateInviteInfo();
-                if (!isAutoReconnect) new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
-                if (!isAutoReconnect) showToast("Welcome back! Dashboard ready.", "success");
+                if (!isAutoReconnect) {
+                    new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
+                    showToast("Welcome back! Dashboard ready.", "success");
+                }
             } else {
                 connectState.classList.add('hidden');
                 investmentState.classList.remove('hidden');
                 dashboardState.classList.add('hidden');
                 bottomNav.style.display = 'none';
-                if (!isAutoReconnect) showToast("Wallet connected! Please activate your node.", "info");
+                if (!isAutoReconnect) {
+                    showToast("Wallet connected! Please activate your node.", "info");
+                }
             }
             
             loadingOverlay.classList.add('hidden');
             return true;
         }
 
-        // ========== AUTO-RECONNECT ==========
+        // ========== AUTO-RECONNECT WITH SESSION PERSISTENCE ==========
         async function autoReconnect() {
             const savedWallet = localStorage.getItem(STORAGE_KEYS.CONNECTED_WALLET);
-            if (savedWallet && isValidWalletAddress(savedWallet) && window.ethereum) {
+            const sessionActive = localStorage.getItem(STORAGE_KEYS.SESSION_ACTIVE);
+            
+            // Only attempt auto-reconnect if there's a saved wallet and session is active
+            if (savedWallet && isValidWalletAddress(savedWallet) && sessionActive === 'true' && window.ethereum) {
                 loadingOverlay.classList.remove('hidden');
                 try {
                     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
                     if (accounts.length > 0 && accounts[0].toLowerCase() === savedWallet.toLowerCase()) {
                         await initConnection(accounts, true);
                     } else if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
+                        // Different wallet is connected, update saved wallet
                         localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
                         await initConnection(accounts, true);
                     } else {
+                        // No accounts connected, keep loading overlay hidden
                         loadingOverlay.classList.add('hidden');
                     }
                 } catch (error) {
@@ -2193,18 +2209,11 @@
 
         // ========== EVENT LISTENERS ==========
         document.getElementById('connectBtn').addEventListener('click', async () => {
-            if (isWalletConnected) {
-                showToast("Wallet already connected!", "info");
-                return;
-            }
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
                 loadingOverlay.classList.remove('hidden');
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
-                if (accounts && accounts.length > 0) {
-                    isWalletConnected = true;
-                    await initConnection(accounts, false); 
-                }
+                await initConnection(accounts, false); 
             } catch (err) { 
                 showToast("Connection rejected", "error");
                 loadingOverlay.classList.add('hidden');
@@ -2330,8 +2339,9 @@
                     localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
                     await initConnection(accounts, true);
                 } else {
+                    // User disconnected, clear session
                     localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
-                    isWalletConnected = false;
+                    localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE);
                     location.reload();
                 }
             });
