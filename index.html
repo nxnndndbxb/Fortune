@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1310,7 +1311,10 @@
     const CHAIN_ID = "0x38";
     const CHAIN_ID_DECIMAL = 56;
     const JOINING_FEE_USDT = 0.10;
-    const IMAGE_HOST_API_KEY = '6d207e02198a847aa98d0a2a901485a5';
+    
+    // ===== CHANGE THIS! =====
+    // Apni free API key https://api.imgbb.com/ se hasil karke yahan paste karen.
+    const IMAGE_HOST_API_KEY = 'YOUR_IMGBB_API_KEY_HERE';
     
     const LEVELS = [
         { id: 1, name: "Iron", price: 5, commission: 2, icon: "🛡️" },
@@ -2239,6 +2243,11 @@
         setupProfilePic.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
+
+            if (IMAGE_HOST_API_KEY === 'YOUR_IMGBB_API_KEY_HERE') {
+                showToast("Image hosting is not configured.", "error");
+                return;
+            }
             
             if (file.size > 2 * 1024 * 1024) {
                 showToast("Image too large! Max 2MB", "error");
@@ -2289,24 +2298,27 @@
                 verifiedInviterId = null;
                 return;
             }
-            
-            // FIXED: Accept any 8 character alphanumeric code
-            if (inviteCode.length !== 8) {
-                statusDiv.innerHTML = '<span class="status-error">❌ Invalid code. Code must be exactly 8 characters (A-Z, 0-9).</span>';
-                verifiedInviterId = null;
-                return;
+
+            if (!isValidInviteCode(inviteCode)) {
+                 statusDiv.innerHTML = '<span class="status-error">❌ Invalid code. Code must be 8 characters (A-Z, 0-9).</span>';
+                 verifiedInviterId = null;
+                 return;
             }
             
             const inviterWallet = getWalletByInviteCode(inviteCode);
+            
             if (inviterWallet && isValidWalletAddress(inviterWallet)) {
-                const inviterProfile = getUserProfile(inviterWallet);
-                if (inviterProfile) {
-                    verifiedInviterId = inviterProfile.userId;
+                // Check if the inviter has a User ID, not a full profile
+                const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
+                const inviterUserId = userIds[inviterWallet.toLowerCase()];
+
+                if(inviterUserId) {
+                    verifiedInviterId = inviterUserId;
                     statusDiv.innerHTML = `<span class="status-success">✅ Verified! You are invited by ID: ZTR-${verifiedInviterId}</span>`;
                     showToast(`Inviter found: ID: ZTR-${verifiedInviterId}`, 'success');
                 } else {
-                    statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter code not found. You can join without an inviter.</span>';
-                    verifiedInviterId = null;
+                     statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter not fully registered. You can join without an inviter.</span>';
+                     verifiedInviterId = null;
                 }
             } else {
                 statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter code not found. You can join without an inviter.</span>';
@@ -2551,6 +2563,11 @@
         profilePicInput.addEventListener('change', async (event) => {
             const file = event.target.files[0];
             if (!file) return;
+
+            if (IMAGE_HOST_API_KEY === 'YOUR_IMGBB_API_KEY_HERE') {
+                showToast("Image hosting is not configured.", "error");
+                return;
+            }
             
             if (file.size > 2 * 1024 * 1024) {
                 showToast("Image too large! Max 2MB", "error");
