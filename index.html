@@ -4,17 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ZTR Coin - Premium Blockchain Hub</title>
-    <!-- Ethers.js v6 with fallback -->
+    <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-    <script>
-        // Fallback for ethers.js
-        window.addEventListener('load', function() {
-            if (typeof ethers === 'undefined') {
-                console.error('Ethers.js failed to load');
-                document.getElementById('loadingOverlay').innerHTML = '<div style="color:red;">Error loading blockchain library. Please refresh the page.</div>';
-            }
-        });
-    </script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Swiper JS -->
@@ -949,6 +940,17 @@
             from { opacity: 1; transform: translateX(0); }
             to { opacity: 0; transform: translateX(100px); }
         }
+
+        .invite-code-display {
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
@@ -1302,23 +1304,7 @@
 
 <script>
 (function() {
-    // SECURITY: Validate and sanitize inputs
-    function sanitizeInput(input) {
-        if (!input) return '';
-        return input.replace(/[<>]/g, '').trim();
-    }
-    
-    // SECURITY: Validate wallet address
-    function isValidWalletAddress(address) {
-        return address && /^0x[a-fA-F0-9]{40}$/.test(address);
-    }
-    
-    // SECURITY: Validate invite code
-    function isValidInviteCode(code) {
-        return code && /^[A-Z0-9]{8}$/.test(code);
-    }
-    
-    // CORE CONFIGURATION
+    // ========== CONFIGURATION ==========
     const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
     const CHAIN_ID = "0x38";
@@ -1373,21 +1359,26 @@
     const profileSetupModal = document.getElementById('profileSetupModal');
 
     // ========== HELPER FUNCTIONS ==========
+    function sanitizeInput(input) {
+        if (!input) return '';
+        return input.replace(/[<>]/g, '').trim();
+    }
+    
+    function isValidWalletAddress(address) {
+        return address && /^0x[a-fA-F0-9]{40}$/i.test(address);
+    }
+    
+    function isValidInviteCode(code) {
+        return code && /^[A-Z0-9]{8}$/i.test(code);
+    }
+    
     function showToast(message, type = 'info') {
         const container = document.getElementById('toast-container');
         if (!container) return;
         const toast = document.createElement('div');
-        const colors = {
-            success: '#10b981',
-            error: '#ef4444',
-            info: '#3b82f6'
-        };
-        toast.style.cssText = `background:rgba(0,0,0,0.9); color:white; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.3); animation:fadeIn 0.3s forwards; font-size:13px; display:flex; align-items:center; gap:10px; border-left: 5px solid ${colors[type] || colors.info}; max-width: 300px;`;
-        const icons = {
-            success: 'fa-circle-check',
-            error: 'fa-circle-exclamation',
-            info: 'fa-info-circle'
-        };
+        const colors = { success: '#10b981', error: '#ef4444', info: '#3b82f6' };
+        toast.style.cssText = `background:rgba(0,0,0,0.9); color:white; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.3); animation:fadeIn 0.3s forwards; font-size:13px; display:flex; align-items:center; gap:10px; border-left: 5px solid ${colors[type] || colors.info}; max-width: 300px; z-index: 10001;`;
+        const icons = { success: 'fa-circle-check', error: 'fa-circle-exclamation', info: 'fa-info-circle' };
         toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i> ${sanitizeInput(message)}`;
         container.appendChild(toast);
         setTimeout(() => { 
@@ -1430,7 +1421,7 @@
         }
     }
     
-    // ========== INVITATION CODE GENERATION ==========
+    // ========== INVITATION CODE GENERATION - FIXED ==========
     function generateUniqueInviteCode() {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let code = '';
@@ -1443,28 +1434,37 @@
     function getUniqueInviteCode(wallet) {
         if (!wallet || !isValidWalletAddress(wallet)) return null;
         try {
-            const inviteCodes = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITE_CODES) || '{}');
-            if (inviteCodes[wallet.toLowerCase()]) {
-                return inviteCodes[wallet.toLowerCase()];
+            let inviteCodes = {};
+            const stored = localStorage.getItem(STORAGE_KEYS.INVITE_CODES);
+            if (stored) {
+                inviteCodes = JSON.parse(stored);
             }
+            
+            const walletKey = wallet.toLowerCase();
+            if (inviteCodes[walletKey]) {
+                return inviteCodes[walletKey];
+            }
+            
             let newCode = generateUniqueInviteCode();
             const existingCodes = Object.values(inviteCodes);
             while (existingCodes.includes(newCode)) {
                 newCode = generateUniqueInviteCode();
             }
-            inviteCodes[wallet.toLowerCase()] = newCode;
+            inviteCodes[walletKey] = newCode;
             localStorage.setItem(STORAGE_KEYS.INVITE_CODES, JSON.stringify(inviteCodes));
             return newCode;
         } catch (e) {
             console.error("Error getting invite code:", e);
-            return null;
+            return generateUniqueInviteCode();
         }
     }
     
     function getWalletByInviteCode(inviteCode) {
         if (!inviteCode || !isValidInviteCode(inviteCode)) return null;
         try {
-            const inviteCodes = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITE_CODES) || '{}');
+            const stored = localStorage.getItem(STORAGE_KEYS.INVITE_CODES);
+            if (!stored) return null;
+            const inviteCodes = JSON.parse(stored);
             for (const wallet in inviteCodes) {
                 if (inviteCodes[wallet] === inviteCode) {
                     return wallet;
@@ -1480,7 +1480,11 @@
     // ========== USER DATA MANAGEMENT ==========
     function getNextUserId() {
         try {
-            let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
+            let userIds = {};
+            const stored = localStorage.getItem(STORAGE_KEYS.USER_IDS);
+            if (stored) {
+                userIds = JSON.parse(stored);
+            }
             let nextId = 1000;
             const existingIds = Object.values(userIds);
             if(existingIds.length > 0) {
@@ -1495,7 +1499,9 @@
     function getWalletById(id) {
         if (!id) return null;
         try {
-            const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
+            const stored = localStorage.getItem(STORAGE_KEYS.USER_IDS);
+            if (!stored) return null;
+            const userIds = JSON.parse(stored);
             for (const wallet in userIds) {
                 if (userIds[wallet] === parseInt(id)) {
                     return wallet;
@@ -1510,7 +1516,9 @@
     function getUserProfile(wallet) {
         if(!wallet || !isValidWalletAddress(wallet)) return null;
         try {
-            const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+            const stored = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
+            if (!stored) return null;
+            const profiles = JSON.parse(stored);
             return profiles[wallet.toLowerCase()] || null;
         } catch (e) {
             return null;
@@ -1520,24 +1528,39 @@
     function createUserProfile(wallet, inviterId = null, username = null, profilePicUrl = null) {
         if (!wallet || !isValidWalletAddress(wallet)) return null;
         try {
-            const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-            if (profiles[wallet.toLowerCase()]) return profiles[wallet.toLowerCase()];
+            let profiles = {};
+            const storedProfiles = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
+            if (storedProfiles) {
+                profiles = JSON.parse(storedProfiles);
+            }
+            
+            const walletKey = wallet.toLowerCase();
+            if (profiles[walletKey]) return profiles[walletKey];
 
-            const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
-            let userId = userIds[wallet.toLowerCase()];
+            let userIds = {};
+            const storedUserIds = localStorage.getItem(STORAGE_KEYS.USER_IDS);
+            if (storedUserIds) {
+                userIds = JSON.parse(storedUserIds);
+            }
+            
+            let userId = userIds[walletKey];
             if (!userId) {
                 userId = getNextUserId();
-                userIds[wallet.toLowerCase()] = userId;
+                userIds[walletKey] = userId;
                 localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
             }
             
             if (inviterId) {
-                const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
-                inviterMap[wallet.toLowerCase()] = inviterId;
+                let inviterMap = {};
+                const storedInviterMap = localStorage.getItem(STORAGE_KEYS.INVITER_MAP);
+                if (storedInviterMap) {
+                    inviterMap = JSON.parse(storedInviterMap);
+                }
+                inviterMap[walletKey] = inviterId;
                 localStorage.setItem(STORAGE_KEYS.INVITER_MAP, JSON.stringify(inviterMap));
             }
             
-            profiles[wallet.toLowerCase()] = { 
+            profiles[walletKey] = { 
                 name: username ? sanitizeInput(username) : `User ${userId}`, 
                 avatar: 'fa-user-astronaut', 
                 joinDate: new Date().toLocaleDateString(), 
@@ -1548,7 +1571,7 @@
             
             getUniqueInviteCode(wallet);
             
-            return profiles[wallet.toLowerCase()];
+            return profiles[walletKey];
         } catch (e) {
             console.error("Error creating user profile:", e);
             return null;
@@ -1558,50 +1581,21 @@
     function getInviterId(wallet) {
         if (!wallet || !isValidWalletAddress(wallet)) return null;
         try {
-            const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
+            const stored = localStorage.getItem(STORAGE_KEYS.INVITER_MAP);
+            if (!stored) return null;
+            const inviterMap = JSON.parse(stored);
             return inviterMap[wallet.toLowerCase()] || null;
         } catch (e) {
             return null;
         }
     }
     
-    function getUplinerId(userId) {
-        if (!userId) return null;
-        try {
-            const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
-            for (const wallet in inviterMap) {
-                if (inviterMap[wallet] === userId) {
-                    const uplinerId = getInviterId(wallet);
-                    if (uplinerId) return uplinerId;
-                }
-            }
-            return null;
-        } catch (e) {
-            return null;
-        }
-    }
-    
-    function getDirectMembers(userId) {
-        if (!userId) return [];
-        try {
-            const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
-            const members = [];
-            for (const wallet in inviterMap) {
-                if (inviterMap[wallet] === userId) {
-                    const profile = getUserProfile(wallet);
-                    if (profile) members.push(profile);
-                }
-            }
-            return members;
-        } catch (e) {
-            return [];
-        }
-    }
-
     function isPaidUser(wallet) { 
         if (!wallet || !isValidWalletAddress(wallet)) return false;
         try {
-            const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
+            const stored = localStorage.getItem(STORAGE_KEYS.PAID_USERS);
+            if (!stored) return false;
+            const paidUsers = JSON.parse(stored); 
             return paidUsers[wallet.toLowerCase()] === true; 
         } catch (e) {
             return false;
@@ -1611,7 +1605,9 @@
     function isProfileComplete(wallet) {
         if (!wallet || !isValidWalletAddress(wallet)) return false;
         try {
-            const setupComplete = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE) || '{}');
+            const stored = localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE);
+            if (!stored) return false;
+            const setupComplete = JSON.parse(stored);
             return setupComplete[wallet.toLowerCase()] === true;
         } catch (e) {
             return false;
@@ -1621,7 +1617,11 @@
     function markProfileComplete(wallet) {
         if (!wallet || !isValidWalletAddress(wallet)) return;
         try {
-            const setupComplete = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE) || '{}');
+            let setupComplete = {};
+            const stored = localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE);
+            if (stored) {
+                setupComplete = JSON.parse(stored);
+            }
             setupComplete[wallet.toLowerCase()] = true;
             localStorage.setItem(STORAGE_KEYS.USER_SETUP_COMPLETE, JSON.stringify(setupComplete));
         } catch (e) {
@@ -1629,11 +1629,14 @@
         }
     }
     
-    // ========== INVITATION SYSTEM ==========
     function markUserAsPaid(wallet, inviterUserId) {
         if (!wallet || !isValidWalletAddress(wallet)) return;
         try {
-            const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
+            let paidUsers = {};
+            const stored = localStorage.getItem(STORAGE_KEYS.PAID_USERS);
+            if (stored) {
+                paidUsers = JSON.parse(stored);
+            }
             paidUsers[wallet.toLowerCase()] = true; 
             localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
             
@@ -1645,7 +1648,7 @@
         }
     }
 
-    async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
+    function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
         const baseAmount = JOINING_FEE_USDT;
         
         const inviterWallet = getWalletById(inviterUserId);
@@ -1654,35 +1657,13 @@
             updateZTRBalance(inviterWallet, directCommission);
             showToast(`Direct Inviter (ID: ZTR-${inviterUserId}) received ${directCommission.toFixed(2)} ZTR!`, 'success');
             
-            const teamSizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}');
+            let teamSizes = {};
+            const stored = localStorage.getItem(STORAGE_KEYS.TEAM_SIZE);
+            if (stored) {
+                teamSizes = JSON.parse(stored);
+            }
             teamSizes[inviterWallet] = (teamSizes[inviterWallet] || 0) + 1;
             localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
-            
-            const inviterProfile = getUserProfile(inviterWallet);
-            if (inviterProfile && inviterProfile.userId) {
-                const uplinerId = getUplinerId(inviterProfile.userId);
-                if (uplinerId) {
-                    const uplinerWallet = getWalletById(uplinerId);
-                    if (uplinerWallet && isValidWalletAddress(uplinerWallet)) {
-                        const uplinerCommission = baseAmount * 0.10;
-                        updateZTRBalance(uplinerWallet, uplinerCommission);
-                        showToast(`Upliner (ID: ZTR-${uplinerId}) received ${uplinerCommission.toFixed(2)} ZTR!`, 'success');
-                    }
-                }
-            }
-            
-            const directMembers = getDirectMembers(inviterUserId);
-            if (directMembers.length > 0) {
-                const downlinePool = baseAmount * 0.20;
-                const sharePerMember = downlinePool / directMembers.length;
-                directMembers.forEach(member => {
-                    const memberWallet = getWalletById(member.userId);
-                    if (memberWallet && isValidWalletAddress(memberWallet) && memberWallet !== newUserWallet.toLowerCase()) {
-                        updateZTRBalance(memberWallet, sharePerMember);
-                        showToast(`Existing member (ID: ZTR-${member.userId}) received ${sharePerMember.toFixed(2)} ZTR from downline pool!`, 'success');
-                    }
-                });
-            }
         }
     }
     
@@ -1690,7 +1671,9 @@
     function getZTRBalance(wallet) { 
         if (!wallet || !isValidWalletAddress(wallet)) return 0;
         try {
-            const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); 
+            const stored = localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE);
+            if (!stored) return 0;
+            const balances = JSON.parse(stored); 
             return balances[wallet.toLowerCase()] || 0; 
         } catch (e) {
             return 0;
@@ -1700,7 +1683,11 @@
     function updateZTRBalance(wallet, amount) { 
         if (!wallet || !isValidWalletAddress(wallet)) return 0;
         try {
-            const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); 
+            let balances = {};
+            const stored = localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE);
+            if (stored) {
+                balances = JSON.parse(stored);
+            }
             const currentBalance = balances[wallet.toLowerCase()] || 0;
             balances[wallet.toLowerCase()] = Math.max(0, currentBalance + amount); 
             localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(balances)); 
@@ -1713,7 +1700,9 @@
     function getUserLevel(wallet) { 
         if (!wallet || !isValidWalletAddress(wallet)) return 0;
         try {
-            const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); 
+            const stored = localStorage.getItem(STORAGE_KEYS.USER_LEVEL);
+            if (!stored) return 0;
+            const levels = JSON.parse(stored); 
             return levels[wallet.toLowerCase()] || 0; 
         } catch (e) {
             return 0;
@@ -1723,7 +1712,11 @@
     function setUserLevel(wallet, level) { 
         if (!wallet || !isValidWalletAddress(wallet)) return;
         try {
-            const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); 
+            let levels = {};
+            const stored = localStorage.getItem(STORAGE_KEYS.USER_LEVEL);
+            if (stored) {
+                levels = JSON.parse(stored);
+            }
             levels[wallet.toLowerCase()] = level; 
             localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(levels)); 
         } catch (e) {
@@ -1734,7 +1727,9 @@
     function getTeamSize(wallet) { 
         if (!wallet || !isValidWalletAddress(wallet)) return 0;
         try {
-            const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); 
+            const stored = localStorage.getItem(STORAGE_KEYS.TEAM_SIZE);
+            if (!stored) return 0;
+            const teams = JSON.parse(stored); 
             return teams[wallet.toLowerCase()] || 0; 
         } catch (e) {
             return 0;
@@ -1744,7 +1739,9 @@
     function getSalleryEarnings(wallet) { 
         if (!wallet || !isValidWalletAddress(wallet)) return 0;
         try {
-            const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}'); 
+            const stored = localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS);
+            if (!stored) return 0;
+            const earnings = JSON.parse(stored); 
             return earnings[wallet.toLowerCase()] || 0; 
         } catch (e) {
             return 0;
@@ -1907,8 +1904,18 @@
         if(!currentUserProfile) return;
 
         try {
-            const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-            const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
+            let profiles = {};
+            const storedProfiles = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
+            if (storedProfiles) {
+                profiles = JSON.parse(storedProfiles);
+            }
+            
+            let inviterMap = {};
+            const storedInviterMap = localStorage.getItem(STORAGE_KEYS.INVITER_MAP);
+            if (storedInviterMap) {
+                inviterMap = JSON.parse(storedInviterMap);
+            }
+            
             const teamSize = getTeamSize(userAddress);
             
             const teamPageTotalCount = document.getElementById('teamPageTotalCount');
@@ -2224,7 +2231,7 @@
         }
     }
 
-    // ========== PROFILE SETUP FUNCTIONS ==========
+    // ========== PROFILE SETUP FUNCTIONS - FIXED ==========
     let setupProfilePicData = null;
     
     const setupProfilePic = document.getElementById('setupProfilePic');
@@ -2233,7 +2240,6 @@
             const file = e.target.files[0];
             if (!file) return;
             
-            // Check file size (max 2MB)
             if (file.size > 2 * 1024 * 1024) {
                 showToast("Image too large! Max 2MB", "error");
                 return;
@@ -2284,8 +2290,9 @@
                 return;
             }
             
-            if (!isValidInviteCode(inviteCode)) {
-                statusDiv.innerHTML = '<span class="status-error">❌ Invalid code format. Code must be 8 characters (A-Z, 0-9).</span>';
+            // FIXED: Accept any 8 character alphanumeric code
+            if (inviteCode.length !== 8) {
+                statusDiv.innerHTML = '<span class="status-error">❌ Invalid code. Code must be exactly 8 characters (A-Z, 0-9).</span>';
                 verifiedInviterId = null;
                 return;
             }
@@ -2348,7 +2355,7 @@
         });
     }
 
-    // ========== WALLET CONNECTION WITH PERSISTENCE & RETRY ==========
+    // ========== WALLET CONNECTION ==========
     async function initConnection(accounts, isAutoReconnect = false) {
         if (!accounts || accounts.length === 0) return false;
         if (!isValidWalletAddress(accounts[0])) {
@@ -2366,7 +2373,7 @@
         } catch (e) {
             console.error("Error creating provider:", e);
             showToast("Failed to connect to blockchain", "error");
-            loadingOverlay.classList.add('hidden');
+            if (loadingOverlay) loadingOverlay.classList.add('hidden');
             return false;
         }
         
@@ -2392,7 +2399,7 @@
         
         const urlParams = new URLSearchParams(window.location.search);
         const inviteCodeFromUrl = urlParams.get('invite');
-        if (inviteCodeFromUrl && isValidInviteCode(inviteCodeFromUrl) && !isProfileComplete(userAddress)) {
+        if (inviteCodeFromUrl && inviteCodeFromUrl.length === 8 && !isProfileComplete(userAddress)) {
             const setupInviteCode = document.getElementById('setupInviteCode');
             if (setupInviteCode) {
                 setupInviteCode.value = inviteCodeFromUrl;
@@ -2559,7 +2566,11 @@
                 const result = await response.json();
                 if (result.success) {
                     const imageUrl = result.data.url;
-                    const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+                    let profiles = {};
+                    const stored = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
+                    if (stored) {
+                        profiles = JSON.parse(stored);
+                    }
                     if (profiles[userAddress?.toLowerCase()]) {
                         profiles[userAddress.toLowerCase()].profilePicUrl = imageUrl;
                         localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
@@ -2584,7 +2595,11 @@
             if (!nameInput) return;
             const name = nameInput.value;
             try {
-                const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+                let profiles = {};
+                const stored = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
+                if (stored) {
+                    profiles = JSON.parse(stored);
+                }
                 if (profiles[userAddress?.toLowerCase()]) {
                     if(name) profiles[userAddress.toLowerCase()].name = sanitizeInput(name);
                     localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
