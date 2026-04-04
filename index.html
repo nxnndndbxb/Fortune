@@ -375,7 +375,7 @@
             text-align: center;
         }
 
-        .invite-link-wrapper, .invite-code-wrapper {
+        .invite-code-wrapper {
             display: flex;
             align-items: center;
             background: rgba(0,0,0,0.4);
@@ -385,12 +385,12 @@
             margin-bottom: 15px;
         }
         
-        .invite-link-wrapper i, .invite-code-wrapper i {
+        .invite-code-wrapper i {
             padding: 0 15px;
             color: var(--text-muted);
         }
         
-        .invite-link-wrapper input, .invite-code-wrapper input {
+        .invite-code-wrapper input {
             flex-grow: 1;
             background: transparent;
             border: none;
@@ -400,7 +400,7 @@
             outline: none;
         }
         
-        .invite-link-wrapper button, .invite-code-wrapper button {
+        .invite-code-wrapper button {
             background: var(--primary);
             color: black;
             border: none;
@@ -1214,20 +1214,10 @@
                 <p style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:15px;">
                     Share this unique code with friends to invite them!
                 </p>
-                <div class="invite-code-wrapper" id="inviteCodeWrapper">
+                <div class="invite-code-wrapper">
                     <i class="fa-solid fa-ticket"></i>
                     <input type="text" id="inviteCodeInput" readonly value="Loading...">
                     <button id="copyInviteCodeBtn"><i class="fa-solid fa-copy"></i></button>
-                </div>
-                
-                <h3 style="margin-top: 20px;"><i class="fa-solid fa-link"></i> Your Invitation Link</h3>
-                <p style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:15px;">
-                    Share this link - your code will be automatically included!
-                </p>
-                <div class="invite-link-wrapper">
-                    <i class="fa-solid fa-link"></i>
-                    <input type="text" id="inviteLink" readonly value="Loading link...">
-                    <button id="copyInviteLinkBtn"><i class="fa-solid fa-copy"></i></button>
                 </div>
             </div>
             
@@ -1708,7 +1698,7 @@
         }
     }
     
-    // ========== NEW COMMISSION DISTRIBUTION LOGIC ==========
+    // ========== COMMISSION DISTRIBUTION LOGIC ==========
     // 40% to direct inviter
     // 10% to upliner (inviter's inviter)
     // 20% divided equally among all direct members of the inviter
@@ -1765,7 +1755,6 @@
             if (distributedCount > 0) {
                 showToast(`📊 ${distributedCount} team members shared ${twentyPercentAmount.toFixed(4)} ZTR (${(twentyPercentAmount*100/baseAmount).toFixed(0)}% pool)!`, 'info');
             } else {
-                // If no existing direct members, this 20% goes to platform
                 showToast(`📊 No existing team members, 20% pool added to platform rewards`, 'info');
             }
         } else {
@@ -1964,16 +1953,9 @@
     
     function updateInviteInfo() {
         if (!userAddress || !isValidWalletAddress(userAddress)) return;
-        const profile = getUserProfile(userAddress);
         const inviteCode = getUniqueInviteCode(userAddress);
-        if (profile && profile.userId && inviteCode) {
-            const baseUrl = window.location.origin + window.location.pathname;
-            const inviteLink = `${baseUrl}?invite=${inviteCode}`;
-            const inviteLinkInput = document.getElementById('inviteLink');
-            const inviteCodeInput = document.getElementById('inviteCodeInput');
-            if (inviteLinkInput) inviteLinkInput.value = inviteLink;
-            if (inviteCodeInput) inviteCodeInput.value = inviteCode;
-        }
+        const inviteCodeInput = document.getElementById('inviteCodeInput');
+        if (inviteCodeInput) inviteCodeInput.value = inviteCode;
     }
     
     function showInviterInfoOnPages(inviterUserId) {
@@ -2777,18 +2759,6 @@
         });
     }
 
-    const copyInviteLinkBtn = document.getElementById('copyInviteLinkBtn');
-    if (copyInviteLinkBtn) {
-        copyInviteLinkBtn.addEventListener('click', () => {
-            const linkInput = document.getElementById('inviteLink');
-            if (linkInput) {
-                linkInput.select();
-                navigator.clipboard.writeText(linkInput.value);
-                showToast('Invitation link copied!', 'success');
-            }
-        });
-    }
-    
     const copyInviteCodeBtn = document.getElementById('copyInviteCodeBtn');
     if (copyInviteCodeBtn) {
         copyInviteCodeBtn.addEventListener('click', () => {
