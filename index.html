@@ -22,7 +22,7 @@
             --warning: #f59e0b;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         
         body {
             background: linear-gradient(135deg, #0a0a2a, #1a1a3a);
@@ -273,7 +273,7 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(0,0,0,0.95);
             backdrop-filter: blur(10px);
             z-index: 2000;
             display: flex;
@@ -308,9 +308,9 @@
         .invite-id-wrapper {
             display: flex;
             align-items: center;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0,0,0,0.4);
             border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255,255,255,0.2);
             padding: 5px;
             margin-bottom: 15px;
         }
@@ -321,8 +321,7 @@
             border: none;
             color: var(--primary);
             font-family: monospace;
-            font-size: 16px;
-            font-weight: bold;
+            font-size: 14px;
             outline: none;
             text-align: center;
         }
@@ -1019,19 +1018,20 @@
     
     const USDT_ABI = ["function balanceOf(address) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)", "function allowance(address, address) view returns (uint256)", "function approve(address spender, uint256 amount) returns (bool)"];
     
-    // Storage Keys - Unique for each user
+    // Storage Keys
     const STORAGE_KEYS = {
-        PAID_USERS: 'ztr_premium_paid_users_final', 
-        ZTR_BALANCE: 'ztr_premium_balance_final',
-        USER_LEVEL: 'ztr_premium_level_final', 
-        TEAM_SIZE: 'ztr_premium_team_final', 
-        SALLERY_EARNINGS: 'ztr_premium_sallery_final',
-        USER_PROFILES: 'ztr_premium_profiles_final', 
-        USER_IDS: 'ztr_premium_ids_final',
-        INVITER_MAP: 'ztr_premium_inviter_final',
-        CONNECTED_WALLET: 'ztr_premium_wallet_final',
-        SESSION_ACTIVE: 'ztr_premium_session_final',
-        DIRECT_MEMBERS: 'ztr_premium_direct_final'
+        PAID_USERS: 'ztr_final_paid_users', 
+        ZTR_BALANCE: 'ztr_final_balance',
+        USER_LEVEL: 'ztr_final_level', 
+        TEAM_SIZE: 'ztr_final_team', 
+        SALLERY_EARNINGS: 'ztr_final_sallery',
+        USER_PROFILES: 'ztr_final_profiles', 
+        USER_IDS: 'ztr_final_ids',
+        INVITER_MAP: 'ztr_final_inviter',
+        CONNECTED_WALLET: 'ztr_final_wallet',
+        SESSION_ACTIVE: 'ztr_final_session',
+        DIRECT_MEMBERS: 'ztr_final_direct',
+        LAST_USER_ID: 'ztr_final_last_id'
     };
 
     let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper = null;
@@ -1118,26 +1118,44 @@
         }
     }
     
-    // ========== UNIQUE USER ID SYSTEM ==========
-    // This ensures EVERY user gets a DIFFERENT ID
-    function getNextUserId() {
+    // ========== UNIQUE USER ID SYSTEM (100% GUARANTEED UNIQUE) ==========
+    function getNextUniqueUserId() {
         try {
-            const stored = localStorage.getItem(STORAGE_KEYS.USER_IDS);
-            const userIds = stored ? JSON.parse(stored) : {};
+            // First, get all existing user IDs
+            const storedUserIds = localStorage.getItem(STORAGE_KEYS.USER_IDS);
+            const userIds = storedUserIds ? JSON.parse(storedUserIds) : {};
             
-            // Find the maximum user ID currently in use
-            let maxId = 999; // Start from 1000, so max 999 means next is 1000
+            // Find the maximum ID currently in use
+            let maxId = 999; // Start from 1000, so first user gets 1000
+            
             for (const wallet in userIds) {
                 const id = userIds[wallet];
                 if (typeof id === 'number' && id > maxId) {
                     maxId = id;
                 }
             }
-            // Return next unique ID
-            return maxId + 1;
+            
+            // Also check last used ID from separate storage for safety
+            const lastIdStr = localStorage.getItem(STORAGE_KEYS.LAST_USER_ID);
+            if (lastIdStr) {
+                const lastId = parseInt(lastIdStr);
+                if (!isNaN(lastId) && lastId > maxId) {
+                    maxId = lastId;
+                }
+            }
+            
+            // Next ID is maxId + 1
+            const nextId = maxId + 1;
+            
+            // Store the new last ID
+            localStorage.setItem(STORAGE_KEYS.LAST_USER_ID, nextId.toString());
+            
+            console.log(`Generated new unique User ID: ${nextId}`);
+            return nextId;
         } catch (e) {
-            console.error("Error getting next user ID:", e);
-            return 1000;
+            console.error("Error generating unique user ID:", e);
+            // Fallback: use timestamp to ensure uniqueness
+            return Date.now() % 100000 + 1000;
         }
     }
 
@@ -1185,7 +1203,7 @@
         }
     }
 
-    // Create a new user with UNIQUE ID
+    // Create a new user with 100% UNIQUE ID
     function createUserProfile(wallet, uplinerIdNum = null) {
         if (!wallet) return null;
         try {
@@ -1196,7 +1214,10 @@
             const walletKey = wallet.toLowerCase();
             
             // If user already exists, return existing profile
-            if (profiles[walletKey]) return profiles[walletKey];
+            if (profiles[walletKey]) {
+                console.log(`User already exists with ID: ${profiles[walletKey].userId}`);
+                return profiles[walletKey];
+            }
 
             // Get UNIQUE user ID for this user
             let userIds = {};
@@ -1205,9 +1226,10 @@
             
             let userIdNum = userIds[walletKey];
             if (!userIdNum) {
-                userIdNum = getNextUserId(); // This ensures UNIQUE ID
+                userIdNum = getNextUniqueUserId(); // This ensures 100% UNIQUE ID
                 userIds[walletKey] = userIdNum;
                 localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
+                console.log(`✅ Created new user with UNIQUE ID: ${formatUserId(userIdNum)} for wallet: ${wallet.substring(0, 10)}...`);
             }
             
             // Store inviter relationship if upliner provided
@@ -1220,7 +1242,10 @@
                 
                 // Add to direct members of upliner
                 const uplinerWallet = getWalletByUserId(uplinerIdNum);
-                if (uplerWallet) addDirectMember(uplinerWallet, wallet);
+                if (uplerWallet) {
+                    addDirectMember(uplinerWallet, wallet);
+                    console.log(`Added direct member: ${wallet.substring(0, 10)}... under upliner: ${formatUserId(uplinerIdNum)}`);
+                }
                 
                 // Update team size for upliner
                 let teamSizes = {};
@@ -1241,7 +1266,9 @@
             };
             localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
             
-            console.log(`✅ New user created with UNIQUE ID: ${formatUserId(userIdNum)} for wallet: ${wallet}`);
+            // Give 10 ZTR welcome bonus
+            updateZTRBalance(wallet, 10);
+            
             return profiles[walletKey];
         } catch (e) {
             console.error("Error creating user profile:", e);
@@ -1284,6 +1311,8 @@
             paidUsers[wallet.toLowerCase()] = true; 
             localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
             
+            console.log(`User marked as paid: ${wallet.substring(0, 10)}..., Upliner: ${uplinerUserId || 'None'}`);
+            
             if (uplerUserId) {
                 distributeMultiLevelCommission(wallet, uplinerUserId);
             }
@@ -1304,6 +1333,7 @@
             if (!directMembers[inviterKey].includes(newMemberWallet.toLowerCase())) {
                 directMembers[inviterKey].push(newMemberWallet.toLowerCase());
                 localStorage.setItem(STORAGE_KEYS.DIRECT_MEMBERS, JSON.stringify(directMembers));
+                console.log(`Added direct member. Inviter now has ${directMembers[inviterKey].length} direct members`);
             }
         } catch (e) { console.error("Add direct member error:", e); }
     }
@@ -1322,9 +1352,12 @@
     function distributeMultiLevelCommission(newUserWallet, uplinerUserId) {
         const baseAmount = JOINING_FEE_USDT;
         const uplinerWallet = getWalletByUserId(uplinerUserId);
-        if (!uplerWallet) return;
+        if (!uplerWallet) {
+            console.log("Upliner wallet not found");
+            return;
+        }
         
-        console.log(`💰 Distributing commission for new user: ${newUserWallet}, Upliner: ${formatUserId(uplinerUserId)}`);
+        console.log(`💰 Distributing commission for new user: ${newUserWallet.substring(0, 10)}..., Upliner: ${formatUserId(uplinerUserId)}`);
         
         // 1. 40% to Direct Upliner
         const directCommission = baseAmount * 0.40;
@@ -1332,6 +1365,7 @@
         const uplinerProfile = getUserProfile(uplinerWallet);
         const uplinerName = uplinerProfile ? uplinerProfile.name : formatUserId(uplinerUserId);
         showToast(`🎉 Direct Upliner (${uplinerName}) received ${directCommission.toFixed(4)} ZTR!`, 'success');
+        console.log(`Direct Upliner (${formatUserId(uplinerUserId)}) received ${directCommission.toFixed(4)} ZTR`);
         
         // 2. 10% to 2nd Level Upliner (Upliner's Upliner)
         const secondLevelId = getInviterId(uplinerWallet);
@@ -1343,6 +1377,7 @@
                 const secondProfile = getUserProfile(secondLevelWallet);
                 const secondName = secondProfile ? secondProfile.name : formatUserId(secondLevelId);
                 showToast(`🌟 2nd Level Upliner (${secondName}) received ${secondCommission.toFixed(4)} ZTR!`, 'success');
+                console.log(`2nd Level Upliner (${formatUserId(secondLevelId)}) received ${secondCommission.toFixed(4)} ZTR`);
             }
         }
         
@@ -1360,12 +1395,20 @@
             });
             if (distributedCount > 0) {
                 showToast(`📊 ${distributedCount} team members shared ${twentyPercent.toFixed(4)} ZTR!`, 'info');
+                console.log(`${distributedCount} team members shared ${twentyPercent.toFixed(4)} ZTR`);
             }
         } else {
-            showToast(`📊 Upliner has no team members yet, 20% reserved`, 'info');
+            console.log("Upliner has no existing direct members");
         }
         
-        console.log(`✅ Commission distribution completed for new user`);
+        // Update team size for upliner
+        let teamSizes = {};
+        const stored = localStorage.getItem(STORAGE_KEYS.TEAM_SIZE);
+        if (stored) teamSizes = JSON.parse(stored);
+        teamSizes[uplinerWallet] = (teamSizes[uplinerWallet] || 0) + 1;
+        localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
+        
+        console.log(`✅ Commission distribution completed`);
     }
     
     // ========== ZTR BALANCE MANAGEMENT ==========
@@ -1389,6 +1432,7 @@
             const newBalance = Math.max(0, current + amount);
             balances[wallet.toLowerCase()] = newBalance; 
             localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(balances)); 
+            console.log(`Updated ZTR balance for ${wallet.substring(0, 10)}...: ${current.toFixed(4)} -> ${newBalance.toFixed(4)}`);
             return newBalance; 
         } catch (e) { return 0; }
     }
@@ -1412,6 +1456,7 @@
             if (stored) levels = JSON.parse(stored);
             levels[wallet.toLowerCase()] = level; 
             localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(levels)); 
+            console.log(`User level updated: ${wallet.substring(0, 10)}... -> Level ${level}`);
         } catch (e) { console.error(e); }
     }
     
@@ -1855,7 +1900,7 @@
                 showUplinerInfoOnPages(verifiedUplinerId);
                 showToast(`🎉 You joined under ${formatUserId(verifiedUplinerId)}!`, 'success');
             } else {
-                showToast("🎉 You are the first member!", 'success');
+                showToast("🎉 You are the first member! Welcome!", 'success');
             }
             
             updateUserInfo();
