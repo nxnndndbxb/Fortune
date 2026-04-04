@@ -375,7 +375,7 @@
             text-align: center;
         }
 
-        .invite-code-wrapper {
+        .invite-id-wrapper {
             display: flex;
             align-items: center;
             background: rgba(0,0,0,0.4);
@@ -385,12 +385,12 @@
             margin-bottom: 15px;
         }
         
-        .invite-code-wrapper i {
+        .invite-id-wrapper i {
             padding: 0 15px;
             color: var(--text-muted);
         }
         
-        .invite-code-wrapper input {
+        .invite-id-wrapper input {
             flex-grow: 1;
             background: transparent;
             border: none;
@@ -400,7 +400,7 @@
             outline: none;
         }
         
-        .invite-code-wrapper button {
+        .invite-id-wrapper button {
             background: var(--primary);
             color: black;
             border: none;
@@ -827,40 +827,13 @@
             margin-bottom: 20px;
         }
         
-        .profile-setup-modal {
-            max-width: 400px;
-            width: 90%;
-        }
-        
-        .avatar-preview {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            margin: 0 auto 15px;
-            background: rgba(0,0,0,0.5);
-            border: 2px solid var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            color: var(--primary);
-            overflow: hidden;
-            cursor: pointer;
-        }
-        
-        .avatar-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .invite-code-input-group {
+        .invite-id-input-group {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
         }
         
-        .invite-code-input-group input {
+        .invite-id-input-group input {
             flex: 1;
             padding: 12px;
             border-radius: 12px;
@@ -868,10 +841,15 @@
             border: 1px solid rgba(255,255,255,0.2);
             color: white;
             font-family: monospace;
-            text-transform: uppercase;
+            font-size: 14px;
         }
         
-        .invite-code-input-group button {
+        .invite-id-input-group input::placeholder {
+            color: rgba(255,255,255,0.5);
+            font-family: monospace;
+        }
+        
+        .invite-id-input-group button {
             padding: 12px 20px;
             background: var(--primary);
             border: none;
@@ -940,25 +918,26 @@
             from { opacity: 1; transform: translateX(0); }
             to { opacity: 0; transform: translateX(100px); }
         }
-
-        .invite-code-display {
-            font-size: 20px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
-            border-radius: 10px;
-            text-align: center;
-            font-family: monospace;
-        }
-
-        .invite-verified-badge {
+        
+        .inviter-verified-badge {
             background: rgba(16, 185, 129, 0.2);
             border: 1px solid var(--success);
             border-radius: 12px;
             padding: 12px;
             margin-bottom: 15px;
             text-align: center;
+        }
+        
+        .userId-display {
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-family: monospace;
+            color: var(--primary);
         }
     </style>
 </head>
@@ -1025,44 +1004,33 @@
     </div>
 </div>
 
-<!-- Profile Setup Modal (First Time User) -->
-<div class="modal-overlay" id="profileSetupModal">
-    <div class="modal-content profile-setup-modal">
-        <i class="fa-solid fa-user-astronaut" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
-        <h2 style="margin-bottom: 15px;">Complete Your Profile</h2>
-        <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 20px;">Please setup your profile to continue</p>
+<!-- Join Modal with Upliner ID Entry (No Profile Making) -->
+<div class="modal-overlay" id="joinModal">
+    <div class="modal-content">
+        <i class="fa-solid fa-user-plus" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
+        <h2 style="margin-bottom: 15px;">Join ZTR Premium</h2>
+        <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 20px;">Enter your upliner's User ID (if any) to join</p>
         
-        <!-- Invite Code Verification Section - Before Profile Creation -->
-        <div id="preProfileVerifySection" style="margin-bottom: 20px;">
-            <div class="invite-code-input-group">
-                <input type="text" id="setupInviteCode" placeholder="Enter inviter's invitation code (optional)" maxlength="8" style="text-transform: uppercase;">
-                <button id="verifyInviteCodeBtn"><i class="fa-solid fa-check"></i> Verify</button>
-            </div>
-            <div id="inviterVerifyStatus" style="font-size: 11px; margin-bottom: 15px; text-align: left;"></div>
+        <div class="invite-id-input-group">
+            <input type="text" id="uplinerUserIdInput" placeholder="Enter Upliner User ID (e.g., ZTR-1001)" style="text-transform: uppercase;">
+            <button id="verifyUplinerBtn"><i class="fa-solid fa-check"></i> Verify</button>
         </div>
+        <div id="uplinerVerifyStatus" style="font-size: 11px; margin-bottom: 15px; text-align: left;"></div>
         
-        <div id="verifiedInviterDisplay" class="invite-verified-badge hidden">
+        <div id="verifiedUplinerDisplay" class="inviter-verified-badge hidden">
             <i class="fa-solid fa-user-check" style="color: var(--success);"></i>
-            <span id="verifiedInviterText">Invitation verified!</span>
+            <span id="verifiedUplinerText">Upliner verified!</span>
         </div>
-        
-        <div class="avatar-preview" id="avatarPreview" onclick="document.getElementById('setupProfilePic')?.click()">
-            <i class="fa-solid fa-user-circle" id="avatarPreviewIcon"></i>
-            <img id="avatarPreviewImg" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
-        </div>
-        <input type="file" id="setupProfilePic" class="hidden" accept="image/*">
-        
-        <input type="text" id="setupUsername" placeholder="Enter your username" style="width:100%; padding:12px; border-radius:12px; margin-bottom:15px;">
         
         <div class="commission-breakdown">
             <p><i class="fa-solid fa-chart-simple"></i> <strong>Commission Structure:</strong></p>
-            <p>• <span>40%</span> to Direct Inviter</p>
-            <p>• <span>10%</span> to Upliner (Inviter's Inviter)</p>
-            <p>• <span>20%</span> Split among all existing Direct Members of Inviter</p>
+            <p>• <span>40%</span> to Direct Upliner</p>
+            <p>• <span>10%</span> to 2nd Level Upliner</p>
+            <p>• <span>20%</span> Split among all existing Direct Members of Upliner</p>
             <p>• <span>30%</span> Platform Fee</p>
         </div>
         
-        <button class="btn btn-success" id="completeProfileBtn">Complete Setup</button>
+        <button class="btn btn-success" id="completeJoinBtn">Continue to Payment</button>
     </div>
 </div>
 
@@ -1097,16 +1065,6 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="editProfileModal">
-    <div class="modal-content">
-        <h3>Edit Identity</h3>
-        <p style="font-size:12px; color: rgba(255,255,255,0.7); margin-bottom:20px;">Your User ID cannot be changed.</p>
-        <input type="file" id="profilePicInput" class="hidden" accept="image/*">
-        <input type="text" id="profileNameInput" placeholder="Username" style="width:100%; padding:15px; border-radius:15px; margin-bottom:15px;">
-        <button class="btn" id="saveProfileBtn">Save Update</button>
-    </div>
-</div>
-
 <div class="navbar">
     <div class="logo">ZTR PREMIUM</div>
     <div style="display:flex; align-items:center; gap:8px;">
@@ -1133,14 +1091,17 @@
     <!-- State 2: Investment -->
     <div id="investmentState" class="hidden">
         <div class="main-card" style="text-align:center;">
-            <div id="inviterInfoOnInvestPage" class="inviter-info-card hidden">
-                <h4><i class="fa-solid fa-user-plus"></i> Invited By</h4>
-                <p id="inviterUserIdDisplay">Loading...</p>
+            <div id="uplinerInfoOnInvestPage" class="inviter-info-card hidden">
+                <h4><i class="fa-solid fa-user-plus"></i> Upliner</h4>
+                <p id="uplinerUserIdDisplay">Loading...</p>
             </div>
             <span class="rank-badge">ENTRY NODE</span>
             <h1 style="font-size:40px; margin:20px 0; color:var(--primary);">0.10 <span style="font-size:18px;">USDT</span></h1>
             <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; margin: 15px 0;">
                 <i class="fa-solid fa-wallet"></i> <span id="investmentWalletAddress">Loading...</span>
+            </div>
+            <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; margin: 15px 0;">
+                <i class="fa-solid fa-id-card"></i> Your User ID: <span id="newUserIdDisplay" style="color: var(--gold); font-weight: bold;">Loading...</span>
             </div>
             <ul style="text-align:left; list-style:none; margin:20px 0; color:rgba(255,255,255,0.7); font-size:14px;">
                 <li style="margin-bottom:10px;"><i class="fa-solid fa-circle-check" style="color:var(--primary);"></i> Permanent Protocol Access</li>
@@ -1167,8 +1128,12 @@
                     <span class="rank-badge" id="userRankBadge">Verified Member</span>
                 </div>
 
-                <div id="inviterDisplayOnHome" class="invite-badge" style="margin: 10px 0;">
-                    <i class="fa-solid fa-user-check"></i> Invited By: <span id="homeInviterId">None</span>
+                <div id="uplinerDisplayOnHome" class="invite-badge" style="margin: 10px 0;">
+                    <i class="fa-solid fa-user-check"></i> Upliner: <span id="homeUplinerId">None</span>
+                </div>
+                
+                <div class="invite-badge" style="margin: 10px 0;">
+                    <i class="fa-solid fa-id-card"></i> Your User ID: <span id="homeUserId" style="color: var(--gold); font-weight: bold;">Loading...</span>
                 </div>
 
                 <div class="income-grid">
@@ -1210,14 +1175,14 @@
 
         <div id="pageTeam" class="page">
             <div class="main-card">
-                <h3><i class="fa-solid fa-share-alt"></i> Your Invitation Code</h3>
+                <h3><i class="fa-solid fa-share-alt"></i> Your User ID</h3>
                 <p style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:15px;">
-                    Share this unique code with friends to invite them!
+                    Share this User ID with friends to invite them!
                 </p>
-                <div class="invite-code-wrapper">
-                    <i class="fa-solid fa-ticket"></i>
-                    <input type="text" id="inviteCodeInput" readonly value="Loading...">
-                    <button id="copyInviteCodeBtn"><i class="fa-solid fa-copy"></i></button>
+                <div class="invite-id-wrapper">
+                    <i class="fa-solid fa-id-card"></i>
+                    <input type="text" id="userIdInput" readonly value="Loading...">
+                    <button id="copyUserIdBtn"><i class="fa-solid fa-copy"></i></button>
                 </div>
             </div>
             
@@ -1248,14 +1213,13 @@
                     <img src="https://iili.io/qsZGN6P.jpg" class="cover-photo" alt="Cover Photo" onerror="this.src='https://via.placeholder.com/400x150?text=Cover+Photo'">
                 </div>
                 <div style="padding: 25px; padding-top: 0;">
-                    <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('profilePicInput')?.click()">
-                        <i class="fa-solid fa-user-circle" id="avatarIcon"></i>
+                    <div class="profile-avatar" id="profileAvatar">
+                        <i class="fa-solid fa-user-astronaut" id="avatarIcon"></i>
                         <img src="" alt="Profile Picture" id="profileAvatarImg" class="profile-avatar-img hidden">
                     </div>
                     <div style="text-align:center; margin-bottom:25px;">
                         <h2 id="profileName">Genesis User</h2>
                         <span style="font-size:12px; color:var(--primary);" id="userId">ID: ZTR-0000</span>
-                        <div style="font-size:11px; color:rgba(255,255,255,0.7); margin-top:5px;" id="profileInviteCode"></div>
                     </div>
 
                     <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:15px; font-family:monospace; font-size:11px; text-align:center; color:var(--primary); margin-bottom:20px; border:1px dashed var(--primary); cursor:pointer;" id="walletAddressDisplay" onclick="window.copyWalletAddress && copyWalletAddress()">
@@ -1294,8 +1258,6 @@
                             <span id="userLevelStat" style="color:var(--primary);">Start</span>
                         </div>
                     </div>
-
-                    <button class="btn" onclick="window.openModal && openModal('editProfileModal')" style="margin-top:25px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">MODIFY IDENTITY</button>
                 </div>
             </div>
         </div>
@@ -1318,9 +1280,6 @@
     const CHAIN_ID = "0x38";
     const CHAIN_ID_DECIMAL = 56;
     const JOINING_FEE_USDT = 0.10;
-    
-    // ===== IMAGE HOSTING API KEY (Replace with your key) =====
-    const IMAGE_HOST_API_KEY = 'YOUR_IMGBB_API_KEY_HERE';
     
     const LEVELS = [
         { id: 1, name: "Iron", price: 5, commission: 2, icon: "🛡️" },
@@ -1345,18 +1304,17 @@
         SALLERY_EARNINGS: 'ztr_sallery_earnings',
         USER_PROFILES: 'ztr_user_profiles', 
         USER_IDS: 'ztr_user_ids',
-        INVITE_CODES: 'ztr_invite_codes',
         INVITER_MAP: 'ztr_inviter_map',
         CONNECTED_WALLET: 'ztr_connected_wallet',
-        USER_SETUP_COMPLETE: 'ztr_user_setup_complete',
         SESSION_ACTIVE: 'ztr_session_active',
         DIRECT_MEMBERS: 'ztr_direct_members'
     };
 
     let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper = null;
-    let verifiedInviterId = null;
+    let verifiedUplinerId = null;
     let pendingLevelUpgrade = null;
     let dashboardSwiperInstance = null;
+    let currentUserProfile = null;
 
     // UI ELEMENTS
     const connectState = document.getElementById('connectState');
@@ -1367,7 +1325,7 @@
     const levelStarsPage = document.getElementById('levelStarsPage');
     const joiningStarsPage = document.getElementById('joiningStarsPage');
     const loadingOverlay = document.getElementById('loadingOverlay');
-    const profileSetupModal = document.getElementById('profileSetupModal');
+    const joinModal = document.getElementById('joinModal');
 
     // ========== HELPER FUNCTIONS ==========
     function sanitizeInput(input) {
@@ -1379,8 +1337,29 @@
         return address && /^0x[a-fA-F0-9]{40}$/i.test(address);
     }
     
-    function isValidInviteCode(code) {
-        return code && /^[A-Z0-9]{8}$/i.test(code);
+    function isValidUserId(userId) {
+        if (!userId) return false;
+        const match = userId.toString().match(/ZTR-(\d+)/i);
+        if (match) {
+            return !isNaN(parseInt(match[1]));
+        }
+        return /^\d+$/.test(userId);
+    }
+    
+    function extractUserIdNumber(input) {
+        if (!input) return null;
+        const match = input.toString().match(/ZTR-(\d+)/i);
+        if (match) {
+            return parseInt(match[1]);
+        }
+        if (/^\d+$/.test(input)) {
+            return parseInt(input);
+        }
+        return null;
+    }
+    
+    function formatUserId(userIdNum) {
+        return `ZTR-${userIdNum}`;
     }
     
     function showToast(message, type = 'info') {
@@ -1432,62 +1411,147 @@
         }
     }
     
-    // ========== INVITATION CODE GENERATION ==========
-    function generateUniqueInviteCode() {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let code = '';
-        for (let i = 0; i < 8; i++) {
-            code += characters.charAt(Math.floor(Math.random() * characters.length));
-        }
-        return code;
-    }
-    
-    function getUniqueInviteCode(wallet) {
-        if (!wallet || !isValidWalletAddress(wallet)) return null;
+    // ========== USER DATA MANAGEMENT ==========
+    function getNextUserId() {
         try {
-            let inviteCodes = {};
-            const stored = localStorage.getItem(STORAGE_KEYS.INVITE_CODES);
+            let userIds = {};
+            const stored = localStorage.getItem(STORAGE_KEYS.USER_IDS);
             if (stored) {
-                inviteCodes = JSON.parse(stored);
+                userIds = JSON.parse(stored);
             }
-            
-            const walletKey = wallet.toLowerCase();
-            if (inviteCodes[walletKey]) {
-                return inviteCodes[walletKey];
+            let nextId = 1000;
+            const existingIds = Object.values(userIds);
+            if(existingIds.length > 0) {
+                nextId = Math.max(...existingIds) + 1;
             }
-            
-            let newCode = generateUniqueInviteCode();
-            const existingCodes = Object.values(inviteCodes);
-            while (existingCodes.includes(newCode)) {
-                newCode = generateUniqueInviteCode();
-            }
-            inviteCodes[walletKey] = newCode;
-            localStorage.setItem(STORAGE_KEYS.INVITE_CODES, JSON.stringify(inviteCodes));
-            return newCode;
+            return nextId;
         } catch (e) {
-            console.error("Error getting invite code:", e);
-            return generateUniqueInviteCode();
+            return 1000;
         }
     }
-    
-    function getWalletByInviteCode(inviteCode) {
-        if (!inviteCode || !isValidInviteCode(inviteCode)) return null;
+
+    function getWalletById(userIdNum) {
+        if (!userIdNum) return null;
         try {
-            const stored = localStorage.getItem(STORAGE_KEYS.INVITE_CODES);
+            const stored = localStorage.getItem(STORAGE_KEYS.USER_IDS);
             if (!stored) return null;
-            const inviteCodes = JSON.parse(stored);
-            for (const wallet in inviteCodes) {
-                if (inviteCodes[wallet] === inviteCode) {
+            const userIds = JSON.parse(stored);
+            for (const wallet in userIds) {
+                if (userIds[wallet] === parseInt(userIdNum)) {
                     return wallet;
                 }
             }
             return null;
         } catch (e) {
-            console.error("Error getting wallet by invite code:", e);
+            return null;
+        }
+    }
+    
+    function getUserIdByWallet(wallet) {
+        if (!wallet || !isValidWalletAddress(wallet)) return null;
+        try {
+            const stored = localStorage.getItem(STORAGE_KEYS.USER_IDS);
+            if (!stored) return null;
+            const userIds = JSON.parse(stored);
+            return userIds[wallet.toLowerCase()] || null;
+        } catch (e) {
+            return null;
+        }
+    }
+    
+    function getUserProfile(wallet) {
+        if(!wallet || !isValidWalletAddress(wallet)) return null;
+        try {
+            const stored = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
+            if (!stored) return null;
+            const profiles = JSON.parse(stored);
+            return profiles[wallet.toLowerCase()] || null;
+        } catch (e) {
             return null;
         }
     }
 
+    function createUserProfile(wallet, uplinerIdNum = null) {
+        if (!wallet || !isValidWalletAddress(wallet)) return null;
+        try {
+            let profiles = {};
+            const storedProfiles = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
+            if (storedProfiles) {
+                profiles = JSON.parse(storedProfiles);
+            }
+            
+            const walletKey = wallet.toLowerCase();
+            if (profiles[walletKey]) return profiles[walletKey];
+
+            let userIds = {};
+            const storedUserIds = localStorage.getItem(STORAGE_KEYS.USER_IDS);
+            if (storedUserIds) {
+                userIds = JSON.parse(storedUserIds);
+            }
+            
+            let userIdNum = userIds[walletKey];
+            if (!userIdNum) {
+                userIdNum = getNextUserId();
+                userIds[walletKey] = userIdNum;
+                localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
+            }
+            
+            if (uplinerIdNum) {
+                let inviterMap = {};
+                const storedInviterMap = localStorage.getItem(STORAGE_KEYS.INVITER_MAP);
+                if (storedInviterMap) {
+                    inviterMap = JSON.parse(storedInviterMap);
+                }
+                inviterMap[walletKey] = uplinerIdNum;
+                localStorage.setItem(STORAGE_KEYS.INVITER_MAP, JSON.stringify(inviterMap));
+                
+                // Add to direct members of upliner
+                const uplinerWallet = getWalletById(uplinerIdNum);
+                if (uplinerWallet) {
+                    addDirectMember(uplinerWallet, wallet);
+                }
+            }
+            
+            profiles[walletKey] = { 
+                name: `User ${userIdNum}`, 
+                avatar: 'fa-user-astronaut', 
+                joinDate: new Date().toLocaleDateString(), 
+                userId: userIdNum,
+                profilePicUrl: null
+            };
+            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
+            
+            return profiles[walletKey];
+        } catch (e) {
+            console.error("Error creating user profile:", e);
+            return null;
+        }
+    }
+    
+    function getInviterId(wallet) {
+        if (!wallet || !isValidWalletAddress(wallet)) return null;
+        try {
+            const stored = localStorage.getItem(STORAGE_KEYS.INVITER_MAP);
+            if (!stored) return null;
+            const inviterMap = JSON.parse(stored);
+            return inviterMap[wallet.toLowerCase()] || null;
+        } catch (e) {
+            return null;
+        }
+    }
+    
+    function isPaidUser(wallet) { 
+        if (!wallet || !isValidWalletAddress(wallet)) return false;
+        try {
+            const stored = localStorage.getItem(STORAGE_KEYS.PAID_USERS);
+            if (!stored) return false;
+            const paidUsers = JSON.parse(stored); 
+            return paidUsers[wallet.toLowerCase()] === true; 
+        } catch (e) {
+            return false;
+        }
+    }
+    
     // ========== DIRECT MEMBERS MANAGEMENT ==========
     function addDirectMember(inviterWallet, newMemberWallet) {
         if (!inviterWallet || !newMemberWallet || !isValidWalletAddress(inviterWallet) || !isValidWalletAddress(newMemberWallet)) return;
@@ -1522,219 +1586,39 @@
         }
     }
     
-    function getUplinerWallet(wallet) {
-        const inviterId = getInviterId(wallet);
-        if (!inviterId) return null;
-        return getWalletById(inviterId);
-    }
-
-    // ========== USER DATA MANAGEMENT ==========
-    function getNextUserId() {
-        try {
-            let userIds = {};
-            const stored = localStorage.getItem(STORAGE_KEYS.USER_IDS);
-            if (stored) {
-                userIds = JSON.parse(stored);
-            }
-            let nextId = 1000;
-            const existingIds = Object.values(userIds);
-            if(existingIds.length > 0) {
-                nextId = Math.max(...existingIds) + 1;
-            }
-            return nextId;
-        } catch (e) {
-            return 1000;
-        }
-    }
-
-    function getWalletById(id) {
-        if (!id) return null;
-        try {
-            const stored = localStorage.getItem(STORAGE_KEYS.USER_IDS);
-            if (!stored) return null;
-            const userIds = JSON.parse(stored);
-            for (const wallet in userIds) {
-                if (userIds[wallet] === parseInt(id)) {
-                    return wallet;
-                }
-            }
-            return null;
-        } catch (e) {
-            return null;
-        }
-    }
-    
-    function getUserIdByWallet(wallet) {
-        if (!wallet || !isValidWalletAddress(wallet)) return null;
-        try {
-            const stored = localStorage.getItem(STORAGE_KEYS.USER_IDS);
-            if (!stored) return null;
-            const userIds = JSON.parse(stored);
-            return userIds[wallet.toLowerCase()] || null;
-        } catch (e) {
-            return null;
-        }
-    }
-    
-    function getUserProfile(wallet) {
-        if(!wallet || !isValidWalletAddress(wallet)) return null;
-        try {
-            const stored = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
-            if (!stored) return null;
-            const profiles = JSON.parse(stored);
-            return profiles[wallet.toLowerCase()] || null;
-        } catch (e) {
-            return null;
-        }
-    }
-
-    function createUserProfile(wallet, inviterId = null, username = null, profilePicUrl = null) {
-        if (!wallet || !isValidWalletAddress(wallet)) return null;
-        try {
-            let profiles = {};
-            const storedProfiles = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
-            if (storedProfiles) {
-                profiles = JSON.parse(storedProfiles);
-            }
-            
-            const walletKey = wallet.toLowerCase();
-            if (profiles[walletKey]) return profiles[walletKey];
-
-            let userIds = {};
-            const storedUserIds = localStorage.getItem(STORAGE_KEYS.USER_IDS);
-            if (storedUserIds) {
-                userIds = JSON.parse(storedUserIds);
-            }
-            
-            let userId = userIds[walletKey];
-            if (!userId) {
-                userId = getNextUserId();
-                userIds[walletKey] = userId;
-                localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
-            }
-            
-            if (inviterId) {
-                let inviterMap = {};
-                const storedInviterMap = localStorage.getItem(STORAGE_KEYS.INVITER_MAP);
-                if (storedInviterMap) {
-                    inviterMap = JSON.parse(storedInviterMap);
-                }
-                inviterMap[walletKey] = inviterId;
-                localStorage.setItem(STORAGE_KEYS.INVITER_MAP, JSON.stringify(inviterMap));
-                
-                // Add to direct members of inviter
-                const inviterWallet = getWalletById(inviterId);
-                if (inviterWallet) {
-                    addDirectMember(inviterWallet, wallet);
-                }
-            }
-            
-            profiles[walletKey] = { 
-                name: username ? sanitizeInput(username) : `User ${userId}`, 
-                avatar: 'fa-user-astronaut', 
-                joinDate: new Date().toLocaleDateString(), 
-                userId: userId,
-                profilePicUrl: profilePicUrl ? sanitizeInput(profilePicUrl) : null
-            };
-            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-            
-            getUniqueInviteCode(wallet);
-            
-            return profiles[walletKey];
-        } catch (e) {
-            console.error("Error creating user profile:", e);
-            return null;
-        }
-    }
-    
-    function getInviterId(wallet) {
-        if (!wallet || !isValidWalletAddress(wallet)) return null;
-        try {
-            const stored = localStorage.getItem(STORAGE_KEYS.INVITER_MAP);
-            if (!stored) return null;
-            const inviterMap = JSON.parse(stored);
-            return inviterMap[wallet.toLowerCase()] || null;
-        } catch (e) {
-            return null;
-        }
-    }
-    
-    function isPaidUser(wallet) { 
-        if (!wallet || !isValidWalletAddress(wallet)) return false;
-        try {
-            const stored = localStorage.getItem(STORAGE_KEYS.PAID_USERS);
-            if (!stored) return false;
-            const paidUsers = JSON.parse(stored); 
-            return paidUsers[wallet.toLowerCase()] === true; 
-        } catch (e) {
-            return false;
-        }
-    }
-    
-    function isProfileComplete(wallet) {
-        if (!wallet || !isValidWalletAddress(wallet)) return false;
-        try {
-            const stored = localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE);
-            if (!stored) return false;
-            const setupComplete = JSON.parse(stored);
-            return setupComplete[wallet.toLowerCase()] === true;
-        } catch (e) {
-            return false;
-        }
-    }
-    
-    function markProfileComplete(wallet) {
-        if (!wallet || !isValidWalletAddress(wallet)) return;
-        try {
-            let setupComplete = {};
-            const stored = localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE);
-            if (stored) {
-                setupComplete = JSON.parse(stored);
-            }
-            setupComplete[wallet.toLowerCase()] = true;
-            localStorage.setItem(STORAGE_KEYS.USER_SETUP_COMPLETE, JSON.stringify(setupComplete));
-        } catch (e) {
-            console.error("Error marking profile complete:", e);
-        }
-    }
-    
     // ========== COMMISSION DISTRIBUTION LOGIC ==========
-    // 40% to direct inviter
-    // 10% to upliner (inviter's inviter)
-    // 20% divided equally among all direct members of the inviter
-    function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
+    function distributeMultiLevelCommission(newUserWallet, uplinerUserId) {
         const baseAmount = JOINING_FEE_USDT;
         
-        // Get inviter wallet from user ID
-        const inviterWallet = getWalletById(inviterUserId);
+        const uplinerWallet = getWalletById(uplinerUserId);
         
-        if (!inviterWallet || !isValidWalletAddress(inviterWallet)) {
-            console.log("No valid inviter found");
+        if (!uplinerWallet || !isValidWalletAddress(uplinerWallet)) {
+            console.log("No valid upliner found");
             return;
         }
         
-        // 1. 40% to Direct Inviter
+        // 1. 40% to Direct Upliner
         const directCommission = baseAmount * 0.40;
-        updateZTRBalance(inviterWallet, directCommission);
-        const inviterProfile = getUserProfile(inviterWallet);
-        const inviterName = inviterProfile ? inviterProfile.name : `ID: ZTR-${inviterUserId}`;
-        showToast(`🎉 Direct Inviter (${inviterName}) received ${directCommission.toFixed(4)} ZTR!`, 'success');
+        updateZTRBalance(uplinerWallet, directCommission);
+        const uplinerProfile = getUserProfile(uplinerWallet);
+        const uplinerName = uplinerProfile ? uplinerProfile.name : `ID: ZTR-${uplinerUserId}`;
+        showToast(`🎉 Direct Upliner (${uplinerName}) received ${directCommission.toFixed(4)} ZTR!`, 'success');
         
-        // 2. 10% to Upliner (Inviter's Inviter - 2nd level)
-        const uplinerId = getInviterId(inviterWallet);
-        if (uplinerId) {
-            const uplinerWallet = getWalletById(uplinerId);
-            if (uplinerWallet && isValidWalletAddress(uplinerWallet)) {
-                const uplinerCommission = baseAmount * 0.10;
-                updateZTRBalance(uplinerWallet, uplinerCommission);
-                const uplinerProfile = getUserProfile(uplinerWallet);
-                const uplinerName = uplinerProfile ? uplinerProfile.name : `ID: ZTR-${uplinerId}`;
-                showToast(`🌟 Upliner (${uplinerName}) received ${uplinerCommission.toFixed(4)} ZTR!`, 'success');
+        // 2. 10% to 2nd Level Upliner
+        const secondLevelId = getInviterId(uplinerWallet);
+        if (secondLevelId) {
+            const secondLevelWallet = getWalletById(secondLevelId);
+            if (secondLevelWallet && isValidWalletAddress(secondLevelWallet)) {
+                const secondLevelCommission = baseAmount * 0.10;
+                updateZTRBalance(secondLevelWallet, secondLevelCommission);
+                const secondLevelProfile = getUserProfile(secondLevelWallet);
+                const secondLevelName = secondLevelProfile ? secondLevelProfile.name : `ID: ZTR-${secondLevelId}`;
+                showToast(`🌟 2nd Level Upliner (${secondLevelName}) received ${secondLevelCommission.toFixed(4)} ZTR!`, 'success');
             }
         }
         
-        // 3. 20% Split among all existing Direct Members of Inviter
-        const directMembers = getDirectMembers(inviterWallet);
+        // 3. 20% Split among all existing Direct Members of Upliner
+        const directMembers = getDirectMembers(uplinerWallet);
         const twentyPercentAmount = baseAmount * 0.20;
         
         if (directMembers.length > 0) {
@@ -1758,16 +1642,16 @@
                 showToast(`📊 No existing team members, 20% pool added to platform rewards`, 'info');
             }
         } else {
-            showToast(`📊 Inviter has no team members yet, 20% pool reserved for future distribution`, 'info');
+            showToast(`📊 Upliner has no team members yet, 20% pool reserved for future distribution`, 'info');
         }
         
-        // Update team size for inviter
+        // Update team size for upliner
         let teamSizes = {};
         const stored = localStorage.getItem(STORAGE_KEYS.TEAM_SIZE);
         if (stored) {
             teamSizes = JSON.parse(stored);
         }
-        teamSizes[inviterWallet] = (teamSizes[inviterWallet] || 0) + 1;
+        teamSizes[uplinerWallet] = (teamSizes[uplinerWallet] || 0) + 1;
         localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
     }
     
@@ -1875,15 +1759,12 @@
         if (!userAddress || !isValidWalletAddress(userAddress)) return;
         const profile = getUserProfile(userAddress);
         if (!profile) return;
-        const inviteCode = getUniqueInviteCode(userAddress);
         const userIdSpan = document.getElementById('userId');
         if (userIdSpan) userIdSpan.innerText = `ID: ZTR-${profile.userId}`;
         const profileNameSpan = document.getElementById('profileName');
         if (profileNameSpan) profileNameSpan.innerText = profile.name;
         const joinDateSpan = document.getElementById('joinDate');
         if (joinDateSpan) joinDateSpan.innerText = profile.joinDate;
-        const profileInviteCodeDiv = document.getElementById('profileInviteCode');
-        if (profileInviteCodeDiv) profileInviteCodeDiv.innerHTML = `<i class="fa-solid fa-ticket"></i> Invite Code: ${inviteCode || 'N/A'}`;
         
         const avatarIcon = document.getElementById('avatarIcon');
         const avatarImg = document.getElementById('profileAvatarImg');
@@ -1917,6 +1798,9 @@
 
     function updateDashboard() {
         if (!userAddress || !isValidWalletAddress(userAddress)) return;
+        const profile = getUserProfile(userAddress);
+        if (!profile) return;
+        
         const ztr = getZTRBalance(userAddress);
         const level = getCurrentLevelInfo(userAddress);
         const team = getTeamSize(userAddress);
@@ -1929,6 +1813,7 @@
         const salleryIncome = document.getElementById('salleryIncome');
         const levelIncome = document.getElementById('levelIncome');
         const userRankBadge = document.getElementById('userRankBadge');
+        const homeUserIdSpan = document.getElementById('homeUserId');
         
         if (profitIncome) profitIncome.innerText = `${ztr.toFixed(2)} ZTR`;
         if (profitUSD) profitUSD.innerText = ztr.toFixed(2);
@@ -1937,43 +1822,46 @@
         if (salleryIncome) salleryIncome.innerText = `${salary.toFixed(2)} ZTR`;
         if (levelIncome) levelIncome.innerText = level.name;
         if (userRankBadge) userRankBadge.innerText = level.name;
+        if (homeUserIdSpan) homeUserIdSpan.innerText = formatUserId(profile.userId);
         
-        const inviterId = getInviterId(userAddress);
-        const homeInviterSpan = document.getElementById('homeInviterId');
-        const inviterDisplayOnHome = document.getElementById('inviterDisplayOnHome');
-        if (homeInviterSpan) {
-            if (inviterId) {
-                homeInviterSpan.innerText = `ID: ZTR-${inviterId}`;
-                if (inviterDisplayOnHome) inviterDisplayOnHome.classList.remove('hidden');
+        const uplinerId = getInviterId(userAddress);
+        const homeUplinerSpan = document.getElementById('homeUplinerId');
+        const uplinerDisplayOnHome = document.getElementById('uplinerDisplayOnHome');
+        if (homeUplinerSpan) {
+            if (uplinerId) {
+                homeUplinerSpan.innerText = formatUserId(uplinerId);
+                if (uplinerDisplayOnHome) uplinerDisplayOnHome.classList.remove('hidden');
             } else {
-                homeInviterSpan.innerText = 'None (First Member)';
+                homeUplinerSpan.innerText = 'None (First Member)';
             }
         }
     }
     
-    function updateInviteInfo() {
+    function updateUserInfo() {
         if (!userAddress || !isValidWalletAddress(userAddress)) return;
-        const inviteCode = getUniqueInviteCode(userAddress);
-        const inviteCodeInput = document.getElementById('inviteCodeInput');
-        if (inviteCodeInput) inviteCodeInput.value = inviteCode;
-    }
-    
-    function showInviterInfoOnPages(inviterUserId) {
-        const inviterDisplayText = inviterUserId ? `ID: ZTR-${inviterUserId}` : 'None';
-        const inviterUserIdDisplay = document.getElementById('inviterUserIdDisplay');
-        const homeInviterId = document.getElementById('homeInviterId');
-        if (inviterUserIdDisplay) inviterUserIdDisplay.innerText = inviterDisplayText;
-        if (homeInviterId) homeInviterId.innerText = inviterDisplayText;
-        
-        const inviterInfoOnInvestPage = document.getElementById('inviterInfoOnInvestPage');
-        const inviterDisplayOnHome = document.getElementById('inviterDisplayOnHome');
-        if (inviterUserId) {
-            if (inviterInfoOnInvestPage) inviterInfoOnInvestPage.classList.remove('hidden');
-            if (inviterDisplayOnHome) inviterDisplayOnHome.classList.remove('hidden');
+        const profile = getUserProfile(userAddress);
+        if (profile && profile.userId) {
+            const userIdInput = document.getElementById('userIdInput');
+            if (userIdInput) userIdInput.value = formatUserId(profile.userId);
         }
     }
     
-    function markUserAsPaid(wallet, inviterUserId) {
+    function showUplinerInfoOnPages(uplinerUserId) {
+        const uplinerDisplayText = uplinerUserId ? formatUserId(uplinerUserId) : 'None';
+        const uplinerUserIdDisplay = document.getElementById('uplinerUserIdDisplay');
+        const homeUplinerId = document.getElementById('homeUplinerId');
+        if (uplinerUserIdDisplay) uplinerUserIdDisplay.innerText = uplinerDisplayText;
+        if (homeUplinerId) homeUplinerId.innerText = uplinerDisplayText;
+        
+        const uplinerInfoOnInvestPage = document.getElementById('uplinerInfoOnInvestPage');
+        const uplinerDisplayOnHome = document.getElementById('uplinerDisplayOnHome');
+        if (uplinerUserId) {
+            if (uplinerInfoOnInvestPage) uplinerInfoOnInvestPage.classList.remove('hidden');
+            if (uplinerDisplayOnHome) uplinerDisplayOnHome.classList.remove('hidden');
+        }
+    }
+    
+    function markUserAsPaid(wallet, uplinerUserId) {
         if (!wallet || !isValidWalletAddress(wallet)) return;
         try {
             let paidUsers = {};
@@ -1984,8 +1872,8 @@
             paidUsers[wallet.toLowerCase()] = true; 
             localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
             
-            if (inviterUserId) {
-                distributeMultiLevelCommission(wallet, inviterUserId);
+            if (uplinerUserId) {
+                distributeMultiLevelCommission(wallet, uplinerUserId);
             }
         } catch (e) {
             console.error("Error marking user as paid:", e);
@@ -2001,7 +1889,7 @@
         updateDashboard();
         updateAssetsPage();
         renderBeautifulTree();
-        updateInviteInfo();
+        updateUserInfo();
         
         setTimeout(() => {
             if (typeof Swiper !== 'undefined' && !dashboardSwiperInstance && document.querySelector('.dashboardSwiper')) {
@@ -2069,7 +1957,7 @@
                             ${avatarHtml}
                         </div>
                         <div class="tree-node-name">${sanitizeInput(profile.name)}</div>
-                        <div class="tree-node-id">ID: ${profile.userId}</div>
+                        <div class="tree-node-id">${formatUserId(profile.userId)}</div>
                         <div class="tree-node-level">
                             <i class="fa-solid fa-crown" style="font-size: 8px;"></i> ${levelName}
                         </div>
@@ -2111,7 +1999,7 @@
                     <div style="text-align:center; padding: 40px;">
                         <i class="fa-solid fa-tree" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i>
                         <p style="color: rgba(255,255,255,0.7);">Your network is empty.</p>
-                        <p style="color: rgba(255,255,255,0.7); font-size: 12px;">Share your invitation code to start building your tree!</p>
+                        <p style="color: rgba(255,255,255,0.7); font-size: 12px;">Share your User ID to start building your tree!</p>
                     </div>
                 `;
                 return;
@@ -2347,159 +2235,98 @@
         }
     }
 
-    // ========== PROFILE SETUP FUNCTIONS ==========
-    let setupProfilePicData = null;
-    
-    const setupProfilePic = document.getElementById('setupProfilePic');
-    if (setupProfilePic) {
-        setupProfilePic.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            if (IMAGE_HOST_API_KEY === 'YOUR_IMGBB_API_KEY_HERE') {
-                showToast("Image hosting is not configured.", "error");
-                return;
-            }
-            
-            if (file.size > 2 * 1024 * 1024) {
-                showToast("Image too large! Max 2MB", "error");
-                return;
-            }
-            
-            showToast("Uploading profile picture...", "info");
-            const formData = new FormData();
-            formData.append('key', IMAGE_HOST_API_KEY);
-            formData.append('image', file);
-            
-            try {
-                const response = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
-                const result = await response.json();
-                if (result.success) {
-                    setupProfilePicData = result.data.url;
-                    const previewImg = document.getElementById('avatarPreviewImg');
-                    const previewIcon = document.getElementById('avatarPreviewIcon');
-                    if (previewImg && previewIcon) {
-                        previewImg.src = setupProfilePicData;
-                        previewImg.style.display = 'block';
-                        previewIcon.style.display = 'none';
-                    }
-                    showToast("Profile picture uploaded successfully!", "success");
-                } else {
-                    throw new Error(result.error?.message || "Upload failed");
-                }
-            } catch (error) {
-                console.error(error);
-                showToast("Upload failed, using default avatar", "error");
-                setupProfilePicData = null;
-            }
-        });
-    }
-    
-    const verifyInviteCodeBtn = document.getElementById('verifyInviteCodeBtn');
-    if (verifyInviteCodeBtn) {
-        verifyInviteCodeBtn.addEventListener('click', () => {
-            const inviteCodeInput = document.getElementById('setupInviteCode');
-            if (!inviteCodeInput) return;
-            const inviteCode = inviteCodeInput.value.trim().toUpperCase();
-            const statusDiv = document.getElementById('inviterVerifyStatus');
-            const verifiedDisplay = document.getElementById('verifiedInviterDisplay');
-            const verifiedText = document.getElementById('verifiedInviterText');
+    // ========== JOIN MODAL FUNCTIONS ==========
+    const verifyUplinerBtn = document.getElementById('verifyUplinerBtn');
+    if (verifyUplinerBtn) {
+        verifyUplinerBtn.addEventListener('click', () => {
+            const uplinerInput = document.getElementById('uplinerUserIdInput');
+            if (!uplinerInput) return;
+            const uplinerInputValue = uplinerInput.value.trim().toUpperCase();
+            const statusDiv = document.getElementById('uplinerVerifyStatus');
+            const verifiedDisplay = document.getElementById('verifiedUplinerDisplay');
+            const verifiedText = document.getElementById('verifiedUplinerText');
             
             if (!statusDiv) return;
             
-            if (!inviteCode) {
-                statusDiv.innerHTML = '<span class="status-info">ℹ️ No code entered. You can join without an inviter.</span>';
-                verifiedInviterId = null;
+            if (!uplinerInputValue) {
+                statusDiv.innerHTML = '<span class="status-info">ℹ️ No User ID entered. You can join as a first member.</span>';
+                verifiedUplinerId = null;
                 if (verifiedDisplay) verifiedDisplay.classList.add('hidden');
                 return;
             }
 
-            if (!isValidInviteCode(inviteCode)) {
-                 statusDiv.innerHTML = '<span class="status-error">❌ Invalid code. Code must be 8 characters (A-Z, 0-9).</span>';
-                 verifiedInviterId = null;
-                 if (verifiedDisplay) verifiedDisplay.classList.add('hidden');
-                 return;
+            const uplinerIdNum = extractUserIdNumber(uplinerInputValue);
+            
+            if (!uplinerIdNum) {
+                statusDiv.innerHTML = '<span class="status-error">❌ Invalid User ID format. Use format like ZTR-1001 or just 1001</span>';
+                verifiedUplinerId = null;
+                if (verifiedDisplay) verifiedDisplay.classList.add('hidden');
+                return;
             }
             
-            const inviterWallet = getWalletByInviteCode(inviteCode);
+            const uplinerWallet = getWalletById(uplinerIdNum);
             
-            if (inviterWallet && isValidWalletAddress(inviterWallet)) {
-                const inviterUserId = getUserIdByWallet(inviterWallet);
-
-                if(inviterUserId) {
-                    verifiedInviterId = inviterUserId;
-                    statusDiv.innerHTML = `<span class="status-success">✅ Verified! You are invited by ID: ZTR-${verifiedInviterId}</span>`;
+            if (uplinerWallet && isValidWalletAddress(uplinerWallet)) {
+                const uplinerProfile = getUserProfile(uplinerWallet);
+                if(uplinerProfile && uplinerProfile.userId) {
+                    verifiedUplinerId = uplinerIdNum;
+                    statusDiv.innerHTML = `<span class="status-success">✅ Verified! Upliner: ${formatUserId(verifiedUplinerId)}</span>`;
                     if (verifiedDisplay && verifiedText) {
-                        verifiedText.innerHTML = `<i class="fa-solid fa-user-check"></i> Invitation verified! You are invited by ID: ZTR-${verifiedInviterId}`;
+                        verifiedText.innerHTML = `<i class="fa-solid fa-user-check"></i> Upliner verified! You will join under ${formatUserId(verifiedUplinerId)}`;
                         verifiedDisplay.classList.remove('hidden');
                     }
-                    showToast(`Inviter found: ID: ZTR-${verifiedInviterId}`, 'success');
+                    showToast(`Upliner found: ${formatUserId(verifiedUplinerId)}`, 'success');
                 } else {
-                     statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter not fully registered. You can join without an inviter.</span>';
-                     verifiedInviterId = null;
-                     if (verifiedDisplay) verifiedDisplay.classList.add('hidden');
+                    statusDiv.innerHTML = '<span class="status-info">ℹ️ Upliner not fully registered. You can join as a first member.</span>';
+                    verifiedUplinerId = null;
+                    if (verifiedDisplay) verifiedDisplay.classList.add('hidden');
                 }
             } else {
-                statusDiv.innerHTML = '<span class="status-error">❌ Inviter code not found. Please check the code.</span>';
-                verifiedInviterId = null;
+                statusDiv.innerHTML = '<span class="status-error">❌ Upliner User ID not found. Please check the ID.</span>';
+                verifiedUplinerId = null;
                 if (verifiedDisplay) verifiedDisplay.classList.add('hidden');
             }
         });
     }
     
-    const completeProfileBtn = document.getElementById('completeProfileBtn');
-    if (completeProfileBtn) {
-        completeProfileBtn.addEventListener('click', async () => {
-            const usernameInput = document.getElementById('setupUsername');
-            if (!usernameInput) return;
-            const username = usernameInput.value.trim();
-            if (!username) {
-                showToast("Please enter a username", "error");
-                return;
-            }
-            
-            const sanitizedUsername = sanitizeInput(username);
-            if (sanitizedUsername.length < 3) {
-                showToast("Username must be at least 3 characters", "error");
-                return;
-            }
-            
+    const completeJoinBtn = document.getElementById('completeJoinBtn');
+    if (completeJoinBtn) {
+        completeJoinBtn.addEventListener('click', async () => {
             if (!userAddress) {
                 showToast("Wallet not connected", "error");
                 return;
             }
             
-            createUserProfile(userAddress, verifiedInviterId, sanitizedUsername, setupProfilePicData);
-            markProfileComplete(userAddress);
-            updateZTRBalance(userAddress, 10);
+            // Create user profile with upliner if any
+            currentUserProfile = createUserProfile(userAddress, verifiedUplinerId);
             
-            closeModal('profileSetupModal');
-            showToast("Profile setup complete! You received 10 ZTR bonus!", "success");
-            
-            if (verifiedInviterId) {
-                showInviterInfoOnPages(verifiedInviterId);
-                showToast(`🎉 You joined using invitation from ID: ZTR-${verifiedInviterId}!`, 'success');
+            if (!currentUserProfile) {
+                showToast("Error creating profile", "error");
+                return;
             }
+            
+            closeModal('joinModal');
+            
+            // Show investment state
             if (connectState) connectState.classList.add('hidden');
             if (investmentState) investmentState.classList.remove('hidden');
-            updateAssetsPage();
-            updateInviteInfo();
-        });
-    }
-
-    // ========== PROCESS INVITE CODE FROM URL ==========
-    function processInviteCodeFromUrl() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const inviteCodeFromUrl = urlParams.get('invite');
-        if (inviteCodeFromUrl && inviteCodeFromUrl.length === 8 && isValidInviteCode(inviteCodeFromUrl)) {
-            const setupInviteCode = document.getElementById('setupInviteCode');
-            if (setupInviteCode) {
-                setupInviteCode.value = inviteCodeFromUrl;
-                setTimeout(() => {
-                    if (verifyInviteCodeBtn) verifyInviteCodeBtn.click();
-                }, 500);
+            if (dashboardState) dashboardState.classList.add('hidden');
+            if (bottomNav) bottomNav.style.display = 'none';
+            
+            // Update UI with user info
+            const newUserIdDisplay = document.getElementById('newUserIdDisplay');
+            if (newUserIdDisplay) newUserIdDisplay.innerText = formatUserId(currentUserProfile.userId);
+            
+            if (verifiedUplinerId) {
+                showUplinerInfoOnPages(verifiedUplinerId);
+                showToast(`🎉 You joined under ${formatUserId(verifiedUplinerId)}!`, 'success');
+            } else {
+                showToast("🎉 You are the first member!", 'success');
             }
-        }
+            
+            updateUserInfo();
+            updateAssetsPage();
+        });
     }
 
     // ========== WALLET CONNECTION ==========
@@ -2544,42 +2371,63 @@
         await getUSDTDecimals();
         await updateBalances();
         
-        // Process invite code from URL BEFORE profile setup
-        if (!isProfileComplete(userAddress)) {
-            processInviteCodeFromUrl();
-        }
+        // Check if user already exists
+        const existingProfile = getUserProfile(userAddress);
         
-        if (!isProfileComplete(userAddress)) {
-            if (connectState) connectState.classList.add('hidden');
-            if (investmentState) investmentState.classList.add('hidden');
-            if (dashboardState) dashboardState.classList.add('hidden');
-            if (bottomNav) bottomNav.style.display = 'none';
-            openModal('profileSetupModal');
-            if (loadingOverlay) loadingOverlay.classList.add('hidden');
-            return true;
-        }
-        
-        if (isPaidUser(userAddress)) {
-            if (connectState) connectState.classList.add('hidden');
-            if (investmentState) investmentState.classList.add('hidden');
-            if (dashboardState) dashboardState.classList.remove('hidden');
-            if (bottomNav) bottomNav.style.display = 'flex';
-            updateDashboard();
-            updateAssetsPage();
-            renderBeautifulTree();
-            updateInviteInfo();
-            setTimeout(() => {
-                if (typeof Swiper !== 'undefined' && !dashboardSwiperInstance && document.querySelector('.dashboardSwiper')) {
-                    dashboardSwiperInstance = new Swiper('.dashboardSwiper', { autoplay: { delay: 3000 }, loop: true });
+        if (existingProfile) {
+            // User exists, check if paid
+            if (isPaidUser(userAddress)) {
+                if (connectState) connectState.classList.add('hidden');
+                if (investmentState) investmentState.classList.add('hidden');
+                if (dashboardState) dashboardState.classList.remove('hidden');
+                if (bottomNav) bottomNav.style.display = 'flex';
+                updateDashboard();
+                updateAssetsPage();
+                renderBeautifulTree();
+                updateUserInfo();
+                setTimeout(() => {
+                    if (typeof Swiper !== 'undefined' && !dashboardSwiperInstance && document.querySelector('.dashboardSwiper')) {
+                        dashboardSwiperInstance = new Swiper('.dashboardSwiper', { autoplay: { delay: 3000 }, loop: true });
+                    }
+                }, 100);
+                if (!isAutoReconnect) showToast("Welcome back! Dashboard ready.", "success");
+            } else {
+                // User exists but not paid - show investment page
+                if (connectState) connectState.classList.add('hidden');
+                if (investmentState) investmentState.classList.remove('hidden');
+                if (dashboardState) dashboardState.classList.add('hidden');
+                if (bottomNav) bottomNav.style.display = 'none';
+                
+                // Show existing user info
+                const newUserIdDisplay = document.getElementById('newUserIdDisplay');
+                if (newUserIdDisplay) newUserIdDisplay.innerText = formatUserId(existingProfile.userId);
+                
+                const uplinerId = getInviterId(userAddress);
+                if (uplinerId) {
+                    showUplinerInfoOnPages(uplinerId);
                 }
-            }, 100);
-            if (!isAutoReconnect) showToast("Welcome back! Dashboard ready.", "success");
+                
+                updateUserInfo();
+                if (!isAutoReconnect) showToast("Wallet connected! Please activate your node.", "info");
+            }
         } else {
+            // New user - show join modal to enter upliner ID
             if (connectState) connectState.classList.add('hidden');
-            if (investmentState) investmentState.classList.remove('hidden');
+            if (investmentState) investmentState.classList.add('hidden');
             if (dashboardState) dashboardState.classList.add('hidden');
             if (bottomNav) bottomNav.style.display = 'none';
-            if (!isAutoReconnect) showToast("Wallet connected! Please activate your node.", "info");
+            
+            // Reset verification
+            verifiedUplinerId = null;
+            const uplinerInput = document.getElementById('uplinerUserIdInput');
+            if (uplinerInput) uplinerInput.value = '';
+            const statusDiv = document.getElementById('uplinerVerifyStatus');
+            if (statusDiv) statusDiv.innerHTML = '';
+            const verifiedDisplay = document.getElementById('verifiedUplinerDisplay');
+            if (verifiedDisplay) verifiedDisplay.classList.add('hidden');
+            
+            openModal('joinModal');
+            if (!isAutoReconnect) showToast("Wallet connected! Please enter upliner ID (optional).", "info");
         }
         
         if (loadingOverlay) loadingOverlay.classList.add('hidden');
@@ -2664,17 +2512,17 @@
                 showToast("Transaction sent! Confirming...", "info");
                 await tx.wait();
                 
-                const inviterId = getInviterId(userAddress);
-                markUserAsPaid(userAddress, inviterId);
+                const uplinerId = getInviterId(userAddress);
+                markUserAsPaid(userAddress, uplinerId);
                 closeModal('paymentModal');
                 showDashboardAfterPayment();
                 await updateBalances();
                 updateDashboard();
                 updateAssetsPage();
                 renderBeautifulTree();
-                updateInviteInfo();
+                updateUserInfo();
                 
-                if (inviterId) showToast(`✅ You joined under ID: ZTR-${inviterId}!`, 'success');
+                if (uplinerId) showToast(`✅ You joined under ${formatUserId(uplinerId)}!`, 'success');
             } catch (e) { 
                 console.error(e);
                 showToast("Transaction failed. Please try again.", "error"); 
@@ -2685,88 +2533,15 @@
             }
         });
     }
-    
-    const profilePicInput = document.getElementById('profilePicInput');
-    if (profilePicInput) {
-        profilePicInput.addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
 
-            if (IMAGE_HOST_API_KEY === 'YOUR_IMGBB_API_KEY_HERE') {
-                showToast("Image hosting is not configured.", "error");
-                return;
-            }
-            
-            if (file.size > 2 * 1024 * 1024) {
-                showToast("Image too large! Max 2MB", "error");
-                return;
-            }
-            
-            showToast("Uploading new profile picture...", "info");
-            const formData = new FormData();
-            formData.append('key', IMAGE_HOST_API_KEY);
-            formData.append('image', file);
-            try {
-                const response = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
-                const result = await response.json();
-                if (result.success) {
-                    const imageUrl = result.data.url;
-                    let profiles = {};
-                    const stored = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
-                    if (stored) {
-                        profiles = JSON.parse(stored);
-                    }
-                    if (profiles[userAddress?.toLowerCase()]) {
-                        profiles[userAddress.toLowerCase()].profilePicUrl = imageUrl;
-                        localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-                        updateAssetsPage();
-                        renderBeautifulTree();
-                        showToast("Profile picture updated successfully!", "success");
-                    }
-                } else {
-                    throw new Error("Upload failed");
-                }
-            } catch (error) {
-                console.error(error);
-                showToast("Upload failed, please try again", "error");
-            }
-        });
-    }
-
-    const saveProfileBtn = document.getElementById('saveProfileBtn');
-    if (saveProfileBtn) {
-        saveProfileBtn.addEventListener('click', () => {
-            const nameInput = document.getElementById('profileNameInput');
-            if (!nameInput) return;
-            const name = nameInput.value;
-            try {
-                let profiles = {};
-                const stored = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
-                if (stored) {
-                    profiles = JSON.parse(stored);
-                }
-                if (profiles[userAddress?.toLowerCase()]) {
-                    if(name) profiles[userAddress.toLowerCase()].name = sanitizeInput(name);
-                    localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-                    updateAssetsPage();
-                    renderBeautifulTree();
-                    closeModal('editProfileModal');
-                    showToast("Profile updated!", "success");
-                }
-            } catch (e) {
-                console.error("Error saving profile:", e);
-            }
-        });
-    }
-
-    const copyInviteCodeBtn = document.getElementById('copyInviteCodeBtn');
-    if (copyInviteCodeBtn) {
-        copyInviteCodeBtn.addEventListener('click', () => {
-            const codeInput = document.getElementById('inviteCodeInput');
-            if (codeInput) {
-                codeInput.select();
-                navigator.clipboard.writeText(codeInput.value);
-                showToast('Invitation code copied!', 'success');
+    const copyUserIdBtn = document.getElementById('copyUserIdBtn');
+    if (copyUserIdBtn) {
+        copyUserIdBtn.addEventListener('click', () => {
+            const userIdInput = document.getElementById('userIdInput');
+            if (userIdInput) {
+                userIdInput.select();
+                navigator.clipboard.writeText(userIdInput.value);
+                showToast('User ID copied! Share it with friends to invite them.', 'success');
             }
         });
     }
@@ -2783,7 +2558,7 @@
             if (targetPage) targetPage.classList.add('active');
             if (pageId === 'team') {
                 renderBeautifulTree();
-                updateInviteInfo();
+                updateUserInfo();
             }
         });
     });
