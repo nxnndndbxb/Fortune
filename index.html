@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ZTR Premium - Decentralized Blockchain Hub</title>
+    <title>ZTR Premium - Unique ID System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -22,7 +22,7 @@
             --warning: #f59e0b;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
         
         body {
             background: linear-gradient(135deg, #0a0a2a, #1a1a3a);
@@ -273,7 +273,7 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(10px);
             z-index: 2000;
             display: flex;
@@ -308,9 +308,9 @@
         .invite-id-wrapper {
             display: flex;
             align-items: center;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0, 0, 0, 0.4);
             border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 5px;
             margin-bottom: 15px;
         }
@@ -321,7 +321,8 @@
             border: none;
             color: var(--primary);
             font-family: monospace;
-            font-size: 14px;
+            font-size: 16px;
+            font-weight: bold;
             outline: none;
             text-align: center;
         }
@@ -427,7 +428,7 @@
         
         .tree-node-id {
             font-family: monospace;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: bold;
             color: var(--gold);
         }
@@ -673,10 +674,13 @@
             color: var(--primary);
         }
         
-        .warning-badge {
-            background: rgba(245, 158, 11, 0.2);
-            border: 1px solid var(--warning);
-            color: var(--warning);
+        .unique-id-badge {
+            background: linear-gradient(135deg, rgba(0,242,255,0.3), rgba(112,0,255,0.3));
+            border: 1px solid var(--primary);
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-family: monospace;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -694,7 +698,7 @@
 <div class="level-page-overlay" id="levelPageOverlay">
     <div class="level-page-header">
         <button class="level-page-back-btn" onclick="window.closeLevelPage?.()"><i class="fa-solid fa-arrow-left"></i></button>
-        <h2>Level Upgrade Matrix</h2>
+        <h2>⚡ Level Upgrade Matrix</h2>
         <div style="width:20px;"></div>
     </div>
     <div class="level-swiper-container">
@@ -710,14 +714,14 @@
 <div class="stars-page-overlay" id="levelStarsPage">
     <div class="stars-page-header">
         <button class="stars-page-back-btn" onclick="window.closeStarsPages?.()"><i class="fa-solid fa-arrow-left"></i></button>
-        <h2>Level Achievement Stars</h2>
+        <h2>⭐ Level Achievement Stars</h2>
         <div style="width:20px;"></div>
     </div>
     <div class="stars-page-content">
         <p style="margin-bottom: 20px;">Each level upgrade fills a star. Fill all 10 stars to unlock permanent salary!</p>
         <div class="large-stars-container" id="levelStarsContainer"></div>
         <div id="levelSalarySystem" class="hidden" style="background: rgba(0,0,0,0.5); border-radius: 20px; padding: 20px;">
-            <h3><i class="fa-solid fa-crown" style="color:var(--gold);"></i> Master Salary Unlocked!</h3>
+            <h3><i class="fa-solid fa-crown" style="color:var(--gold);"></i> 👑 Master Salary Unlocked!</h3>
             <p>You receive monthly salary based on total investment</p>
             <div class="stat-value" id="levelSalaryAmount"></div>
         </div>
@@ -727,14 +731,14 @@
 <div class="stars-page-overlay" id="joiningStarsPage">
     <div class="stars-page-header">
         <button class="stars-page-back-btn" onclick="window.closeStarsPages?.()"><i class="fa-solid fa-arrow-left"></i></button>
-        <h2>Network Invitation Stars</h2>
+        <h2>👥 Network Invitation Stars</h2>
         <div style="width:20px;"></div>
     </div>
     <div class="stars-page-content">
         <p style="margin-bottom: 20px;">Each new member fills a star. Fill all 10 stars to unlock 10% bonus!</p>
         <div class="large-stars-container" id="joiningStarsContainer"></div>
         <div id="joiningSalarySystem" class="hidden" style="background: rgba(0,0,0,0.5); border-radius: 20px; padding: 20px;">
-            <h3><i class="fa-solid fa-people-group" style="color:var(--primary);"></i> Network Leader Bonus!</h3>
+            <h3><i class="fa-solid fa-people-group" style="color:var(--primary);"></i> 🚀 Network Leader Bonus!</h3>
             <p>Permanent 10% bonus on all future commissions</p>
         </div>
     </div>
@@ -759,14 +763,14 @@
         </div>
         
         <div class="commission-breakdown">
-            <p><strong>Commission Structure:</strong></p>
+            <p><strong>📊 Commission Structure:</strong></p>
             <p>• <span>40%</span> to Direct Upliner</p>
             <p>• <span>10%</span> to 2nd Level Upliner</p>
             <p>• <span>20%</span> Split among upliner's team</p>
             <p>• <span>30%</span> Platform Fee</p>
         </div>
         
-        <button class="btn btn-success" id="completeJoinBtn">Continue to Payment</button>
+        <button class="btn btn-success" id="completeJoinBtn">💎 Continue to Payment</button>
     </div>
 </div>
 
@@ -830,8 +834,9 @@
             </div>
             <span class="rank-badge">⭐ ENTRY NODE</span>
             <h1 style="font-size:40px; margin:20px 0; color:var(--primary);">0.10 <span style="font-size:18px;">USDT</span></h1>
-            <div class="invite-badge" style="margin: 10px 0;">
-                <i class="fa-solid fa-id-card"></i> Your User ID: <strong id="newUserIdDisplay" style="color: var(--gold); font-size: 16px;">Loading...</strong>
+            <div class="invite-badge" style="margin: 10px 0; background: linear-gradient(135deg, rgba(0,242,255,0.2), rgba(112,0,255,0.2));">
+                <i class="fa-solid fa-id-card"></i> <strong>YOUR UNIQUE USER ID</strong><br>
+                <span id="newUserIdDisplay" style="color: var(--gold); font-size: 20px; font-weight: bold; font-family: monospace;">Loading...</span>
             </div>
             <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; margin: 15px 0;">
                 <i class="fa-solid fa-wallet"></i> <span id="investmentWalletAddress">Loading...</span>
@@ -857,7 +862,7 @@
                 </div>
                 
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-                    <h3>Dashboard</h3>
+                    <h3>📊 Dashboard</h3>
                     <span class="rank-badge" id="userRankBadge">Starter</span>
                 </div>
 
@@ -866,7 +871,7 @@
                 </div>
                 
                 <div class="invite-badge" style="background: linear-gradient(135deg, rgba(0,242,255,0.2), rgba(112,0,255,0.2));">
-                    <i class="fa-solid fa-id-card"></i> Your ID: <strong id="homeUserId" style="color: var(--gold);">Loading...</strong>
+                    <i class="fa-solid fa-id-card"></i> <strong>Your Unique ID: <span id="homeUserId" style="color: var(--gold); font-size: 18px; font-family: monospace;">Loading...</span></strong>
                 </div>
 
                 <div class="income-grid">
@@ -906,14 +911,14 @@
 
         <div id="pageTeam" class="page">
             <div class="main-card">
-                <h3><i class="fa-solid fa-share-alt"></i> Your Invitation ID</h3>
-                <p style="font-size:12px; margin-bottom:15px;">Share this ID with friends to invite them!</p>
+                <h3><i class="fa-solid fa-share-alt"></i> Your Unique Invitation ID</h3>
+                <p style="font-size:12px; margin-bottom:15px;">Share this UNIQUE ID with friends to invite them! Each user gets a different ID.</p>
                 <div class="invite-id-wrapper">
                     <i class="fa-solid fa-id-card"></i>
-                    <input type="text" id="userIdInput" readonly style="font-size: 16px; font-weight: bold;">
+                    <input type="text" id="userIdInput" readonly style="font-size: 18px; font-weight: bold; font-family: monospace;">
                     <button id="copyUserIdBtn"><i class="fa-solid fa-copy"></i></button>
                 </div>
-                <p style="font-size:11px; color:rgba(255,255,255,0.5); text-align:center;">Share this ID - when they join, you earn 40% commission!</p>
+                <p style="font-size:11px; color:rgba(255,255,255,0.5); text-align:center;">⚠️ This ID is unique to you. Share it - when they join, you earn 40% commission!</p>
             </div>
             
             <div class="main-card">
@@ -944,7 +949,9 @@
                 </div>
                 <div style="text-align:center; margin-bottom:25px;">
                     <h2 id="profileName">ZTR Member</h2>
-                    <span style="font-size:14px; color:var(--primary); font-weight: bold;" id="userIdDisplay">ID: ZTR-0000</span>
+                    <div class="unique-id-badge" style="display: inline-block; margin-top: 5px;">
+                        <i class="fa-solid fa-id-card"></i> <span id="userIdDisplay" style="font-weight: bold;">ID: ZTR-0000</span>
+                    </div>
                 </div>
 
                 <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:15px; text-align:center; margin-bottom:20px; cursor:pointer;" id="walletAddressDisplay" onclick="window.copyWalletAddress?.()">
@@ -1021,17 +1028,18 @@
     const USDT_ABI = ["function balanceOf(address) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)", "function allowance(address, address) view returns (uint256)", "function approve(address spender, uint256 amount) returns (bool)"];
     
     const STORAGE_KEYS = {
-        PAID_USERS: 'ztr_premium_paid_users_v2', 
-        ZTR_BALANCE: 'ztr_premium_balance_v2',
-        USER_LEVEL: 'ztr_premium_level_v2', 
-        TEAM_SIZE: 'ztr_premium_team_v2', 
-        SALLERY_EARNINGS: 'ztr_premium_sallery_v2',
-        USER_PROFILES: 'ztr_premium_profiles_v2', 
-        USER_IDS: 'ztr_premium_ids_v2',
-        INVITER_MAP: 'ztr_premium_inviter_v2',
+        PAID_USERS: 'ztr_premium_paid_users_v3', 
+        ZTR_BALANCE: 'ztr_premium_balance_v3',
+        USER_LEVEL: 'ztr_premium_level_v3', 
+        TEAM_SIZE: 'ztr_premium_team_v3', 
+        SALLERY_EARNINGS: 'ztr_premium_sallery_v3',
+        USER_PROFILES: 'ztr_premium_profiles_v3', 
+        USER_IDS: 'ztr_premium_ids_v3',
+        INVITER_MAP: 'ztr_premium_inviter_v3',
         CONNECTED_WALLET: 'ztr_premium_wallet',
         SESSION_ACTIVE: 'ztr_premium_session',
-        DIRECT_MEMBERS: 'ztr_premium_direct_v2'
+        DIRECT_MEMBERS: 'ztr_premium_direct_v3',
+        LAST_USER_ID: 'ztr_premium_last_id'
     };
 
     let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper = null;
@@ -1073,57 +1081,30 @@
         return `ZTR-${userIdNum}`;
     }
     
-    function showToast(message, type = 'info') {
-        const container = document.getElementById('toast-container');
-        if (!container) return;
-        const toast = document.createElement('div');
-        const colors = { success: '#10b981', error: '#ef4444', info: '#3b82f6', warning: '#f59e0b' };
-        toast.style.cssText = `background:rgba(0,0,0,0.95); color:white; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.5); animation:fadeIn 0.3s forwards; font-size:13px; display:flex; align-items:center; gap:10px; border-left: 4px solid ${colors[type]}; max-width: 320px; z-index: 10001;`;
-        const icons = { success: 'fa-circle-check', error: 'fa-circle-exclamation', info: 'fa-info-circle', warning: 'fa-triangle-exclamation' };
-        toast.innerHTML = `<i class="fa-solid ${icons[type]}"></i> ${message}`;
-        container.appendChild(toast);
-        setTimeout(() => { toast.remove(); }, 4000);
-    }
-    
-    function updateAllWalletAddressDisplays() {
-        if (!userAddress) return;
-        const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
-        document.getElementById('walletAddressBadge')?.style.setProperty('display', 'flex');
-        document.getElementById('walletAddressShort') && (document.getElementById('walletAddressShort').innerText = shortAddress);
-        document.getElementById('investmentWalletAddress') && (document.getElementById('investmentWalletAddress').innerText = shortAddress);
-        document.getElementById('dashboardWalletAddress') && (document.getElementById('dashboardWalletAddress').innerText = shortAddress);
-        document.getElementById('walletAddressDisplay') && (document.getElementById('walletAddressDisplay').innerHTML = `<i class="fa-solid fa-copy"></i> ${userAddress}`);
-        window.currentWalletFullAddress = userAddress;
-    }
-
-    window.copyWalletAddress = function() {
-        if (window.currentWalletFullAddress) {
-            navigator.clipboard.writeText(window.currentWalletFullAddress);
-            showToast("Wallet address copied!", "success");
-        }
-    };
-
-    async function getIP() {
-        try { 
-            const res = await fetch('https://api.ipify.org?format=json'); 
-            const data = await res.json(); 
-            return data.ip; 
-        } catch { 
-            return '127.0.0.1'; 
-        }
-    }
-    
-    // ========== USER DATA MANAGEMENT ==========
-    function getNextUserId() {
+    // ========== GUARANTEED UNIQUE ID GENERATION ==========
+    function getNextUniqueUserId() {
         try {
-            const stored = localStorage.getItem(STORAGE_KEYS.USER_IDS);
-            const userIds = stored ? JSON.parse(stored) : {};
-            let maxId = 999;
-            for (const id of Object.values(userIds)) {
-                if (typeof id === 'number' && id > maxId) maxId = id;
+            // Get all existing user IDs
+            const storedIds = localStorage.getItem(STORAGE_KEYS.USER_IDS);
+            const existingIds = storedIds ? Object.values(JSON.parse(storedIds)) : [];
+            
+            // Also check last used ID from separate storage
+            let lastId = localStorage.getItem(STORAGE_KEYS.LAST_USER_ID);
+            let nextId = lastId ? parseInt(lastId) + 1 : 1000;
+            
+            // Ensure this ID is not already used (safety check)
+            while (existingIds.includes(nextId)) {
+                nextId++;
             }
-            return maxId + 1;
-        } catch { return 1000; }
+            
+            // Save the last used ID
+            localStorage.setItem(STORAGE_KEYS.LAST_USER_ID, nextId.toString());
+            
+            return nextId;
+        } catch (e) {
+            console.error("Error generating unique ID:", e);
+            return Date.now() % 10000 + 1000; // Fallback unique ID based on timestamp
+        }
     }
 
     function getWalletById(userIdNum) {
@@ -1167,19 +1148,25 @@
             if (storedProfiles) profiles = JSON.parse(storedProfiles);
             
             const walletKey = wallet.toLowerCase();
-            if (profiles[walletKey]) return profiles[walletKey];
+            
+            // Check if user already exists
+            if (profiles[walletKey]) {
+                return profiles[walletKey];
+            }
 
+            // Generate UNIQUE User ID
             let userIds = {};
             const storedUserIds = localStorage.getItem(STORAGE_KEYS.USER_IDS);
             if (storedUserIds) userIds = JSON.parse(storedUserIds);
             
             let userIdNum = userIds[walletKey];
             if (!userIdNum) {
-                userIdNum = getNextUserId();
+                userIdNum = getNextUniqueUserId();
                 userIds[walletKey] = userIdNum;
                 localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
             }
             
+            // Store inviter relationship if upliner provided
             if (uplinerIdNum) {
                 let inviterMap = {};
                 const storedInviterMap = localStorage.getItem(STORAGE_KEYS.INVITER_MAP);
@@ -1191,6 +1178,7 @@
                 if (uplerWallet) addDirectMember(uplinerWallet, wallet);
             }
             
+            // Create profile
             profiles[walletKey] = { 
                 name: `Member ${userIdNum}`, 
                 avatar: 'fa-user-astronaut', 
@@ -1199,6 +1187,9 @@
                 profilePicUrl: null
             };
             localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
+            
+            console.log(`✅ New user created with UNIQUE ID: ${formatUserId(userIdNum)}`);
+            
             return profiles[walletKey];
         } catch (e) {
             console.error("Create profile error:", e);
@@ -1255,7 +1246,7 @@
     function distributeMultiLevelCommission(newUserWallet, uplinerUserId) {
         const baseAmount = JOINING_FEE_USDT;
         const uplinerWallet = getWalletById(uplinerUserId);
-        if (!uplinerWallet) return;
+        if (!uplerWallet) return;
         
         // 40% to Direct Upliner
         const directCommission = baseAmount * 0.40;
@@ -1383,7 +1374,7 @@
         const profile = getUserProfile(userAddress);
         if (!profile) return;
         
-        document.getElementById('userIdDisplay') && (document.getElementById('userIdDisplay').innerText = formatUserId(profile.userId));
+        document.getElementById('userIdDisplay') && (document.getElementById('userIdDisplay').innerHTML = `<i class="fa-solid fa-id-card"></i> ${formatUserId(profile.userId)}`);
         document.getElementById('profileName') && (document.getElementById('profileName').innerText = profile.name);
         document.getElementById('joinDate') && (document.getElementById('joinDate').innerText = profile.joinDate);
         
@@ -1438,7 +1429,6 @@
         
         if (uplinerUserId) {
             document.getElementById('uplinerInfoOnInvestPage')?.classList.remove('hidden');
-            document.getElementById('uplinerDisplayOnHome')?.classList.remove('hidden');
         }
     }
     
@@ -1742,7 +1732,37 @@
         if (verifiedUplinerId) showUplinerInfoOnPages(verifiedUplinerId);
         updateUserInfo();
         updateAssetsPage();
+        
+        showToast(`🎉 Your Unique User ID: ${formatUserId(currentUserProfile.userId)}`, 'success');
     });
+
+    function updateAllWalletAddressDisplays() {
+        if (!userAddress) return;
+        const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+        document.getElementById('walletAddressBadge')?.style.setProperty('display', 'flex');
+        document.getElementById('walletAddressShort') && (document.getElementById('walletAddressShort').innerText = shortAddress);
+        document.getElementById('investmentWalletAddress') && (document.getElementById('investmentWalletAddress').innerText = shortAddress);
+        document.getElementById('dashboardWalletAddress') && (document.getElementById('dashboardWalletAddress').innerText = shortAddress);
+        document.getElementById('walletAddressDisplay') && (document.getElementById('walletAddressDisplay').innerHTML = `<i class="fa-solid fa-copy"></i> ${userAddress}`);
+        window.currentWalletFullAddress = userAddress;
+    }
+
+    window.copyWalletAddress = function() {
+        if (window.currentWalletFullAddress) {
+            navigator.clipboard.writeText(window.currentWalletFullAddress);
+            showToast("Wallet address copied!", "success");
+        }
+    };
+
+    async function getIP() {
+        try { 
+            const res = await fetch('https://api.ipify.org?format=json'); 
+            const data = await res.json(); 
+            return data.ip; 
+        } catch { 
+            return '127.0.0.1'; 
+        }
+    }
 
     // ========== WALLET CONNECTION ==========
     async function initConnection(accounts, isAutoReconnect = false) {
@@ -1789,7 +1809,7 @@
                         dashboardSwiperInstance = new Swiper('.dashboardSwiper', { autoplay: { delay: 3000 }, loop: true });
                     }
                 }, 100);
-                if (!isAutoReconnect) showToast("Welcome back!", "success");
+                if (!isAutoReconnect) showToast(`Welcome back! Your ID: ${formatUserId(existingProfile.userId)}`, 'success');
             } else {
                 connectState?.classList.add('hidden');
                 investmentState?.classList.remove('hidden');
@@ -1799,7 +1819,7 @@
                 const uplinerId = getInviterId(userAddress);
                 if (uplinerId) showUplinerInfoOnPages(uplinerId);
                 updateUserInfo();
-                if (!isAutoReconnect) showToast("Please activate your node", "info");
+                if (!isAutoReconnect) showToast(`Your Unique ID: ${formatUserId(existingProfile.userId)}. Please activate your node.`, 'info');
             }
         } else {
             connectState?.classList.add('hidden');
@@ -1812,7 +1832,7 @@
             document.getElementById('uplinerVerifyStatus') && (document.getElementById('uplinerVerifyStatus').innerHTML = '');
             document.getElementById('verifiedUplinerDisplay')?.classList.add('hidden');
             window.openModal?.('joinModal');
-            if (!isAutoReconnect) showToast("Enter upliner ID (optional)", "info");
+            if (!isAutoReconnect) showToast("New user! Enter upliner ID (optional) to get your unique ID.", "info");
         }
         
         loadingOverlay?.classList.add('hidden');
@@ -1896,7 +1916,7 @@
         if (input) {
             input.select();
             navigator.clipboard.writeText(input.value);
-            showToast('User ID copied! Share to invite friends.', 'success');
+            showToast('Your Unique User ID copied! Share to invite friends.', 'success');
         }
     });
 
