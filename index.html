@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -952,6 +951,15 @@
             text-align: center;
             font-family: monospace;
         }
+
+        .invite-verified-badge {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--success);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -1024,6 +1032,20 @@
         <h2 style="margin-bottom: 15px;">Complete Your Profile</h2>
         <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 20px;">Please setup your profile to continue</p>
         
+        <!-- Invite Code Verification Section - Before Profile Creation -->
+        <div id="preProfileVerifySection" style="margin-bottom: 20px;">
+            <div class="invite-code-input-group">
+                <input type="text" id="setupInviteCode" placeholder="Enter inviter's invitation code (optional)" maxlength="8" style="text-transform: uppercase;">
+                <button id="verifyInviteCodeBtn"><i class="fa-solid fa-check"></i> Verify</button>
+            </div>
+            <div id="inviterVerifyStatus" style="font-size: 11px; margin-bottom: 15px; text-align: left;"></div>
+        </div>
+        
+        <div id="verifiedInviterDisplay" class="invite-verified-badge hidden">
+            <i class="fa-solid fa-user-check" style="color: var(--success);"></i>
+            <span id="verifiedInviterText">Invitation verified!</span>
+        </div>
+        
         <div class="avatar-preview" id="avatarPreview" onclick="document.getElementById('setupProfilePic')?.click()">
             <i class="fa-solid fa-user-circle" id="avatarPreviewIcon"></i>
             <img id="avatarPreviewImg" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
@@ -1032,17 +1054,12 @@
         
         <input type="text" id="setupUsername" placeholder="Enter your username" style="width:100%; padding:12px; border-radius:12px; margin-bottom:15px;">
         
-        <div class="invite-code-input-group">
-            <input type="text" id="setupInviteCode" placeholder="Enter inviter's invitation code (optional)" maxlength="8" style="text-transform: uppercase;">
-            <button id="verifyInviteCodeBtn"><i class="fa-solid fa-check"></i> Verify</button>
-        </div>
-        <div id="inviterVerifyStatus" style="font-size: 11px; margin-bottom: 15px; text-align: left;"></div>
-        
         <div class="commission-breakdown">
             <p><i class="fa-solid fa-chart-simple"></i> <strong>Commission Structure:</strong></p>
             <p>• <span>40%</span> to Direct Inviter</p>
             <p>• <span>10%</span> to Upliner (Inviter's Inviter)</p>
             <p>• <span>20%</span> Split among all existing Direct Members of Inviter</p>
+            <p>• <span>30%</span> Platform Fee</p>
         </div>
         
         <button class="btn btn-success" id="completeProfileBtn">Complete Setup</button>
@@ -1312,8 +1329,7 @@
     const CHAIN_ID_DECIMAL = 56;
     const JOINING_FEE_USDT = 0.10;
     
-    // ===== CHANGE THIS! =====
-    // Apni free API key https://api.imgbb.com/ se hasil karke yahan paste karen.
+    // ===== IMAGE HOSTING API KEY (Replace with your key) =====
     const IMAGE_HOST_API_KEY = 'YOUR_IMGBB_API_KEY_HERE';
     
     const LEVELS = [
@@ -1343,7 +1359,8 @@
         INVITER_MAP: 'ztr_inviter_map',
         CONNECTED_WALLET: 'ztr_connected_wallet',
         USER_SETUP_COMPLETE: 'ztr_user_setup_complete',
-        SESSION_ACTIVE: 'ztr_session_active'
+        SESSION_ACTIVE: 'ztr_session_active',
+        DIRECT_MEMBERS: 'ztr_direct_members'
     };
 
     let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper = null;
@@ -1425,7 +1442,7 @@
         }
     }
     
-    // ========== INVITATION CODE GENERATION - FIXED ==========
+    // ========== INVITATION CODE GENERATION ==========
     function generateUniqueInviteCode() {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let code = '';
@@ -1481,6 +1498,46 @@
         }
     }
 
+    // ========== DIRECT MEMBERS MANAGEMENT ==========
+    function addDirectMember(inviterWallet, newMemberWallet) {
+        if (!inviterWallet || !newMemberWallet || !isValidWalletAddress(inviterWallet) || !isValidWalletAddress(newMemberWallet)) return;
+        try {
+            let directMembers = {};
+            const stored = localStorage.getItem(STORAGE_KEYS.DIRECT_MEMBERS);
+            if (stored) {
+                directMembers = JSON.parse(stored);
+            }
+            const inviterKey = inviterWallet.toLowerCase();
+            if (!directMembers[inviterKey]) {
+                directMembers[inviterKey] = [];
+            }
+            if (!directMembers[inviterKey].includes(newMemberWallet.toLowerCase())) {
+                directMembers[inviterKey].push(newMemberWallet.toLowerCase());
+                localStorage.setItem(STORAGE_KEYS.DIRECT_MEMBERS, JSON.stringify(directMembers));
+            }
+        } catch (e) {
+            console.error("Error adding direct member:", e);
+        }
+    }
+    
+    function getDirectMembers(wallet) {
+        if (!wallet || !isValidWalletAddress(wallet)) return [];
+        try {
+            const stored = localStorage.getItem(STORAGE_KEYS.DIRECT_MEMBERS);
+            if (!stored) return [];
+            const directMembers = JSON.parse(stored);
+            return directMembers[wallet.toLowerCase()] || [];
+        } catch (e) {
+            return [];
+        }
+    }
+    
+    function getUplinerWallet(wallet) {
+        const inviterId = getInviterId(wallet);
+        if (!inviterId) return null;
+        return getWalletById(inviterId);
+    }
+
     // ========== USER DATA MANAGEMENT ==========
     function getNextUserId() {
         try {
@@ -1512,6 +1569,18 @@
                 }
             }
             return null;
+        } catch (e) {
+            return null;
+        }
+    }
+    
+    function getUserIdByWallet(wallet) {
+        if (!wallet || !isValidWalletAddress(wallet)) return null;
+        try {
+            const stored = localStorage.getItem(STORAGE_KEYS.USER_IDS);
+            if (!stored) return null;
+            const userIds = JSON.parse(stored);
+            return userIds[wallet.toLowerCase()] || null;
         } catch (e) {
             return null;
         }
@@ -1562,6 +1631,12 @@
                 }
                 inviterMap[walletKey] = inviterId;
                 localStorage.setItem(STORAGE_KEYS.INVITER_MAP, JSON.stringify(inviterMap));
+                
+                // Add to direct members of inviter
+                const inviterWallet = getWalletById(inviterId);
+                if (inviterWallet) {
+                    addDirectMember(inviterWallet, wallet);
+                }
             }
             
             profiles[walletKey] = { 
@@ -1633,42 +1708,78 @@
         }
     }
     
-    function markUserAsPaid(wallet, inviterUserId) {
-        if (!wallet || !isValidWalletAddress(wallet)) return;
-        try {
-            let paidUsers = {};
-            const stored = localStorage.getItem(STORAGE_KEYS.PAID_USERS);
-            if (stored) {
-                paidUsers = JSON.parse(stored);
-            }
-            paidUsers[wallet.toLowerCase()] = true; 
-            localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
-            
-            if (inviterUserId) {
-                distributeMultiLevelCommission(wallet, inviterUserId);
-            }
-        } catch (e) {
-            console.error("Error marking user as paid:", e);
-        }
-    }
-
+    // ========== NEW COMMISSION DISTRIBUTION LOGIC ==========
+    // 40% to direct inviter
+    // 10% to upliner (inviter's inviter)
+    // 20% divided equally among all direct members of the inviter
     function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
         const baseAmount = JOINING_FEE_USDT;
         
+        // Get inviter wallet from user ID
         const inviterWallet = getWalletById(inviterUserId);
-        if (inviterWallet && isValidWalletAddress(inviterWallet)) {
-            const directCommission = baseAmount * 0.40;
-            updateZTRBalance(inviterWallet, directCommission);
-            showToast(`Direct Inviter (ID: ZTR-${inviterUserId}) received ${directCommission.toFixed(2)} ZTR!`, 'success');
-            
-            let teamSizes = {};
-            const stored = localStorage.getItem(STORAGE_KEYS.TEAM_SIZE);
-            if (stored) {
-                teamSizes = JSON.parse(stored);
-            }
-            teamSizes[inviterWallet] = (teamSizes[inviterWallet] || 0) + 1;
-            localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
+        
+        if (!inviterWallet || !isValidWalletAddress(inviterWallet)) {
+            console.log("No valid inviter found");
+            return;
         }
+        
+        // 1. 40% to Direct Inviter
+        const directCommission = baseAmount * 0.40;
+        updateZTRBalance(inviterWallet, directCommission);
+        const inviterProfile = getUserProfile(inviterWallet);
+        const inviterName = inviterProfile ? inviterProfile.name : `ID: ZTR-${inviterUserId}`;
+        showToast(`🎉 Direct Inviter (${inviterName}) received ${directCommission.toFixed(4)} ZTR!`, 'success');
+        
+        // 2. 10% to Upliner (Inviter's Inviter - 2nd level)
+        const uplinerId = getInviterId(inviterWallet);
+        if (uplinerId) {
+            const uplinerWallet = getWalletById(uplinerId);
+            if (uplinerWallet && isValidWalletAddress(uplinerWallet)) {
+                const uplinerCommission = baseAmount * 0.10;
+                updateZTRBalance(uplinerWallet, uplinerCommission);
+                const uplinerProfile = getUserProfile(uplinerWallet);
+                const uplinerName = uplinerProfile ? uplinerProfile.name : `ID: ZTR-${uplinerId}`;
+                showToast(`🌟 Upliner (${uplinerName}) received ${uplinerCommission.toFixed(4)} ZTR!`, 'success');
+            }
+        }
+        
+        // 3. 20% Split among all existing Direct Members of Inviter
+        const directMembers = getDirectMembers(inviterWallet);
+        const twentyPercentAmount = baseAmount * 0.20;
+        
+        if (directMembers.length > 0) {
+            const perMemberAmount = twentyPercentAmount / directMembers.length;
+            let distributedCount = 0;
+            
+            directMembers.forEach(memberWallet => {
+                if (memberWallet && isValidWalletAddress(memberWallet) && memberWallet !== newUserWallet.toLowerCase()) {
+                    updateZTRBalance(memberWallet, perMemberAmount);
+                    distributedCount++;
+                    const memberProfile = getUserProfile(memberWallet);
+                    if (memberProfile) {
+                        showToast(`👥 Team member ${memberProfile.name} received ${perMemberAmount.toFixed(4)} ZTR from team pool!`, 'info');
+                    }
+                }
+            });
+            
+            if (distributedCount > 0) {
+                showToast(`📊 ${distributedCount} team members shared ${twentyPercentAmount.toFixed(4)} ZTR (${(twentyPercentAmount*100/baseAmount).toFixed(0)}% pool)!`, 'info');
+            } else {
+                // If no existing direct members, this 20% goes to platform
+                showToast(`📊 No existing team members, 20% pool added to platform rewards`, 'info');
+            }
+        } else {
+            showToast(`📊 Inviter has no team members yet, 20% pool reserved for future distribution`, 'info');
+        }
+        
+        // Update team size for inviter
+        let teamSizes = {};
+        const stored = localStorage.getItem(STORAGE_KEYS.TEAM_SIZE);
+        if (stored) {
+            teamSizes = JSON.parse(stored);
+        }
+        teamSizes[inviterWallet] = (teamSizes[inviterWallet] || 0) + 1;
+        localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
     }
     
     // ========== ZTR BALANCE MANAGEMENT ==========
@@ -1877,6 +1988,25 @@
         if (inviterUserId) {
             if (inviterInfoOnInvestPage) inviterInfoOnInvestPage.classList.remove('hidden');
             if (inviterDisplayOnHome) inviterDisplayOnHome.classList.remove('hidden');
+        }
+    }
+    
+    function markUserAsPaid(wallet, inviterUserId) {
+        if (!wallet || !isValidWalletAddress(wallet)) return;
+        try {
+            let paidUsers = {};
+            const stored = localStorage.getItem(STORAGE_KEYS.PAID_USERS);
+            if (stored) {
+                paidUsers = JSON.parse(stored);
+            }
+            paidUsers[wallet.toLowerCase()] = true; 
+            localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
+            
+            if (inviterUserId) {
+                distributeMultiLevelCommission(wallet, inviterUserId);
+            }
+        } catch (e) {
+            console.error("Error marking user as paid:", e);
         }
     }
     
@@ -2235,7 +2365,7 @@
         }
     }
 
-    // ========== PROFILE SETUP FUNCTIONS - FIXED ==========
+    // ========== PROFILE SETUP FUNCTIONS ==========
     let setupProfilePicData = null;
     
     const setupProfilePic = document.getElementById('setupProfilePic');
@@ -2290,39 +2420,47 @@
             if (!inviteCodeInput) return;
             const inviteCode = inviteCodeInput.value.trim().toUpperCase();
             const statusDiv = document.getElementById('inviterVerifyStatus');
+            const verifiedDisplay = document.getElementById('verifiedInviterDisplay');
+            const verifiedText = document.getElementById('verifiedInviterText');
             
             if (!statusDiv) return;
             
             if (!inviteCode) {
                 statusDiv.innerHTML = '<span class="status-info">ℹ️ No code entered. You can join without an inviter.</span>';
                 verifiedInviterId = null;
+                if (verifiedDisplay) verifiedDisplay.classList.add('hidden');
                 return;
             }
 
             if (!isValidInviteCode(inviteCode)) {
                  statusDiv.innerHTML = '<span class="status-error">❌ Invalid code. Code must be 8 characters (A-Z, 0-9).</span>';
                  verifiedInviterId = null;
+                 if (verifiedDisplay) verifiedDisplay.classList.add('hidden');
                  return;
             }
             
             const inviterWallet = getWalletByInviteCode(inviteCode);
             
             if (inviterWallet && isValidWalletAddress(inviterWallet)) {
-                // Check if the inviter has a User ID, not a full profile
-                const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
-                const inviterUserId = userIds[inviterWallet.toLowerCase()];
+                const inviterUserId = getUserIdByWallet(inviterWallet);
 
                 if(inviterUserId) {
                     verifiedInviterId = inviterUserId;
                     statusDiv.innerHTML = `<span class="status-success">✅ Verified! You are invited by ID: ZTR-${verifiedInviterId}</span>`;
+                    if (verifiedDisplay && verifiedText) {
+                        verifiedText.innerHTML = `<i class="fa-solid fa-user-check"></i> Invitation verified! You are invited by ID: ZTR-${verifiedInviterId}`;
+                        verifiedDisplay.classList.remove('hidden');
+                    }
                     showToast(`Inviter found: ID: ZTR-${verifiedInviterId}`, 'success');
                 } else {
                      statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter not fully registered. You can join without an inviter.</span>';
                      verifiedInviterId = null;
+                     if (verifiedDisplay) verifiedDisplay.classList.add('hidden');
                 }
             } else {
-                statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter code not found. You can join without an inviter.</span>';
+                statusDiv.innerHTML = '<span class="status-error">❌ Inviter code not found. Please check the code.</span>';
                 verifiedInviterId = null;
+                if (verifiedDisplay) verifiedDisplay.classList.add('hidden');
             }
         });
     }
@@ -2367,6 +2505,21 @@
         });
     }
 
+    // ========== PROCESS INVITE CODE FROM URL ==========
+    function processInviteCodeFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const inviteCodeFromUrl = urlParams.get('invite');
+        if (inviteCodeFromUrl && inviteCodeFromUrl.length === 8 && isValidInviteCode(inviteCodeFromUrl)) {
+            const setupInviteCode = document.getElementById('setupInviteCode');
+            if (setupInviteCode) {
+                setupInviteCode.value = inviteCodeFromUrl;
+                setTimeout(() => {
+                    if (verifyInviteCodeBtn) verifyInviteCodeBtn.click();
+                }, 500);
+            }
+        }
+    }
+
     // ========== WALLET CONNECTION ==========
     async function initConnection(accounts, isAutoReconnect = false) {
         if (!accounts || accounts.length === 0) return false;
@@ -2409,16 +2562,9 @@
         await getUSDTDecimals();
         await updateBalances();
         
-        const urlParams = new URLSearchParams(window.location.search);
-        const inviteCodeFromUrl = urlParams.get('invite');
-        if (inviteCodeFromUrl && inviteCodeFromUrl.length === 8 && !isProfileComplete(userAddress)) {
-            const setupInviteCode = document.getElementById('setupInviteCode');
-            if (setupInviteCode) {
-                setupInviteCode.value = inviteCodeFromUrl;
-                setTimeout(() => {
-                    if (verifyInviteCodeBtn) verifyInviteCodeBtn.click();
-                }, 500);
-            }
+        // Process invite code from URL BEFORE profile setup
+        if (!isProfileComplete(userAddress)) {
+            processInviteCodeFromUrl();
         }
         
         if (!isProfileComplete(userAddress)) {
