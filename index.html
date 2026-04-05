@@ -1477,26 +1477,18 @@
             return inviterMap[wallet.toLowerCase()] || null;
         }
         
-        function getUplinerId(userId) {
-            if (!userId) return null;
-            const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
-            for (const wallet in inviterMap) {
-                if (inviterMap[wallet] === userId) {
-                    const uplinerId = getInviterId(wallet);
-                    if (uplinerId) return uplinerId;
-                }
-            }
-            return null;
+        function getUplinerId(inviterWallet) {
+            if (!inviterWallet) return null;
+            return getInviterId(inviterWallet);
         }
         
-        function getDirectMembers(userId) {
-            if (!userId) return [];
+        function getDirectMembersOfInviter(inviterUserId) {
+            if (!inviterUserId) return [];
             const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
             const members = [];
             for (const wallet in inviterMap) {
-                if (inviterMap[wallet] === userId) {
-                    const profile = getUserProfile(wallet);
-                    if (profile) members.push(profile);
+                if (inviterMap[wallet] === inviterUserId) {
+                     members.push(wallet);
                 }
             }
             return members;
@@ -1533,44 +1525,48 @@
             }
         }
 
-        async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
+        function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
             const baseAmount = JOINING_FEE_USDT;
-            
             const inviterWallet = getWalletById(inviterUserId);
-            if (inviterWallet && isValidWalletAddress(inviterWallet)) {
-                const directCommission = baseAmount * 0.40;
-                updateZTRBalance(inviterWallet, directCommission);
-                showToast(`Direct Inviter (ID: ZTR-${inviterUserId}) received ${directCommission.toFixed(2)} ZTR!`, 'success');
-                
-                const teamSizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}');
-                teamSizes[inviterWallet] = (teamSizes[inviterWallet] || 0) + 1;
-                localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
-                
-                const inviterProfile = getUserProfile(inviterWallet);
-                if (inviterProfile && inviterProfile.userId) {
-                    const uplinerId = getUplinerId(inviterProfile.userId);
-                    if (uplinerId) {
-                        const uplinerWallet = getWalletById(uplinerId);
-                        if (uplinerWallet && isValidWalletAddress(uplinerWallet)) {
-                            const uplinerCommission = baseAmount * 0.10;
-                            updateZTRBalance(uplinerWallet, uplinerCommission);
-                            showToast(`Upliner (ID: ZTR-${uplinerId}) received ${uplinerCommission.toFixed(2)} ZTR!`, 'success');
-                        }
+
+            if (!inviterWallet || !isValidWalletAddress(inviterWallet)) return;
+
+            // 1. 40% to Direct Inviter
+            const directCommission = baseAmount * 0.40;
+            updateZTRBalance(inviterWallet, directCommission);
+            showToast(`Inviter ID:ZTR-${inviterUserId} received ${directCommission.toFixed(2)} ZTR!`, 'success');
+            
+            // Increment inviter's team size
+            const teamSizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}');
+            teamSizes[inviterWallet.toLowerCase()] = (teamSizes[inviterWallet.toLowerCase()] || 0) + 1;
+            localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
+
+            // 2. 10% to Upliner (Inviter's Inviter)
+            const uplinerId = getUplinerId(inviterWallet);
+            if (uplinerId) {
+                const uplinerWallet = getWalletById(uplinerId);
+                if (uplinerWallet && isValidWalletAddress(uplinerWallet)) {
+                    const uplinerCommission = baseAmount * 0.10;
+                    updateZTRBalance(uplinerWallet, uplinerCommission);
+                    showToast(`Upliner ID:ZTR-${uplinerId} received ${uplinerCommission.toFixed(2)} ZTR!`, 'success');
+                }
+            }
+
+            // 3. 20% to Inviter's existing direct members
+            const directMembers = getDirectMembersOfInviter(inviterUserId);
+            // Exclude the new user who just joined from this pool
+            const eligibleMembers = directMembers.filter(wallet => wallet.toLowerCase() !== newUserWallet.toLowerCase());
+
+            if (eligibleMembers.length > 0) {
+                const downlinePool = baseAmount * 0.20;
+                const sharePerMember = downlinePool / eligibleMembers.length;
+                eligibleMembers.forEach(memberWallet => {
+                    const memberProfile = getUserProfile(memberWallet);
+                    if (memberProfile) {
+                       updateZTRBalance(memberWallet, sharePerMember);
+                       showToast(`Existing member ID:ZTR-${memberProfile.userId} received ${sharePerMember.toFixed(2)} ZTR from downline pool!`, 'success');
                     }
-                }
-                
-                const directMembers = getDirectMembers(inviterUserId);
-                if (directMembers.length > 0) {
-                    const downlinePool = baseAmount * 0.20;
-                    const sharePerMember = downlinePool / directMembers.length;
-                    directMembers.forEach(member => {
-                        const memberWallet = getWalletById(member.userId);
-                        if (memberWallet && isValidWalletAddress(memberWallet) && memberWallet !== newUserWallet.toLowerCase()) {
-                            updateZTRBalance(memberWallet, sharePerMember);
-                            showToast(`Existing member (ID: ZTR-${member.userId}) received ${sharePerMember.toFixed(2)} ZTR from downline pool!`, 'success');
-                        }
-                    });
-                }
+                });
             }
         }
         
@@ -2064,11 +2060,11 @@
                     statusDiv.innerHTML = `<span class="status-success">✅ Verified! You are invited by ID: ZTR-${verifiedInviterId}</span>`;
                     showToast(`Inviter found: ID: ZTR-${verifiedInviterId}`, 'success');
                 } else {
-                    statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter code not found. You can join without an inviter.</span>';
+                    statusDiv.innerHTML = '<span class="status-error">❌ Inviter profile not found. Code is invalid.</span>';
                     verifiedInviterId = null;
                 }
             } else {
-                statusDiv.innerHTML = '<span class="status-info">ℹ️ Inviter code not found. You can join without an inviter.</span>';
+                statusDiv.innerHTML = '<span class="status-error">❌ Inviter code not found.</span>';
                 verifiedInviterId = null;
             }
         });
@@ -2095,7 +2091,6 @@
             
             if (verifiedInviterId) {
                 showInviterInfoOnPages(verifiedInviterId);
-                showToast(`🎉 You joined using invitation from ID: ZTR-${verifiedInviterId}!`, 'success');
             }
             connectState.classList.add('hidden');
             investmentState.classList.remove('hidden');
@@ -2134,7 +2129,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCodeFromUrl = urlParams.get('invite');
             if (inviteCodeFromUrl && isValidInviteCode(inviteCodeFromUrl) && !isProfileComplete(userAddress)) {
-                document.getElementById('setupInviteCode').value = inviteCodeFromUrl;
+                document.getElementById('setupInviteCode').value = inviteCodeFromUrl.toUpperCase();
                 setTimeout(() => {
                     document.getElementById('verifyInviteCodeBtn').click();
                 }, 500);
@@ -2151,6 +2146,11 @@
                 return true;
             }
             
+            const inviterId = getInviterId(userAddress);
+            if (inviterId) {
+                 showInviterInfoOnPages(inviterId);
+            }
+
             if (isPaidUser(userAddress)) {
                 connectState.classList.add('hidden');
                 investmentState.classList.add('hidden');
@@ -2247,7 +2247,6 @@
                 renderBeautifulTree();
                 updateInviteInfo();
                 
-                if (inviterId) showToast(`✅ You joined under ID: ZTR-${inviterId}!`, 'success');
             } catch (e) { 
                 showToast("Transaction failed. Please try again.", "error"); 
             } finally { 
