@@ -2035,8 +2035,13 @@
 
         // ========== WALLET CONNECTION LOGIC ==========
         async function initConnection(accounts, isAutoReconnect = false) {
-            if (!accounts || accounts.length === 0 || !isValidWalletAddress(accounts[0])) {
-                showToast("Invalid wallet address", "error");
+            if (!accounts || accounts.length === 0 ) {
+                 loadingOverlay.classList.add('hidden');
+                 return false;
+            }
+             if(!isValidWalletAddress(accounts[0])) {
+                if(!isAutoReconnect) showToast("Invalid wallet address", "error");
+                loadingOverlay.classList.add('hidden');
                 return false;
             }
             userAddress = accounts[0];
@@ -2069,7 +2074,8 @@
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
             } else {
-                // New user who hasn't paid yet, show payment modal
+                // New user who hasn't paid yet, show connect screen (or payment modal after connect)
+                connectState.classList.add('hidden');
                 openModal('paymentModal');
             }
             
@@ -2102,6 +2108,52 @@
                 loadingOverlay.classList.add('hidden');
             }
         }
+        
+        // ========== SPECIAL FUNCTION TO CREATE THE FIRST USER ==========
+        /**
+         * IMPORTANT: This function is for developers only to initialize the system.
+         * Run this ONCE from the browser console to create the first "Genesis" user.
+         * This will generate the first valid invitation code needed for others to register.
+         */
+        function createGenesisUserForTesting() {
+            const genesisWallet = '0x0000000000000000000000000000000000000001'.toLowerCase();
+            const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+            const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
+            
+            if (profiles[genesisWallet]) {
+                const existingCode = getUniqueInviteCode(genesisWallet);
+                const message = `Genesis user already exists.\nInvite Code: ${existingCode}`;
+                console.log(message);
+                alert(message);
+                return;
+            }
+
+            // Create profile
+            userIds[genesisWallet] = 1000;
+            profiles[genesisWallet] = {
+                name: 'Genesis User',
+                avatar: 'fa-user-secret',
+                joinDate: new Date().toLocaleDateString(),
+                userId: 1000,
+                profilePicUrl: null
+            };
+            localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
+            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
+            
+            // Mark as paid and profile complete so they can generate a code
+            markUserAsPaid(genesisWallet);
+            markProfileComplete(genesisWallet);
+
+            // Generate and save their unique invite code
+            const genesisCode = getUniqueInviteCode(genesisWallet); 
+            
+            const message = `Genesis User created successfully!\n\nUse this Invite Code for the first real user to register:\n\n${genesisCode}`;
+            console.log(message);
+            alert(message);
+        }
+        // Make the function accessible from the console
+        window.createGenesisUserForTesting = createGenesisUserForTesting;
+
 
         // ========== EVENT LISTENERS ==========
         document.getElementById('connectBtn').addEventListener('click', async () => {
@@ -2171,6 +2223,7 @@
                     showToast(`Inviter found: ${inviterProfile.name}`, 'success');
                     proceedBtn.disabled = false;
                 } else {
+                    // This case should be rare if data is consistent
                     statusDiv.innerHTML = '<span class="status-error">❌ Inviter profile not found. Code is invalid.</span>';
                     verifiedInviterId = null;
                     proceedBtn.disabled = true;
@@ -2269,8 +2322,8 @@
 
         if (window.ethereum) {
             window.ethereum.on('accountsChanged', async (accounts) => {
-                if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
-                    localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
+                if (accounts.length > 0) {
+                    // Don't save wallet here, let initConnection handle it
                     await initConnection(accounts, true);
                 } else {
                     localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
@@ -2282,12 +2335,8 @@
         }
 
         window.addEventListener('load', async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const inviteCodeFromUrl = urlParams.get('invite');
-            if(inviteCodeFromUrl) {
-                // If there's an invite code in the URL, we pre-fill it for the user later.
-                // We don't automatically connect the wallet here, to let the user initiate.
-            }
+             const ip = await getIP();
+            document.getElementById('ipDisplay').innerText = `IP: ${sanitizeInput(ip)}`;
             await autoReconnect();
         });
     })();
