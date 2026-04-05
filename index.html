@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1169,7 +1170,7 @@
             </div>
             
             <div class="main-card" style="margin-top:20px;">
-                <h3>Your Network Tree - Beautiful Hierarchy (<span id="teamPageTotalCount">0</span> members)</h3>
+                <h3>Your Network Tree (<span id="teamPageTotalCount">0</span> members)</h3>
                 <div id="networkTreeContainer" class="network-tree-container">
                     <p style="text-align:center; color:rgba(255,255,255,0.7); font-size:13px;">Loading network tree...</p>
                 </div>
@@ -1556,7 +1557,7 @@
                     const memberProfile = getUserProfile(memberWallet);
                     if (memberProfile) {
                        updateZTRBalance(memberWallet, sharePerMember);
-                       showToast(`Existing member ID:ZTR-${memberProfile.userId} received ${sharePerMember.toFixed(2)} ZTR from downline pool!`, 'success');
+                       showToast(`Member ID:ZTR-${memberProfile.userId} received ${sharePerMember.toFixed(2)} ZTR from pool!`, 'success');
                     }
                 });
             }
@@ -1685,7 +1686,7 @@
             
             if (inviteCode && profile) {
                 const baseUrl = window.location.origin + window.location.pathname;
-                const inviteLink = `${baseUrl}?invite=${inviteCode}&inviterName=${encodeURIComponent(profile.name)}&inviterId=${profile.userId}`;
+                const inviteLink = `${baseUrl}?invite=${inviteCode}`;
                 
                 const inviteLinkInput = document.getElementById('inviteLink');
                 const inviteCodeInput = document.getElementById('inviteCodeInput');
@@ -1741,6 +1742,16 @@
                 return children;
             };
             
+            const getWalletFromProfile = (profile) => {
+                 const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
+                 for(const wallet in userIds) {
+                     if(userIds[wallet] === profile.userId) {
+                         return wallet;
+                     }
+                 }
+                 return null;
+            }
+
             const getUserLevelName = (wallet) => {
                 const levelId = getUserLevel(wallet);
                 if (levelId === 0) return "Starter";
@@ -1749,7 +1760,8 @@
             
             // This function creates the HTML for a single user card in the tree
             const buildNodeHTML = (profile, isCurrentUser = false, level = 0) => {
-                const levelName = getUserLevelName(getWalletById(profile.userId));
+                const wallet = getWalletFromProfile(profile);
+                const levelName = wallet ? getUserLevelName(wallet) : 'Starter';
                 const avatarHtml = profile.profilePicUrl 
                     ? `<img src="${profile.profilePicUrl}" alt="${profile.name}">` 
                     : `<i class="fa-solid fa-user-astronaut"></i>`;
@@ -2081,11 +2093,13 @@
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
 
-                const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
-                if (storedInviteInfo) {
-                    document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code;
+                const urlParams = new URLSearchParams(window.location.search);
+                const inviteCodeFromUrl = urlParams.get('invite');
+                if (inviteCodeFromUrl) {
+                    document.getElementById('verifyInviteCodeInput').value = inviteCodeFromUrl;
                     document.getElementById('verifyInviteCodeBtn').click();
                 }
+
             } else {
                 openModal('paymentModal');
             }
@@ -2156,9 +2170,10 @@
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
 
-                const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
-                if (storedInviteInfo) {
-                    document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code;
+                const urlParams = new URLSearchParams(window.location.search);
+                const inviteCodeFromUrl = urlParams.get('invite');
+                if (inviteCodeFromUrl) {
+                    document.getElementById('verifyInviteCodeInput').value = inviteCodeFromUrl;
                     document.getElementById('verifyInviteCodeBtn').click();
                 }
                 
@@ -2171,6 +2186,7 @@
             }
         });
         
+        // --- CORRECTED INVITATION VERIFICATION LOGIC ---
         document.getElementById('verifyInviteCodeBtn').addEventListener('click', () => {
             const inviteCode = document.getElementById('verifyInviteCodeInput').value.trim().toUpperCase();
             const statusDiv = document.getElementById('inviterVerifyStatus');
@@ -2182,20 +2198,30 @@
                 proceedBtn.disabled = true;
                 return;
             }
-            
-            const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
 
-            if (storedInviteInfo && inviteCode === storedInviteInfo.code) {
-                verifiedInviterId = storedInviteInfo.id;
-                statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by: ${sanitizeInput(storedInviteInfo.name)} (ID: ZTR-${verifiedInviterId})</span>`;
-                showToast(`Inviter found: ${sanitizeInput(storedInviteInfo.name)}`, 'success');
+            const inviterWallet = getWalletByInviteCode(inviteCode);
+
+            if (!inviterWallet) {
+                statusDiv.innerHTML = '<span class="status-error">❌ Invitation code not found. Please check the code and try again.</span>';
+                verifiedInviterId = null;
+                proceedBtn.disabled = true;
+                return;
+            }
+
+            const inviterProfile = getUserProfile(inviterWallet);
+
+            if (inviterProfile) {
+                verifiedInviterId = inviterProfile.userId;
+                statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by: ${sanitizeInput(inviterProfile.name)} (ID: ZTR-${verifiedInviterId})</span>`;
+                showToast(`Inviter found: ${sanitizeInput(inviterProfile.name)}`, 'success');
                 proceedBtn.disabled = false;
             } else {
-                statusDiv.innerHTML = '<span class="status-error">❌ Invitation code not found. Please use a valid invitation link.</span>';
+                 statusDiv.innerHTML = '<span class="status-error">❌ Error retrieving inviter profile. The code is valid but the user data is missing.</span>';
                 verifiedInviterId = null;
                 proceedBtn.disabled = true;
             }
         });
+
 
         document.getElementById('proceedToProfileBtn').addEventListener('click', () => {
             if (!verifiedInviterId) {
@@ -2298,18 +2324,13 @@
         }
 
         window.addEventListener('load', async () => {
+            // This part is now just for convenience to pre-fill the code from a URL.
+            // The core verification logic no longer depends on it.
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCodeFromUrl = urlParams.get('invite');
-            const inviterNameFromUrl = urlParams.get('inviterName');
-            const inviterIdFromUrl = urlParams.get('inviterId');
-
-            if(inviteCodeFromUrl && inviterNameFromUrl && inviterIdFromUrl) {
-                const inviteInfo = {
-                    code: inviteCodeFromUrl.toUpperCase(),
-                    name: decodeURIComponent(inviterNameFromUrl),
-                    id: inviterIdFromUrl
-                };
-                sessionStorage.setItem(STORAGE_KEYS.INVITE_INFO, JSON.stringify(inviteInfo));
+            const inviteInput = document.getElementById('verifyInviteCodeInput');
+            if(inviteCodeFromUrl && inviteInput) {
+                inviteInput.value = inviteCodeFromUrl.toUpperCase();
             }
             await autoReconnect();
         });
