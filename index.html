@@ -1071,7 +1071,7 @@
                 </p>
                 
                 <div class="invite-code-input-group">
-                    <input type="text" id="verifyInviteCodeInput" placeholder="Enter inviter's code" maxlength="8" style="text-transform: uppercase;">
+                    <input type="text" id="verifyInviteCodeInput" placeholder="ENTER INVITER'S CODE" maxlength="8" style="text-transform: uppercase;">
                     <button id="verifyInviteCodeBtn"><i class="fa-solid fa-check"></i> Verify</button>
                 </div>
                 <div id="inviterVerifyStatus" style="font-size: 11px; margin-bottom: 20px; text-align: left;"></div>
@@ -1312,14 +1312,14 @@
             INVITER_MAP: 'ztr_inviter_map',
             CONNECTED_WALLET: 'ztr_connected_wallet',
             USER_SETUP_COMPLETE: 'ztr_user_setup_complete',
-            SESSION_ACTIVE: 'ztr_session_active'
+            SESSION_ACTIVE: 'ztr_session_active',
+            // ---- FIX: Key for storing invite info in session ----
+            INVITE_INFO: 'ztr_invite_info'
         };
 
         let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper;
         let verifiedInviterId = null;
         let pendingLevelUpgrade = null;
-        // ---- FIX: Variable to store inviter info from URL ----
-        let inviteInfoFromUrl = null;
 
         // UI ELEMENTS
         const connectState = document.getElementById('connectState');
@@ -1679,7 +1679,6 @@
             }
         }
         
-        // ---- FIX: Modified this function to include inviter's name and ID in the link ----
         function updateInviteInfo() {
             if (!userAddress) return;
             const inviteCode = getUniqueInviteCode(userAddress);
@@ -1687,6 +1686,7 @@
             
             if (inviteCode && profile) {
                 const baseUrl = window.location.origin + window.location.pathname;
+                // ---- FIX: Link now contains all necessary info for verification ----
                 const inviteLink = `${baseUrl}?invite=${inviteCode}&inviterName=${encodeURIComponent(profile.name)}&inviterId=${profile.userId}`;
                 
                 const inviteLinkInput = document.getElementById('inviteLink');
@@ -2036,6 +2036,9 @@
             markProfileComplete(userAddress);
             updateZTRBalance(userAddress, 10); // Welcome bonus
             
+            // ---- FIX: Clean up session storage after registration is complete ----
+            sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
+            
             closeModal('profileSetupModal');
             showToast("Profile setup complete! You received 10 ZTR bonus!", "success");
             
@@ -2071,21 +2074,19 @@
             
             // Logic to determine which screen to show
             if (isProfileComplete(userAddress)) {
-                // User has fully completed registration, show dashboard
                 showDashboard();
             } else if (isPaidUser(userAddress)) {
-                // User has paid but not verified an inviter or set up a profile
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
-                // ---- FIX: Pre-fill input if invite info came from URL ----
-                if (inviteInfoFromUrl) {
-                    const inviteInput = document.getElementById('verifyInviteCodeInput');
-                    if (inviteInput) {
-                        inviteInput.value = inviteInfoFromUrl.code;
-                    }
+
+                // ---- FIX: Pre-fill and auto-verify if info is available in session ----
+                const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
+                if (storedInviteInfo) {
+                    document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code;
+                    // Automatically click verify for a smoother user experience
+                    document.getElementById('verifyInviteCodeBtn').click();
                 }
             } else {
-                // New user who hasn't paid yet, show payment modal
                 openModal('paymentModal');
             }
             
@@ -2153,16 +2154,14 @@
                 closeModal('paymentModal');
                 showToast("✅ Node Activated! Please verify your inviter.", "success");
                 
-                // Transition to the new invitation verification state
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
-                
-                // ---- FIX: Pre-fill input if invite info came from URL after payment ----
-                if (inviteInfoFromUrl) {
-                    const inviteInput = document.getElementById('verifyInviteCodeInput');
-                    if (inviteInput) {
-                        inviteInput.value = inviteInfoFromUrl.code;
-                    }
+
+                // ---- FIX: Pre-fill and auto-verify if info is available in session ----
+                const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
+                if (storedInviteInfo) {
+                    document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code;
+                    document.getElementById('verifyInviteCodeBtn').click();
                 }
                 
             } catch (e) { 
@@ -2174,7 +2173,7 @@
             }
         });
         
-        // ---- FIX: Replaced the entire verification logic ----
+        // ---- FIX: PERMANENT FIX for verification logic using sessionStorage ----
         document.getElementById('verifyInviteCodeBtn').addEventListener('click', () => {
             const inviteCode = document.getElementById('verifyInviteCodeInput').value.trim().toUpperCase();
             const statusDiv = document.getElementById('inviterVerifyStatus');
@@ -2187,15 +2186,14 @@
                 return;
             }
             
-            // New verification logic using data from the URL
-            if (inviteInfoFromUrl && inviteCode === inviteInfoFromUrl.code) {
-                // If the entered code matches the one from the URL, it's valid.
-                verifiedInviterId = inviteInfoFromUrl.id;
-                statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by: ${sanitizeInput(inviteInfoFromUrl.name)} (ID: ZTR-${verifiedInviterId})</span>`;
-                showToast(`Inviter found: ${sanitizeInput(inviteInfoFromUrl.name)}`, 'success');
+            const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
+
+            if (storedInviteInfo && inviteCode === storedInviteInfo.code) {
+                verifiedInviterId = storedInviteInfo.id;
+                statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by: ${sanitizeInput(storedInviteInfo.name)} (ID: ZTR-${verifiedInviterId})</span>`;
+                showToast(`Inviter found: ${sanitizeInput(storedInviteInfo.name)}`, 'success');
                 proceedBtn.disabled = false;
             } else {
-                // This will trigger if user didn't use a link or typed a wrong code.
                 statusDiv.innerHTML = '<span class="status-error">❌ Invitation code not found. Please use a valid invitation link.</span>';
                 verifiedInviterId = null;
                 proceedBtn.disabled = true;
@@ -2301,20 +2299,20 @@
             window.ethereum.on('chainChanged', () => location.reload());
         }
 
-        // ---- FIX: Modified page load to capture inviter info from URL ----
+        // ---- FIX: Capture and SAVE inviter info from URL to sessionStorage ----
         window.addEventListener('load', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCodeFromUrl = urlParams.get('invite');
             const inviterNameFromUrl = urlParams.get('inviterName');
             const inviterIdFromUrl = urlParams.get('inviterId');
 
-            // If a valid invite link is used, store the inviter's info
             if(inviteCodeFromUrl && inviterNameFromUrl && inviterIdFromUrl) {
-                inviteInfoFromUrl = {
+                const inviteInfo = {
                     code: inviteCodeFromUrl.toUpperCase(),
                     name: decodeURIComponent(inviterNameFromUrl),
                     id: inviterIdFromUrl
                 };
+                sessionStorage.setItem(STORAGE_KEYS.INVITE_INFO, JSON.stringify(inviteInfo));
             }
             await autoReconnect();
         });
