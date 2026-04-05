@@ -31,7 +31,7 @@
         }
 
         body {
-            background: url('https://iili.io/BTgNzKJ.jpg') no-repeat center center fixed;
+            background: url('https://iili.io/qmuYshF.jpg') no-repeat center center fixed;
             background-size: cover;
             color: var(--text-main);
             min-height: 100vh;
@@ -1067,7 +1067,7 @@
                 <i class="fa-solid fa-user-check" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
                 <h2 style="margin-bottom: 15px;">Invitation Required</h2>
                 <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 20px;">
-                    Node activation successful! To proceed, you must enter a valid invitation code from your upliner.
+                    Node activation successful! To proceed, please use a valid invitation link from your upliner.
                 </p>
                 
                 <div class="invite-code-input-group">
@@ -1313,7 +1313,7 @@
             CONNECTED_WALLET: 'ztr_connected_wallet',
             USER_SETUP_COMPLETE: 'ztr_user_setup_complete',
             SESSION_ACTIVE: 'ztr_session_active',
-            INVITE_INFO: 'ztr_invite_info'
+            PENDING_INVITER: 'ztr_pending_inviter_info'
         };
 
         let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper;
@@ -1394,17 +1394,6 @@
             inviteCodes[wallet.toLowerCase()] = newCode;
             localStorage.setItem(STORAGE_KEYS.INVITE_CODES, JSON.stringify(inviteCodes));
             return newCode;
-        }
-        
-        function getWalletByInviteCode(inviteCode) {
-            if (!inviteCode || !isValidInviteCode(inviteCode)) return null;
-            const inviteCodes = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITE_CODES) || '{}');
-            for (const wallet in inviteCodes) {
-                if (inviteCodes[wallet] === inviteCode) {
-                    return wallet;
-                }
-            }
-            return null;
         }
 
         // ========== USER DATA MANAGEMENT ==========
@@ -1678,20 +1667,32 @@
             }
         }
         
+        // --- FIXED INVITATION LINK GENERATION ---
         function updateInviteInfo() {
             if (!userAddress) return;
-            const inviteCode = getUniqueInviteCode(userAddress);
             const profile = getUserProfile(userAddress);
+            if (!profile) return;
             
-            if (inviteCode && profile) {
+            const inviteCode = getUniqueInviteCode(userAddress);
+            if (!inviteCode) return;
+
+            const invitePayload = {
+                code: inviteCode,
+                wallet: userAddress,
+                id: profile.userId,
+                name: profile.name
+            };
+            try {
+                const encodedPayload = btoa(JSON.stringify(invitePayload));
                 const baseUrl = window.location.origin + window.location.pathname;
-                const inviteLink = `${baseUrl}?invite=${inviteCode}`;
+                const inviteLinkValue = `${baseUrl}?ref=${encodedPayload}`;
                 
-                const inviteLinkInput = document.getElementById('inviteLink');
-                const inviteCodeInput = document.getElementById('inviteCodeInput');
-                
-                if (inviteLinkInput) inviteLinkInput.value = inviteLink;
-                if (inviteCodeInput) inviteCodeInput.value = inviteCode;
+                document.getElementById('inviteLink').value = inviteLinkValue;
+                document.getElementById('inviteCodeInput').value = inviteCode;
+
+            } catch (e) {
+                console.error("Failed to create invite link", e);
+                document.getElementById('inviteLink').value = "Error creating link.";
             }
         }
 
@@ -1726,14 +1727,10 @@
             document.getElementById('teamPageTotalCount').innerText = teamSize;
             const treeContainer = document.getElementById('networkTreeContainer');
             
-            // This function finds all direct children of a given user ID
             const getChildren = (userId) => {
                 const children = [];
-                // It checks every registered user
                 for (const wallet in profiles) {
-                    // It looks up who invited that user
                     const inviterId = inviterMap[wallet];
-                    // If the inviter's ID matches the one we're looking for, we add them to the list
                     if (inviterId === userId) {
                         children.push(profiles[wallet]);
                     }
@@ -1757,7 +1754,6 @@
                 return LEVELS[levelId - 1]?.name || "Starter";
             };
             
-            // This function creates the HTML for a single user card in the tree
             const buildNodeHTML = (profile, isCurrentUser = false, level = 0) => {
                 const wallet = getWalletFromProfile(profile);
                 const levelName = wallet ? getUserLevelName(wallet) : 'Starter';
@@ -1780,7 +1776,6 @@
                 `;
             };
             
-            // This function builds the entire tree structure recursively
             const buildTree = (userId, level = 1) => {
                 const children = getChildren(userId);
                 if (children.length === 0) return '';
@@ -1799,7 +1794,6 @@
                 return `<ul>${childrenHTML}</ul>`;
             };
             
-            // Start building the tree from the current user
             let treeHTML = `
                 <div class="tree">
                     <ul>
@@ -1816,7 +1810,7 @@
                     <div style="text-align:center; padding: 40px;">
                         <i class="fa-solid fa-tree" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i>
                         <p style="color: rgba(255,255,255,0.7);">Your network is empty.</p>
-                        <p style="color: rgba(255,255,255,0.7); font-size: 12px;">Share your invitation code to start building your tree!</p>
+                        <p style="color: rgba(255,255,255,0.7); font-size: 12px;">Share your invitation link to start building your tree!</p>
                     </div>
                 `;
             } else {
@@ -2050,7 +2044,7 @@
             markProfileComplete(userAddress);
             updateZTRBalance(userAddress, 10); // Welcome bonus
             
-            sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
+            sessionStorage.removeItem(STORAGE_KEYS.PENDING_INVITER);
             
             closeModal('profileSetupModal');
             showToast("Profile setup complete! You received 10 ZTR bonus!", "success");
@@ -2085,20 +2079,17 @@
             await getUSDTDecimals();
             await updateBalances();
             
-            // Logic to determine which screen to show
             if (isProfileComplete(userAddress)) {
                 showDashboard();
             } else if (isPaidUser(userAddress)) {
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
 
-                const urlParams = new URLSearchParams(window.location.search);
-                const inviteCodeFromUrl = urlParams.get('invite');
-                if (inviteCodeFromUrl) {
-                    document.getElementById('verifyInviteCodeInput').value = inviteCodeFromUrl;
-                    document.getElementById('verifyInviteCodeBtn').click();
+                const pendingInviterInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.PENDING_INVITER) || 'null');
+                if (pendingInviterInfo && pendingInviterInfo.code) {
+                    document.getElementById('verifyInviteCodeInput').value = pendingInviterInfo.code;
+                    document.getElementById('verifyInviteCodeBtn').click(); 
                 }
-
             } else {
                 openModal('paymentModal');
             }
@@ -2169,10 +2160,9 @@
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
 
-                const urlParams = new URLSearchParams(window.location.search);
-                const inviteCodeFromUrl = urlParams.get('invite');
-                if (inviteCodeFromUrl) {
-                    document.getElementById('verifyInviteCodeInput').value = inviteCodeFromUrl;
+                const pendingInviterInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.PENDING_INVITER) || 'null');
+                if (pendingInviterInfo && pendingInviterInfo.code) {
+                    document.getElementById('verifyInviteCodeInput').value = pendingInviterInfo.code;
                     document.getElementById('verifyInviteCodeBtn').click();
                 }
                 
@@ -2185,7 +2175,7 @@
             }
         });
         
-        // --- CORRECTED INVITATION VERIFICATION LOGIC ---
+        // --- FIXED AND ROBUST INVITATION VERIFICATION LOGIC ---
         document.getElementById('verifyInviteCodeBtn').addEventListener('click', () => {
             const inviteCode = document.getElementById('verifyInviteCodeInput').value.trim().toUpperCase();
             const statusDiv = document.getElementById('inviterVerifyStatus');
@@ -2198,26 +2188,18 @@
                 return;
             }
 
-            const inviterWallet = getWalletByInviteCode(inviteCode);
+            const pendingInviterInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.PENDING_INVITER) || 'null');
 
-            if (!inviterWallet) {
-                statusDiv.innerHTML = '<span class="status-error">❌ Invitation code not found. Please check the code and try again.</span>';
-                verifiedInviterId = null;
-                proceedBtn.disabled = true;
-                return;
-            }
-
-            const inviterProfile = getUserProfile(inviterWallet);
-
-            if (inviterProfile) {
-                verifiedInviterId = inviterProfile.userId;
-                statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by: ${sanitizeInput(inviterProfile.name)} (ID: ZTR-${verifiedInviterId})</span>`;
-                showToast(`Inviter found: ${sanitizeInput(inviterProfile.name)}`, 'success');
+            if (pendingInviterInfo && pendingInviterInfo.code && inviteCode === pendingInviterInfo.code) {
+                verifiedInviterId = pendingInviterInfo.id;
+                statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by: ${sanitizeInput(pendingInviterInfo.name)} (ID: ZTR-${verifiedInviterId})</span>`;
+                showToast(`Inviter found: ${sanitizeInput(pendingInviterInfo.name)}`, 'success');
                 proceedBtn.disabled = false;
             } else {
-                 statusDiv.innerHTML = '<span class="status-error">❌ Error retrieving inviter profile. The code is valid but the user data is missing.</span>';
                 verifiedInviterId = null;
                 proceedBtn.disabled = true;
+                statusDiv.innerHTML = '<span class="status-error">❌ Code not valid. Please make sure you have opened the DApp using a valid invitation link.</span>';
+                showToast("Verification failed. Please use an invitation link.", "error");
             }
         });
 
@@ -2315,7 +2297,7 @@
                 } else {
                     localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
                     localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE);
-                    sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
+                    sessionStorage.removeItem(STORAGE_KEYS.PENDING_INVITER);
                     location.reload();
                 }
             });
@@ -2323,13 +2305,23 @@
         }
 
         window.addEventListener('load', async () => {
-            // This part is now just for convenience to pre-fill the code from a URL.
-            // The core verification logic no longer depends on it.
             const urlParams = new URLSearchParams(window.location.search);
-            const inviteCodeFromUrl = urlParams.get('invite');
-            const inviteInput = document.getElementById('verifyInviteCodeInput');
-            if(inviteCodeFromUrl && inviteInput) {
-                inviteInput.value = inviteCodeFromUrl.toUpperCase();
+            const refData = urlParams.get('ref');
+            if (refData) {
+                try {
+                    const decodedPayload = atob(refData);
+                    const inviteInfo = JSON.parse(decodedPayload);
+                    if (inviteInfo.code && inviteInfo.id && inviteInfo.name && inviteInfo.wallet) {
+                        sessionStorage.setItem(STORAGE_KEYS.PENDING_INVITER, JSON.stringify(inviteInfo));
+                        const inviteInput = document.getElementById('verifyInviteCodeInput');
+                        if (inviteInput) {
+                            inviteInput.value = inviteInfo.code;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Failed to parse referral link data:", e);
+                    sessionStorage.removeItem(STORAGE_KEYS.PENDING_INVITER);
+                }
             }
             await autoReconnect();
         });
