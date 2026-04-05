@@ -1267,65 +1267,15 @@
             return div.innerHTML;
         }
         
+        // SECURITY: Validate wallet address
         function isValidWalletAddress(address) {
             return /^0x[a-fA-F0-9]{40}$/.test(address);
         }
         
+        // SECURITY: Validate invite code
         function isValidInviteCode(code) {
             return /^[A-Z0-9]{8}$/.test(code);
         }
-        
-        // --- START OF PERMANENT FIX: CENTRAL DATABASE CONFIG ---
-        // Step 1: JSONbin.io se apni API Key yahan paste karen
-        const JSONBIN_API_KEY = "$2a$10$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; // <--- APNA API KEY YAHAN PASTE KAREN
-        
-        // Step 2: JSONbin.io se apni Bin ID yahan paste karen
-        const JSONBIN_BIN_ID = "663XXXXXXXXXXXXXXXXXXXXX"; // <--- APNI BIN ID YAHAN PASTE KAREN
-
-        // This object will hold all shared data fetched from the central database
-        let sharedData = {
-            profiles: {},
-            userIds: {},
-            inviteCodes: {},
-            inviterMap: {},
-            teamSize: {}
-        };
-        
-        // Function to read all data from our central database (JSONBin)
-        async function readDataFromBin() {
-            try {
-                const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-                    headers: { 'X-Master-Key': JSONBIN_API_KEY }
-                });
-                if (!response.ok) {
-                    console.error("Failed to fetch data from bin. Initializing with empty data.");
-                    return {}; // Return empty object on failure
-                }
-                const data = await response.json();
-                return data.record;
-            } catch (error) {
-                console.error("Error reading data from bin:", error);
-                return {}; // Return empty object on error
-            }
-        }
-
-        // Function to write all data to our central database (JSONBin)
-        async function writeDataToBin(data) {
-            try {
-                await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': JSONBIN_API_KEY
-                    },
-                    body: JSON.stringify(data)
-                });
-            } catch (error) {
-                console.error("Error writing data to bin:", error);
-                showToast("Network error: Could not save data.", "error");
-            }
-        }
-        // --- END OF PERMANENT FIX: CENTRAL DATABASE CONFIG ---
         
         // CORE CONFIGURATION
         const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
@@ -1353,8 +1303,13 @@
         const STORAGE_KEYS = {
             PAID_USERS: 'ztr_paid_users', 
             ZTR_BALANCE: 'ztr_user_balance',
-            USER_LEVEL: 'ztr_user_level',
+            USER_LEVEL: 'ztr_user_level', 
+            TEAM_SIZE: 'ztr_team_size', 
             SALLERY_EARNINGS: 'ztr_sallery_earnings',
+            USER_PROFILES: 'ztr_user_profiles', 
+            USER_IDS: 'ztr_user_ids',
+            INVITE_CODES: 'ztr_invite_codes',
+            INVITER_MAP: 'ztr_inviter_map',
             CONNECTED_WALLET: 'ztr_connected_wallet',
             USER_SETUP_COMPLETE: 'ztr_user_setup_complete',
             SESSION_ACTIVE: 'ztr_session_active',
@@ -1365,6 +1320,7 @@
         let verifiedInviterId = null;
         let pendingLevelUpgrade = null;
 
+        // UI ELEMENTS
         const connectState = document.getElementById('connectState');
         const invitationState = document.getElementById('invitationState');
         const dashboardState = document.getElementById('dashboardState');
@@ -1375,6 +1331,7 @@
         const loadingOverlay = document.getElementById('loadingOverlay');
         const profileSetupModal = document.getElementById('profileSetupModal');
 
+        // ========== HELPER FUNCTIONS ==========
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -1413,6 +1370,7 @@
             }
         }
         
+        // ========== INVITATION CODE GENERATION ==========
         function generateUniqueInviteCode() {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = '';
@@ -1422,84 +1380,90 @@
             return code;
         }
         
-        // --- FIX: This function now uses the central `sharedData` object ---
         function getUniqueInviteCode(wallet) {
             if (!wallet || !isValidWalletAddress(wallet)) return null;
-            if (sharedData.inviteCodes[wallet.toLowerCase()]) {
-                return sharedData.inviteCodes[wallet.toLowerCase()];
+            const inviteCodes = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITE_CODES) || '{}');
+            if (inviteCodes[wallet.toLowerCase()]) {
+                return inviteCodes[wallet.toLowerCase()];
             }
             let newCode = generateUniqueInviteCode();
-            const existingCodes = Object.values(sharedData.inviteCodes);
+            const existingCodes = Object.values(inviteCodes);
             while (existingCodes.includes(newCode)) {
                 newCode = generateUniqueInviteCode();
             }
-            // Note: We don't save to the bin here. Saving happens only on user creation.
+            inviteCodes[wallet.toLowerCase()] = newCode;
+            localStorage.setItem(STORAGE_KEYS.INVITE_CODES, JSON.stringify(inviteCodes));
             return newCode;
         }
         
-        // --- FIX: This function now uses the central `sharedData` object ---
+        // ========== USER DATA MANAGEMENT (localStorage) ==========
+        // Yeh functions har user ke apne browser/phone ki storage (localStorage) mein data save/read karte hain.
+        
         function getNextUserId() {
+            let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
             let nextId = 1000;
-            const existingIds = Object.values(sharedData.userIds);
+            const existingIds = Object.values(userIds);
             if(existingIds.length > 0) {
                 nextId = Math.max(...existingIds) + 1;
             }
             return nextId;
         }
 
-        // --- FIX: This function now uses the central `sharedData` object ---
         function getWalletById(id) {
             if (!id) return null;
-            for (const wallet in sharedData.userIds) {
-                if (sharedData.userIds[wallet] === parseInt(id)) {
+            const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
+            for (const wallet in userIds) {
+                if (userIds[wallet] === parseInt(id)) {
                     return wallet;
                 }
             }
             return null;
         }
         
-        // --- FIX: This function now uses the central `sharedData` object ---
         function getUserProfile(wallet) {
             if(!wallet || !isValidWalletAddress(wallet)) return null;
-            return sharedData.profiles[wallet.toLowerCase()] || null;
+            const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+            return profiles[wallet.toLowerCase()] || null;
         }
 
-        // --- FIX: This is a critical function. It now updates the central `sharedData` object and saves it to the bin. ---
-        async function createUserProfile(wallet, inviterId, username, profilePicUrl) {
+        // Yeh function naye user ka poora data uske apne browser mein create karta hai
+        function createUserProfile(wallet, inviterId, username, profilePicUrl) {
             if (!wallet || !isValidWalletAddress(wallet) || !inviterId) return null;
             
-            const walletLower = wallet.toLowerCase();
-            if (sharedData.profiles[walletLower]) return sharedData.profiles[walletLower];
+            const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+            if (profiles[wallet.toLowerCase()]) return profiles[wallet.toLowerCase()];
 
-            let userId = sharedData.userIds[walletLower];
+            const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
+            let userId = userIds[wallet.toLowerCase()];
             if (!userId) {
                 userId = getNextUserId();
-                sharedData.userIds[walletLower] = userId;
+                userIds[wallet.toLowerCase()] = userId;
+                localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
             }
             
-            sharedData.inviterMap[walletLower] = inviterId;
+            // Sab se zaroori hissa: Yahan naya user apne inviter ki ID apne paas save kar raha hai.
+            const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
+            inviterMap[wallet.toLowerCase()] = inviterId;
+            localStorage.setItem(STORAGE_KEYS.INVITER_MAP, JSON.stringify(inviterMap));
             
-            sharedData.profiles[walletLower] = { 
+            profiles[wallet.toLowerCase()] = { 
                 name: username ? sanitizeInput(username) : `User ${userId}`, 
                 avatar: 'fa-user-astronaut', 
                 joinDate: new Date().toLocaleDateString(), 
                 userId: userId,
                 profilePicUrl: profilePicUrl ? sanitizeInput(profilePicUrl) : null
             };
+            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
             
-            // Generate and save invite code for the new user in the shared data
-            sharedData.inviteCodes[walletLower] = getUniqueInviteCode(wallet);
-
-            // Now, write the entire updated database back to the bin
-            await writeDataToBin(sharedData);
+            getUniqueInviteCode(wallet); // Naye user ke liye code generate karna
             
-            return sharedData.profiles[walletLower];
+            return profiles[wallet.toLowerCase()];
         }
         
-        // --- FIX: All data-reading functions now use `sharedData` instead of `localStorage` ---
         function getInviterId(wallet) {
             if (!wallet || !isValidWalletAddress(wallet)) return null;
-            return sharedData.inviterMap[wallet.toLowerCase()] || null;
+            const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
+            return inviterMap[wallet.toLowerCase()] || null;
         }
         
         function getUplinerId(inviterWallet) {
@@ -1507,17 +1471,21 @@
             return getInviterId(inviterWallet);
         }
         
+        // Yeh function batata hai ke ek inviter ke direct members kon hain.
+        // Yeh data bhi har user ke apne localStorage se hi aata hai.
         function getDirectMembersOfInviter(inviterUserId) {
             if (!inviterUserId) return [];
+            const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
+            const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
             const members = [];
-            for (const wallet in sharedData.inviterMap) {
-                if (sharedData.inviterMap[wallet] === inviterUserId) {
+            for (const wallet in inviterMap) {
+                if (inviterMap[wallet] === inviterUserId && profiles[wallet]) {
                      members.push(wallet);
                 }
             }
             return members;
         }
-        
+
         function isPaidUser(wallet) { 
             if (!wallet || !isValidWalletAddress(wallet)) return false;
             const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
@@ -1526,8 +1494,15 @@
         
         function isProfileComplete(wallet) {
             if (!wallet || !isValidWalletAddress(wallet)) return false;
-            // A user's profile is complete if it exists in our central database
-            return !!sharedData.profiles[wallet.toLowerCase()];
+            const setupComplete = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE) || '{}');
+            return setupComplete[wallet.toLowerCase()] === true;
+        }
+        
+        function markProfileComplete(wallet) {
+            if (!wallet || !isValidWalletAddress(wallet)) return;
+            const setupComplete = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE) || '{}');
+            setupComplete[wallet.toLowerCase()] = true;
+            localStorage.setItem(STORAGE_KEYS.USER_SETUP_COMPLETE, JSON.stringify(setupComplete));
         }
         
         function markUserAsPaid(wallet) {
@@ -1536,44 +1511,47 @@
             paidUsers[wallet.toLowerCase()] = true; 
             localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
         }
-
-        async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
+        
+        // Yahan commissions inviter, upliner aur doosre members ko di jaati hain.
+        // Yeh sab calculations naye user ke browser mein hoti hain.
+        function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
             const baseAmount = JOINING_FEE_USDT;
             const inviterWallet = getWalletById(inviterUserId);
 
             if (!inviterWallet || !isValidWalletAddress(inviterWallet)) return;
 
-            // 1. 40% to Direct Inviter
-            updateZTRBalance(inviterWallet, baseAmount * 0.40);
+            // 40% to Direct Inviter
+            const directCommission = baseAmount * 0.40;
+            updateZTRBalance(inviterWallet, directCommission);
             
-            // Increment inviter's team size in the shared data
-            const inviterWalletLower = inviterWallet.toLowerCase();
-            sharedData.teamSize[inviterWalletLower] = (sharedData.teamSize[inviterWalletLower] || 0) + 1;
+            // Inviter ki team ka size update karna
+            const teamSizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}');
+            teamSizes[inviterWallet.toLowerCase()] = (teamSizes[inviterWallet.toLowerCase()] || 0) + 1;
+            localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
 
-            // 2. 10% to Upliner (Inviter's Inviter)
+            // 10% to Upliner (Inviter's Inviter)
             const uplinerId = getUplinerId(inviterWallet);
             if (uplinerId) {
                 const uplinerWallet = getWalletById(uplinerId);
                 if (uplinerWallet && isValidWalletAddress(uplinerWallet)) {
-                    updateZTRBalance(uplinerWallet, baseAmount * 0.10);
+                    const uplinerCommission = baseAmount * 0.10;
+                    updateZTRBalance(uplinerWallet, uplinerCommission);
                 }
             }
 
-            // 3. 20% to Inviter's existing direct members
+            // 20% to Inviter's existing direct members
             const directMembers = getDirectMembersOfInviter(inviterUserId);
             const eligibleMembers = directMembers.filter(wallet => wallet.toLowerCase() !== newUserWallet.toLowerCase());
 
             if (eligibleMembers.length > 0) {
-                const sharePerMember = (baseAmount * 0.20) / eligibleMembers.length;
+                const downlinePool = baseAmount * 0.20;
+                const sharePerMember = downlinePool / eligibleMembers.length;
                 eligibleMembers.forEach(memberWallet => {
                     updateZTRBalance(memberWallet, sharePerMember);
                 });
             }
-            
-            // We don't need to save here, as `createUserProfile` will save everything.
         }
         
-        // Local data functions remain unchanged (they are specific to the user's browser)
         function getZTRBalance(wallet) { 
             if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); 
@@ -1602,10 +1580,10 @@
             localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(levels)); 
         }
         
-        // --- FIX: This now reads from the central `sharedData` object ---
         function getTeamSize(wallet) { 
             if (!wallet || !isValidWalletAddress(wallet)) return 0;
-            return sharedData.teamSize[wallet.toLowerCase()] || 0; 
+            const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); 
+            return teams[wallet.toLowerCase()] || 0; 
         }
         
         function getSalleryEarnings(wallet) { 
@@ -1697,8 +1675,11 @@
                 const baseUrl = window.location.origin + window.location.pathname;
                 const inviteLink = `${baseUrl}?invite=${inviteCode}&inviterName=${encodeURIComponent(profile.name)}&inviterId=${profile.userId}`;
                 
-                document.getElementById('inviteLink').value = inviteLink;
-                document.getElementById('inviteCodeInput').value = inviteCode;
+                const inviteLinkInput = document.getElementById('inviteLink');
+                const inviteCodeInput = document.getElementById('inviteCodeInput');
+                
+                if (inviteLinkInput) inviteLinkInput.value = inviteLink;
+                if (inviteCodeInput) inviteCodeInput.value = inviteCode;
             }
         }
 
@@ -1720,68 +1701,75 @@
             localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
         }
         
+        // Yeh function poori team ka tree banata hai.
+        // Yeh data user ke apne localStorage se hi read karta hai.
         function renderBeautifulTree() {
             if (!userAddress) return;
             const currentUserProfile = getUserProfile(userAddress);
             if(!currentUserProfile) return;
 
+            const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+            const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
             const teamSize = getTeamSize(userAddress);
             
             document.getElementById('teamPageTotalCount').innerText = teamSize;
             const treeContainer = document.getElementById('networkTreeContainer');
             
             const getChildren = (userId) => {
-                return Object.values(sharedData.profiles).filter(p => sharedData.inviterMap[getWalletById(p.userId)] === userId);
+                const children = [];
+                for (const wallet in inviterMap) {
+                    if (String(inviterMap[wallet]) === String(userId)) {
+                        if (profiles[wallet]) {
+                            children.push(profiles[wallet]);
+                        }
+                    }
+                }
+                return children;
             };
             
             const buildNodeHTML = (profile, isCurrentUser = false, level = 0) => {
-                const levelInfo = getCurrentLevelInfo(getWalletById(profile.userId));
+                const wallet = getWalletById(profile.userId);
+                const levelName = wallet ? getUserLevelName(wallet) : "Starter";
                 const avatarHtml = profile.profilePicUrl 
                     ? `<img src="${profile.profilePicUrl}" alt="${profile.name}">` 
                     : `<i class="fa-solid fa-user-astronaut"></i>`;
                 
                 return `
                     <div class="tree-node-card ${isCurrentUser ? 'is-user' : ''}">
-                        <div class="tree-node-avatar">${avatarHtml}</div>
+                        <div class="tree-node-avatar">
+                            ${avatarHtml}
+                        </div>
                         <div class="tree-node-name">${sanitizeInput(profile.name)}</div>
                         <div class="tree-node-id">ID: ${profile.userId}</div>
-                        <div class="tree-node-level"><i class="fa-solid fa-crown" style="font-size: 8px;"></i> ${levelInfo.name}</div>
+                        <div class="tree-node-level">
+                            <i class="fa-solid fa-crown" style="font-size: 8px;"></i> ${levelName}
+                        </div>
                         ${level > 0 ? `<div class="tree-node-level" style="background: rgba(0,242,255,0.2);"><i class="fa-solid fa-level-down-alt"></i> Level ${level}</div>` : ''}
-                    </div>`;
+                    </div>
+                `;
             };
             
             const buildTree = (userId, level = 1) => {
                 const children = getChildren(userId);
                 if (children.length === 0) return '';
                 
-                let childrenHTML = children.map(child => `
-                    <li class="level-${level}">
-                        ${buildNodeHTML(child, false, level)}
-                        ${buildTree(child.userId, level + 1)}
-                    </li>`
-                ).join('');
+                let childrenHTML = '';
+                children.forEach(child => {
+                    childrenHTML += `<li>${buildNodeHTML(child, false, level)}${buildTree(child.userId, level + 1)}</li>`;
+                });
                 
                 return `<ul>${childrenHTML}</ul>`;
             };
             
-            treeContainer.innerHTML = (teamSize === 0) ? `
-                <div style="text-align:center; padding: 40px;">
-                    <i class="fa-solid fa-tree" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i>
-                    <p style="color: rgba(255,255,255,0.7);">Your network is empty.</p>
-                    <p style="color: rgba(255,255,255,0.7); font-size: 12px;">Share your invitation code to start building your tree!</p>
-                </div>` : `
-                <div class="tree">
-                    <ul>
-                        <li class="level-0">
-                            ${buildNodeHTML(currentUserProfile, true, 0)}
-                            ${buildTree(currentUserProfile.userId, 1)}
-                        </li>
-                    </ul>
-                </div>`;
+            let treeHTML = `<div class="tree"><ul><li>${buildNodeHTML(currentUserProfile, true, 0)}${buildTree(currentUserProfile.userId)}</li></ul></div>`;
+            
+            if (teamSize === 0) {
+                 treeContainer.innerHTML = `<div style="text-align:center; padding: 40px;"><i class="fa-solid fa-tree" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i><p style="color: rgba(255,255,255,0.7);">Your network is empty.</p><p style="color: rgba(255,255,255,0.7); font-size: 12px;">Share your invitation code to start building your tree!</p></div>`;
+            } else {
+                 treeContainer.innerHTML = treeHTML;
+            }
         }
 
-        // Functions below this point do not need changes as they use local data or are UI-only.
-        
         function generateLargeStarsHTML(count, filledCount) {
             let starsHtml = '';
             for (let i = 0; i < count; i++) {
@@ -1827,61 +1815,31 @@
             levelStarsPage.classList.remove('active');
             joiningStarsPage.classList.remove('active');
         }
-        window.closeStarsPages = closeStarsPages;
-        window.openLevelStarsPage = openLevelStarsPage;
-        window.openJoiningStarsPage = openJoiningStarsPage;
+        window.closeStarsPages = closeStarsPages; window.openLevelStarsPage = openLevelStarsPage; window.openJoiningStarsPage = openJoiningStarsPage;
 
         function initializeLevelSwiper() {
             const wrapper = document.getElementById('levelSwiperWrapper');
             if (!wrapper) return;
             const currentLevelId = getUserLevel(userAddress);
-            let slidesHTML = `
-                <div class="swiper-slide">
-                    <div class="level-slide-card unlocked">
-                        <div><div class="level-icon">🌱</div><h2>Starter Level</h2><span class="rank-badge">CURRENTLY ACTIVE</span></div>
-                        <p class="level-info">Your journey begins here. Upgrade to the next level to start earning higher commissions.</p>
-                        <button class="btn" disabled>ACHIEVED</button>
-                    </div>
-                </div>`;
+            let slidesHTML = `<div class="swiper-slide"><div class="level-slide-card unlocked"><div><div class="level-icon">🌱</div><h2>Starter Level</h2><span class="rank-badge">CURRENTLY ACTIVE</span></div><p class="level-info">Your journey begins here. Upgrade to the next level to start earning higher commissions.</p><button class="btn" disabled>ACHIEVED</button></div></div>`;
             LEVELS.forEach(level => {
                 const isUnlocked = currentLevelId >= level.id;
                 const canUpgrade = currentLevelId === level.id - 1;
-                slidesHTML += `
-                    <div class="swiper-slide">
-                        <div class="level-slide-card ${isUnlocked ? 'unlocked' : ''}">
-                            <div><div class="level-icon">${level.icon}</div><h2>${level.name} Level</h2>
-                                ${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}
-                            </div>
-                            <div><p class="level-info">Commission Bonus: <strong>+${level.commission}%</strong></p><h3 class="level-price">${level.price} USDT</h3></div>
-                            <button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price}, ${level.commission})">
-                                ${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}
-                            </button>
-                        </div>
-                    </div>`;
+                slidesHTML += `<div class="swiper-slide"><div class="level-slide-card ${isUnlocked ? 'unlocked' : ''}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} Level</h2>${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}</div><div><p class="level-info">Commission Bonus: <strong>+${level.commission}%</strong></p><h3 class="level-price">${level.price} USDT</h3></div><button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price}, ${level.commission})">${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}</button></div></div>`;
             });
             wrapper.innerHTML = slidesHTML;
             if (levelSwiper) levelSwiper.destroy(true, true);
             levelSwiper = new Swiper('.levelSwiper', { effect: 'cards', grabCursor: true, initialSlide: currentLevelId, navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' } });
         }
         
-        window.openLevelPage = function() {
-            levelPageOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            initializeLevelSwiper();
-        }
-        
-        window.closeLevelPage = function() {
-            levelPageOverlay.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
+        window.openLevelPage = function() { levelPageOverlay.classList.add('active'); document.body.style.overflow = 'hidden'; initializeLevelSwiper(); }
+        window.closeLevelPage = function() { levelPageOverlay.classList.remove('active'); document.body.style.overflow = 'auto'; }
 
         window.upgradeLevel = function(levelId, levelName, price, commission) {
             const currentId = getUserLevel(userAddress);
             if (currentId >= levelId) { showToast(`You already have the ${levelName} level!`, 'info'); return; }
             if (currentId !== levelId - 1) { showToast(`Upgrade to the previous level first!`, 'info'); return; }
-            
             pendingLevelUpgrade = { levelId, levelName, price, commission };
-            
             document.getElementById('upgradeLevelNameDisplay').innerText = `Upgrade to ${levelName}`;
             document.getElementById('levelUpgradeAmount').innerHTML = `${price} USDT`;
             document.getElementById('levelUpgradeCommission').innerHTML = `${commission}%`;
@@ -1892,55 +1850,32 @@
             if (isProcessing || !pendingLevelUpgrade) return;
             isProcessing = true;
             const confirmBtn = document.getElementById('confirmLevelUpgradeBtn');
-            confirmBtn.disabled = true;
-            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
-            
+            confirmBtn.disabled = true; confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
             try {
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
                 const amount = ethers.parseUnits(pendingLevelUpgrade.price.toString(), usdtDecimals);
+                showToast("Waiting for approval...", "info");
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
+                showToast("Transaction sent! Confirming...", "info");
                 await tx.wait();
-                
                 setUserLevel(userAddress, pendingLevelUpgrade.levelId);
                 showToast(`✅ Successfully upgraded to ${pendingLevelUpgrade.levelName}!`, 'success');
-                
-                closeModal('levelUpgradePaymentModal');
-                updateDashboard();
-                initializeLevelSwiper();
-                updateAssetsPage();
-                renderBeautifulTree();
-                
-            } catch (e) { 
-                showToast("Transaction failed. Please try again.", "error"); 
-            } finally { 
-                isProcessing = false; 
-                confirmBtn.disabled = false;
-                confirmBtn.innerHTML = 'Pay & Upgrade';
-                pendingLevelUpgrade = null;
-            }
+                closeModal('levelUpgradePaymentModal'); updateDashboard(); initializeLevelSwiper(); updateAssetsPage(); renderBeautifulTree();
+            } catch (e) { showToast("Transaction failed. Please try again.", "error"); } 
+            finally { isProcessing = false; confirmBtn.disabled = false; confirmBtn.innerHTML = 'Pay & Upgrade'; pendingLevelUpgrade = null; }
         });
 
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
-        window.closeModal = closeModal;
-        window.openModal = openModal;
+        window.closeModal = closeModal; window.openModal = openModal;
 
-        async function getUSDTDecimals() {
-            try { 
-                const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); 
-                usdtDecimals = await usdtContract.decimals(); 
-            } catch { usdtDecimals = 18; }
-        }
+        async function getUSDTDecimals() { try { const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); usdtDecimals = await usdtContract.decimals(); } catch { usdtDecimals = 18; } }
 
         let setupProfilePicData = null;
-        
         document.getElementById('setupProfilePic').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            showToast("Uploading profile picture...", "info");
-            const formData = new FormData();
-            formData.append('key', IMAGE_HOST_API_KEY);
-            formData.append('image', file);
+            const file = e.target.files[0]; if (!file) return;
+            showToast("Uploading profile picture...", "info"); const formData = new FormData();
+            formData.append('key', IMAGE_HOST_API_KEY); formData.append('image', file);
             try {
                 const response = await fetch('https://freeimage.host/api/1/upload', { method: 'POST', body: formData });
                 const result = await response.json();
@@ -1955,73 +1890,42 @@
         });
         
         document.getElementById('completeProfileBtn').addEventListener('click', async () => {
-            const username = document.getElementById('setupUsername').value.trim();
-            if (!username || username.length < 3) {
-                showToast("Username must be at least 3 characters", "error");
-                return;
-            }
-            
-            isProcessing = true;
-            document.getElementById('completeProfileBtn').disabled = true;
-            document.getElementById('completeProfileBtn').innerHTML = '<i class="fa-solid fa-spinner spin"></i> Setting Up...';
-
-            await distributeMultiLevelCommission(userAddress, verifiedInviterId);
-            await createUserProfile(userAddress, verifiedInviterId, sanitizeInput(username), setupProfilePicData);
-            
-            updateZTRBalance(userAddress, 10); // Welcome bonus
-            
+            const username = sanitizeInput(document.getElementById('setupUsername').value.trim());
+            if (!username) { showToast("Please enter a username", "error"); return; }
+            if (username.length < 3) { showToast("Username must be at least 3 characters", "error"); return; }
+            createUserProfile(userAddress, verifiedInviterId, username, setupProfilePicData);
+            distributeMultiLevelCommission(userAddress, verifiedInviterId);
+            markProfileComplete(userAddress);
+            updateZTRBalance(userAddress, 10);
             sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
-            
             closeModal('profileSetupModal');
             showToast("Profile setup complete! You received 10 ZTR bonus!", "success");
             showDashboard();
-
-            isProcessing = false;
-            document.getElementById('completeProfileBtn').disabled = false;
-            document.getElementById('completeProfileBtn').innerText = 'Complete Setup';
         });
 
         async function initConnection(accounts, isAutoReconnect = false) {
-            if (!accounts || accounts.length === 0 || !isValidWalletAddress(accounts[0])) {
-                showToast("Invalid wallet address", "error");
-                loadingOverlay.classList.add('hidden');
-                return false;
-            }
+            if (!accounts || accounts.length === 0 || !isValidWalletAddress(accounts[0])) { showToast("Invalid wallet address", "error"); return false; }
             userAddress = accounts[0];
-            
             localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, userAddress);
             localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
-            
             provider = new ethers.BrowserProvider(window.ethereum);
             signer = await provider.getSigner();
-            
             const ip = await getIP();
             document.getElementById('ipDisplay').innerText = `IP: ${sanitizeInput(ip)}`;
             updateAllWalletAddressDisplays();
-            
             const network = await provider.getNetwork();
-            if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
-                if (!isAutoReconnect) showToast("Please switch to BSC network.", "info");
-                try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {}
-            }
-            
+            if (Number(network.chainId) !== CHAIN_ID_DECIMAL) { if (!isAutoReconnect) showToast("Please switch to BSC network.", "info"); try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {} }
             await getUSDTDecimals();
             await updateBalances();
-            
             if (isProfileComplete(userAddress)) {
                 showDashboard();
             } else if (isPaidUser(userAddress)) {
-                connectState.classList.add('hidden');
-                invitationState.classList.remove('hidden');
+                connectState.classList.add('hidden'); invitationState.classList.remove('hidden');
                 const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
-                if (storedInviteInfo) {
-                    document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code;
-                    document.getElementById('verifyInviteCodeBtn').click();
-                }
+                if (storedInviteInfo) { document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code; document.getElementById('verifyInviteCodeBtn').click(); }
             } else {
                 openModal('paymentModal');
             }
-            
             loadingOverlay.classList.add('hidden');
             return true;
         }
@@ -2029,178 +1933,87 @@
         async function autoReconnect() {
             const savedWallet = localStorage.getItem(STORAGE_KEYS.CONNECTED_WALLET);
             const sessionActive = localStorage.getItem(STORAGE_KEYS.SESSION_ACTIVE);
-            
             if (savedWallet && isValidWalletAddress(savedWallet) && sessionActive === 'true' && window.ethereum) {
-                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                if (accounts.length > 0 && accounts[0].toLowerCase() === savedWallet.toLowerCase()) {
-                    await initConnection(accounts, true);
-                } else if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
-                    localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
-                    await initConnection(accounts, true);
-                }
-            }
+                loadingOverlay.classList.remove('hidden');
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0 && accounts[0].toLowerCase() === savedWallet.toLowerCase()) {
+                        await initConnection(accounts, true);
+                    } else if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
+                        localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
+                        await initConnection(accounts, true);
+                    } else { loadingOverlay.classList.add('hidden'); }
+                } catch (error) { console.error("Auto-reconnect failed:", error); loadingOverlay.classList.add('hidden'); }
+            } else { loadingOverlay.classList.add('hidden'); }
         }
 
         document.getElementById('connectBtn').addEventListener('click', async () => {
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
-            try { 
-                loadingOverlay.classList.remove('hidden');
-                loadingOverlay.querySelector('p').innerText = 'Connecting to wallet...';
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
-                loadingOverlay.querySelector('p').innerText = 'Loading network data...';
-                await initConnection(accounts, false); 
-            } catch (err) { 
-                showToast("Connection rejected", "error");
-                loadingOverlay.classList.add('hidden');
-            }
+            try { loadingOverlay.classList.remove('hidden'); const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); await initConnection(accounts, false); } 
+            catch (err) { showToast("Connection rejected", "error"); loadingOverlay.classList.add('hidden'); }
         });
 
         document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
             if (isProcessing) return;
             isProcessing = true;
             const confirmBtn = document.getElementById('confirmPaymentBtn');
-            confirmBtn.disabled = true;
-            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
-            
+            confirmBtn.disabled = true; confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
             try {
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
                 const amount = ethers.parseUnits(JOINING_FEE_USDT.toString(), usdtDecimals);
+                showToast("Waiting for approval...", "info");
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
+                showToast("Transaction sent! Confirming...", "info");
                 await tx.wait();
-                
                 markUserAsPaid(userAddress);
                 closeModal('paymentModal');
                 showToast("✅ Node Activated! Please verify your inviter.", "success");
-                
-                connectState.classList.add('hidden');
-                invitationState.classList.remove('hidden');
+                connectState.classList.add('hidden'); invitationState.classList.remove('hidden');
                 const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
-                if (storedInviteInfo) {
-                    document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code;
-                    document.getElementById('verifyInviteCodeBtn').click();
-                }
-            } catch (e) { 
-                showToast("Transaction failed. Please try again.", "error"); 
-            } finally { 
-                isProcessing = false; 
-                confirmBtn.disabled = false;
-                confirmBtn.innerHTML = 'Confirm';
-            }
+                if (storedInviteInfo) { document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code; document.getElementById('verifyInviteCodeBtn').click(); }
+            } catch (e) { showToast("Transaction failed. Please try again.", "error"); } 
+            finally { isProcessing = false; confirmBtn.disabled = false; confirmBtn.innerHTML = 'Confirm'; }
         });
         
         document.getElementById('verifyInviteCodeBtn').addEventListener('click', () => {
             const inviteCode = document.getElementById('verifyInviteCodeInput').value.trim().toUpperCase();
             const statusDiv = document.getElementById('inviterVerifyStatus');
             const proceedBtn = document.getElementById('proceedToProfileBtn');
-            
-            if (!isValidInviteCode(inviteCode)) {
-                statusDiv.innerHTML = '<span class="status-error">❌ Invalid code format.</span>';
-                verifiedInviterId = null;
-                proceedBtn.disabled = true;
-                return;
-            }
-            
+            if (!isValidInviteCode(inviteCode)) { statusDiv.innerHTML = '<span class="status-error">❌ Invalid code format.</span>'; verifiedInviterId = null; proceedBtn.disabled = true; return; }
             const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
-
             if (storedInviteInfo && inviteCode === storedInviteInfo.code) {
                 verifiedInviterId = storedInviteInfo.id;
                 statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by: ${sanitizeInput(storedInviteInfo.name)} (ID: ZTR-${verifiedInviterId})</span>`;
+                showToast(`Inviter found: ${sanitizeInput(storedInviteInfo.name)}`, 'success');
                 proceedBtn.disabled = false;
-            } else {
-                statusDiv.innerHTML = '<span class="status-error">❌ Invitation code not found. Please join using a valid invitation link.</span>';
-                verifiedInviterId = null;
-                proceedBtn.disabled = true;
-            }
+            } else { statusDiv.innerHTML = '<span class="status-error">❌ Invitation code not found. Please use a valid invitation link.</span>'; verifiedInviterId = null; proceedBtn.disabled = true; }
         });
 
-        document.getElementById('proceedToProfileBtn').addEventListener('click', () => {
-            if (!verifiedInviterId) {
-                showToast("You must verify an invitation code first.", "error");
-                return;
-            }
-            invitationState.classList.add('hidden');
-            openModal('profileSetupModal');
-        });
-
+        document.getElementById('proceedToProfileBtn').addEventListener('click', () => { if (!verifiedInviterId) { showToast("You must verify an invitation code first.", "error"); return; } invitationState.classList.add('hidden'); openModal('profileSetupModal'); });
         document.getElementById('profilePicInput').addEventListener('change', async (event) => {
-            // ... (code for profile pic upload is fine)
+            const file = event.target.files[0]; if (!file) return; showToast("Uploading new profile picture...", "info"); const formData = new FormData(); formData.append('key', IMAGE_HOST_API_KEY); formData.append('image', file);
+            try {
+                const response = await fetch('https://freeimage.host/api/1/upload', { method: 'POST', body: formData }); const result = await response.json();
+                if (result.status_code === 200) {
+                    const imageUrl = result.image.url; const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+                    if (profiles[userAddress?.toLowerCase()]) { profiles[userAddress.toLowerCase()].profilePicUrl = imageUrl; localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles)); updateAssetsPage(); renderBeautifulTree(); showToast("Profile picture updated successfully!", "success"); }
+                } else { throw new Error("Upload failed"); }
+            } catch (error) { showToast("Upload failed, please try again", "error"); }
         });
-
-        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
-            const name = document.getElementById('profileNameInput').value;
-            const profile = getUserProfile(userAddress);
-            if (profile) {
-                if(name) sharedData.profiles[userAddress.toLowerCase()].name = sanitizeInput(name);
-                await writeDataToBin(sharedData); // Save changes to the central database
-                updateAssetsPage();
-                renderBeautifulTree();
-                closeModal('editProfileModal');
-                showToast("Profile updated!", "success");
-            }
+        document.getElementById('saveProfileBtn').addEventListener('click', () => {
+            const name = document.getElementById('profileNameInput').value; const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
+            if (profiles[userAddress?.toLowerCase()]) { if(name) profiles[userAddress.toLowerCase()].name = sanitizeInput(name); localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles)); updateAssetsPage(); renderBeautifulTree(); closeModal('editProfileModal'); showToast("Profile updated!", "success"); }
         });
-
-        document.getElementById('copyInviteLinkBtn').addEventListener('click', () => {
-            navigator.clipboard.writeText(document.getElementById('inviteLink').value);
-            showToast('Invitation link copied!', 'success');
-        });
-        
-        document.getElementById('copyInviteCodeBtn').addEventListener('click', () => {
-            navigator.clipboard.writeText(document.getElementById('inviteCodeInput').value);
-            showToast('Invitation code copied!', 'success');
-        });
-
-        document.querySelectorAll('.nav-item').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const pageId = btn.dataset.page;
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
-                if (pageId === 'team') {
-                    renderBeautifulTree();
-                    updateInviteInfo();
-                }
-            });
-        });
-
-        setInterval(async () => {
-            if (userAddress && isProfileComplete(userAddress)) {
-                // Periodically refresh data from the central store to see new members
-                sharedData = await readDataFromBin();
-                updateBalances();
-                updateDashboard();
-                renderBeautifulTree();
-            }
-        }, 30000); // Refresh every 30 seconds
-
-        if (window.ethereum) {
-            window.ethereum.on('accountsChanged', () => location.reload());
-            window.ethereum.on('chainChanged', () => location.reload());
-        }
-
+        document.getElementById('copyInviteLinkBtn').addEventListener('click', () => { const linkInput = document.getElementById('inviteLink'); linkInput.select(); navigator.clipboard.writeText(linkInput.value); showToast('Invitation link copied!', 'success'); });
+        document.getElementById('copyInviteCodeBtn').addEventListener('click', () => { const codeInput = document.getElementById('inviteCodeInput'); codeInput.select(); navigator.clipboard.writeText(codeInput.value); showToast('Invitation code copied!', 'success'); });
+        document.querySelectorAll('.nav-item').forEach(btn => { btn.addEventListener('click', () => { document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); btn.classList.add('active'); const pageId = btn.dataset.page; document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active'); if (pageId === 'team') { renderBeautifulTree(); updateInviteInfo(); } }); });
+        setInterval(() => { if (userAddress && isProfileComplete(userAddress)) { updateBalances(); updateDashboard(); } }, 15000);
+        if (window.ethereum) { window.ethereum.on('accountsChanged', async (accounts) => { if (accounts.length > 0 && isValidWalletAddress(accounts[0])) { localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]); await initConnection(accounts, true); } else { localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET); localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE); location.reload(); } }); window.ethereum.on('chainChanged', () => location.reload()); }
         window.addEventListener('load', async () => {
-            loadingOverlay.classList.remove('hidden');
-            loadingOverlay.querySelector('p').innerText = 'Initializing...';
-            
-            // First, fetch the central data
-            sharedData = await readDataFromBin();
-            loadingOverlay.querySelector('p').innerText = 'Connecting to blockchain...';
-
-            // Then, check for invite links
             const urlParams = new URLSearchParams(window.location.search);
-            const inviteCodeFromUrl = urlParams.get('invite');
-            if(inviteCodeFromUrl) {
-                const inviteInfo = {
-                    code: inviteCodeFromUrl.toUpperCase(),
-                    name: decodeURIComponent(urlParams.get('inviterName')),
-                    id: urlParams.get('inviterId')
-                };
-                sessionStorage.setItem(STORAGE_KEYS.INVITE_INFO, JSON.stringify(inviteInfo));
-            }
-            
-            // Finally, try to auto-reconnect
+            const inviteCodeFromUrl = urlParams.get('invite'); const inviterNameFromUrl = urlParams.get('inviterName'); const inviterIdFromUrl = urlParams.get('inviterId');
+            if(inviteCodeFromUrl && inviterNameFromUrl && inviterIdFromUrl) { const inviteInfo = { code: inviteCodeFromUrl.toUpperCase(), name: decodeURIComponent(inviterNameFromUrl), id: inviterIdFromUrl }; sessionStorage.setItem(STORAGE_KEYS.INVITE_INFO, JSON.stringify(inviteInfo)); }
             await autoReconnect();
-            loadingOverlay.classList.add('hidden');
         });
     })();
 </script>
