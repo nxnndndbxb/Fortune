@@ -2051,7 +2051,6 @@
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0 || !isValidWalletAddress(accounts[0])) {
                 showToast("Invalid wallet address", "error");
-                loadingOverlay.classList.add('hidden');
                 return false;
             }
             userAddress = accounts[0];
@@ -2069,12 +2068,7 @@
             const network = await provider.getNetwork();
             if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
                 if (!isAutoReconnect) showToast("Please switch to BSC network.", "info");
-                try { 
-                    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); 
-                } catch(e) {
-                    console.error("Failed to switch network:", e);
-                    showToast("Failed to switch to BSC network.", "error");
-                }
+                try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {}
             }
             
             await getUSDTDecimals();
@@ -2114,10 +2108,6 @@
                         localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
                         await initConnection(accounts, true);
                     } else {
-                        // User has disconnected their wallet from the site permissions
-                        localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
-                        localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE);
-                        sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
                         loadingOverlay.classList.add('hidden');
                     }
                 } catch (error) {
@@ -2173,7 +2163,6 @@
                 }
                 
             } catch (e) { 
-                console.error("Payment failed:", e);
                 showToast("Transaction failed. Please try again.", "error"); 
             } finally { 
                 isProcessing = false; 
@@ -2295,17 +2284,17 @@
 
         if (window.ethereum) {
             window.ethereum.on('accountsChanged', async (accounts) => {
-                // This event means the user changed their active wallet in Metamask/Trust Wallet.
-                // The best practice is to reload the page to start a fresh session with the new account.
-                localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
-                localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE);
-                sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
-                location.reload();
+                if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
+                    localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
+                    location.reload();
+                } else {
+                    localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
+                    localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE);
+                    sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
+                    location.reload();
+                }
             });
-            window.ethereum.on('chainChanged', () => {
-                // If user changes the network (e.g., from BSC to Ethereum), reload the page.
-                location.reload();
-            });
+            window.ethereum.on('chainChanged', () => location.reload());
         }
 
         window.addEventListener('load', async () => {
