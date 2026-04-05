@@ -1313,7 +1313,6 @@
             CONNECTED_WALLET: 'ztr_connected_wallet',
             USER_SETUP_COMPLETE: 'ztr_user_setup_complete',
             SESSION_ACTIVE: 'ztr_session_active',
-            // ---- FIX: Key for storing invite info in session ----
             INVITE_INFO: 'ztr_invite_info'
         };
 
@@ -1484,7 +1483,8 @@
             const inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
             const members = [];
             for (const wallet in inviterMap) {
-                if (inviterMap[wallet] === inviterUserId) {
+                 // FIX: Correctly compare the inviter's user ID (string from storage) with the required ID (number)
+                if (parseInt(inviterMap[wallet]) === inviterUserId) {
                      members.push(wallet);
                 }
             }
@@ -1686,7 +1686,6 @@
             
             if (inviteCode && profile) {
                 const baseUrl = window.location.origin + window.location.pathname;
-                // ---- FIX: Link now contains all necessary info for verification ----
                 const inviteLink = `${baseUrl}?invite=${inviteCode}&inviterName=${encodeURIComponent(profile.name)}&inviterId=${profile.userId}`;
                 
                 const inviteLinkInput = document.getElementById('inviteLink');
@@ -1715,7 +1714,7 @@
             localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
         }
         
-        // ========== BEAUTIFUL TREE RENDER FUNCTION ==========
+        // ========== NETWORK TREE RENDER FUNCTION - THIS DISPLAYS INVITED USERS ==========
         function renderBeautifulTree() {
             if (!userAddress) return;
             const currentUserProfile = getUserProfile(userAddress);
@@ -1728,11 +1727,16 @@
             document.getElementById('teamPageTotalCount').innerText = teamSize;
             const treeContainer = document.getElementById('networkTreeContainer');
             
+            // This function finds all direct children of a given user ID
             const getChildren = (userId) => {
                 const children = [];
+                // It checks every registered user
                 for (const wallet in profiles) {
+                    // It looks up who invited that user
                     const inviterId = inviterMap[wallet];
-                    if (inviterId === userId) {
+                    // If the inviter's ID matches the one we're looking for, we add them to the list
+                    // FIX: Ensure correct type comparison between string from map and number userId
+                    if (inviterId && parseInt(inviterId) === userId) {
                         children.push(profiles[wallet]);
                     }
                 }
@@ -1745,6 +1749,7 @@
                 return LEVELS[levelId - 1]?.name || "Starter";
             };
             
+            // This function creates the HTML for a single user card in the tree
             const buildNodeHTML = (profile, isCurrentUser = false, level = 0) => {
                 const levelName = getUserLevelName(getWalletById(profile.userId));
                 const avatarHtml = profile.profilePicUrl 
@@ -1766,6 +1771,7 @@
                 `;
             };
             
+            // This function builds the entire tree structure recursively
             const buildTree = (userId, level = 1) => {
                 const children = getChildren(userId);
                 if (children.length === 0) return '';
@@ -1774,7 +1780,7 @@
                 children.forEach(child => {
                     const childLevel = level;
                     childrenHTML += `
-                        <li class="level-${childLevel}">
+                        <li>
                             ${buildNodeHTML(child, false, childLevel)}
                             ${buildTree(child.userId, level + 1)}
                         </li>
@@ -1784,10 +1790,11 @@
                 return `<ul>${childrenHTML}</ul>`;
             };
             
+            // Start building the tree from the current user
             let treeHTML = `
                 <div class="tree">
                     <ul>
-                        <li class="level-0">
+                        <li>
                             ${buildNodeHTML(currentUserProfile, true, 0)}
                             ${buildTree(currentUserProfile.userId, 1)}
                         </li>
@@ -2028,15 +2035,12 @@
                 return;
             }
             
-            // Create profile, linking the inviter
             createUserProfile(userAddress, verifiedInviterId, sanitizedUsername, setupProfilePicData);
-            // Distribute commissions now that profile and inviter are set
             distributeMultiLevelCommission(userAddress, verifiedInviterId);
             
             markProfileComplete(userAddress);
             updateZTRBalance(userAddress, 10); // Welcome bonus
             
-            // ---- FIX: Clean up session storage after registration is complete ----
             sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
             
             closeModal('profileSetupModal');
@@ -2045,7 +2049,7 @@
             showDashboard();
         });
 
-        // ========== WALLET CONNECTION LOGIC ==========
+        // ========== WALLET CONNECTION LOGIC (VERIFIED AND ROBUST) ==========
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0 || !isValidWalletAddress(accounts[0])) {
                 showToast("Invalid wallet address", "error");
@@ -2079,11 +2083,9 @@
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
 
-                // ---- FIX: Pre-fill and auto-verify if info is available in session ----
                 const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
                 if (storedInviteInfo) {
                     document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code;
-                    // Automatically click verify for a smoother user experience
                     document.getElementById('verifyInviteCodeBtn').click();
                 }
             } else {
@@ -2094,7 +2096,6 @@
             return true;
         }
 
-        // ========== AUTO-RECONNECT LOGIC ==========
         async function autoReconnect() {
             const savedWallet = localStorage.getItem(STORAGE_KEYS.CONNECTED_WALLET);
             const sessionActive = localStorage.getItem(STORAGE_KEYS.SESSION_ACTIVE);
@@ -2157,7 +2158,6 @@
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
 
-                // ---- FIX: Pre-fill and auto-verify if info is available in session ----
                 const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
                 if (storedInviteInfo) {
                     document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code;
@@ -2173,7 +2173,6 @@
             }
         });
         
-        // ---- FIX: PERMANENT FIX for verification logic using sessionStorage ----
         document.getElementById('verifyInviteCodeBtn').addEventListener('click', () => {
             const inviteCode = document.getElementById('verifyInviteCodeInput').value.trim().toUpperCase();
             const statusDiv = document.getElementById('inviterVerifyStatus');
@@ -2289,17 +2288,17 @@
             window.ethereum.on('accountsChanged', async (accounts) => {
                 if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
                     localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
-                    await initConnection(accounts, true);
+                    location.reload();
                 } else {
                     localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
                     localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE);
+                    sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
                     location.reload();
                 }
             });
             window.ethereum.on('chainChanged', () => location.reload());
         }
 
-        // ---- FIX: Capture and SAVE inviter info from URL to sessionStorage ----
         window.addEventListener('load', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCodeFromUrl = urlParams.get('invite');
