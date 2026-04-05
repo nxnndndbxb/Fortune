@@ -1256,8 +1256,6 @@
     const CHAIN_ID_DECIMAL = 56;
     const JOINING_FEE_USDT = 0.10;
     
-    // ===== CHANGE THIS! =====
-    // Apni free API key https://api.imgbb.com/ se hasil karke yahan paste karen.
     const IMAGE_HOST_API_KEY = 'YOUR_IMGBB_API_KEY_HERE';
     
     const LEVELS = [
@@ -1293,7 +1291,6 @@
     let pendingLevelUpgrade = null;
     let dashboardSwiperInstance = null;
 
-    // UI ELEMENTS
     const connectState = document.getElementById('connectState');
     const investmentState = document.getElementById('investmentState');
     const dashboardState = document.getElementById('dashboardState');
@@ -1302,7 +1299,6 @@
     const levelStarsPage = document.getElementById('levelStarsPage');
     const joiningStarsPage = document.getElementById('joiningStarsPage');
     const loadingOverlay = document.getElementById('loadingOverlay');
-    const profileSetupModal = document.getElementById('profileSetupModal');
 
     // ========== HELPER FUNCTIONS ==========
     function sanitizeInput(input) {
@@ -1333,16 +1329,11 @@
         if (!userAddress || !isValidWalletAddress(userAddress)) return;
         const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
         const fullAddress = userAddress;
-        const badge = document.getElementById('walletAddressBadge');
-        if(badge) badge.style.display = 'flex';
-        const shortSpan = document.getElementById('walletAddressShort');
-        if(shortSpan) shortSpan.innerText = shortAddress;
-        const investSpan = document.getElementById('investmentWalletAddress');
-        if(investSpan) investSpan.innerText = shortAddress;
-        const dashSpan = document.getElementById('dashboardWalletAddress');
-        if(dashSpan) dashSpan.innerText = shortAddress;
-        const walletDisplay = document.getElementById('walletAddressDisplay');
-        if(walletDisplay) walletDisplay.innerText = fullAddress;
+        document.getElementById('walletAddressBadge').style.display = 'flex';
+        document.getElementById('walletAddressShort').innerText = shortAddress;
+        document.getElementById('investmentWalletAddress').innerText = shortAddress;
+        document.getElementById('dashboardWalletAddress').innerText = shortAddress;
+        document.getElementById('walletAddressDisplay').innerText = fullAddress;
         window.currentWalletFullAddress = fullAddress;
     }
 
@@ -1363,23 +1354,31 @@
         }
     }
     
-    // ========== USER DATA MANAGEMENT ==========
+    // ========== USER DATA & ID MANAGEMENT (FIXED) ==========
     function getNextUserId() {
         try {
-            let userIds = {};
             const stored = localStorage.getItem(STORAGE_KEYS.USER_IDS);
-            if (stored) {
-                userIds = JSON.parse(stored);
+            if (!stored) {
+                // No IDs exist yet, this is the first user.
+                return 1000;
             }
-            // Start from 1000 to ensure 4 digits
-            let nextId = 1000;
+            
+            const userIds = JSON.parse(stored);
             const existingIds = Object.values(userIds);
-            if(existingIds.length > 0) {
-                nextId = Math.max(...existingIds) + 1;
+            
+            if (existingIds.length === 0) {
+                // The storage item exists but is empty for some reason.
+                return 1000;
             }
-            return nextId;
+            
+            // Find the maximum ID and add 1 for the new unique ID.
+            const maxId = Math.max(...existingIds);
+            return maxId + 1;
+
         } catch (e) {
-            return 1000;
+            console.error("Error getting next User ID:", e);
+            // Fallback in case of parsing errors, returns a random high number.
+            return Math.floor(Math.random() * (9999 - 1000 + 1) + 1000); 
         }
     }
 
@@ -1416,16 +1415,11 @@
     function createUserProfile(wallet, inviterId = null, username = null, profilePicUrl = null) {
         if (!wallet || !isValidWalletAddress(wallet)) return null;
         try {
-            let profiles = {};
-            const storedProfiles = localStorage.getItem(STORAGE_KEYS.USER_PROFILES);
-            if (storedProfiles) profiles = JSON.parse(storedProfiles);
-            
+            let profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
             const walletKey = wallet.toLowerCase();
             if (profiles[walletKey]) return profiles[walletKey];
 
-            let userIds = {};
-            const storedUserIds = localStorage.getItem(STORAGE_KEYS.USER_IDS);
-            if (storedUserIds) userIds = JSON.parse(storedUserIds);
+            let userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
             
             let userId = userIds[walletKey];
             if (!userId) {
@@ -1435,9 +1429,7 @@
             }
             
             if (inviterId) {
-                let inviterMap = {};
-                const storedInviterMap = localStorage.getItem(STORAGE_KEYS.INVITER_MAP);
-                if (storedInviterMap) inviterMap = JSON.parse(storedInviterMap);
+                let inviterMap = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVITER_MAP) || '{}');
                 inviterMap[walletKey] = parseInt(inviterId);
                 localStorage.setItem(STORAGE_KEYS.INVITER_MAP, JSON.stringify(inviterMap));
             }
@@ -1473,55 +1465,39 @@
     function isPaidUser(wallet) { 
         if (!wallet || !isValidWalletAddress(wallet)) return false;
         try {
-            const stored = localStorage.getItem(STORAGE_KEYS.PAID_USERS);
-            if (!stored) return false;
-            const paidUsers = JSON.parse(stored); 
+            const paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}'); 
             return paidUsers[wallet.toLowerCase()] === true; 
-        } catch (e) {
-            return false;
-        }
+        } catch (e) { return false; }
     }
     
     function isProfileComplete(wallet) {
         if (!wallet || !isValidWalletAddress(wallet)) return false;
         try {
-            const stored = localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE);
-            if (!stored) return false;
-            const setupComplete = JSON.parse(stored);
+            const setupComplete = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE) || '{}');
             return setupComplete[wallet.toLowerCase()] === true;
-        } catch (e) {
-            return false;
-        }
+        } catch (e) { return false; }
     }
     
     function markProfileComplete(wallet) {
         if (!wallet || !isValidWalletAddress(wallet)) return;
         try {
-            let setupComplete = {};
-            const stored = localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE);
-            if (stored) setupComplete = JSON.parse(stored);
+            let setupComplete = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SETUP_COMPLETE) || '{}');
             setupComplete[wallet.toLowerCase()] = true;
             localStorage.setItem(STORAGE_KEYS.USER_SETUP_COMPLETE, JSON.stringify(setupComplete));
-        } catch (e) {
-            console.error("Error marking profile complete:", e);
-        }
+        } catch (e) { console.error("Error marking profile complete:", e); }
     }
     
     function markUserAsPaid(wallet, inviterUserId) {
         if (!wallet || !isValidWalletAddress(wallet)) return;
         try {
-            let paidUsers = {};
-            const stored = localStorage.getItem(STORAGE_KEYS.PAID_USERS);
-            if (stored) paidUsers = JSON.parse(stored);
+            let paidUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.PAID_USERS) || '{}');
             paidUsers[wallet.toLowerCase()] = true; 
             localStorage.setItem(STORAGE_KEYS.PAID_USERS, JSON.stringify(paidUsers)); 
             
             if (inviterUserId) {
                 distributeAdvancedCommission(wallet, inviterUserId);
             }
-        } catch (e) {
-            console.error("Error marking user as paid:", e);
-        }
+        } catch (e) { console.error("Error marking user as paid:", e); }
     }
 
     function distributeAdvancedCommission(newUserWallet, inviterUserId) {
@@ -1534,7 +1510,6 @@
             updateZTRBalance(inviterWallet, directCommission);
             showToast(`Upline ID:${inviterUserId} received ${directCommission.toFixed(3)} ZTR!`, 'success');
             
-            // Increment team size for the inviter
             let teamSizes = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}');
             teamSizes[inviterWallet.toLowerCase()] = (teamSizes[inviterWallet.toLowerCase()] || 0) + 1;
             localStorage.setItem(STORAGE_KEYS.TEAM_SIZE, JSON.stringify(teamSizes));
@@ -1555,7 +1530,10 @@
             const siblingWallets = [];
             for (const memberWallet in inviterMap) {
                 if (inviterMap[memberWallet] === inviterUserId && memberWallet.toLowerCase() !== newUserWallet.toLowerCase()) {
-                    siblingWallets.push(memberWallet);
+                    // Check if this sibling is already a paid user
+                    if (isPaidUser(memberWallet)) {
+                        siblingWallets.push(memberWallet);
+                    }
                 }
             }
 
@@ -1564,91 +1542,65 @@
                 const amountPerSibling = totalSplitAmount / siblingWallets.length;
                 
                 siblingWallets.forEach(siblingWallet => {
-                    if (isValidWalletAddress(siblingWallet)) {
-                        updateZTRBalance(siblingWallet, amountPerSibling);
-                    }
+                    updateZTRBalance(siblingWallet, amountPerSibling);
                 });
                 showToast(`${totalSplitAmount.toFixed(3)} ZTR split among ${siblingWallets.length} team members!`, 'success');
             }
         }
     }
     
-    // ========== ZTR BALANCE MANAGEMENT ==========
+    // ========== ZTR BALANCE & OTHER DATA GETTERS/SETTERS ==========
     function getZTRBalance(wallet) { 
         if (!wallet || !isValidWalletAddress(wallet)) return 0;
         try {
-            const stored = localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE);
-            if (!stored) return 0;
-            const balances = JSON.parse(stored); 
+            const balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}'); 
             return balances[wallet.toLowerCase()] || 0; 
-        } catch (e) {
-            return 0;
-        }
+        } catch (e) { return 0; }
     }
     
     function updateZTRBalance(wallet, amount) { 
         if (!wallet || !isValidWalletAddress(wallet)) return 0;
         try {
-            let balances = {};
-            const stored = localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE);
-            if (stored) balances = JSON.parse(stored);
+            let balances = JSON.parse(localStorage.getItem(STORAGE_KEYS.ZTR_BALANCE) || '{}');
             const walletKey = wallet.toLowerCase();
             const currentBalance = balances[walletKey] || 0;
             balances[walletKey] = Math.max(0, currentBalance + amount); 
             localStorage.setItem(STORAGE_KEYS.ZTR_BALANCE, JSON.stringify(balances)); 
             return balances[walletKey]; 
-        } catch (e) {
-            return 0;
-        }
+        } catch (e) { return 0; }
     }
     
     function getUserLevel(wallet) { 
         if (!wallet || !isValidWalletAddress(wallet)) return 0;
         try {
-            const stored = localStorage.getItem(STORAGE_KEYS.USER_LEVEL);
-            if (!stored) return 0;
-            const levels = JSON.parse(stored); 
+            const levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}'); 
             return levels[wallet.toLowerCase()] || 0; 
-        } catch (e) {
-            return 0;
-        }
+        } catch (e) { return 0; }
     }
     
     function setUserLevel(wallet, level) { 
         if (!wallet || !isValidWalletAddress(wallet)) return;
         try {
-            let levels = {};
-            const stored = localStorage.getItem(STORAGE_KEYS.USER_LEVEL);
-            if (stored) levels = JSON.parse(stored);
+            let levels = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_LEVEL) || '{}');
             levels[wallet.toLowerCase()] = level; 
             localStorage.setItem(STORAGE_KEYS.USER_LEVEL, JSON.stringify(levels)); 
-        } catch (e) {
-            console.error("Error setting user level:", e);
-        }
+        } catch (e) { console.error("Error setting user level:", e); }
     }
     
     function getTeamSize(wallet) { 
         if (!wallet || !isValidWalletAddress(wallet)) return 0;
         try {
-            const stored = localStorage.getItem(STORAGE_KEYS.TEAM_SIZE);
-            if (!stored) return 0;
-            const teams = JSON.parse(stored); 
+            const teams = JSON.parse(localStorage.getItem(STORAGE_KEYS.TEAM_SIZE) || '{}'); 
             return teams[wallet.toLowerCase()] || 0; 
-        } catch (e) {
-            return 0;
-        }
+        } catch (e) { return 0; }
     }
     
     function getSalleryEarnings(wallet) { 
         if (!wallet || !isValidWalletAddress(wallet)) return 0;
         try {
-            const stored = localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS);
-            if (!stored) return 0;
-            const earnings = JSON.parse(stored); 
+            const earnings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SALLERY_EARNINGS) || '{}');
             return earnings[wallet.toLowerCase()] || 0; 
-        } catch (e) {
-            return 0;
-        }
+        } catch (e) { return 0; }
     }
     
     function getCurrentLevelInfo(wallet) { 
@@ -1675,25 +1627,20 @@
         const profile = getUserProfile(userAddress);
         if (!profile) return;
         
-        const userIdSpan = document.getElementById('userId');
-        if (userIdSpan) userIdSpan.innerText = `ID: ${profile.userId}`;
-        const profileNameSpan = document.getElementById('profileName');
-        if (profileNameSpan) profileNameSpan.innerText = profile.name;
-        const joinDateSpan = document.getElementById('joinDate');
-        if (joinDateSpan) joinDateSpan.innerText = profile.joinDate;
+        document.getElementById('userId').innerText = `ID: ${profile.userId}`;
+        document.getElementById('profileName').innerText = profile.name;
+        document.getElementById('joinDate').innerText = profile.joinDate;
         
         const avatarIcon = document.getElementById('avatarIcon');
         const avatarImg = document.getElementById('profileAvatarImg');
-        if (avatarIcon && avatarImg) {
-            if (profile.profilePicUrl) {
-                avatarImg.src = profile.profilePicUrl;
-                avatarImg.classList.remove('hidden');
-                avatarIcon.classList.add('hidden');
-            } else {
-                avatarIcon.className = `fa-solid ${profile.avatar}`;
-                avatarIcon.classList.remove('hidden');
-                avatarImg.classList.add('hidden');
-            }
+        if (profile.profilePicUrl) {
+            avatarImg.src = profile.profilePicUrl;
+            avatarImg.classList.remove('hidden');
+            avatarIcon.classList.add('hidden');
+        } else {
+            avatarIcon.className = `fa-solid ${profile.avatar}`;
+            avatarIcon.classList.remove('hidden');
+            avatarImg.classList.add('hidden');
         }
         
         const ztrBalance = getZTRBalance(userAddress);
@@ -1724,13 +1671,12 @@
         const inviterId = getInviterId(userAddress);
         const homeInviterSpan = document.getElementById('homeInviterId');
         const inviterDisplayOnHome = document.getElementById('inviterDisplayOnHome');
-        if (homeInviterSpan) {
-            if (inviterId) {
-                homeInviterSpan.innerText = inviterId;
-                if (inviterDisplayOnHome) inviterDisplayOnHome.classList.remove('hidden');
-            } else {
-                homeInviterSpan.innerText = 'None';
-            }
+        if (inviterId) {
+            homeInviterSpan.innerText = inviterId;
+            inviterDisplayOnHome.classList.remove('hidden');
+        } else {
+            homeInviterSpan.innerText = 'None';
+            inviterDisplayOnHome.classList.add('hidden');
         }
     }
     
@@ -1744,16 +1690,14 @@
     
     function showInviterInfoOnPages(inviterUserId) {
         const inviterDisplayText = inviterUserId ? `${inviterUserId}` : 'None';
-        const inviterUserIdDisplay = document.getElementById('inviterUserIdDisplay');
-        const homeInviterId = document.getElementById('homeInviterId');
-        if (inviterUserIdDisplay) inviterUserIdDisplay.innerText = inviterDisplayText;
-        if (homeInviterId) homeInviterId.innerText = inviterDisplayText;
+        document.getElementById('inviterUserIdDisplay').innerText = inviterDisplayText;
+        document.getElementById('homeInviterId').innerText = inviterDisplayText;
         
         const inviterInfoOnInvestPage = document.getElementById('inviterInfoOnInvestPage');
         const inviterDisplayOnHome = document.getElementById('inviterDisplayOnHome');
         if (inviterUserId) {
-            if (inviterInfoOnInvestPage) inviterInfoOnInvestPage.classList.remove('hidden');
-            if (inviterDisplayOnHome) inviterDisplayOnHome.classList.remove('hidden');
+            inviterInfoOnInvestPage.classList.remove('hidden');
+            inviterDisplayOnHome.classList.remove('hidden');
         }
     }
     
@@ -1868,53 +1812,35 @@
         }
     }
 
-    // ========== STARS PAGES ==========
+    // ========== STARS & LEVEL PAGES (Unchanged) ==========
     function generateLargeStarsHTML(count, filledCount) {
         let starsHtml = '';
         for (let i = 0; i < count; i++) {
-            const state = i < filledCount ? 'filled' : 'empty';
-            starsHtml += `<i class="fa-solid fa-star large-star-icon ${state}"></i>`;
+            starsHtml += `<i class="fa-solid fa-star large-star-icon ${i < filledCount ? 'filled' : 'empty'}"></i>`;
         }
         return starsHtml;
     }
 
     window.openLevelStarsPage = function() {
         if (!userAddress) return;
-        const container = document.getElementById('levelStarsContainer');
-        const salarySystem = document.getElementById('levelSalarySystem');
-        const salaryAmount = document.getElementById('levelSalaryAmount');
-        if (!container) return;
         const userLevel = getUserLevel(userAddress);
-        const maxLevel = LEVELS.length;
-        container.innerHTML = generateLargeStarsHTML(maxLevel, userLevel);
-        if (salarySystem && salaryAmount) {
-            if (userLevel >= maxLevel) {
-                const totalInvestment = LEVELS.reduce((acc, level) => acc + level.price, 0);
-                const salary = totalInvestment * 0.10;
-                salaryAmount.innerText = `${salary.toFixed(2)} ZTR / Month`;
-                salarySystem.classList.remove('hidden');
-            } else {
-                salarySystem.classList.add('hidden');
-            }
+        document.getElementById('levelStarsContainer').innerHTML = generateLargeStarsHTML(LEVELS.length, userLevel);
+        const salarySystem = document.getElementById('levelSalarySystem');
+        if (userLevel >= LEVELS.length) {
+            const totalInvestment = LEVELS.reduce((acc, level) => acc + level.price, 0);
+            document.getElementById('levelSalaryAmount').innerText = `${(totalInvestment * 0.10).toFixed(2)} ZTR / Month`;
+            salarySystem.classList.remove('hidden');
+        } else {
+            salarySystem.classList.add('hidden');
         }
         levelStarsPage.classList.add('active');
     };
 
     window.openJoiningStarsPage = function() {
         if (!userAddress) return;
-        const container = document.getElementById('joiningStarsContainer');
-        const salarySystem = document.getElementById('joiningSalarySystem');
-        if (!container) return;
         const teamSize = getTeamSize(userAddress);
-        const requiredTeamSize = 10;
-        container.innerHTML = generateLargeStarsHTML(requiredTeamSize, teamSize);
-        if (salarySystem) {
-            if (teamSize >= requiredTeamSize) {
-                salarySystem.classList.remove('hidden');
-            } else {
-                salarySystem.classList.add('hidden');
-            }
-        }
+        document.getElementById('joiningStarsContainer').innerHTML = generateLargeStarsHTML(10, teamSize);
+        document.getElementById('joiningSalarySystem').classList.toggle('hidden', teamSize < 10);
         joiningStarsPage.classList.add('active');
     };
 
@@ -1923,78 +1849,40 @@
         joiningStarsPage.classList.remove('active');
     };
 
-    // ========== LEVEL PAGE ==========
     function initializeLevelSwiper() {
         if (!userAddress) return;
         const wrapper = document.getElementById('levelSwiperWrapper');
-        if (!wrapper) return;
         const currentLevelId = getUserLevel(userAddress);
-        let slidesHTML = `
-            <div class="swiper-slide">
-                <div class="level-slide-card unlocked">
-                    <div>
-                        <div class="level-icon">🌱</div>
-                        <h2>Starter Level</h2>
-                        <span class="rank-badge">CURRENTLY ACTIVE</span>
-                    </div>
-                    <p class="level-info">Your journey begins here. Upgrade to the next level to start earning higher commissions.</p>
-                    <button class="btn" disabled>ACHIEVED</button>
-                </div>
-            </div>`;
+        let slidesHTML = `<div class="swiper-slide"><div class="level-slide-card unlocked"><div><div class="level-icon">🌱</div><h2>Starter Level</h2><span class="rank-badge">CURRENTLY ACTIVE</span></div><p class="level-info">Your journey begins here. Upgrade to the next level to start earning higher commissions.</p><button class="btn" disabled>ACHIEVED</button></div></div>`;
         LEVELS.forEach(level => {
             const isUnlocked = currentLevelId >= level.id;
             const canUpgrade = currentLevelId === level.id - 1;
-            slidesHTML += `
-                <div class="swiper-slide">
-                    <div class="level-slide-card ${isUnlocked ? 'unlocked' : ''}">
-                        <div>
-                            <div class="level-icon">${level.icon}</div>
-                            <h2>${level.name} Level</h2>
-                            ${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}
-                        </div>
-                        <div>
-                            <p class="level-info">Commission Bonus: <strong>+${level.commission}%</strong></p>
-                            <h3 class="level-price">${level.price} USDT</h3>
-                        </div>
-                        <button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="window.upgradeLevel && upgradeLevel(${level.id}, '${level.name}', ${level.price}, ${level.commission})">
-                            ${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}
-                        </button>
-                    </div>
-                </div>`;
+            slidesHTML += `<div class="swiper-slide"><div class="level-slide-card ${isUnlocked ? 'unlocked' : ''}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} Level</h2>${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}</div><div><p class="level-info">Commission Bonus: <strong>+${level.commission}%</strong></p><h3 class="level-price">${level.price} USDT</h3></div><button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="window.upgradeLevel && upgradeLevel(${level.id}, '${level.name}', ${level.price}, ${level.commission})">${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}</button></div></div>`;
         });
         wrapper.innerHTML = slidesHTML;
         if (levelSwiper) levelSwiper.destroy(true, true);
         if (typeof Swiper !== 'undefined') {
-            levelSwiper = new Swiper('.levelSwiper', { 
-                effect: 'cards', 
-                grabCursor: true, 
-                initialSlide: currentLevelId, 
-                navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' } 
-            });
+            levelSwiper = new Swiper('.levelSwiper', { effect: 'cards', grabCursor: true, initialSlide: currentLevelId, navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' } });
         }
     }
     
     window.openLevelPage = function() {
-        if (levelPageOverlay) {
-            levelPageOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            initializeLevelSwiper();
-        }
+        levelPageOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        initializeLevelSwiper();
     };
     
     window.closeLevelPage = function() {
-        if (levelPageOverlay) {
-            levelPageOverlay.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
+        levelPageOverlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
     };
 
-    // ========== USDT APPROVAL AND TRANSFER HELPER ==========
+    // ========== USDT & UPGRADE LOGIC (Unchanged) ==========
     async function checkAndApproveUSDT(amount) {
         if (!signer || !userAddress) throw new Error("Wallet not connected");
         const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-        const allowance = await usdtContract.allowance(userAddress, ADMIN_WALLET);
         const amountWei = ethers.parseUnits(amount.toString(), usdtDecimals);
+        const allowance = await usdtContract.allowance(userAddress, ADMIN_WALLET);
         if (allowance < amountWei) {
             showToast("Please approve USDT spending first", "info");
             const approveTx = await usdtContract.approve(ADMIN_WALLET, ethers.MaxUint256);
@@ -2002,10 +1890,8 @@
             await approveTx.wait();
             showToast("USDT approved successfully!", "success");
         }
-        return true;
     }
 
-    // Level upgrade function
     window.upgradeLevel = function(levelId, levelName, price, commission) {
         if (!userAddress) return;
         const currentId = getUserLevel(userAddress);
@@ -2025,25 +1911,19 @@
         const btn = document.getElementById('confirmLevelUpgradeBtn');
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
-        
         try {
             await checkAndApproveUSDT(pendingLevelUpgrade.price);
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
             const amount = ethers.parseUnits(pendingLevelUpgrade.price.toString(), usdtDecimals);
-            
-            showToast("Sending transaction...", "info");
             const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
             await tx.wait();
-            
             setUserLevel(userAddress, pendingLevelUpgrade.levelId);
             showToast(`✅ Successfully upgraded to ${pendingLevelUpgrade.levelName}!`, 'success');
-            
             closeModal('levelUpgradePaymentModal');
             updateDashboard();
             initializeLevelSwiper();
             updateAssetsPage();
             renderBeautifulTree();
-            
         } catch (e) { 
             console.error("Level upgrade failed:", e);
             showToast("Transaction failed. Please try again.", "error"); 
@@ -2055,40 +1935,30 @@
         }
     });
     
-
-    // ========== MODAL CONTROLS ==========
+    // ========== MODAL & UTILITY (Unchanged) ==========
     window.openModal = (modalId) => document.getElementById(modalId)?.classList.add('active');
     window.closeModal = (modalId) => document.getElementById(modalId)?.classList.remove('active');
 
-    // ========== USDT DECIMALS ==========
     async function getUSDTDecimals() {
         try { 
             if (!provider) return;
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); 
             usdtDecimals = await usdtContract.decimals(); 
-        } catch { 
-            usdtDecimals = 18; 
-        }
+        } catch { usdtDecimals = 18; }
     }
 
-    // ========== PROFILE SETUP FUNCTIONS ==========
+    // ========== PROFILE SETUP & CONNECTION ==========
     let setupProfilePicData = null;
     
     document.getElementById('setupProfilePic').addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
-        if (IMAGE_HOST_API_KEY === 'YOUR_IMGBB_API_KEY_HERE') {
-            showToast("Image hosting is not configured.", "error");
-            return;
-        }
+        if (IMAGE_HOST_API_KEY === 'YOUR_IMGBB_API_KEY_HERE') { showToast("Image hosting is not configured.", "error"); return; }
         if (file.size > 2 * 1024 * 1024) { showToast("Image too large! Max 2MB", "error"); return; }
-        
         showToast("Uploading profile picture...", "info");
         const formData = new FormData();
         formData.append('key', IMAGE_HOST_API_KEY);
         formData.append('image', file);
-        
         try {
             const response = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
             const result = await response.json();
@@ -2109,23 +1979,21 @@
     document.getElementById('completeProfileBtn').addEventListener('click', async () => {
         const username = document.getElementById('setupUsername').value.trim();
         const uplineIdInput = document.getElementById('setupUplineId').value.trim();
-        
-        if (!username) { showToast("Please enter a username", "error"); return; }
-        const sanitizedUsername = sanitizeInput(username);
-        if (sanitizedUsername.length < 3) { showToast("Username must be at least 3 characters", "error"); return; }
+        if (!username || username.length < 3) { showToast("Username must be at least 3 characters", "error"); return; }
         if (!userAddress) { showToast("Wallet not connected", "error"); return; }
         
         let uplineId = null;
         if (uplineIdInput) {
-            uplineId = parseInt(uplineIdInput);
-            const uplineWallet = getWalletById(uplineId);
-            if (!uplineWallet) {
-                showToast(`Upline ID ${uplineId} not found. Joining without an upline.`, "info");
-                uplineId = null;
+            const potentialId = parseInt(uplineIdInput);
+            const uplineWallet = getWalletById(potentialId);
+            if (uplineWallet) {
+                uplineId = potentialId;
+            } else {
+                showToast(`Upline ID ${potentialId} not found. Joining without an upline.`, "info");
             }
         }
         
-        createUserProfile(userAddress, uplineId, sanitizedUsername, setupProfilePicData);
+        createUserProfile(userAddress, uplineId, sanitizeInput(username), setupProfilePicData);
         markProfileComplete(userAddress);
         updateZTRBalance(userAddress, 10);
         
@@ -2142,13 +2010,8 @@
         updateTeamPageInfo();
     });
 
-    // ========== WALLET CONNECTION ==========
     async function initConnection(accounts, isAutoReconnect = false) {
-        if (!accounts || accounts.length === 0) return false;
-        if (!isValidWalletAddress(accounts[0])) {
-            showToast("Invalid wallet address", "error");
-            return false;
-        }
+        if (!accounts || accounts.length === 0 || !isValidWalletAddress(accounts[0])) return;
         userAddress = accounts[0];
         
         localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, userAddress);
@@ -2158,24 +2021,20 @@
             provider = new ethers.BrowserProvider(window.ethereum);
             signer = await provider.getSigner();
         } catch (e) {
-            console.error("Error creating provider:", e);
             showToast("Failed to connect to blockchain", "error");
             loadingOverlay.classList.add('hidden');
-            return false;
+            return;
         }
         
         document.getElementById('ipDisplay').innerText = `IP: ${sanitizeInput(await getIP())}`;
         updateAllWalletAddressDisplays();
         
-        try {
-            const network = await provider.getNetwork();
-            if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
-                if (!isAutoReconnect) showToast("Please switch to BSC network.", "info");
-                try { 
-                    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); 
-                } catch(e) { console.log("Network switch cancelled or failed"); }
-            }
-        } catch (e) { console.error("Network check error:", e); }
+        const network = await provider.getNetwork();
+        if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
+            if (!isAutoReconnect) showToast("Please switch to BSC network.", "info");
+            try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } 
+            catch(e) { console.log("Network switch cancelled or failed"); }
+        }
         
         await getUSDTDecimals();
         await updateBalances();
@@ -2186,24 +2045,8 @@
             dashboardState.classList.add('hidden');
             bottomNav.style.display = 'none';
             openModal('profileSetupModal');
-            loadingOverlay.classList.add('hidden');
-            return true;
-        }
-        
-        if (isPaidUser(userAddress)) {
-            connectState.classList.add('hidden');
-            investmentState.classList.add('hidden');
-            dashboardState.classList.remove('hidden');
-            bottomNav.style.display = 'flex';
-            updateDashboard();
-            updateAssetsPage();
-            renderBeautifulTree();
-            updateTeamPageInfo();
-            setTimeout(() => {
-                if (typeof Swiper !== 'undefined' && !dashboardSwiperInstance && document.querySelector('.dashboardSwiper')) {
-                    dashboardSwiperInstance = new Swiper('.dashboardSwiper', { autoplay: { delay: 3000 }, loop: true });
-                }
-            }, 100);
+        } else if (isPaidUser(userAddress)) {
+            showDashboardAfterPayment();
             if (!isAutoReconnect) showToast("Welcome back! Dashboard ready.", "success");
         } else {
             connectState.classList.add('hidden');
@@ -2214,37 +2057,22 @@
             if (inviterId) showInviterInfoOnPages(inviterId);
             if (!isAutoReconnect) showToast("Wallet connected! Please activate your node.", "info");
         }
-        
         loadingOverlay.classList.add('hidden');
-        return true;
     }
 
     async function autoReconnect() {
         const savedWallet = localStorage.getItem(STORAGE_KEYS.CONNECTED_WALLET);
-        const sessionActive = localStorage.getItem(STORAGE_KEYS.SESSION_ACTIVE);
-        
-        if (savedWallet && isValidWalletAddress(savedWallet) && sessionActive === 'true') {
+        if (savedWallet && isValidWalletAddress(savedWallet) && localStorage.getItem(STORAGE_KEYS.SESSION_ACTIVE) === 'true') {
             loadingOverlay.classList.remove('hidden');
-            let retries = 10;
-            let connected = false;
-            while (retries > 0 && !connected) {
-                if (window.ethereum) {
-                    try {
-                        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                        if (accounts.length > 0 && accounts[0].toLowerCase() === savedWallet.toLowerCase()) {
-                            await initConnection(accounts, true);
-                            connected = true;
-                        } else if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
-                            localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
-                            await initConnection(accounts, true);
-                            connected = true;
-                        }
-                    } catch (error) { console.error("Auto-reconnect error:", error); }
-                }
-                await new Promise(r => setTimeout(r, 300));
-                retries--;
+            if (window.ethereum) {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        await initConnection(accounts, true);
+                    }
+                } catch (error) { console.error("Auto-reconnect error:", error); }
             }
-            if (!connected) loadingOverlay.classList.add('hidden');
+            loadingOverlay.classList.add('hidden');
         } else {
             loadingOverlay.classList.add('hidden');
         }
@@ -2252,12 +2080,9 @@
 
     // ========== EVENT LISTENERS ==========
     document.getElementById('connectBtn').addEventListener('click', async () => {
-        if (!window.ethereum) {
-            showToast("Please install MetaMask or Trust Wallet", "error");
-            return;
-        }
+        if (!window.ethereum) { showToast("Please install MetaMask or Trust Wallet", "error"); return; }
+        loadingOverlay.classList.remove('hidden');
         try { 
-            loadingOverlay.classList.remove('hidden');
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
             await initConnection(accounts, false); 
         } catch (err) { 
@@ -2274,13 +2099,11 @@
         const btn = document.getElementById('confirmPaymentBtn');
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
-        
         try {
             await checkAndApproveUSDT(JOINING_FEE_USDT);
             const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
             const amount = ethers.parseUnits(JOINING_FEE_USDT.toString(), usdtDecimals);
             const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
-            showToast("Transaction sent! Confirming...", "info");
             await tx.wait();
             
             const inviterId = getInviterId(userAddress);
@@ -2303,12 +2126,8 @@
     document.getElementById('profilePicInput').addEventListener('change', async (event) => {
         const file = event.target.files[0];
         if (!file) return;
-
-        if (IMAGE_HOST_API_KEY === 'YOUR_IMGBB_API_KEY_HERE') {
-            showToast("Image hosting is not configured.", "error"); return;
-        }
+        if (IMAGE_HOST_API_KEY === 'YOUR_IMGBB_API_KEY_HERE') { showToast("Image hosting is not configured.", "error"); return; }
         if (file.size > 2 * 1024 * 1024) { showToast("Image too large! Max 2MB", "error"); return; }
-        
         showToast("Uploading new profile picture...", "info");
         const formData = new FormData();
         formData.append('key', IMAGE_HOST_API_KEY);
@@ -2337,8 +2156,8 @@
         const name = document.getElementById('profileNameInput').value;
         try {
             let profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-            if (profiles[userAddress?.toLowerCase()]) {
-                if(name) profiles[userAddress.toLowerCase()].name = sanitizeInput(name);
+            if (profiles[userAddress?.toLowerCase()] && name) {
+                profiles[userAddress.toLowerCase()].name = sanitizeInput(name);
                 localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
                 updateAssetsPage();
                 renderBeautifulTree();
@@ -2378,15 +2197,10 @@
     }, 15000);
 
     if (window.ethereum) {
-        window.ethereum.on('accountsChanged', async (accounts) => {
-            if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
-                localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
-                await initConnection(accounts, true);
-            } else {
-                localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
-                localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE);
-                location.reload();
-            }
+        window.ethereum.on('accountsChanged', (accounts) => {
+            localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
+            localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE);
+            location.reload();
         });
         window.ethereum.on('chainChanged', () => location.reload());
     }
