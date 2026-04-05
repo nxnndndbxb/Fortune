@@ -1262,7 +1262,9 @@
         // SECURITY: Validate and sanitize inputs
         function sanitizeInput(input) {
             if (!input) return '';
-            return input.replace(/[<>]/g, '').trim();
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML;
         }
         
         // SECURITY: Validate wallet address
@@ -1316,6 +1318,8 @@
         let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper;
         let verifiedInviterId = null;
         let pendingLevelUpgrade = null;
+        // ---- FIX: Variable to store inviter info from URL ----
+        let inviteInfoFromUrl = null;
 
         // UI ELEMENTS
         const connectState = document.getElementById('connectState');
@@ -1675,19 +1679,24 @@
             }
         }
         
+        // ---- FIX: Modified this function to include inviter's name and ID in the link ----
         function updateInviteInfo() {
             if (!userAddress) return;
             const inviteCode = getUniqueInviteCode(userAddress);
-            if (inviteCode) {
+            const profile = getUserProfile(userAddress);
+            
+            if (inviteCode && profile) {
                 const baseUrl = window.location.origin + window.location.pathname;
-                const inviteLink = `${baseUrl}?invite=${inviteCode}`;
+                const inviteLink = `${baseUrl}?invite=${inviteCode}&inviterName=${encodeURIComponent(profile.name)}&inviterId=${profile.userId}`;
+                
                 const inviteLinkInput = document.getElementById('inviteLink');
                 const inviteCodeInput = document.getElementById('inviteCodeInput');
+                
                 if (inviteLinkInput) inviteLinkInput.value = inviteLink;
                 if (inviteCodeInput) inviteCodeInput.value = inviteCode;
             }
         }
-        
+
         function showDashboard() {
             connectState.classList.add('hidden');
             invitationState.classList.add('hidden');
@@ -2035,13 +2044,8 @@
 
         // ========== WALLET CONNECTION LOGIC ==========
         async function initConnection(accounts, isAutoReconnect = false) {
-            if (!accounts || accounts.length === 0 ) {
-                 loadingOverlay.classList.add('hidden');
-                 return false;
-            }
-             if(!isValidWalletAddress(accounts[0])) {
-                if(!isAutoReconnect) showToast("Invalid wallet address", "error");
-                loadingOverlay.classList.add('hidden');
+            if (!accounts || accounts.length === 0 || !isValidWalletAddress(accounts[0])) {
+                showToast("Invalid wallet address", "error");
                 return false;
             }
             userAddress = accounts[0];
@@ -2073,9 +2077,15 @@
                 // User has paid but not verified an inviter or set up a profile
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
+                // ---- FIX: Pre-fill input if invite info came from URL ----
+                if (inviteInfoFromUrl) {
+                    const inviteInput = document.getElementById('verifyInviteCodeInput');
+                    if (inviteInput) {
+                        inviteInput.value = inviteInfoFromUrl.code;
+                    }
+                }
             } else {
-                // New user who hasn't paid yet, show connect screen (or payment modal after connect)
-                connectState.classList.add('hidden');
+                // New user who hasn't paid yet, show payment modal
                 openModal('paymentModal');
             }
             
@@ -2108,52 +2118,6 @@
                 loadingOverlay.classList.add('hidden');
             }
         }
-        
-        // ========== SPECIAL FUNCTION TO CREATE THE FIRST USER ==========
-        /**
-         * IMPORTANT: This function is for developers only to initialize the system.
-         * Run this ONCE from the browser console to create the first "Genesis" user.
-         * This will generate the first valid invitation code needed for others to register.
-         */
-        function createGenesisUserForTesting() {
-            const genesisWallet = '0x0000000000000000000000000000000000000001'.toLowerCase();
-            const profiles = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROFILES) || '{}');
-            const userIds = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_IDS) || '{}');
-            
-            if (profiles[genesisWallet]) {
-                const existingCode = getUniqueInviteCode(genesisWallet);
-                const message = `Genesis user already exists.\nInvite Code: ${existingCode}`;
-                console.log(message);
-                alert(message);
-                return;
-            }
-
-            // Create profile
-            userIds[genesisWallet] = 1000;
-            profiles[genesisWallet] = {
-                name: 'Genesis User',
-                avatar: 'fa-user-secret',
-                joinDate: new Date().toLocaleDateString(),
-                userId: 1000,
-                profilePicUrl: null
-            };
-            localStorage.setItem(STORAGE_KEYS.USER_IDS, JSON.stringify(userIds));
-            localStorage.setItem(STORAGE_KEYS.USER_PROFILES, JSON.stringify(profiles));
-            
-            // Mark as paid and profile complete so they can generate a code
-            markUserAsPaid(genesisWallet);
-            markProfileComplete(genesisWallet);
-
-            // Generate and save their unique invite code
-            const genesisCode = getUniqueInviteCode(genesisWallet); 
-            
-            const message = `Genesis User created successfully!\n\nUse this Invite Code for the first real user to register:\n\n${genesisCode}`;
-            console.log(message);
-            alert(message);
-        }
-        // Make the function accessible from the console
-        window.createGenesisUserForTesting = createGenesisUserForTesting;
-
 
         // ========== EVENT LISTENERS ==========
         document.getElementById('connectBtn').addEventListener('click', async () => {
@@ -2193,6 +2157,14 @@
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
                 
+                // ---- FIX: Pre-fill input if invite info came from URL after payment ----
+                if (inviteInfoFromUrl) {
+                    const inviteInput = document.getElementById('verifyInviteCodeInput');
+                    if (inviteInput) {
+                        inviteInput.value = inviteInfoFromUrl.code;
+                    }
+                }
+                
             } catch (e) { 
                 showToast("Transaction failed. Please try again.", "error"); 
             } finally { 
@@ -2202,6 +2174,7 @@
             }
         });
         
+        // ---- FIX: Replaced the entire verification logic ----
         document.getElementById('verifyInviteCodeBtn').addEventListener('click', () => {
             const inviteCode = document.getElementById('verifyInviteCodeInput').value.trim().toUpperCase();
             const statusDiv = document.getElementById('inviterVerifyStatus');
@@ -2214,22 +2187,16 @@
                 return;
             }
             
-            const inviterWallet = getWalletByInviteCode(inviteCode);
-            if (inviterWallet && isValidWalletAddress(inviterWallet)) {
-                const inviterProfile = getUserProfile(inviterWallet);
-                if (inviterProfile) {
-                    verifiedInviterId = inviterProfile.userId;
-                    statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by: ${inviterProfile.name} (ID: ZTR-${verifiedInviterId})</span>`;
-                    showToast(`Inviter found: ${inviterProfile.name}`, 'success');
-                    proceedBtn.disabled = false;
-                } else {
-                    // This case should be rare if data is consistent
-                    statusDiv.innerHTML = '<span class="status-error">❌ Inviter profile not found. Code is invalid.</span>';
-                    verifiedInviterId = null;
-                    proceedBtn.disabled = true;
-                }
+            // New verification logic using data from the URL
+            if (inviteInfoFromUrl && inviteCode === inviteInfoFromUrl.code) {
+                // If the entered code matches the one from the URL, it's valid.
+                verifiedInviterId = inviteInfoFromUrl.id;
+                statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by: ${sanitizeInput(inviteInfoFromUrl.name)} (ID: ZTR-${verifiedInviterId})</span>`;
+                showToast(`Inviter found: ${sanitizeInput(inviteInfoFromUrl.name)}`, 'success');
+                proceedBtn.disabled = false;
             } else {
-                statusDiv.innerHTML = '<span class="status-error">❌ Invitation code not found.</span>';
+                // This will trigger if user didn't use a link or typed a wrong code.
+                statusDiv.innerHTML = '<span class="status-error">❌ Invitation code not found. Please use a valid invitation link.</span>';
                 verifiedInviterId = null;
                 proceedBtn.disabled = true;
             }
@@ -2322,8 +2289,8 @@
 
         if (window.ethereum) {
             window.ethereum.on('accountsChanged', async (accounts) => {
-                if (accounts.length > 0) {
-                    // Don't save wallet here, let initConnection handle it
+                if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
+                    localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
                     await initConnection(accounts, true);
                 } else {
                     localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
@@ -2334,9 +2301,21 @@
             window.ethereum.on('chainChanged', () => location.reload());
         }
 
+        // ---- FIX: Modified page load to capture inviter info from URL ----
         window.addEventListener('load', async () => {
-             const ip = await getIP();
-            document.getElementById('ipDisplay').innerText = `IP: ${sanitizeInput(ip)}`;
+            const urlParams = new URLSearchParams(window.location.search);
+            const inviteCodeFromUrl = urlParams.get('invite');
+            const inviterNameFromUrl = urlParams.get('inviterName');
+            const inviterIdFromUrl = urlParams.get('inviterId');
+
+            // If a valid invite link is used, store the inviter's info
+            if(inviteCodeFromUrl && inviterNameFromUrl && inviterIdFromUrl) {
+                inviteInfoFromUrl = {
+                    code: inviteCodeFromUrl.toUpperCase(),
+                    name: decodeURIComponent(inviterNameFromUrl),
+                    id: inviterIdFromUrl
+                };
+            }
             await autoReconnect();
         });
     })();
