@@ -1278,7 +1278,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-
         // SECURITY: Validate and sanitize inputs
         function sanitizeInput(input) {
             if (!input) return '';
@@ -1318,7 +1317,6 @@
         
         const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
         
-        // NOTE: These keys are for localStorage only (session data)
         const STORAGE_KEYS = {
             CONNECTED_WALLET: 'ztr_connected_wallet',
             SESSION_ACTIVE: 'ztr_session_active',
@@ -1424,7 +1422,7 @@
             const counterRef = db.ref('nextUserId');
             const result = await counterRef.transaction(currentId => {
                 if (currentId === null) {
-                    return 1000; // Starting ID
+                    return 1000;
                 }
                 return currentId + 1;
             });
@@ -1466,7 +1464,7 @@
             updates[`/userIdMap/${userId}`] = walletLower;
             
             await db.ref().update(updates);
-            await getUniqueInviteCode(walletLower); // Generate and save invite code
+            await getUniqueInviteCode(walletLower);
             
             return newProfile;
         }
@@ -1502,7 +1500,6 @@
         }
         
         async function isProfileComplete(wallet) {
-            // In the Firebase model, if a profile exists, it's considered complete.
             return await getUserProfile(wallet) !== null;
         }
         
@@ -1518,16 +1515,13 @@
 
             if (!inviterWallet || !isValidWalletAddress(inviterWallet)) return;
 
-            // 1. 40% to Direct Inviter
             const directCommission = baseAmount * 0.40;
             await updateZTRBalance(inviterWallet, directCommission);
             showToast(`Inviter ID:ZTR-${inviterUserId} received ${directCommission.toFixed(2)} ZTR!`, 'success');
             
-            // Increment inviter's team size
             const teamSizeRef = db.ref(`users/${inviterWallet.toLowerCase()}/teamSize`);
             await teamSizeRef.transaction(currentSize => (currentSize || 0) + 1);
 
-            // 2. 10% to Upliner (Inviter's Inviter)
             const uplinerId = await getUplinerId(inviterWallet);
             if (uplinerId) {
                 const uplinerWallet = await getWalletById(uplinerId);
@@ -1538,7 +1532,6 @@
                 }
             }
 
-            // 3. 20% to Inviter's existing direct members
             const directMembers = await getDirectMembersOfInviter(inviterUserId);
             const eligibleMembers = directMembers.filter(wallet => wallet.toLowerCase() !== newUserWallet.toLowerCase());
 
@@ -1672,7 +1665,7 @@
             const profile = await getUserProfile(userAddress);
             
             if (inviteCode && profile) {
-                const baseUrl = window.location.origin + window.location.pathname;
+                const baseUrl = 'https://fortune-ruby.vercel.app/';
                 const inviteLink = `${baseUrl}?invite=${inviteCode}&inviterName=${encodeURIComponent(profile.name)}&inviterId=${profile.userId}`;
                 
                 document.getElementById('inviteLink').value = inviteLink;
@@ -1954,7 +1947,7 @@
             
             await createUserProfile(userAddress, verifiedInviterId, sanitizedUsername, setupProfilePicData);
             await distributeMultiLevelCommission(userAddress, verifiedInviterId);
-            await updateZTRBalance(userAddress, 10); // Welcome bonus
+            await updateZTRBalance(userAddress, 10);
             
             sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
             
