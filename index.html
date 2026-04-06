@@ -8,9 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Swiper JS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -126,6 +123,7 @@
         .income-card:hover {
             border-color: var(--primary);
             transform: translateY(-3px);
+            cursor: pointer;
         }
 
         .income-card h3 {
@@ -359,6 +357,42 @@
             border-radius: 30px;
             padding: 30px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-modal-content {
+            height: 70vh;
+        }
+        
+        .history-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-top: 20px;
+            text-align: left;
+            font-size: 13px;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-item-details .date {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+        
+        .history-item-amount {
+            font-weight: bold;
+            color: var(--success);
         }
 
         .balance-stat {
@@ -718,30 +752,24 @@
             margin: 0;
         }
         
-        .level-swiper-container {
+        .level-viewer-container {
             flex-grow: 1;
+            padding: 30px;
+            overflow-x: auto;
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 20px 0;
-            overflow: hidden;
+            gap: 20px;
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+        .level-viewer-container::-webkit-scrollbar {
+             display: none; /* Chrome, Safari, Opera */
         }
         
-        .levelSwiper {
-            width: 100%;
-            height: 100%;
-        }
-        
-        .swiper-slide {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 85%;
-        }
-        
-        .level-slide-card {
-            width: 100%;
-            height: 500px;
+        .level-card {
+            flex-shrink: 0;
+            width: 280px;
+            height: 450px;
             padding: 30px;
             text-align: center;
             display: flex;
@@ -754,31 +782,27 @@
             transition: 0.4s;
         }
         
-        .level-slide-card.unlocked {
+        .level-card.unlocked {
             border: 2px solid var(--primary);
             box-shadow: 0 0 35px var(--primary-glow);
         }
         
-        .level-slide-card .level-icon {
+        .level-card .level-icon {
             font-size: 80px;
             line-height: 1;
         }
         
-        .level-slide-card .level-price {
+        .level-card .level-price {
             font-size: 36px;
             font-weight: 800;
             color: var(--primary);
         }
         
-        .level-slide-card .level-info {
+        .level-card .level-info {
             font-size: 13px;
             color: rgba(255,255,255,0.7);
         }
-        
-        .swiper-button-next, .swiper-button-prev {
-            color: var(--primary) !important;
-        }
-        
+
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         
@@ -934,13 +958,8 @@
         <h2>Level Matrix</h2>
         <div style="width:20px;"></div>
     </div>
-    <div class="level-swiper-container">
-        <div class="swiper levelSwiper">
-            <div class="swiper-wrapper" id="levelSwiperWrapper">
-            </div>
-        </div>
-        <div class="swiper-button-prev"></div>
-        <div class="swiper-button-next"></div>
+    <div class="level-viewer-container" id="levelViewer">
+        <!-- Level cards will be injected here by JavaScript -->
     </div>
 </div>
 
@@ -957,7 +976,7 @@
         </div>
         <div class="salary-system-box hidden" id="levelSalarySystem" style="background: rgba(0,0,0,0.5); border-radius: 20px; padding: 20px;">
             <h3><i class="fa-solid fa-crown" style="color:var(--gold);"></i> Level Mastery Salary Unlocked!</h3>
-            <p style="color: rgba(255,255,255,0.7);">You have achieved the highest rank. As a reward, you will receive a monthly salary based on your total level investment.</p>
+            <p style="color: rgba(255,255,255,0.7);">You have achieved the highest rank. As a reward, you will receive a weekly salary based on your total level investment.</p>
             <div class="salary-amount" id="levelSalaryAmount" style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 12px;"></div>
         </div>
     </div>
@@ -1022,15 +1041,36 @@
         <i class="fa-solid fa-up-long" style="font-size: 50px; color: var(--gold);"></i>
         <h2 style="margin: 15px 0;">Level Upgrade</h2>
         <p id="upgradeLevelNameDisplay" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">Level Name</p>
-        <p style="color: rgba(255,255,255,0.7);">Upgrade to higher level and earn more commissions!</p>
+        <p style="color: rgba(255,255,255,0.7);">Upgrade to a higher level to continue your progress!</p>
         <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;" id="levelUpgradeAmount">0 USDT</div>
-        <div class="gas-info"><i class="fa-solid fa-chart-line"></i> New Commission: <span id="levelUpgradeCommission">0%</span></div>
-        <div style="display:flex; gap:10px;">
+        <div style="display:flex; gap:10px; margin-top:15px;">
             <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('levelUpgradePaymentModal')">Cancel</button>
             <button class="btn btn-success" id="confirmLevelUpgradeBtn">Pay & Upgrade</button>
         </div>
     </div>
 </div>
+
+<!-- History Modals -->
+<div class="modal-overlay" id="incomeHistoryModal">
+    <div class="modal-content history-modal-content">
+        <h3><i class="fa-solid fa-chart-line" style="color:var(--success)"></i> Income History</h3>
+        <div class="history-list" id="incomeHistoryList">
+            <!-- History items will be injected here -->
+        </div>
+        <button class="btn" style="background:rgba(0,0,0,0.5); margin-top: 20px;" onclick="closeModal('incomeHistoryModal')">Close</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="salaryHistoryModal">
+    <div class="modal-content history-modal-content">
+        <h3><i class="fa-solid fa-sack-dollar" style="color:var(--gold)"></i> Weekly Salary History</h3>
+        <div class="history-list" id="salaryHistoryList">
+            <!-- History items will be injected here -->
+        </div>
+        <button class="btn" style="background:rgba(0,0,0,0.5); margin-top: 20px;" onclick="closeModal('salaryHistoryModal')">Close</button>
+    </div>
+</div>
+
 
 <div class="modal-overlay" id="editProfileModal">
     <div class="modal-content">
@@ -1097,11 +1137,7 @@
     <div id="dashboardState" class="hidden">
         <div id="pageDashboard" class="page active">
             <div class="main-card">
-                <div class="swiper dashboardSwiper" style="border-radius:20px; height:160px; margin-bottom:20px;">
-                    <div class="swiper-wrapper">
-                        <div class="swiper-slide"><img src="https://iili.io/q4VQShN.jpg" style="width:100%; height:100%; object-fit:cover;"></div>
-                        <div class="swiper-slide"><img src="https://iili.io/q4VQShN.jpg" style="width:100%; height:100%; object-fit:cover;"></div>
-                    </div>
+                <div style="background: url(https://iili.io/q4VQShN.jpg); background-size: cover; border-radius:20px; height:160px; margin-bottom:20px;">
                 </div>
                 
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1114,22 +1150,22 @@
                 </div>
 
                 <div class="income-grid">
-                    <div class="income-card">
+                    <div class="income-card" onclick="openIncomeHistory()">
                         <p style="font-size:11px; color:rgba(255,255,255,0.7);">Core Profit</p>
                         <h3 id="profitIncome">0.00 ZTR</h3>
                         <small style="color:var(--success);">≈ $<span id="profitUSD">0</span></small>
                     </div>
-                    <div class="income-card">
+                    <div class="income-card" style="cursor:default;">
                         <p style="font-size:11px; color:rgba(255,255,255,0.7);">Network Size</p>
                         <h3 id="teamIncome" style="color:var(--text-main);">0</h3>
                         <small id="teamCount">Members</small>
                     </div>
-                    <div class="income-card">
-                        <p style="font-size:11px; color:rgba(255,255,255,0.7);">Monthly Salary</p>
+                    <div class="income-card" onclick="openSalaryHistory()">
+                        <p style="font-size:11px; color:rgba(255,255,255,0.7);">Weekly Salary</p>
                         <h3 id="salleryIncome" style="color:var(--gold);">0.00 ZTR</h3>
                         <small>From Stars</small>
                     </div>
-                     <div class="income-card">
+                     <div class="income-card" style="cursor:default;">
                         <p style="font-size:11px; color:rgba(255,255,255,0.7);">Current Node</p>
                         <h3 id="levelIncome" style="font-size: 18px; color: var(--text-main);">Starter</h3>
                         <small id="levelNameDisplay" style="visibility: hidden;">Phase 1</small>
@@ -1303,16 +1339,16 @@
         const IMAGE_HOST_API_KEY = '5f4240b4c2aac947e10bb8cf49954bd2';
         
         const LEVELS = [
-            { id: 1, name: "Iron", price: 5, commission: 2, icon: "🛡️" },
-            { id: 2, name: "Bronze", price: 10, commission: 4, icon: "🥉" },
-            { id: 3, name: "Silver", price: 15, commission: 6, icon: "🥈" },
-            { id: 4, name: "Gold", price: 20, commission: 8, icon: "🥇" },
-            { id: 5, name: "Platinum", price: 25, commission: 10, icon: "💎" },
-            { id: 6, name: "Emerald", price: 30, commission: 12, icon: "❇️" },
-            { id: 7, name: "Sapphire", price: 35, commission: 14, icon: "💠" },
-            { id: 8, name: "Ruby", price: 40, commission: 16, icon: "❤️" },
-            { id: 9, name: "Diamond", price: 45, commission: 18, icon: "💍" },
-            { id: 10, name: "Master", price: 50, commission: 25, icon: "👑" }
+            { id: 1, name: "Iron", price: 5, icon: "🛡️" },
+            { id: 2, name: "Bronze", price: 10, icon: "🥉" },
+            { id: 3, name: "Silver", price: 15, icon: "🥈" },
+            { id: 4, name: "Gold", price: 20, icon: "🥇" },
+            { id: 5, name: "Platinum", price: 25, icon: "💎" },
+            { id: 6, name: "Emerald", price: 30, icon: "❇️" },
+            { id: 7, name: "Sapphire", price: 35, icon: "💠" },
+            { id: 8, name: "Ruby", price: 40, icon: "❤️" },
+            { id: 9, name: "Diamond", price: 45, icon: "💍" },
+            { id: 10, name: "Master", price: 50, icon: "👑" }
         ];
         
         const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
@@ -1323,7 +1359,7 @@
             INVITE_INFO: 'ztr_invite_info'
         };
 
-        let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false, levelSwiper;
+        let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false;
         let verifiedInviterId = null;
         let pendingLevelUpgrade = null;
 
@@ -1507,6 +1543,18 @@
             if (!wallet || !isValidWalletAddress(wallet)) return;
             await db.ref(`users/${wallet.toLowerCase()}/paid`).set(true);
         }
+
+        // ========== INCOME LOGGING ==========
+        async function logIncome(wallet, amount, type) {
+            if (!wallet || !isValidWalletAddress(wallet)) return;
+            const incomeRef = db.ref(`users/${wallet.toLowerCase()}/incomeHistory`);
+            const newLog = {
+                amount: amount,
+                type: type,
+                date: new Date().toISOString()
+            };
+            await incomeRef.push(newLog);
+        }
         
         // ========== INVITATION SYSTEM (DATABASE) ==========
         async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
@@ -1515,23 +1563,28 @@
 
             if (!inviterWallet || !isValidWalletAddress(inviterWallet)) return;
 
+            // Direct inviter commission
             const directCommission = baseAmount * 0.40;
             await updateZTRBalance(inviterWallet, directCommission);
+            await logIncome(inviterWallet, directCommission, 'Direct Commission');
             showToast(`Inviter ID:ZTR-${inviterUserId} received ${directCommission.toFixed(2)} ZTR!`, 'success');
             
             const teamSizeRef = db.ref(`users/${inviterWallet.toLowerCase()}/teamSize`);
             await teamSizeRef.transaction(currentSize => (currentSize || 0) + 1);
 
+            // Upliner commission
             const uplinerId = await getUplinerId(inviterWallet);
             if (uplinerId) {
                 const uplinerWallet = await getWalletById(uplinerId);
                 if (uplinerWallet && isValidWalletAddress(uplinerWallet)) {
                     const uplinerCommission = baseAmount * 0.10;
                     await updateZTRBalance(uplinerWallet, uplinerCommission);
+                    await logIncome(uplinerWallet, uplinerCommission, 'Upliner Commission');
                     showToast(`Upliner ID:ZTR-${uplinerId} received ${uplinerCommission.toFixed(2)} ZTR!`, 'success');
                 }
             }
 
+            // Downline pool commission
             const directMembers = await getDirectMembersOfInviter(inviterUserId);
             const eligibleMembers = directMembers.filter(wallet => wallet.toLowerCase() !== newUserWallet.toLowerCase());
 
@@ -1542,7 +1595,8 @@
                     const memberProfile = await getUserProfile(memberWallet);
                     if (memberProfile) {
                        await updateZTRBalance(memberWallet, sharePerMember);
-                       showToast(`Existing member ID:ZTR-${memberProfile.userId} received ${sharePerMember.toFixed(2)} ZTR from downline pool!`, 'success');
+                       await logIncome(memberWallet, sharePerMember, 'Downline Pool Share');
+                       showToast(`Existing member ID:ZTR-${memberProfile.userId} received ${sharePerMember.toFixed(2)} ZTR!`, 'success');
                     }
                 }
             }
@@ -1586,7 +1640,7 @@
         
         async function getCurrentLevelInfo(wallet) { 
             const levelId = await getUserLevel(wallet); 
-            if (levelId === 0) return { name: "Starter", price: 0, commission: 0, icon: "🌱" }; 
+            if (levelId === 0) return { name: "Starter", price: 0, icon: "🌱" }; 
             return LEVELS[levelId - 1]; 
         }
 
@@ -1665,7 +1719,7 @@
             const profile = await getUserProfile(userAddress);
             
             if (inviteCode && profile) {
-                const baseUrl = 'https://fortune-ruby.vercel.app/';
+                const baseUrl = window.location.origin + window.location.pathname;
                 const inviteLink = `${baseUrl}?invite=${inviteCode}&inviterName=${encodeURIComponent(profile.name)}&inviterId=${profile.userId}`;
                 
                 document.getElementById('inviteLink').value = inviteLink;
@@ -1683,10 +1737,6 @@
             await updateAssetsPage();
             await renderBeautifulTree();
             await updateInviteInfo();
-            
-            if (typeof Swiper !== 'undefined') {
-                new Swiper('.dashboardSwiper', { autoplay: true, loop: true });
-            }
             
             localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
         }
@@ -1768,6 +1818,48 @@
             }
         }
 
+        // ========== HISTORY PAGES ==========
+        window.openIncomeHistory = async function() {
+            const listContainer = document.getElementById('incomeHistoryList');
+            listContainer.innerHTML = '<div class="spinner" style="margin: auto;"></div>';
+            openModal('incomeHistoryModal');
+
+            const incomeRef = db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`);
+            const snapshot = await incomeRef.orderByChild('date').once('value');
+            
+            if (snapshot.exists()) {
+                listContainer.innerHTML = '';
+                const historyData = [];
+                snapshot.forEach(child => {
+                    historyData.push(child.val());
+                });
+
+                historyData.reverse().forEach(item => {
+                    const date = new Date(item.date);
+                    const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                    const itemHtml = `
+                        <div class="history-item">
+                            <div class="history-item-details">
+                                <strong>${sanitizeInput(item.type)}</strong>
+                                <div class="date">${formattedDate}</div>
+                            </div>
+                            <div class="history-item-amount">+${item.amount.toFixed(4)} ZTR</div>
+                        </div>
+                    `;
+                    listContainer.innerHTML += itemHtml;
+                });
+            } else {
+                listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No income history found.</p>';
+            }
+        }
+
+        window.openSalaryHistory = async function() {
+            const listContainer = document.getElementById('salaryHistoryList');
+            // This is a placeholder as salary distribution logic is not implemented.
+            listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No salary payments have been recorded yet.</p>';
+            openModal('salaryHistoryModal');
+        }
+
         // ========== STARS PAGES ==========
         function generateLargeStarsHTML(count, filledCount) {
             let starsHtml = '';
@@ -1787,8 +1879,8 @@
             container.innerHTML = generateLargeStarsHTML(maxLevel, userLevel);
             if (userLevel >= maxLevel) {
                 const totalInvestment = LEVELS.reduce((acc, level) => acc + level.price, 0);
-                const salary = totalInvestment * 0.10;
-                salaryAmount.innerText = `${salary.toFixed(2)} ZTR / Month`;
+                const salary = totalInvestment * 0.10; // Assuming 10% weekly salary
+                salaryAmount.innerText = `${salary.toFixed(2)} ZTR / Week`;
                 salarySystem.classList.remove('hidden');
             } else {
                 salarySystem.classList.add('hidden');
@@ -1819,25 +1911,23 @@
         window.openJoiningStarsPage = openJoiningStarsPage;
 
         // ========== LEVEL PAGE ==========
-        async function initializeLevelSwiper() {
-            const wrapper = document.getElementById('levelSwiperWrapper');
-            if (!wrapper) return;
+        async function initializeLevelViewer() {
+            const viewer = document.getElementById('levelViewer');
+            if (!viewer) return;
             const currentLevelId = await getUserLevel(userAddress);
-            let slidesHTML = `<div class="swiper-slide"><div class="level-slide-card unlocked"><div><div class="level-icon">🌱</div><h2>Starter Level</h2><span class="rank-badge">CURRENTLY ACTIVE</span></div><p class="level-info">Your journey begins here. Upgrade to the next level to start earning higher commissions.</p><button class="btn" disabled>ACHIEVED</button></div></div>`;
+            let cardsHTML = `<div class="level-card unlocked"><div><div class="level-icon">🌱</div><h2>Starter Level</h2><span class="rank-badge">CURRENTLY ACTIVE</span></div><p class="level-info">Your journey begins here. Upgrade to the next level to start earning.</p><button class="btn" disabled>ACHIEVED</button></div>`;
             LEVELS.forEach(level => {
                 const isUnlocked = currentLevelId >= level.id;
                 const canUpgrade = currentLevelId === level.id - 1;
-                slidesHTML += `<div class="swiper-slide"><div class="level-slide-card ${isUnlocked ? 'unlocked' : ''}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} Level</h2>${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}</div><div><p class="level-info">Commission Bonus: <strong>+${level.commission}%</strong></p><h3 class="level-price">${level.price} USDT</h3></div><button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price}, ${level.commission})">${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}</button></div></div>`;
+                cardsHTML += `<div class="level-card ${isUnlocked ? 'unlocked' : ''}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} Level</h2>${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}</div><div><h3 class="level-price">${level.price} USDT</h3></div><button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price})">${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}</button></div>`;
             });
-            wrapper.innerHTML = slidesHTML;
-            if (levelSwiper) levelSwiper.destroy(true, true);
-            levelSwiper = new Swiper('.levelSwiper', { effect: 'cards', grabCursor: true, initialSlide: currentLevelId, navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' } });
+            viewer.innerHTML = cardsHTML;
         }
         
         window.openLevelPage = async function() {
             levelPageOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
-            await initializeLevelSwiper();
+            await initializeLevelViewer();
         }
         
         window.closeLevelPage = function() {
@@ -1845,16 +1935,15 @@
             document.body.style.overflow = 'auto';
         }
 
-        window.upgradeLevel = async function(levelId, levelName, price, commission) {
+        window.upgradeLevel = async function(levelId, levelName, price) {
             const currentId = await getUserLevel(userAddress);
             if (currentId >= levelId) { showToast(`You already have the ${levelName} level!`, 'info'); return; }
             if (currentId !== levelId - 1) { showToast(`Upgrade to the previous level first!`, 'info'); return; }
             
-            pendingLevelUpgrade = { levelId, levelName, price, commission };
+            pendingLevelUpgrade = { levelId, levelName, price };
             
             document.getElementById('upgradeLevelNameDisplay').innerText = `Upgrade to ${levelName}`;
             document.getElementById('levelUpgradeAmount').innerHTML = `${price} USDT`;
-            document.getElementById('levelUpgradeCommission').innerHTML = `${commission}%`;
             openModal('levelUpgradePaymentModal');
         };
 
@@ -1880,7 +1969,7 @@
                 
                 closeModal('levelUpgradePaymentModal');
                 await updateDashboard();
-                await initializeLevelSwiper();
+                await initializeLevelViewer();
                 await updateAssetsPage();
                 await renderBeautifulTree();
                 
@@ -1947,12 +2036,11 @@
             
             await createUserProfile(userAddress, verifiedInviterId, sanitizedUsername, setupProfilePicData);
             await distributeMultiLevelCommission(userAddress, verifiedInviterId);
-            await updateZTRBalance(userAddress, 10);
             
             sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
             
             closeModal('profileSetupModal');
-            showToast("Profile setup complete! You received 10 ZTR bonus!", "success");
+            showToast("Profile setup complete!", "success");
             
             await showDashboard();
         });
