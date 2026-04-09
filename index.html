@@ -4,762 +4,267 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ZTR Coin - Premium Blockchain Hub</title>
+    <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
     <style>
         :root {
             --primary: #00f2ff;
             --primary-glow: rgba(0, 242, 255, 0.5);
             --secondary: #7000ff;
+            --secondary-glow: rgba(112, 0, 255, 0.5);
             --text-main: #ffffff;
             --text-muted: rgba(255, 255, 255, 0.8);
             --success: #10b981;
             --gold: #ffb800;
-            --error: #ef4444;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        html, body { overscroll-behavior: none; height: 100%; }
         body {
             background: url('https://iili.io/qmuYshF.jpg') no-repeat center center fixed;
             background-size: cover;
             color: var(--text-main);
+            min-height: 100vh;
             padding-bottom: 90px;
+            overflow-x: hidden;
         }
-        .navbar {
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .logo {
-            font-size: 20px;
-            font-weight: 800;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .wallet-address-badge {
-            font-size: 10px;
-            padding: 5px 12px;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid var(--secondary);
-            border-radius: 50px;
-            cursor: pointer;
-        }
+        .navbar { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); }
+        .logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 15px var(--primary-glow); }
+        .wallet-address-badge { font-size: 10px; padding: 5px 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--secondary); border-radius: 50px; color: var(--text-main); font-family: monospace; cursor: pointer; transition: 0.3s; }
         .container { max-width: 480px; margin: 0 auto; padding: 20px; }
-        .main-card {
-            margin-bottom: 20px;
-            padding: 25px;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(2px);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .income-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 20px;
-        }
-        .income-card {
-            padding: 20px 15px;
-            text-align: center;
-            border-radius: 20px;
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
-            cursor: pointer;
-        }
-        .income-card h3 { font-size: 22px; color: var(--primary); }
-        .btn {
-            width: 100%;
-            padding: 16px;
-            border-radius: 16px;
-            border: none;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            background: linear-gradient(135deg, var(--secondary), #4f00b3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
+        .main-card { margin-bottom: 20px; padding: 25px; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(2px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .income-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .income-card { padding: 20px 15px; text-align: center; border-radius: 20px; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(2px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .income-card h3 { font-size: 22px; color: var(--primary); text-shadow: 0 0 10px var(--primary-glow); }
+        .btn { width: 100%; padding: 16px; border-radius: 16px; border: none; color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, var(--secondary), #4f00b3); }
+        .btn:disabled { background: rgba(0,0,0,0.5); color: rgba(255,255,255,0.5); cursor: not-allowed; }
         .btn-success { background: linear-gradient(135deg, #059669, #10b981); }
-        .btn-warning { background: linear-gradient(135deg, #d97706, #f59e0b); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .bottom-nav {
-            position: fixed;
-            bottom: 15px;
-            left: 15px;
-            right: 15px;
-            height: 70px;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(10px);
-            border-radius: 25px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 1000;
-        }
-        .nav-item {
-            color: rgba(255,255,255,0.6);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 10px;
-            cursor: pointer;
-            width: 100%;
-            justify-content: center;
-        }
-        .nav-item i { font-size: 20px; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item-special {
-            width: 65px;
-            height: 65px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            cursor: pointer;
-            transform: translateY(-20px);
-            box-shadow: 0 0 20px var(--primary-glow);
-        }
         .hidden { display: none !important; }
-        .page { display: none; animation: fadeIn 0.4s ease; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(8px);
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: 0.3s;
-        }
-        .modal-overlay.active { opacity: 1; pointer-events: all; }
-        .modal-content {
-            width: 90%;
-            max-width: 380px;
-            background: rgba(0,0,0,0.85);
-            border: 1px solid var(--primary);
-            border-radius: 30px;
-            padding: 25px;
-            text-align: center;
-        }
-        .claim-card {
-            background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(0,0,0,0.4));
-            border: 2px solid var(--success);
-            border-radius: 20px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-        .claim-amount { font-size: 48px; font-weight: 900; color: var(--success); }
-        .gas-info {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,184,0,0.3);
-            border-radius: 12px;
-            padding: 10px;
-            font-size: 11px;
-            color: var(--gold);
-            text-align: center;
-            margin: 15px 0;
-        }
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        .loading-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(10px);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-        .loading-overlay.hidden { display: none; }
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        .profile-avatar {
-            width: 90px; height: 90px;
-            border-radius: 50%;
-            margin: 0 auto 15px;
-            background: rgba(0,0,0,0.5);
-            border: 3px solid var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            cursor: pointer;
-        }
-        .balance-stat {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 15px 10px;
-            text-align: center;
-        }
-        .invite-code-wrapper {
-            display: flex;
-            align-items: center;
-            background: rgba(0,0,0,0.4);
-            border-radius: 15px;
-            padding: 5px;
-        }
-        .invite-code-wrapper input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--primary);
-            font-family: monospace;
-            padding: 10px;
-        }
-        .invite-code-wrapper button {
-            background: var(--primary);
-            border: none;
-            border-radius: 12px;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-        }
-        .status-success { color: var(--success); }
-        .status-error { color: var(--error); }
-        .status-info { color: var(--gold); }
+        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(10px); z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column; transition: 0.3s; }
+        .spinner { width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.3); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-content { width: 90%; max-width: 360px; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); border: 1px solid var(--primary); border-radius: 30px; padding: 30px; text-align: center; display: flex; flex-direction: column; }
+        .invite-code-input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        .invite-code-input-group input { flex: 1; padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; text-align: left;}
+        .invite-code-input-group button { padding: 12px 20px; background: var(--primary); border: none; border-radius: 12px; color: black; font-weight: bold; cursor: pointer; flex-shrink: 0; }
+        input { background: rgba(0,0,0,0.5) !important; border: 1px solid rgba(255,255,255,0.2) !important; color: white !important; }
     </style>
 </head>
 <body>
 
-<div id="loadingOverlay" class="loading-overlay">
-    <div class="spinner"></div>
-    <p>Connecting to blockchain...</p>
-</div>
-
+<div id="loadingOverlay" class="loading-overlay"> <div class="spinner"></div> <p>Connecting...</p> </div>
 <div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
 
-<!-- Modals -->
-<div class="modal-overlay" id="paymentModal">
+<!-- NAYA MODAL: Withdrawal Request Modal -->
+<div class="modal-overlay" id="claimModal">
     <div class="modal-content">
-        <i class="fa-solid fa-bolt" style="font-size: 50px; color: var(--primary);"></i>
-        <h2>Activate Node</h2>
-        <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;">0.10 USDT</div>
-        <button class="btn btn-success" id="confirmPaymentBtn">Confirm Payment</button>
-        <button class="btn" style="margin-top:10px; background:rgba(0,0,0,0.5);" onclick="closeModal('paymentModal')">Cancel</button>
-    </div>
-</div>
-
-<div class="modal-overlay" id="profileSetupModal">
-    <div class="modal-content">
-        <i class="fa-solid fa-user-astronaut" style="font-size: 50px; color: var(--primary);"></i>
-        <h2>Complete Profile</h2>
-        <div class="avatar-preview" id="avatarPreview" onclick="document.getElementById('setupProfilePic').click()" style="width:100px; height:100px; border-radius:50%; margin:15px auto; background:rgba(0,0,0,0.5); border:2px solid var(--primary); display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer;">
-            <i class="fa-solid fa-user-circle" id="avatarPreviewIcon" style="font-size:50px;"></i>
-            <img id="avatarPreviewImg" style="display:none; width:100%; height:100%; object-fit:cover;">
+        <i class="fa-solid fa-hand-holding-dollar" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
+        <h2>Claim Earnings</h2>
+        <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin: 10px 0 20px 0;">
+            Enter the amount you wish to withdraw. Your request will be sent to the admin for approval. Minimum 10 USDT.
+        </p>
+        <div class="invite-code-input-group">
+            <input type="number" id="claimAmountInput" placeholder="Enter Amount in USDT" style="font-family: 'Segoe UI', sans-serif; font-size: 14px; text-transform: none;">
         </div>
-        <input type="file" id="setupProfilePic" style="display:none;">
-        <input type="text" id="setupUsername" placeholder="Username" style="width:100%; padding:12px; margin-bottom:15px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:12px; color:white;">
-        <button class="btn btn-success" id="completeProfileBtn">Complete Setup</button>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('claimModal')">Cancel</button>
+            <button class="btn btn-success" id="confirmClaimBtn">Submit Request</button>
+        </div>
     </div>
 </div>
 
-<div class="modal-overlay" id="transactionModal">
-    <div class="modal-content">
-        <i class="fa-solid fa-circle-check" id="transactionIcon" style="font-size: 60px; color: var(--success);"></i>
-        <h2 id="transactionTitle">Processing</h2>
-        <p id="transactionMessage" style="margin: 15px 0;">Please wait...</p>
-        <div id="transactionHash" style="font-size: 11px; word-break: break-all;"></div>
-        <button class="btn" onclick="closeModal('transactionModal')" style="margin-top:15px;">Close</button>
-    </div>
-</div>
 
-<!-- Navbar -->
 <div class="navbar">
     <div class="logo">ZTR PREMIUM</div>
-    <div class="wallet-address-badge" id="walletAddressBadge" onclick="copyWalletAddress()" style="display:none;">
-        <i class="fa-solid fa-wallet"></i> <span id="walletAddressShort">Connect</span>
+    <div class="wallet-address-badge" id="walletAddressBadge" onclick="copyWalletAddress()" style="display: none;">
+        <i class="fa-solid fa-wallet"></i> <span id="walletAddressShort">Not Connected</span>
     </div>
 </div>
 
 <div class="container">
-    <!-- Connect State -->
     <div id="connectState">
         <div class="main-card" style="text-align:center;">
-            <div style="font-size:60px; color:var(--primary); margin-bottom:20px;"><i class="fa-solid fa-fingerprint"></i></div>
-            <h2>Quantum Access</h2>
-            <p style="margin-bottom:30px;">Initialize your decentralized protocol</p>
+             <div style="font-size:60px; color:var(--primary); margin-bottom:20px;"><i class="fa-solid fa-fingerprint"></i></div>
+                <h2 style="margin-bottom:10px;">Quantum Access</h2>
+                <p style="color:rgba(255,255,255,0.7); font-size:14px; margin-bottom:30px;">Initialize your decentralized protocol</p>
             <button id="connectBtn" class="btn"><i class="fa-solid fa-link"></i> CONNECT WALLET</button>
         </div>
     </div>
-
-    <!-- Invitation State -->
-    <div id="invitationState" class="hidden">
-        <div class="main-card" style="text-align:center;">
-            <i class="fa-solid fa-user-check" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
-            <h2>Invitation Required</h2>
-            <p style="margin-bottom: 20px;">Enter your inviter's invitation code</p>
-            <div style="display:flex; gap:10px; margin-bottom:20px;">
-                <input type="text" id="verifyInviteCodeInput" placeholder="ENTER CODE" maxlength="8" style="flex:1; padding:12px; border-radius:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); color:white; text-transform:uppercase;">
-                <button id="verifyInviteCodeBtn" style="padding:12px 20px; background:var(--primary); border:none; border-radius:12px; font-weight:bold; cursor:pointer;">Verify</button>
-            </div>
-            <div id="inviterVerifyStatus" style="margin-bottom:20px;"></div>
-            <button class="btn btn-success" id="proceedToProfileBtn" disabled>Proceed</button>
-        </div>
-    </div>
-
-    <!-- Dashboard -->
+    
     <div id="dashboardState" class="hidden">
-        <div id="pageDashboard" class="page active">
-            <div class="main-card">
-                <div style="background: url(https://iili.io/q4VQShN.jpg); background-size: cover; border-radius:20px; height:160px; margin-bottom:20px;"></div>
-                <div style="display:flex; justify-content:space-between;">
-                    <h2 id="welcomeMessage">Welcome!</h2>
-                    <span class="rank-badge" id="userRankBadge">Member</span>
+        <div class="main-card">
+            <div style="background: url(https://iili.io/q4VQShN.jpg); background-size: cover; border-radius:20px; height:160px; margin-bottom:20px;"></div>
+            <h2 id="welcomeMessage" style="font-size: 20px; text-align:center; margin-bottom: 20px;">Welcome!</h2>
+            <div class="income-grid">
+                <div class="income-card">
+                    <p style="font-size:11px; color:rgba(255,255,255,0.7);">My Earnings (ZTR)</p>
+                    <h3 id="profitIncome">0.00</h3>
                 </div>
-                <div class="income-grid">
-                    <div class="income-card" onclick="openIncomeHistory()">
-                        <p>Core Profit</p>
-                        <h3 id="profitIncome">0.00 ZTR</h3>
-                    </div>
-                    <div class="income-card">
-                        <p>Network Size</p>
-                        <h3 id="teamIncome">0</h3>
-                    </div>
-                    <div class="income-card">
-                        <p>Weekly Salary</p>
-                        <h3 id="salleryIncome" style="color:var(--gold);">0.00 ZTR</h3>
-                    </div>
-                    <div class="income-card">
-                        <p>Current Node</p>
-                        <h3 id="levelIncome">Starter</h3>
-                    </div>
-                </div>
-                <div class="gas-info"><i class="fa-solid fa-wallet"></i> Wallet: <span id="dashboardWalletAddress">Not Connected</span></div>
-            </div>
-        </div>
-
-        <div id="pageTeam" class="page">
-            <div class="main-card">
-                <h3>Your Invitation Code</h3>
-                <div class="invite-code-wrapper">
-                    <input type="text" id="inviteCodeInput" readonly>
-                    <button id="copyInviteCodeBtn"><i class="fa-solid fa-copy"></i></button>
-                </div>
-                <h3 style="margin-top:20px;">Your Network Tree</h3>
-                <div id="networkTreeContainer" style="padding:20px; overflow-x:auto; background:rgba(0,0,0,0.2); border-radius:20px;">
-                    <p>Loading...</p>
+                <div class="income-card">
+                    <p style="font-size:11px; color:rgba(255,255,255,0.7);">Earnings Value (USDT)</p>
+                    <h3 id="profitUSD" style="color: var(--success);">$0.00</h3>
                 </div>
             </div>
-        </div>
-
-        <div id="pageStars" class="page">
-            <div class="main-card" style="text-align:center;">
-                <i class="fa-solid fa-star" style="font-size: 40px; color: var(--gold);"></i>
-                <h3>Salary Progress</h3>
-                <div id="starsContainer"></div>
-                <div class="progress-bar-container" style="background:rgba(0,0,0,0.5); border-radius:12px; height:12px; margin-top:15px;">
-                    <div class="progress-bar" id="starsProgress" style="width:0%; height:100%; background:linear-gradient(90deg, var(--primary), var(--secondary)); border-radius:12px;"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="pageAssets" class="page">
-            <div class="main-card">
-                <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('profilePicInput').click()">
-                    <i class="fa-solid fa-user-circle" id="avatarIcon" style="font-size:40px;"></i>
-                    <img id="profileAvatarImg" style="display:none; width:100%; height:100%; object-fit:cover;">
-                </div>
-                <input type="file" id="profilePicInput" style="display:none;">
-                <div style="text-align:center;">
-                    <h2 id="profileName">User</h2>
-                    <span style="font-size:12px; color:var(--primary);" id="userId">ID: Loading...</span>
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:20px 0;">
-                    <div class="balance-stat"><i class="fa-solid fa-dollar-sign"></i><div style="font-size:18px; font-weight:bold;" id="statUSDT">0.00</div><div>USDT</div></div>
-                    <div class="balance-stat"><i class="fa-solid fa-coins"></i><div style="font-size:18px; font-weight:bold;" id="statZTR">0.00</div><div>ZTR</div></div>
-                </div>
-
-                <!-- CLAIM BUTTON -->
-                <div class="claim-card">
-                    <i class="fa-solid fa-hand-holding-usd" style="font-size: 40px; color: var(--success);"></i>
-                    <h3 style="color: var(--success);">Claim ZTR to USDT</h3>
-                    <div class="claim-amount" id="claimZtrAmount">0.00 ZTR</div>
-                    <div style="font-size: 20px; margin: 10px 0;">↓ 1:1 ↓</div>
-                    <div style="font-size: 28px; font-weight: bold; color: var(--gold);" id="claimUsdtAmount">0.00 USDT</div>
-                    <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Gas Fee: ~0.0005 BNB</div>
-                    <button class="btn btn-success" id="claimBtn" style="gap: 10px;">
-                        <i class="fa-solid fa-money-bill-wave"></i> CLAIM ALL ZTR
-                    </button>
-                    <div id="claimStatus" style="margin-top: 10px; font-size: 12px;"></div>
-                </div>
-
-                <div style="margin-top: 20px;">
-                    <h4>Claim History</h4>
-                    <div id="claimHistoryList" style="max-height: 150px; overflow-y: auto;"></div>
-                </div>
+            <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                 <h3 style="text-align:center; margin-bottom: 15px;">Withdraw Your Earnings</h3>
+                 <p style="font-size:12px; color:rgba(255,255,255,0.7); text-align:center; margin-bottom:15px;">
+                     You can claim your ZTR earnings as USDT. Requests are processed manually by the admin.
+                 </p>
+                 <button class="btn btn-success" id="claimBtn"><i class="fa-solid fa-hand-holding-dollar"></i> REQUEST WITHDRAWAL</button>
             </div>
         </div>
     </div>
-</div>
-
-<div class="bottom-nav" id="bottomNav" style="display:none;">
-    <div class="nav-item active" data-page="dashboard"><i class="fa-solid fa-house"></i><span>Home</span></div>
-    <div class="nav-item" data-page="team"><i class="fa-solid fa-diagram-project"></i><span>Network</span></div>
-    <div class="nav-item-special" onclick="openLevelPage()"><i class="fa-solid fa-layer-group"></i></div>
-    <div class="nav-item" data-page="stars"><i class="fa-solid fa-star"></i><span>Salary</span></div>
-    <div class="nav-item" data-page="assets"><i class="fa-solid fa-wallet"></i><span>Vault</span></div>
 </div>
 
 <script>
-(function() {
-    // Firebase Config
-    const firebaseConfig = {
-        apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
-        authDomain: "fortune-2cb70.firebaseapp.com",
-        databaseURL: "https://fortune-2cb70-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "fortune-2cb70",
-        storageBucket: "fortune-2cb70.appspot.com",
-        messagingSenderId: "1071497910345",
-        appId: "1:1071497910345:web:1ba75c13e481b4764b8d71"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    // Admin Configuration
-    const ADMIN_PRIVATE_KEY = "7dcdb84fec9be6566f645b1450add3ad20718fd6c757fb21980fb1f6fbfc757c";
-    const ADMIN_WALLET = "0x80f04796a094648f48b3215bd90b142c77e8250e";
-    const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
-    const JOINING_FEE = 0.10;
-
-    let provider, signer, userAddress, usdtDecimals = 18, isProcessing = false;
-    let verifiedInviterId = null;
-    let adminSigner = null;
-
-    // Helper Functions
-    function showToast(msg, type) {
-        const toast = document.createElement('div');
-        toast.style.cssText = `background:rgba(0,0,0,0.9); color:white; padding:12px 20px; border-radius:12px; margin-bottom:10px; border-left:4px solid ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#f59e0b'};`;
-        toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i> ${msg}`;
-        document.getElementById('toast-container').appendChild(toast);
-        setTimeout(() => toast.remove(), 4000);
-    }
-
-    function isValidWallet(addr) { return /^0x[a-fA-F0-9]{40}$/.test(addr); }
-    function openModal(id) { document.getElementById(id).classList.add('active'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-    window.closeModal = closeModal;
-
-    async function getZTRBalance(wallet) {
-        const snap = await db.ref(`users/${wallet.toLowerCase()}/ztrBalance`).once('value');
-        return snap.exists() ? snap.val() : 0;
-    }
-
-    async function updateZTRBalance(wallet, amount) {
-        await db.ref(`users/${wallet.toLowerCase()}/ztrBalance`).transaction(c => (c || 0) + amount);
-    }
-
-    async function getUserProfile(wallet) {
-        const snap = await db.ref(`users/${wallet.toLowerCase()}/profile`).once('value');
-        return snap.exists() ? snap.val() : null;
-    }
-
-    async function getInviterId(wallet) {
-        const snap = await db.ref(`users/${wallet.toLowerCase()}/inviterId`).once('value');
-        return snap.exists() ? snap.val() : null;
-    }
-
-    async function getWalletByInviteCode(code) {
-        const snap = await db.ref(`inviteCodeMap/${code}`).once('value');
-        return snap.exists() ? snap.val() : null;
-    }
-
-    async function getUniqueInviteCode(wallet) {
-        const lower = wallet.toLowerCase();
-        let snap = await db.ref(`users/${lower}/inviteCode`).once('value');
-        if (snap.exists()) return snap.val();
-        
-        let code;
-        do {
-            code = Math.random().toString(36).substring(2, 10).toUpperCase();
-            snap = await db.ref(`inviteCodeMap/${code}`).once('value');
-        } while (snap.exists());
-        
-        await db.ref(`users/${lower}/inviteCode`).set(code);
-        await db.ref(`inviteCodeMap/${code}`).set(lower);
-        return code;
-    }
-
-    async function getWalletById(id) {
-        const snap = await db.ref(`userIdMap/${id}`).once('value');
-        return snap.exists() ? snap.val() : null;
-    }
-
-    async function createUserProfile(wallet, inviterId, username, picUrl) {
-        const lower = wallet.toLowerCase();
-        const userId = await db.ref('nextUserId').transaction(c => (c || 1000) + 1).then(r => r.snapshot.val());
-        const profile = { name: username, userId, joinDate: new Date().toLocaleDateString(), profilePicUrl: picUrl };
-        await db.ref(`users/${lower}/profile`).set(profile);
-        await db.ref(`users/${lower}/inviterId`).set(parseInt(inviterId));
-        await db.ref(`users/${lower}/paid`).set(true);
-        await db.ref(`userIdMap/${userId}`).set(lower);
-        await getUniqueInviteCode(lower);
-        return profile;
-    }
-
-    async function initAdminSigner() {
-        const provider = new ethers.JsonRpcProvider('https://bsc-dataseed1.binance.org');
-        adminSigner = new ethers.Wallet(ADMIN_PRIVATE_KEY, provider);
-        const usdt = new ethers.Contract(USDT_CONTRACT, ["function decimals() view returns (uint8)"], adminSigner);
-        usdtDecimals = await usdt.decimals();
-    }
-
-    // CLAIM FUNCTION - Auto transaction from admin wallet
-    async function claimZTR() {
-        if (!userAddress) { showToast("Connect wallet first", "error"); return; }
-        if (isProcessing) { showToast("Wait for previous transaction", "error"); return; }
-        
-        const ztrBal = await getZTRBalance(userAddress);
-        if (ztrBal <= 0) { showToast("No ZTR to claim", "error"); return; }
-        
-        if (!confirm(`Claim ${ztrBal.toFixed(4)} ZTR → ${ztrBal.toFixed(4)} USDT?\nGas fee ~0.0005 BNB will be deducted.`)) return;
-        
-        isProcessing = true;
-        const claimBtn = document.getElementById('claimBtn');
-        claimBtn.disabled = true;
-        claimBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
-        
-        openModal('transactionModal');
-        document.getElementById('transactionIcon').className = 'fa-solid fa-spinner spin';
-        document.getElementById('transactionIcon').style.color = '#f59e0b';
-        document.getElementById('transactionTitle').innerText = 'Processing Claim';
-        document.getElementById('transactionMessage').innerHTML = `Converting ${ztrBal.toFixed(4)} ZTR to USDT...`;
-        
-        try {
-            if (!adminSigner) await initAdminSigner();
-            const usdtContract = new ethers.Contract(USDT_CONTRACT, ["function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"], adminSigner);
-            const amount = ethers.parseUnits(ztrBal.toString(), usdtDecimals);
-            const balance = await usdtContract.balanceOf(ADMIN_WALLET);
-            if (balance < amount) throw new Error("Admin wallet insufficient USDT");
-            
-            const tx = await usdtContract.transfer(userAddress, amount);
-            document.getElementById('transactionMessage').innerHTML = `Transaction sent! Waiting for confirmation...<br><small>${tx.hash.slice(0, 30)}...</small>`;
-            await tx.wait();
-            
-            await updateZTRBalance(userAddress, -ztrBal);
-            await db.ref(`claims/${userAddress.toLowerCase()}`).push({ ztrAmount: ztrBal, usdtAmount: ztrBal, txHash: tx.hash, date: Date.now() });
-            
-            document.getElementById('transactionIcon').className = 'fa-solid fa-circle-check';
-            document.getElementById('transactionIcon').style.color = '#10b981';
-            document.getElementById('transactionTitle').innerText = 'Claim Successful!';
-            document.getElementById('transactionMessage').innerHTML = `Received ${ztrBal.toFixed(4)} USDT!`;
-            showToast(`Claimed ${ztrBal.toFixed(4)} USDT!`, 'success');
-            
-            await updateAssetsPage();
-            await updateDashboard();
-            await loadClaimHistory();
-        } catch (err) {
-            showToast(err.message, 'error');
-            document.getElementById('transactionIcon').className = 'fa-solid fa-circle-exclamation';
-            document.getElementById('transactionIcon').style.color = '#ef4444';
-            document.getElementById('transactionTitle').innerText = 'Claim Failed';
-            document.getElementById('transactionMessage').innerHTML = err.message;
-        } finally {
-            isProcessing = false;
-            claimBtn.disabled = false;
-            claimBtn.innerHTML = '<i class="fa-solid fa-money-bill-wave"></i> CLAIM ALL ZTR';
-        }
-    }
-
-    async function loadClaimHistory() {
-        if (!userAddress) return;
-        const snap = await db.ref(`claims/${userAddress.toLowerCase()}`).orderByChild('date').limitToLast(5).once('value');
-        const container = document.getElementById('claimHistoryList');
-        if (!snap.exists()) { container.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.5);">No claims yet</p>'; return; }
-        container.innerHTML = '';
-        const items = [];
-        snap.forEach(c => items.push(c.val()));
-        items.reverse().forEach(c => {
-            container.innerHTML += `<div style="background:rgba(16,185,129,0.1); border-radius:10px; padding:8px; margin-bottom:5px;"><div style="display:flex; justify-content:space-between;"><span>${c.usdtAmount.toFixed(4)} USDT</span><span style="font-size:10px;">${new Date(c.date).toLocaleString()}</span></div><div style="font-size:10px; color:var(--primary);">${c.ztrAmount.toFixed(4)} ZTR</div></div>`;
-        });
-    }
-
-    async function updateAssetsPage() {
-        if (!userAddress) return;
-        const profile = await getUserProfile(userAddress);
-        if (!profile) return;
-        const ztr = await getZTRBalance(userAddress);
-        document.getElementById('statZTR').innerText = ztr.toFixed(2);
-        document.getElementById('claimZtrAmount').innerText = ztr.toFixed(2) + ' ZTR';
-        document.getElementById('claimUsdtAmount').innerText = ztr.toFixed(2) + ' USDT';
-        document.getElementById('profileName').innerText = profile.name;
-        document.getElementById('userId').innerText = `ID: ZTR-${profile.userId}`;
-    }
-
-    async function updateDashboard() {
-        if (!userAddress) return;
-        const profile = await getUserProfile(userAddress);
-        if (profile) document.getElementById('welcomeMessage').innerHTML = `Welcome, ${profile.name}!`;
-        const ztr = await getZTRBalance(userAddress);
-        document.getElementById('profitIncome').innerText = ztr.toFixed(2) + ' ZTR';
-    }
-
-    async function updateInviteInfo() {
-        if (!userAddress) return;
-        const code = await getUniqueInviteCode(userAddress);
-        document.getElementById('inviteCodeInput').value = code;
-    }
-
-    async function showDashboard() {
-        document.getElementById('connectState').classList.add('hidden');
-        document.getElementById('invitationState').classList.add('hidden');
-        document.getElementById('dashboardState').classList.remove('hidden');
-        document.getElementById('bottomNav').style.display = 'flex';
-        await updateDashboard();
-        await updateAssetsPage();
-        await updateInviteInfo();
-        await loadClaimHistory();
-    }
-
-    // Wallet Connection
-    async function initConnection(accounts) {
-        if (!accounts || !accounts[0]) return;
-        userAddress = accounts[0];
-        localStorage.setItem('ztr_wallet', userAddress);
-        provider = new ethers.BrowserProvider(window.ethereum);
-        signer = await provider.getSigner();
-        document.getElementById('walletAddressBadge').style.display = 'flex';
-        document.getElementById('walletAddressShort').innerHTML = `${userAddress.slice(0,6)}...${userAddress.slice(-4)}`;
-        document.getElementById('dashboardWalletAddress').innerHTML = `${userAddress.slice(0,6)}...${userAddress.slice(-4)}`;
-        
-        if (await getUserProfile(userAddress)) {
-            await showDashboard();
-        } else if (await db.ref(`users/${userAddress.toLowerCase()}/paid`).once('value').then(s => s.val())) {
-            document.getElementById('connectState').classList.add('hidden');
-            document.getElementById('invitationState').classList.remove('hidden');
-        } else {
-            openModal('paymentModal');
-        }
-        document.getElementById('loadingOverlay').classList.add('hidden');
-    }
-
-    // Event Listeners
-    document.getElementById('connectBtn').onclick = async () => {
-        if (!window.ethereum) return showToast("Install MetaMask", "error");
-        try {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            const acc = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            await initConnection(acc);
-        } catch(e) { showToast(e.message, "error"); document.getElementById('loadingOverlay').classList.add('hidden'); }
-    };
-
-    document.getElementById('confirmPaymentBtn').onclick = async () => {
-        const usdt = new ethers.Contract(USDT_CONTRACT, ["function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"], signer);
-        const amount = ethers.parseUnits(JOINING_FEE.toString(), await usdt.decimals());
-        const tx = await usdt.transfer(ADMIN_WALLET, amount);
-        await tx.wait();
-        await db.ref(`users/${userAddress.toLowerCase()}/paid`).set(true);
-        closeModal('paymentModal');
-        document.getElementById('connectState').classList.add('hidden');
-        document.getElementById('invitationState').classList.remove('hidden');
-        showToast("Node Activated! Enter inviter code.", "success");
-    };
-
-    document.getElementById('verifyInviteCodeBtn').onclick = async () => {
-        const code = document.getElementById('verifyInviteCodeInput').value.trim().toUpperCase();
-        const inviterWallet = await getWalletByInviteCode(code);
-        if (inviterWallet) {
-            const inviter = await getUserProfile(inviterWallet);
-            if (inviter) {
-                verifiedInviterId = inviter.userId;
-                document.getElementById('inviterVerifyStatus').innerHTML = `<span class="status-success">✅ Invited by: ${inviter.name}</span>`;
-                document.getElementById('proceedToProfileBtn').disabled = false;
-            }
-        } else {
-            document.getElementById('inviterVerifyStatus').innerHTML = '<span class="status-error">❌ Invalid code</span>';
-        }
-    };
-
-    document.getElementById('proceedToProfileBtn').onclick = () => {
-        if (verifiedInviterId) {
-            document.getElementById('invitationState').classList.add('hidden');
-            openModal('profileSetupModal');
-        }
-    };
-
-    document.getElementById('completeProfileBtn').onclick = async () => {
-        const username = document.getElementById('setupUsername').value.trim();
-        if (!username) return showToast("Enter username", "error");
-        await createUserProfile(userAddress, verifiedInviterId, username, null);
-        closeModal('profileSetupModal');
-        await showDashboard();
-    };
-
-    document.getElementById('claimBtn').onclick = claimZTR;
-    document.getElementById('copyInviteCodeBtn').onclick = () => {
-        navigator.clipboard.writeText(document.getElementById('inviteCodeInput').value);
-        showToast("Copied!", "success");
-    };
-
-    // Navigation
-    document.querySelectorAll('.nav-item').forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page' + btn.dataset.page.charAt(0).toUpperCase() + btn.dataset.page.slice(1)).classList.add('active');
+    (function() {
+        const firebaseConfig = {
+            apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
+            authDomain: "fortune-2cb70.firebaseapp.com",
+            databaseURL: "https://fortune-2cb70-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "fortune-2cb70",
+            storageBucket: "fortune-2cb70.appspot.com",
+            messagingSenderId: "1071497910345",
+            appId: "1:1071497910345:web:1ba75c13e481b4764b8d71"
         };
-    });
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-    window.openIncomeHistory = async function() {
-        const snap = await db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`).once('value');
-        let html = '<div class="history-list">';
-        if (snap.exists()) {
-            snap.forEach(c => {
-                const d = c.val();
-                html += `<div class="history-item"><div><strong>${d.type}</strong><div class="date">${new Date(d.date).toLocaleString()}</div></div><div>+${d.amount.toFixed(4)} ZTR</div></div>`;
-            });
-        } else html += '<p>No history</p>';
-        html += '</div><button class="btn" onclick="closeModal(\'incomeHistoryModal\')">Close</button>';
-        document.getElementById('incomeHistoryList').innerHTML = html;
-        openModal('incomeHistoryModal');
-    };
+        let provider, signer, userAddress, isProcessing = false;
+        
+        const loadingOverlay = document.getElementById('loadingOverlay');
 
-    window.openLevelPage = function() { alert("Levels: Iron(5 USDT), Bronze(10), Silver(15), Gold(20), Platinum(25)"); };
-    window.copyWalletAddress = function() { navigator.clipboard.writeText(userAddress); showToast("Copied!", "success"); };
-
-    // Auto reconnect
-    window.addEventListener('load', async () => {
-        const saved = localStorage.getItem('ztr_wallet');
-        if (saved && window.ethereum) {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            try {
-                const acc = await window.ethereum.request({ method: 'eth_accounts' });
-                if (acc.length && acc[0].toLowerCase() === saved.toLowerCase()) await initConnection(acc);
-                else document.getElementById('loadingOverlay').classList.add('hidden');
-            } catch(e) { document.getElementById('loadingOverlay').classList.add('hidden'); }
-        } else {
-            document.getElementById('loadingOverlay').classList.add('hidden');
+        function showToast(message, type = 'info') {
+             const container = document.getElementById('toast-container');
+             if (!container) return;
+             const toast = document.createElement('div');
+             const color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6';
+             toast.style.cssText = `background:rgba(0,0,0,0.8); color:white; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.3); font-size:13px; border-left: 5px solid ${color};`;
+             toast.innerText = message;
+             container.appendChild(toast);
+             setTimeout(() => { toast.remove() }, 4000);
         }
-    });
-})();
+
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+        
+        async function handleClaimRequest() {
+            if (isProcessing) return;
+            const confirmBtn = document.getElementById('confirmClaimBtn');
+            const amountInput = document.getElementById('claimAmountInput');
+            const amount = parseFloat(amountInput.value);
+
+            if (isNaN(amount) || amount < 10) {
+                return showToast("Minimum withdrawal is 10 USDT.", "error");
+            }
+            
+            isProcessing = true;
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Submitting...';
+            
+            try {
+                const balance = await getZTRBalance(userAddress);
+                if (balance < amount) {
+                    throw new Error("You do not have enough balance for this withdrawal.");
+                }
+                
+                const requestsRef = db.ref('withdrawal_requests').push();
+                await requestsRef.set({
+                    userAddress: userAddress,
+                    amount: amount,
+                    status: 'pending',
+                    timestamp: new Date().toISOString()
+                });
+
+                const newBalance = balance - amount;
+                await db.ref(`users/${userAddress.toLowerCase()}/ztrBalance`).set(newBalance);
+
+                closeModal('claimModal');
+                showToast("Your withdrawal request has been submitted successfully!", "success");
+                await updateDashboard();
+
+            } catch (error) {
+                showToast(error.message, "error");
+            } finally {
+                isProcessing = false;
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = 'Submit Request';
+                amountInput.value = '';
+            }
+        }
+
+        async function initConnection(accounts) {
+            if (!accounts || accounts.length === 0) return;
+            userAddress = accounts[0].toLowerCase();
+
+            loadingOverlay.style.display = 'flex';
+            
+            provider = new ethers.BrowserProvider(window.ethereum);
+            signer = await provider.getSigner();
+
+            const network = await provider.getNetwork();
+            if (Number(network.chainId) !== 56) {
+                 showToast("Please switch to Binance Smart Chain.", "info");
+            }
+            
+            document.getElementById('connectState').classList.add('hidden');
+            document.getElementById('dashboardState').classList.remove('hidden');
+            document.getElementById('walletAddressShort').innerText = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+            document.getElementById('walletAddressBadge').style.display = 'flex';
+            
+            await updateDashboard();
+            loadingOverlay.style.display = 'none';
+        }
+        
+        async function getZTRBalance(wallet) { 
+            if (!wallet) return 0;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/ztrBalance`).once('value');
+            return snapshot.exists() ? snapshot.val() : 0;
+        }
+
+        async function updateDashboard() {
+            if(!userAddress) return;
+            const ztrBalance = await getZTRBalance(userAddress);
+            document.getElementById('profitIncome').innerText = `${ztrBalance.toFixed(2)}`;
+            document.getElementById('profitUSD').innerText = `$${ztrBalance.toFixed(2)}`;
+            document.getElementById('welcomeMessage').innerText = `Welcome, ${userAddress.slice(0, 6)}...`;
+        }
+        
+        // Event Listeners
+        document.getElementById('connectBtn').addEventListener('click', async () => {
+            if (!window.ethereum) return showToast("Please use a dApp browser like MetaMask or Trust Wallet.", "error");
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                await initConnection(accounts);
+            } catch (err) {
+                showToast("Connection rejected by user.", "error");
+            }
+        });
+
+        document.getElementById('claimBtn').addEventListener('click', () => {
+            openModal('claimModal');
+        });
+        
+        document.getElementById('confirmClaimBtn').addEventListener('click', handleClaimRequest);
+        
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', () => {
+                location.reload();
+            });
+            window.ethereum.on('chainChanged', () => {
+                location.reload();
+            });
+        }
+    })();
 </script>
 </body>
 </html>
