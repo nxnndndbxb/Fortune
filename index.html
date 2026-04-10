@@ -23,8 +23,6 @@
             --text-muted: rgba(255, 255, 255, 0.8);
             --success: #10b981;
             --gold: #ffb800;
-            --error: #ef4444;
-            --warning: #f59e0b;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
@@ -963,26 +961,6 @@
         .status-error {
             color: #ef4444;
         }
-
-        .withdrawal-status-card {
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 15px;
-            font-size: 12px;
-        }
-
-        .withdrawal-status-card.pending {
-            border-left: 3px solid var(--warning);
-        }
-
-        .withdrawal-status-card.completed {
-            border-left: 3px solid var(--success);
-        }
-
-        .withdrawal-status-card.failed {
-            border-left: 3px solid var(--error);
-        }
     </style>
 </head>
 <body>
@@ -1037,7 +1015,7 @@
     </div>
 </div>
 
-<!-- Profile Setup Modal (First Time User) -->
+<!-- Profile Setup Modal -->
 <div class="modal-overlay" id="profileSetupModal">
     <div class="modal-content glass profile-setup-modal">
         <i class="fa-solid fa-user-astronaut" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
@@ -1071,12 +1049,12 @@
     </div>
 </div>
 
-<!-- Withdrawal Modal (Auto-Process via Backend) -->
+<!-- Withdrawal Modal -->
 <div class="modal-overlay" id="withdrawalModal">
     <div class="modal-content">
         <i class="fa-solid fa-paper-plane" style="font-size: 50px; color: var(--primary);"></i>
         <h2 style="margin: 15px 0;">Claim ZTR Coins</h2>
-        <p style="color: rgba(255,255,255,0.7);">Your ZTR balance will be sent to your wallet automatically.</p>
+        <p style="color: rgba(255,255,255,0.7);">Your ZTR balance will be sent to your wallet after admin approval.</p>
         
         <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; margin: 20px 0; text-align: left; font-size: 14px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
@@ -1085,13 +1063,13 @@
             </div>
             <div style="display: flex; justify-content: space-between;">
                 <span style="color: rgba(255,255,255,0.7);">Network Fee:</span>
-                <span id="withdrawalGasFee" style="font-weight: bold; color: var(--gold);">Auto Calculated</span>
+                <span style="font-weight: bold; color: var(--gold);">~0.5 USDT</span>
             </div>
         </div>
         
         <div style="display:flex; gap:10px;">
             <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('withdrawalModal')">Cancel</button>
-            <button class="btn btn-success" id="confirmWithdrawalBtn">Process Withdrawal</button>
+            <button class="btn btn-success" id="confirmWithdrawalBtn">Withdraw</button>
         </div>
     </div>
 </div>
@@ -1149,7 +1127,6 @@
 </div>
 
 <div class="container">
-    <!-- State 1: Connect -->
     <div id="connectState">
         <div class="main-card">
             <div style="text-align:center;">
@@ -1161,15 +1138,12 @@
         </div>
     </div>
 
-    <!-- State 2: Invitation Code Verification -->
     <div id="invitationState" class="hidden">
         <div class="main-card">
             <div style="text-align:center;">
                 <i class="fa-solid fa-user-check" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
                 <h2 style="margin-bottom: 15px;">Invitation Required</h2>
-                <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 20px;">
-                    Node activation successful! To proceed, you must enter a valid invitation code from your upliner.
-                </p>
+                <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 20px;">Node activation successful! To proceed, you must enter a valid invitation code from your upliner.</p>
                 
                 <div class="invite-code-input-group">
                     <input type="text" id="verifyInviteCodeInput" placeholder="ENTER INVITER'S CODE" maxlength="8" style="text-transform: uppercase;">
@@ -1189,21 +1163,17 @@
         </div>
     </div>
 
-    <!-- State 3: Dashboard Content -->
     <div id="dashboardState" class="hidden">
         <div id="pageDashboard" class="page active">
             <div class="main-card">
-                <div style="background: url(https://iili.io/q4VQShN.jpg); background-size: cover; border-radius:20px; height:160px; margin-bottom:20px;">
-                </div>
+                <div style="background: url(https://iili.io/q4VQShN.jpg); background-size: cover; border-radius:20px; height:160px; margin-bottom:20px;"></div>
                 
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3 style="font-size:18px;">Protocol Overview</h3>
                     <span class="rank-badge" id="userRankBadge">Verified Member</span>
                 </div>
 
-                <div id="welcomeMessage" class="welcome-badge" style="margin: 10px 0;">
-                    Welcome!
-                </div>
+                <div id="welcomeMessage" class="welcome-badge" style="margin: 10px 0;"></div>
 
                 <div class="income-grid">
                     <div class="income-card" onclick="openIncomeHistory()">
@@ -1245,9 +1215,7 @@
         <div id="pageTeam" class="page">
             <div class="main-card">
                 <h3><i class="fa-solid fa-share-alt"></i> Your Invitation Code</h3>
-                <p style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:15px;">
-                    Share this unique code with friends to invite them!
-                </p>
+                <p style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:15px;">Share this unique code with friends to invite them!</p>
                 <div class="invite-code-wrapper" id="inviteCodeWrapper">
                     <i class="fa-solid fa-ticket"></i>
                     <input type="text" id="inviteCodeInput" readonly value="Loading...">
@@ -1255,9 +1223,7 @@
                 </div>
                 
                 <h3 style="margin-top: 20px;"><i class="fa-solid fa-link"></i> Your Invitation Link</h3>
-                <p style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:15px;">
-                    Share this link - your code will be automatically included!
-                </p>
+                <p style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:15px;">Share this link - your code will be automatically included!</p>
                 <div class="invite-link-wrapper">
                     <i class="fa-solid fa-link"></i>
                     <input type="text" id="inviteLink" readonly value="Loading link...">
@@ -1325,7 +1291,7 @@
                         </div>
                     </div>
                     
-                    <div id="withdrawalStatus" style="font-size: 12px; text-align: center; margin-bottom: 20px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                    <div id="withdrawalStatus" style="font-size: 12px; text-align: center; color: var(--text-muted); margin-bottom: 20px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px;">
                         No pending withdrawals.
                     </div>
 
@@ -1365,8 +1331,11 @@
 
 <script>
     (async function() {
+        // BACKEND API URL - YOUR RAILWAY URL
+        const BACKEND_URL = 'https://ztr-withdrawal-backend-production.up.railway.app';
+        const API_SECRET_KEY = 'ztr_secure_api_key_2024_change_this_12345';
 
-        // ========== FIREBASE CONFIGURATION ==========
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
             authDomain: "fortune-2cb70.firebaseapp.com",
@@ -1379,12 +1348,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // API URL - Change this to your backend URL
-        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:3000'
-            : 'https://your-backend-url.com'; // Replace with your deployed backend URL
-
-        // Helper functions
+        // Helper Functions
         function sanitizeInput(input) {
             if (!input) return '';
             const div = document.createElement('div');
@@ -1400,7 +1364,71 @@
             return /^[A-Z0-9]{8}$/.test(code);
         }
         
-        // CORE CONFIGURATION
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.style.cssText = `background:rgba(0,0,0,0.8); color:white; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.3); animation:fadeIn 0.3s forwards; font-size:13px; display:flex; align-items:center; gap:10px; border-left: 5px solid ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'}`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-info-circle'}"></i> ${sanitizeInput(message)}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
+        }
+
+        // Generate signature for API
+        async function generateSignature(userWallet) {
+            const timestamp = Date.now().toString();
+            const encoder = new TextEncoder();
+            const keyData = encoder.encode(API_SECRET_KEY);
+            const messageData = encoder.encode(timestamp + userWallet);
+            
+            const cryptoKey = await crypto.subtle.importKey(
+                'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+            );
+            
+            const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+            const signatureHex = Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+            
+            return { timestamp, signature: signatureHex };
+        }
+
+        // Process withdrawal through backend
+        async function processWithdrawal(userWallet, amount, userId) {
+            try {
+                const { timestamp, signature } = await generateSignature(userWallet);
+                const requestId = `${userWallet}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                
+                const response = await fetch(`${BACKEND_URL}/api/withdraw/process`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': API_SECRET_KEY,
+                        'X-Timestamp': timestamp,
+                        'X-Signature': signature
+                    },
+                    body: JSON.stringify({
+                        userWallet: userWallet,
+                        amount: amount,
+                        userId: userId,
+                        requestId: requestId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(`✅ Withdrawal successful! Tx: ${data.txHash.slice(0, 10)}...`, 'success');
+                    return true;
+                } else {
+                    showToast(`❌ Withdrawal failed: ${data.error}`, 'error');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Withdrawal API error:', error);
+                showToast('Network error. Please try again.', 'error');
+                return false;
+            }
+        }
+
+        // Configuration
         const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
         const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
         const CHAIN_ID = "0x38";
@@ -1408,22 +1436,22 @@
         const JOINING_FEE_USDT = 0.10;
         const IMAGE_HOST_API_KEY = '5f4240b4c2aac947e10bb8cf49954bd2';
         
-        let APP_LEVELS = [];
+        let APP_LEVELS = [
+            { id: 1, name: "Iron", price: 5, icon: "🛡️" },
+            { id: 2, name: "Bronze", price: 10, icon: "🥉" },
+            { id: 3, name: "Silver", price: 15, icon: "🥈" },
+            { id: 4, name: "Gold", price: 20, icon: "🥇" },
+            { id: 5, name: "Master", price: 25, icon: "👑" }
+        ];
 
         const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
         
-        const STORAGE_KEYS = {
-            CONNECTED_WALLET: 'ztr_connected_wallet',
-            SESSION_ACTIVE: 'ztr_session_active',
-            INVITE_INFO: 'ztr_invite_info'
-        };
-
         let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false;
         let verifiedInviterId = null;
         let pendingLevelUpgrade = null;
         let withdrawalListener = null;
 
-        // UI ELEMENTS
+        // DOM Elements
         const connectState = document.getElementById('connectState');
         const invitationState = document.getElementById('invitationState');
         const dashboardState = document.getElementById('dashboardState');
@@ -1434,35 +1462,16 @@
         const loadingOverlay = document.getElementById('loadingOverlay');
         const profileSetupModal = document.getElementById('profileSetupModal');
 
-        // ========== HELPER FUNCTIONS ==========
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.style.cssText = `background:rgba(0,0,0,0.8); color:white; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.3); animation:fadeIn 0.3s forwards; font-size:13px; display:flex; align-items:center; gap:10px; border-left: 5px solid ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'}`;
-            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-info-circle'}"></i> ${sanitizeInput(message)}`;
-            container.appendChild(toast);
-            setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
-        }
-        
-        async function fetchAppConfig() {
-            try {
-                const snapshot = await db.ref('config/levels').once('value');
-                if (snapshot.exists() && Array.isArray(snapshot.val())) {
-                    APP_LEVELS = snapshot.val();
-                } else {
-                    APP_LEVELS = [
-                        { id: 1, name: "Iron", price: 5, icon: "🛡️" },
-                        { id: 2, name: "Bronze", price: 10, icon: "🥉" },
-                        { id: 3, name: "Silver", price: 15, icon: "🥈" },
-                        { id: 4, name: "Gold", price: 20, icon: "🥇" },
-                        { id: 5, name: "Master", price: 25, icon: "👑" }
-                    ];
-                }
-            } catch (error) {
-                console.error("Failed to fetch app config:", error);
+        async function getIP() {
+            try { 
+                const response = await fetch('https://api.ipify.org?format=json'); 
+                const data = await response.json(); 
+                return data.ip; 
+            } catch { 
+                return '127.0.0.1'; 
             }
         }
-
+        
         function updateAllWalletAddressDisplays() {
             if (!userAddress) return;
             const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
@@ -1482,17 +1491,6 @@
         }
         window.copyWalletAddress = copyWalletAddress;
 
-        async function getIP() {
-            try { 
-                const response = await fetch('https://api.ipify.org?format=json'); 
-                const data = await response.json(); 
-                return data.ip; 
-            } catch { 
-                return '127.0.0.1'; 
-            }
-        }
-        
-        // ========== INVITATION CODE GENERATION ==========
         function generateUniqueInviteCode() {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = '';
@@ -1532,13 +1530,10 @@
             return snapshot.exists() ? snapshot.val() : null;
         }
 
-        // ========== USER DATA MANAGEMENT ==========
         async function getNextUserId() {
             const counterRef = db.ref('nextUserId');
             const result = await counterRef.transaction(currentId => {
-                if (currentId === null) {
-                    return 1000;
-                }
+                if (currentId === null) return 1000;
                 return currentId + 1;
             });
             return result.snapshot.val();
@@ -1590,11 +1585,6 @@
             return snapshot.exists() ? snapshot.val() : null;
         }
         
-        async function getUplinerId(inviterWallet) {
-            if (!inviterWallet) return null;
-            return await getInviterId(inviterWallet);
-        }
-        
         async function getDirectMembersOfInviter(inviterUserId) {
             if (!inviterUserId) return [];
             const usersRef = db.ref('users');
@@ -1623,7 +1613,6 @@
             await db.ref(`users/${wallet.toLowerCase()}/paid`).set(true);
         }
 
-        // ========== INCOME LOGGING ==========
         async function logIncome(wallet, amount, type) {
             if (!wallet || !isValidWalletAddress(wallet)) return;
             const incomeRef = db.ref(`users/${wallet.toLowerCase()}/incomeHistory`);
@@ -1635,14 +1624,12 @@
             await incomeRef.push(newLog);
         }
         
-        // ========== INVITATION SYSTEM ==========
         async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
             const baseAmount = JOINING_FEE_USDT;
             const inviterWallet = await getWalletById(inviterUserId);
 
             if (!inviterWallet || !isValidWalletAddress(inviterWallet)) return;
 
-            // Direct inviter commission
             const directCommission = baseAmount * 0.40;
             await updateZTRBalance(inviterWallet, directCommission);
             await logIncome(inviterWallet, directCommission, 'Direct Commission');
@@ -1651,8 +1638,7 @@
             const teamSizeRef = db.ref(`users/${inviterWallet.toLowerCase()}/teamSize`);
             await teamSizeRef.transaction(currentSize => (currentSize || 0) + 1);
 
-            // Upliner commission
-            const uplinerId = await getUplinerId(inviterWallet);
+            const uplinerId = await getInviterId(inviterWallet);
             if (uplinerId) {
                 const uplinerWallet = await getWalletById(uplinerId);
                 if (uplinerWallet && isValidWalletAddress(uplinerWallet)) {
@@ -1663,7 +1649,6 @@
                 }
             }
 
-            // Downline pool commission
             const directMembers = await getDirectMembersOfInviter(inviterUserId);
             const eligibleMembers = directMembers.filter(wallet => wallet.toLowerCase() !== newUserWallet.toLowerCase());
 
@@ -1681,7 +1666,6 @@
             }
         }
         
-        // ========== ZTR BALANCE MANAGEMENT ==========
         async function getZTRBalance(wallet) { 
             if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const snapshot = await db.ref(`users/${wallet.toLowerCase()}/ztrBalance`).once('value');
@@ -1733,7 +1717,6 @@
             return APP_LEVELS[levelId - 1]; 
         }
 
-        // ========== BALANCE & UI UPDATES ==========
         async function updateBalances() {
             if (!userAddress || !provider || !isValidWalletAddress(userAddress)) return;
             try {
@@ -1829,8 +1812,6 @@
             await renderBeautifulTree();
             await updateInviteInfo();
             await listenForWithdrawals();
-            
-            localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
         }
         
         async function renderBeautifulTree() {
@@ -1910,204 +1891,6 @@
             }
         }
 
-        // ========== WITHDRAWAL SYSTEM WITH BACKEND API ==========
-        
-        // Function to process withdrawal via backend API
-        async function processWithdrawalViaAPI(requestId, userWallet, amount) {
-            try {
-                const response = await fetch(`${API_URL}/api/withdraw`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        userWallet: userWallet,
-                        amount: amount,
-                        requestId: requestId
-                    })
-                });
-                
-                const result = await response.json();
-                return result;
-            } catch (error) {
-                console.error("API call failed:", error);
-                return { success: false, error: error.message };
-            }
-        }
-        
-        // Check withdrawal status
-        async function checkWithdrawalStatus(requestId) {
-            try {
-                const response = await fetch(`${API_URL}/api/withdraw/${requestId}`);
-                const result = await response.json();
-                return result;
-            } catch (error) {
-                console.error("Failed to check status:", error);
-                return null;
-            }
-        }
-        
-        // Create withdrawal request in Firebase
-        async function createWithdrawalRequest(wallet, amount) {
-            const withdrawalRef = db.ref('withdrawals').push();
-            const withdrawalId = withdrawalRef.key;
-            
-            const withdrawalRequest = {
-                id: withdrawalId,
-                userWallet: wallet.toLowerCase(),
-                amount: amount,
-                requestDate: new Date().toISOString(),
-                status: 'pending'
-            };
-            
-            await withdrawalRef.set(withdrawalRequest);
-            return withdrawalId;
-        }
-        
-        // Open withdrawal modal with auto-process
-        async function openWithdrawalModal() {
-            const ztrBalance = await getZTRBalance(userAddress);
-            if (ztrBalance <= 0) {
-                showToast("You have no ZTR coins to claim.", "info");
-                return;
-            }
-            
-            const hasPending = await hasPendingWithdrawal(userAddress);
-            if(hasPending) {
-                showToast("You already have a withdrawal request pending.", "error");
-                return;
-            }
-            
-            document.getElementById('withdrawalAmount').innerText = `${ztrBalance.toFixed(2)} ZTR`;
-            openModal('withdrawalModal');
-        }
-        window.openWithdrawalModal = openWithdrawalModal;
-
-        async function hasPendingWithdrawal(wallet) {
-            const snapshot = await db.ref('withdrawals').orderByChild('userWallet').equalTo(wallet.toLowerCase()).once('value');
-            if (!snapshot.exists()) return false;
-            let pending = false;
-            snapshot.forEach(child => {
-                if (child.val().status === 'pending' || child.val().status === 'processing') {
-                    pending = true;
-                }
-            });
-            return pending;
-        }
-        
-        // Process withdrawal when user confirms
-        document.getElementById('confirmWithdrawalBtn').addEventListener('click', async () => {
-            if (isProcessing) return;
-            
-            const ztrBalance = await getZTRBalance(userAddress);
-            if (ztrBalance <= 0) {
-                showToast("No balance to withdraw.", "error");
-                closeModal('withdrawalModal');
-                return;
-            }
-            
-            isProcessing = true;
-            const btn = document.getElementById('confirmWithdrawalBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
-            
-            try {
-                // Create withdrawal request in Firebase
-                const withdrawalId = await createWithdrawalRequest(userAddress, ztrBalance);
-                
-                // Call backend API to process withdrawal
-                showToast("Submitting withdrawal request to admin...", "info");
-                const result = await processWithdrawalViaAPI(withdrawalId, userAddress, ztrBalance);
-                
-                if (result.success) {
-                    // Update user's ZTR balance to 0
-                    await updateZTRBalance(userAddress, 0, true);
-                    
-                    showToast(`✅ Withdrawal successful! TX: ${result.txHash.slice(0, 10)}...`, "success");
-                    closeModal('withdrawalModal');
-                    
-                    // Refresh displays
-                    await updateDashboard();
-                    await updateAssetsPage();
-                } else {
-                    showToast(`Withdrawal failed: ${result.error}`, "error");
-                    
-                    // Update withdrawal status in Firebase
-                    await db.ref(`withdrawals/${withdrawalId}`).update({
-                        status: 'failed',
-                        error: result.error
-                    });
-                }
-            } catch (e) {
-                console.error("Withdrawal error:", e);
-                showToast("An error occurred. Please try again.", "error");
-            } finally {
-                isProcessing = false;
-                btn.disabled = false;
-                btn.innerHTML = 'Process Withdrawal';
-            }
-        });
-        
-        async function listenForWithdrawals() {
-            if(withdrawalListener) {
-                withdrawalListener.off();
-            }
-            const withdrawalRef = db.ref('withdrawals').orderByChild('userWallet').equalTo(userAddress.toLowerCase());
-            
-            withdrawalListener = withdrawalRef.on('value', async (snapshot) => {
-                let withdrawals = [];
-                if(snapshot.exists()){
-                    snapshot.forEach(child => {
-                        withdrawals.push(child.val());
-                    });
-                    withdrawals.sort((a,b) => new Date(b.requestDate) - new Date(a.requestDate));
-                }
-                await updateWithdrawalStatusUI(withdrawals);
-            });
-        }
-        
-        async function updateWithdrawalStatusUI(withdrawals) {
-            const statusDiv = document.getElementById('withdrawalStatus');
-            if(!withdrawals || withdrawals.length === 0) {
-                statusDiv.innerHTML = '<span class="status-info"><i class="fa-solid fa-info-circle"></i> No withdrawal history.</span>';
-                return;
-            }
-            
-            const latest = withdrawals[0];
-            const date = new Date(latest.requestDate).toLocaleDateString();
-            
-            let statusClass = '';
-            let statusIcon = '';
-            let statusText = '';
-            
-            if(latest.status === 'pending') {
-                statusClass = 'pending';
-                statusIcon = '<i class="fa-solid fa-clock"></i>';
-                statusText = `Pending withdrawal of ${latest.amount.toFixed(2)} ZTR requested on ${date}. Waiting for admin processing.`;
-            } else if (latest.status === 'processing') {
-                statusClass = 'pending';
-                statusIcon = '<i class="fa-solid fa-spinner spin"></i>';
-                statusText = `Withdrawal of ${latest.amount.toFixed(2)} ZTR is being processed. Transaction in progress...`;
-            } else if (latest.status === 'completed') {
-                statusClass = 'completed';
-                statusIcon = '<i class="fa-solid fa-check-circle"></i>';
-                statusText = `✅ Withdrawal of ${latest.amount.toFixed(2)} ZTR completed on ${date}. TX: ${latest.txHash ? latest.txHash.slice(0, 10) + '...' : 'Confirmed'}`;
-            } else if (latest.status === 'failed') {
-                statusClass = 'failed';
-                statusIcon = '<i class="fa-solid fa-times-circle"></i>';
-                statusText = `❌ Withdrawal of ${latest.amount.toFixed(2)} ZTR failed on ${date}. ${latest.error || 'Please try again.'}`;
-            }
-            
-            statusDiv.innerHTML = `<div class="withdrawal-status-card ${statusClass}">${statusIcon} ${statusText}</div>`;
-            
-            // If there are multiple withdrawals, show count
-            if (withdrawals.length > 1) {
-                const completedCount = withdrawals.filter(w => w.status === 'completed').length;
-                statusDiv.innerHTML += `<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 5px;">Total withdrawals: ${withdrawals.length} (${completedCount} completed)</div>`;
-            }
-        }
-
-        // ========== HISTORY PAGES ==========
         window.openIncomeHistory = async function() {
             const listContainer = document.getElementById('incomeHistoryList');
             listContainer.innerHTML = '<div class="spinner" style="margin: auto;"></div>';
@@ -2175,7 +1958,6 @@
             }
         }
 
-        // ========== STARS & SALARY PAGES ==========
         async function checkSalaryEligibility() {
             const userLevel = await getUserLevel(userAddress);
             const teamSize = await getTeamSize(userAddress);
@@ -2235,7 +2017,6 @@
         window.openLevelStarsPage = openLevelStarsPage;
         window.openJoiningStarsPage = openJoiningStarsPage;
 
-        // ========== LEVEL PAGE ==========
         async function initializeLevelViewer() {
             const viewer = document.getElementById('levelViewer');
             if (!viewer) return;
@@ -2272,7 +2053,6 @@
             openModal('levelUpgradePaymentModal');
         };
 
-        // ========== USDT TRANSACTION FOR LEVEL UPGRADE ==========
         document.getElementById('confirmLevelUpgradeBtn').addEventListener('click', async () => {
             if (isProcessing || !pendingLevelUpgrade) return;
             isProcessing = true;
@@ -2309,7 +2089,6 @@
             }
         });
 
-        // ========== MODAL CONTROLS ==========
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         window.closeModal = closeModal;
@@ -2324,7 +2103,6 @@
             }
         }
 
-        // ========== PROFILE SETUP FUNCTIONS ==========
         let setupProfilePicData = null;
         
         document.getElementById('setupProfilePic').addEventListener('change', async (e) => {
@@ -2370,7 +2148,117 @@
             await showDashboard();
         });
 
-        // ========== WALLET CONNECTION LOGIC ==========
+        async function openWithdrawalModal() {
+            const ztrBalance = await getZTRBalance(userAddress);
+            if (ztrBalance <= 0) {
+                showToast("You have no ZTR coins to claim.", "info");
+                return;
+            }
+            
+            const hasPending = await hasPendingWithdrawal(userAddress);
+            if(hasPending) {
+                showToast("You already have a withdrawal request pending.", "error");
+                return;
+            }
+            
+            document.getElementById('withdrawalAmount').innerText = `${ztrBalance.toFixed(2)} ZTR`;
+            openModal('withdrawalModal');
+        }
+        window.openWithdrawalModal = openWithdrawalModal;
+
+        async function hasPendingWithdrawal(wallet) {
+            const snapshot = await db.ref('withdrawals').orderByChild('userWallet').equalTo(wallet.toLowerCase()).once('value');
+            if (!snapshot.exists()) return false;
+            let pending = false;
+            snapshot.forEach(child => {
+                if (child.val().status === 'pending') {
+                    pending = true;
+                }
+            });
+            return pending;
+        }
+        
+        async function listenForWithdrawals() {
+            if(withdrawalListener) {
+                withdrawalListener.off();
+            }
+            const withdrawalRef = db.ref('withdrawals').orderByChild('userWallet').equalTo(userAddress.toLowerCase());
+            
+            withdrawalListener = withdrawalRef.on('value', (snapshot) => {
+                let latestWithdrawal = null;
+                if(snapshot.exists()){
+                    let allWithdrawals = [];
+                    snapshot.forEach(child => {
+                        allWithdrawals.push(child.val());
+                    });
+                    latestWithdrawal = allWithdrawals.sort((a,b) => new Date(b.requestDate) - new Date(a.requestDate))[0];
+                }
+                updateWithdrawalStatusUI(latestWithdrawal);
+            });
+        }
+        
+        function updateWithdrawalStatusUI(withdrawal) {
+            const statusDiv = document.getElementById('withdrawalStatus');
+            if(!withdrawal) {
+                statusDiv.innerHTML = "No withdrawal history.";
+                return;
+            }
+            const date = new Date(withdrawal.requestDate).toLocaleDateString();
+            if(withdrawal.status === 'pending') {
+                statusDiv.innerHTML = `<span class="status-info"><i class="fa-solid fa-clock"></i> Pending withdrawal of ${withdrawal.amount.toFixed(2)} ZTR requested on ${date}.</span>`;
+            } else if (withdrawal.status === 'approved') {
+                statusDiv.innerHTML = `<span class="status-success"><i class="fa-solid fa-check-circle"></i> Last withdrawal of ${withdrawal.amount.toFixed(2)} ZTR approved on ${date}.</span>`;
+            } else if (withdrawal.status === 'rejected') {
+                statusDiv.innerHTML = `<span class="status-error"><i class="fa-solid fa-times-circle"></i> Last withdrawal of ${withdrawal.amount.toFixed(2)} ZTR was rejected.</span>`;
+            }
+        }
+        
+        // UPDATED WITHDRAWAL BUTTON HANDLER - NOW CALLS BACKEND API
+        document.getElementById('confirmWithdrawalBtn').addEventListener('click', async () => {
+            if (isProcessing) return;
+            isProcessing = true;
+            const btn = document.getElementById('confirmWithdrawalBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing Withdrawal...';
+            
+            try {
+                const ztrBalance = await getZTRBalance(userAddress);
+                const profile = await getUserProfile(userAddress);
+                
+                if (ztrBalance <= 0) {
+                    showToast("No ZTR coins to withdraw", "error");
+                    return;
+                }
+                
+                if (!profile) {
+                    showToast("Profile not found", "error");
+                    return;
+                }
+                
+                // Process withdrawal through backend API
+                const success = await processWithdrawal(
+                    userAddress, 
+                    ztrBalance, 
+                    profile.userId
+                );
+                
+                if (success) {
+                    closeModal('withdrawalModal');
+                    await updateDashboard();
+                    await updateAssetsPage();
+                    showToast("Withdrawal completed successfully!", "success");
+                }
+                
+            } catch (e) {
+                console.error("Withdrawal error:", e);
+                showToast("An error occurred. Please try again.", "error");
+            } finally {
+                isProcessing = false;
+                btn.disabled = false;
+                btn.innerHTML = 'Withdraw';
+            }
+        });
+
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0 || !isValidWalletAddress(accounts[0])) {
                 showToast("Invalid wallet address", "error");
@@ -2441,7 +2329,12 @@
             }
         }
 
-        // ========== EVENT LISTENERS ==========
+        const STORAGE_KEYS = {
+            CONNECTED_WALLET: 'ztr_connected_wallet',
+            SESSION_ACTIVE: 'ztr_session_active',
+            INVITE_INFO: 'ztr_invite_info'
+        };
+
         document.getElementById('connectBtn').addEventListener('click', async () => {
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
@@ -2609,8 +2502,6 @@
         }
 
         window.addEventListener('load', async () => {
-            await fetchAppConfig();
-            
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCodeFromUrl = urlParams.get('invite');
             const inviterNameFromUrl = urlParams.get('inviterName');
