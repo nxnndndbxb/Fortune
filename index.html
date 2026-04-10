@@ -1049,17 +1049,21 @@
     </div>
 </div>
 
-<!-- Withdrawal Modal -->
+<!-- Withdrawal Modal - No Limits -->
 <div class="modal-overlay" id="withdrawalModal">
     <div class="modal-content">
         <i class="fa-solid fa-paper-plane" style="font-size: 50px; color: var(--primary);"></i>
         <h2 style="margin: 15px 0;">Claim ZTR Coins</h2>
-        <p style="color: rgba(255,255,255,0.7);">Your ZTR balance will be sent to your wallet automatically.</p>
+        <p style="color: rgba(255,255,255,0.7);">Your ZTR balance will be sent to your wallet. Gas fee is standard network fee.</p>
         
         <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; margin: 20px 0; text-align: left; font-size: 14px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                 <span style="color: rgba(255,255,255,0.7);">Amount:</span>
                 <span id="withdrawalAmount" style="font-weight: bold; color: var(--primary);">0.00 ZTR</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span style="color: rgba(255,255,255,0.7);">Gas Fee:</span>
+                <span style="font-weight: bold; color: var(--gold);">Standard BSC Network Fee</span>
             </div>
         </div>
         
@@ -1329,7 +1333,7 @@
 <script>
 (async function() {
 
-    // ========== BACKEND API URL (UPDATE WITH YOUR RAILWAY URL) ==========
+    // ========== BACKEND API URL ==========
     const BACKEND_URL = 'https://ztr-backend-production.up.railway.app';
     
     // ========== FIREBASE CONFIGURATION ==========
@@ -1345,7 +1349,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // SECURITY: Validate and sanitize inputs
     function sanitizeInput(input) {
         if (!input) return '';
         const div = document.createElement('div');
@@ -1361,7 +1364,6 @@
         return /^[A-Z0-9]{8}$/.test(code);
     }
     
-    // CORE CONFIGURATION
     const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
     const CHAIN_ID = "0x38";
@@ -1384,7 +1386,6 @@
     let pendingLevelUpgrade = null;
     let withdrawalListener = null;
 
-    // UI ELEMENTS
     const connectState = document.getElementById('connectState');
     const invitationState = document.getElementById('invitationState');
     const dashboardState = document.getElementById('dashboardState');
@@ -1464,22 +1465,15 @@
     async function getUniqueInviteCode(wallet) {
         if (!wallet || !isValidWalletAddress(wallet)) return null;
         const walletLower = wallet.toLowerCase();
-        
         const snapshot = await db.ref(`users/${walletLower}/inviteCode`).once('value');
-        if (snapshot.exists()) {
-            return snapshot.val();
-        }
-
+        if (snapshot.exists()) return snapshot.val();
         let newCode;
         let codeExists = true;
         while(codeExists) {
             newCode = generateUniqueInviteCode();
             const existingCodeSnap = await db.ref('inviteCodeMap').orderByValue().equalTo(newCode).once('value');
-            if(!existingCodeSnap.exists()) {
-                codeExists = false;
-            }
+            if(!existingCodeSnap.exists()) codeExists = false;
         }
-        
         await db.ref(`users/${walletLower}/inviteCode`).set(newCode);
         await db.ref(`inviteCodeMap/${newCode}`).set(walletLower);
         return newCode;
@@ -1515,10 +1509,8 @@
     async function createUserProfile(wallet, inviterId, username, profilePicUrl) {
         if (!wallet || !isValidWalletAddress(wallet) || !inviterId) return null;
         const walletLower = wallet.toLowerCase();
-        
         const userExists = await getUserProfile(walletLower);
         if(userExists) return userExists;
-
         const userId = await getNextUserId();
         const newProfile = { 
             name: username ? sanitizeInput(username) : `User ${userId}`, 
@@ -1527,16 +1519,13 @@
             userId: userId,
             profilePicUrl: profilePicUrl ? sanitizeInput(profilePicUrl) : null
         };
-        
         const updates = {};
         updates[`/users/${walletLower}/profile`] = newProfile;
         updates[`/users/${walletLower}/inviterId`] = parseInt(inviterId);
         updates[`/users/${walletLower}/paid`] = true;
         updates[`/userIdMap/${userId}`] = walletLower;
-        
         await db.ref().update(updates);
         await getUniqueInviteCode(walletLower);
-        
         return newProfile;
     }
     
@@ -1557,9 +1546,7 @@
         const snapshot = await usersRef.orderByChild('inviterId').equalTo(parseInt(inviterUserId)).once('value');
         const members = [];
         if(snapshot.exists()) {
-            snapshot.forEach(childSnapshot => {
-                members.push(childSnapshot.key);
-            });
+            snapshot.forEach(childSnapshot => { members.push(childSnapshot.key); });
         }
         return members;
     }
@@ -1582,23 +1569,19 @@
     async function logIncome(wallet, amount, type) {
         if (!wallet || !isValidWalletAddress(wallet)) return;
         const incomeRef = db.ref(`users/${wallet.toLowerCase()}/incomeHistory`);
-        const newLog = { amount: amount, type: type, date: new Date().toISOString() };
-        await incomeRef.push(newLog);
+        await incomeRef.push({ amount: amount, type: type, date: new Date().toISOString() });
     }
     
     async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
         const baseAmount = JOINING_FEE_USDT;
         const inviterWallet = await getWalletById(inviterUserId);
         if (!inviterWallet || !isValidWalletAddress(inviterWallet)) return;
-
         const directCommission = baseAmount * 0.40;
         await updateZTRBalance(inviterWallet, directCommission);
         await logIncome(inviterWallet, directCommission, 'Direct Commission');
         showToast(`Inviter ID:ZTR-${inviterUserId} received ${directCommission.toFixed(2)} ZTR!`, 'success');
-        
         const teamSizeRef = db.ref(`users/${inviterWallet.toLowerCase()}/teamSize`);
         await teamSizeRef.transaction(currentSize => (currentSize || 0) + 1);
-
         const uplinerId = await getUplinerId(inviterWallet);
         if (uplinerId) {
             const uplinerWallet = await getWalletById(uplinerId);
@@ -1609,7 +1592,6 @@
                 showToast(`Upliner ID:ZTR-${uplinerId} received ${uplinerCommission.toFixed(2)} ZTR!`, 'success');
             }
         }
-
         const directMembers = await getDirectMembersOfInviter(inviterUserId);
         const eligibleMembers = directMembers.filter(wallet => wallet.toLowerCase() !== newUserWallet.toLowerCase());
         if (eligibleMembers.length > 0) {
@@ -1691,16 +1673,13 @@
         if (!userAddress) return;
         const profile = await getUserProfile(userAddress);
         if (!profile) return;
-        
         const inviteCode = await getUniqueInviteCode(userAddress);
         document.getElementById('userId').innerText = `ID: ZTR-${profile.userId}`;
         document.getElementById('profileName').innerText = profile.name;
         document.getElementById('joinDate').innerText = profile.joinDate;
         document.getElementById('profileInviteCode').innerHTML = `<i class="fa-solid fa-ticket"></i> Invite Code: ${inviteCode}`;
-
         const inviterId = await getInviterId(userAddress);
         if(inviterId) document.getElementById('profileInviterId').innerText = `ID: ZTR-${inviterId}`;
-        
         const avatarIcon = document.getElementById('avatarIcon');
         const avatarImg = document.getElementById('profileAvatarImg');
         if (profile.profilePicUrl) {
@@ -1712,10 +1691,8 @@
             avatarIcon.classList.remove('hidden');
             avatarImg.classList.add('hidden');
         }
-        
         const ztrBalance = await getZTRBalance(userAddress);
         const levelInfo = await getCurrentLevelInfo(userAddress);
-        
         document.getElementById('statBNB').innerText = parseFloat(rawBnbBalance).toFixed(4);
         document.getElementById('statUSDT').innerText = parseFloat(rawUsdtBalance).toFixed(2);
         document.getElementById('statZTR').innerText = ztrBalance.toFixed(2);
@@ -1727,9 +1704,7 @@
         if (!userAddress) return;
         const profile = await getUserProfile(userAddress);
         if (!profile) return;
-        
         document.getElementById('welcomeMessage').innerHTML = `Welcome back, <strong>${sanitizeInput(profile.name)}</strong>! 🤗`;
-
         const ztr = await getZTRBalance(userAddress);
         const level = await getCurrentLevelInfo(userAddress);
         const team = await getTeamSize(userAddress);
@@ -1747,7 +1722,6 @@
         if (!userAddress) return;
         const inviteCode = await getUniqueInviteCode(userAddress);
         const profile = await getUserProfile(userAddress);
-        
         if (inviteCode && profile) {
             const baseUrl = window.location.origin + window.location.pathname;
             const inviteLink = `${baseUrl}?invite=${inviteCode}&inviterName=${encodeURIComponent(profile.name)}&inviterId=${profile.userId}`;
@@ -1761,13 +1735,11 @@
         invitationState.classList.add('hidden');
         dashboardState.classList.remove('hidden');
         bottomNav.style.display = 'flex';
-        
         await updateDashboard();
         await updateAssetsPage();
         await renderBeautifulTree();
         await updateInviteInfo();
         await listenForWithdrawals();
-        
         localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
     }
     
@@ -1775,36 +1747,23 @@
         if (!userAddress) return;
         const currentUserProfile = await getUserProfile(userAddress);
         if (!currentUserProfile) return;
-
         const teamSize = await getTeamSize(userAddress);
         document.getElementById('teamPageTotalCount').innerText = teamSize;
         const treeContainer = document.getElementById('networkTreeContainer');
-        
         const getChildrenProfiles = async (userId) => {
             const childrenWallets = await getDirectMembersOfInviter(userId);
             const childrenProfiles = await Promise.all(childrenWallets.map(wallet => getUserProfile(wallet)));
             return childrenProfiles.filter(p => p !== null);
         };
-
         const getUserLevelName = async (wallet) => {
             const levelId = await getUserLevel(wallet);
             if (levelId === 0) return "Starter";
             return APP_LEVELS[levelId - 1]?.name || "Starter";
         };
-
         const buildNodeHTML = (profile, levelName, isCurrentUser = false, level = 0) => {
             const avatarHtml = profile.profilePicUrl ? `<img src="${profile.profilePicUrl}" alt="${profile.name}">` : `<i class="fa-solid fa-user-astronaut"></i>`;
-            return `
-                <div class="tree-node-card ${isCurrentUser ? 'is-user' : ''}">
-                    <div class="tree-node-avatar">${avatarHtml}</div>
-                    <div class="tree-node-name">${sanitizeInput(profile.name)}</div>
-                    <div class="tree-node-id">ID: ${profile.userId}</div>
-                    <div class="tree-node-level"><i class="fa-solid fa-crown" style="font-size: 8px;"></i> ${levelName}</div>
-                    ${level > 0 ? `<div class="tree-node-level" style="background: rgba(0,242,255,0.2);"><i class="fa-solid fa-level-down-alt"></i> Level ${level}</div>` : ''}
-                </div>
-            `;
+            return `<div class="tree-node-card ${isCurrentUser ? 'is-user' : ''}"><div class="tree-node-avatar">${avatarHtml}</div><div class="tree-node-name">${sanitizeInput(profile.name)}</div><div class="tree-node-id">ID: ${profile.userId}</div><div class="tree-node-level"><i class="fa-solid fa-crown" style="font-size: 8px;"></i> ${levelName}</div>${level > 0 ? `<div class="tree-node-level" style="background: rgba(0,242,255,0.2);"><i class="fa-solid fa-level-down-alt"></i> Level ${level}</div>` : ''}</div>`;
         };
-
         const buildTree = async (userId, level = 1) => {
             const children = await getChildrenProfiles(userId);
             if (children.length === 0) return '';
@@ -1816,10 +1775,8 @@
             }
             return `<ul>${childrenHTML}</ul>`;
         };
-
         const currentUserLevelName = await getUserLevelName(userAddress);
         let treeHTML = `<div class="tree"><ul><li>${buildNodeHTML(currentUserProfile, currentUserLevelName, true, 0)}${await buildTree(currentUserProfile.userId, 1)}</li></ul></div>`;
-        
         if (teamSize === 0) {
             treeContainer.innerHTML = `<div style="text-align:center; padding: 40px;"><i class="fa-solid fa-tree" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i><p style="color: rgba(255,255,255,0.7);">Your network is empty.</p><p style="color: rgba(255,255,255,0.7); font-size: 12px;">Share your invitation code to start building your tree!</p></div>`;
         } else {
@@ -2040,7 +1997,7 @@
         await showDashboard();
     });
 
-    // ========== UPDATED WITHDRAWAL SYSTEM WITH BACKEND API ==========
+    // ========== WITHDRAWAL SYSTEM - NO LIMITS ==========
     async function openWithdrawalModal() {
         const ztrBalance = await getZTRBalance(userAddress);
         if (ztrBalance <= 0) {
@@ -2065,9 +2022,7 @@
     }
     
     async function listenForWithdrawals() {
-        if(withdrawalListener) {
-            withdrawalListener.off();
-        }
+        if(withdrawalListener) withdrawalListener.off();
         const withdrawalRef = db.ref('withdrawals').orderByChild('userWallet').equalTo(userAddress.toLowerCase());
         withdrawalListener = withdrawalRef.on('value', (snapshot) => {
             let latestWithdrawal = null;
@@ -2087,7 +2042,7 @@
             return;
         }
         const date = new Date(withdrawal.requestDate).toLocaleDateString();
-        if(withdrawal.status === 'pending') {
+        if(withdrawal.status === 'processing' || withdrawal.status === 'pending') {
             statusDiv.innerHTML = `<span class="status-info"><i class="fa-solid fa-clock"></i> Processing withdrawal of ${withdrawal.amount.toFixed(2)} ZTR... (${date})</span>`;
         } else if (withdrawal.status === 'completed') {
             statusDiv.innerHTML = `<span class="status-success"><i class="fa-solid fa-check-circle"></i> Withdrawal of ${withdrawal.amount.toFixed(2)} ZTR completed! Tx: <a href="https://bscscan.com/tx/${withdrawal.txHash}" target="_blank" style="color:var(--primary);">View</a></span>`;
@@ -2096,7 +2051,7 @@
         }
     }
     
-    // Process withdrawal via backend API (AUTOMATIC)
+    // Process withdrawal - NO LIMITS, backend handles everything
     document.getElementById('confirmWithdrawalBtn').addEventListener('click', async () => {
         if (isProcessing) return;
         isProcessing = true;
@@ -2119,7 +2074,6 @@
                 return;
             }
             
-            // Create withdrawal request record
             const withdrawalRequest = {
                 userWallet: userAddress.toLowerCase(),
                 userId: profile.userId,
@@ -2130,9 +2084,8 @@
             const withdrawalRef = await db.ref('withdrawals').push(withdrawalRequest);
             const withdrawalId = withdrawalRef.key;
             
-            showToast("Processing withdrawal via secure backend...", "info");
+            showToast("Processing withdrawal...", "info");
             
-            // Call backend API to process withdrawal automatically
             const response = await fetch(`${BACKEND_URL}/api/withdraw`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -2146,20 +2099,15 @@
             const result = await response.json();
             
             if (result.success) {
-                // Update withdrawal status to completed
                 await db.ref(`withdrawals/${withdrawalId}`).update({
                     status: 'completed',
                     txHash: result.txHash,
                     completedDate: new Date().toISOString()
                 });
-                
-                // Reset user's ZTR balance after successful withdrawal
                 await updateZTRBalance(userAddress, 0, true);
-                
                 await updateDashboard();
                 await updateAssetsPage();
-                
-                showToast(`✅ Withdrawal successful! ${ztrBalance.toFixed(2)} USDT sent to your wallet. Tx: ${result.txHash.slice(0, 10)}...`, "success");
+                showToast(`✅ Withdrawal successful! ${ztrBalance.toFixed(2)} USDT sent to your wallet.`, "success");
                 closeModal('withdrawalModal');
             } else {
                 await db.ref(`withdrawals/${withdrawalId}`).update({
@@ -2185,26 +2133,20 @@
             return false;
         }
         userAddress = accounts[0];
-        
         localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, userAddress);
         localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
-        
         provider = new ethers.BrowserProvider(window.ethereum);
         signer = await provider.getSigner();
-        
         const ip = await getIP();
         document.getElementById('ipDisplay').innerText = `IP: ${sanitizeInput(ip)}`;
         updateAllWalletAddressDisplays();
-        
         const network = await provider.getNetwork();
         if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
             if (!isAutoReconnect) showToast("Please switch to BSC network.", "info");
             try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {}
         }
-        
         await getUSDTDecimals();
         await updateBalances();
-        
         if (await isProfileComplete(userAddress)) {
             await showDashboard();
         } else if (await isPaidUser(userAddress)) {
