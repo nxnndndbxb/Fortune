@@ -1,3 +1,10 @@
+Of course. I have updated the code to incorporate all the requested changes. This includes moving the "Invited By" information to the Vault, creating a welcome message on the home page, making the node/level plans configurable by the admin via Firebase, updating the salary system logic, and implementing a complete ZTR coin withdrawal system with admin approval.
+
+Here is the fully edited and complete code.
+
+--- START OF FILE text/plain ---
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -401,6 +408,27 @@
             border-radius: 20px;
             padding: 15px 10px;
             text-align: center;
+            position: relative;
+        }
+        
+        .claim-btn {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 5px 15px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+        .claim-btn:hover {
+            transform: translateX(-50%) scale(1.1);
+            box-shadow: 0 0 15px var(--primary-glow);
         }
 
         .invite-link-wrapper, .invite-code-wrapper {
@@ -806,7 +834,7 @@
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         
-        .invite-badge {
+        .welcome-badge {
             background: rgba(0, 242, 255, 0.2);
             border: 1px solid var(--primary);
             border-radius: 50px;
@@ -971,13 +999,12 @@
         <div style="width:20px;"></div>
     </div>
     <div class="stars-page-content">
-        <p class="stars-page-subtitle" style="color: rgba(255,255,255,0.7);">Each level you upgrade fills a star. Fill all stars to unlock a permanent salary.</p>
+        <p class="stars-page-subtitle" style="color: rgba(255,255,255,0.7);">Achieve all level stars to become eligible for weekly salary.</p>
         <div class="large-stars-container" id="levelStarsContainer">
         </div>
-        <div class="salary-system-box hidden" id="levelSalarySystem" style="background: rgba(0,0,0,0.5); border-radius: 20px; padding: 20px;">
-            <h3><i class="fa-solid fa-crown" style="color:var(--gold);"></i> Level Mastery Salary Unlocked!</h3>
-            <p style="color: rgba(255,255,255,0.7);">You have achieved the highest rank. As a reward, you will receive a weekly salary based on your total level investment.</p>
-            <div class="salary-amount" id="levelSalaryAmount" style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 12px;"></div>
+        <div class="salary-system-box hidden" id="salaryEligibilitySystem" style="background: rgba(0,0,0,0.5); border-radius: 20px; padding: 20px;">
+            <h3><i class="fa-solid fa-crown" style="color:var(--gold);"></i> Weekly Salary Unlocked!</h3>
+            <p style="color: rgba(255,255,255,0.7);">Congratulations! You have achieved all Level Stars and invited 10+ members. You are now eligible to receive a weekly salary, distributed by the admin.</p>
         </div>
     </div>
 </div>
@@ -989,13 +1016,12 @@
         <div style="width:20px;"></div>
     </div>
     <div class="stars-page-content">
-        <p class="stars-page-subtitle" style="color: rgba(255,255,255,0.7);">Each new member you invite fills a star. Fill all 10 stars to unlock a commission bonus.</p>
+        <p class="stars-page-subtitle" style="color: rgba(255,255,255,0.7);">Invite 10 new members to become eligible for weekly salary.</p>
         <div class="large-stars-container" id="joiningStarsContainer">
         </div>
-        <div class="salary-system-box hidden" id="joiningSalarySystem" style="background: rgba(0,0,0,0.5); border-radius: 20px; padding: 20px;">
+         <div class="salary-system-box hidden" id="joiningBonusSystem" style="background: rgba(0,0,0,0.5); border-radius: 20px; padding: 20px;">
             <h3><i class="fa-solid fa-people-group" style="color:var(--primary);"></i> Network Leader Bonus Unlocked!</h3>
-            <p style="color: rgba(255,255,255,0.7);">You have successfully invited 10 members. You will now receive a permanent 10% bonus on all your future network commissions.</p>
-            <div class="salary-amount" id="joiningSalaryAmount" style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 12px;">+10% Network Commission</div>
+            <p style="color: rgba(255,255,255,0.7);">You have successfully invited 10 members and are now eligible for weekly salary if you have also achieved all level stars.</p>
         </div>
     </div>
 </div>
@@ -1034,6 +1060,32 @@
         </div>
     </div>
 </div>
+
+<!-- Withdrawal Modal -->
+<div class="modal-overlay" id="withdrawalModal">
+    <div class="modal-content">
+        <i class="fa-solid fa-paper-plane" style="font-size: 50px; color: var(--primary);"></i>
+        <h2 style="margin: 15px 0;">Claim ZTR Coins</h2>
+        <p style="color: rgba(255,255,255,0.7);">Your ZTR balance will be sent to your wallet after admin approval.</p>
+        
+        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; margin: 20px 0; text-align: left; font-size: 14px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: rgba(255,255,255,0.7);">Amount:</span>
+                <span id="withdrawalAmount" style="font-weight: bold; color: var(--primary);">0.00 ZTR</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span style="color: rgba(255,255,255,0.7);">Network Fee:</span>
+                <span style="font-weight: bold; color: var(--gold);">~0.5 USDT</span>
+            </div>
+        </div>
+        
+        <div style="display:flex; gap:10px;">
+            <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('withdrawalModal')">Cancel</button>
+            <button class="btn btn-success" id="confirmWithdrawalBtn">Withdraw</button>
+        </div>
+    </div>
+</div>
+
 
 <!-- Level Upgrade Modal -->
 <div class="modal-overlay" id="levelUpgradePaymentModal">
@@ -1145,8 +1197,8 @@
                     <span class="rank-badge" id="userRankBadge">Verified Member</span>
                 </div>
 
-                <div id="inviterDisplayOnHome" class="invite-badge" style="margin: 10px 0;">
-                    <i class="fa-solid fa-user-check"></i> Invited By: <span id="homeInviterId">None</span>
+                <div id="welcomeMessage" class="welcome-badge" style="margin: 10px 0;">
+                    Welcome!
                 </div>
 
                 <div class="income-grid">
@@ -1163,7 +1215,7 @@
                     <div class="income-card" onclick="openSalaryHistory()">
                         <p style="font-size:11px; color:rgba(255,255,255,0.7);">Weekly Salary</p>
                         <h3 id="salleryIncome" style="color:var(--gold);">0.00 ZTR</h3>
-                        <small>From Stars</small>
+                        <small>From Admin</small>
                     </div>
                      <div class="income-card" style="cursor:default;">
                         <p style="font-size:11px; color:rgba(255,255,255,0.7);">Current Node</p>
@@ -1265,13 +1317,22 @@
                             <i class="fa-solid fa-coins" style="color:var(--primary);"></i>
                             <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statZTR">0.00</div>
                             <div style="font-size:9px; color:rgba(255,255,255,0.7);">ZTR</div>
+                            <button class="claim-btn" onclick="openWithdrawalModal()">Claim</button>
                         </div>
+                    </div>
+                    
+                    <div id="withdrawalStatus" style="font-size: 12px; text-align: center; color: var(--text-muted); margin-bottom: 20px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                        No pending withdrawals.
                     </div>
 
                     <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
                         <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
                             <span style="color:rgba(255,255,255,0.7);"><i class="fa-solid fa-calendar"></i> Deployment</span>
                             <span id="joinDate">--/--/--</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
+                            <span style="color:rgba(255,255,255,0.7);"><i class="fa-solid fa-user-check"></i> Invited By</span>
+                            <span id="profileInviterId">None</span>
                         </div>
                         <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
                             <span style="color:rgba(255,255,255,0.7);"><i class="fa-solid fa-chart-area"></i> Total Yield</span>
@@ -1299,7 +1360,7 @@
 </div>
 
 <script>
-    (function() {
+    (async function() {
 
         // ========== FIREBASE CONFIGURATION ==========
         const firebaseConfig = {
@@ -1338,19 +1399,8 @@
         const JOINING_FEE_USDT = 0.10;
         const IMAGE_HOST_API_KEY = '5f4240b4c2aac947e10bb8cf49954bd2';
         
-        const LEVELS = [
-            { id: 1, name: "Iron", price: 5, icon: "🛡️" },
-            { id: 2, name: "Bronze", price: 10, icon: "🥉" },
-            { id: 3, name: "Silver", price: 15, icon: "🥈" },
-            { id: 4, name: "Gold", price: 20, icon: "🥇" },
-            { id: 5, name: "Platinum", price: 25, icon: "💎" },
-            { id: 6, name: "Emerald", price: 30, icon: "❇️" },
-            { id: 7, name: "Sapphire", price: 35, icon: "💠" },
-            { id: 8, name: "Ruby", price: 40, icon: "❤️" },
-            { id: 9, name: "Diamond", price: 45, icon: "💍" },
-            { id: 10, name: "Master", price: 50, icon: "👑" }
-        ];
-        
+        let APP_LEVELS = []; // Will be fetched from Firebase
+
         const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
         
         const STORAGE_KEYS = {
@@ -1362,6 +1412,7 @@
         let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false;
         let verifiedInviterId = null;
         let pendingLevelUpgrade = null;
+        let withdrawalListener = null;
 
         // UI ELEMENTS
         const connectState = document.getElementById('connectState');
@@ -1384,6 +1435,28 @@
             setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
         }
         
+        async function fetchAppConfig() {
+            try {
+                const snapshot = await db.ref('config/levels').once('value');
+                if (snapshot.exists() && Array.isArray(snapshot.val())) {
+                    APP_LEVELS = snapshot.val();
+                } else {
+                    // Fallback if config is missing in Firebase
+                    APP_LEVELS = [
+                        { id: 1, name: "Iron", price: 5, icon: "🛡️" },
+                        { id: 2, name: "Bronze", price: 10, icon: "🥉" },
+                        { id: 3, name: "Silver", price: 15, icon: "🥈" },
+                        { id: 4, name: "Gold", price: 20, icon: "🥇" },
+                        { id: 5, name: "Master", price: 25, icon: "👑" }
+                    ];
+                    console.warn("Using fallback level configuration.");
+                }
+            } catch (error) {
+                console.error("Failed to fetch app config:", error);
+                showToast("Could not load app configuration.", "error");
+            }
+        }
+
         function updateAllWalletAddressDisplays() {
             if (!userAddress) return;
             const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
@@ -1609,10 +1682,14 @@
             return snapshot.exists() ? snapshot.val() : 0;
         }
         
-        async function updateZTRBalance(wallet, amount) { 
+        async function updateZTRBalance(wallet, amount, isWithdrawal = false) { 
             if (!wallet || !isValidWalletAddress(wallet)) return;
             const balanceRef = db.ref(`users/${wallet.toLowerCase()}/ztrBalance`);
-            await balanceRef.transaction(currentBalance => (currentBalance || 0) + amount);
+            if (isWithdrawal) {
+                await balanceRef.set(0);
+            } else {
+                await balanceRef.transaction(currentBalance => (currentBalance || 0) + amount);
+            }
         }
         
         async function getUserLevel(wallet) { 
@@ -1634,14 +1711,20 @@
         
         async function getSalleryEarnings(wallet) {
              if (!wallet || !isValidWalletAddress(wallet)) return 0;
-            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/salleryEarnings`).once('value');
-            return snapshot.exists() ? snapshot.val() : 0;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/salaryHistory`).once('value');
+            let totalSalary = 0;
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    totalSalary += child.val().amount;
+                });
+            }
+            return totalSalary;
         }
         
         async function getCurrentLevelInfo(wallet) { 
             const levelId = await getUserLevel(wallet); 
             if (levelId === 0) return { name: "Starter", price: 0, icon: "🌱" }; 
-            return LEVELS[levelId - 1]; 
+            return APP_LEVELS[levelId - 1]; 
         }
 
         // ========== BALANCE & UI UPDATES ==========
@@ -1661,11 +1744,17 @@
             if (!userAddress) return;
             const profile = await getUserProfile(userAddress);
             if (!profile) return;
+            
             const inviteCode = await getUniqueInviteCode(userAddress);
             document.getElementById('userId').innerText = `ID: ZTR-${profile.userId}`;
             document.getElementById('profileName').innerText = profile.name;
             document.getElementById('joinDate').innerText = profile.joinDate;
             document.getElementById('profileInviteCode').innerHTML = `<i class="fa-solid fa-ticket"></i> Invite Code: ${inviteCode}`;
+
+            const inviterId = await getInviterId(userAddress);
+            if(inviterId) {
+                document.getElementById('profileInviterId').innerText = `ID: ZTR-${inviterId}`;
+            }
             
             const avatarIcon = document.getElementById('avatarIcon');
             const avatarImg = document.getElementById('profileAvatarImg');
@@ -1691,6 +1780,11 @@
 
         async function updateDashboard() {
             if (!userAddress) return;
+            const profile = await getUserProfile(userAddress);
+            if (!profile) return;
+            
+            document.getElementById('welcomeMessage').innerHTML = `Welcome back, <strong>${sanitizeInput(profile.name)}</strong>! 🤗`;
+
             const ztr = await getZTRBalance(userAddress);
             const level = await getCurrentLevelInfo(userAddress);
             const team = await getTeamSize(userAddress);
@@ -1702,15 +1796,6 @@
             document.getElementById('salleryIncome').innerText = `${salary.toFixed(2)} ZTR`;
             document.getElementById('levelIncome').innerText = level.name;
             document.getElementById('userRankBadge').innerText = level.name;
-            
-            const inviterId = await getInviterId(userAddress);
-            const homeInviterSpan = document.getElementById('homeInviterId');
-            if (inviterId) {
-                homeInviterSpan.innerText = `ID: ZTR-${inviterId}`;
-                document.getElementById('inviterDisplayOnHome').classList.remove('hidden');
-            } else {
-                homeInviterSpan.innerText = 'None';
-            }
         }
         
         async function updateInviteInfo() {
@@ -1737,6 +1822,7 @@
             await updateAssetsPage();
             await renderBeautifulTree();
             await updateInviteInfo();
+            await listenForWithdrawals();
             
             localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
         }
@@ -1761,7 +1847,7 @@
             const getUserLevelName = async (wallet) => {
                 const levelId = await getUserLevel(wallet);
                 if (levelId === 0) return "Starter";
-                return LEVELS[levelId - 1]?.name || "Starter";
+                return APP_LEVELS[levelId - 1]?.name || "Starter";
             };
 
             const buildNodeHTML = (profile, levelName, isCurrentUser = false, level = 0) => {
@@ -1855,12 +1941,46 @@
 
         window.openSalaryHistory = async function() {
             const listContainer = document.getElementById('salaryHistoryList');
-            // This is a placeholder as salary distribution logic is not implemented.
-            listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No salary payments have been recorded yet.</p>';
+            listContainer.innerHTML = '<div class="spinner" style="margin: auto;"></div>';
             openModal('salaryHistoryModal');
+            
+            const salaryRef = db.ref(`users/${userAddress.toLowerCase()}/salaryHistory`);
+            const snapshot = await salaryRef.orderByChild('date').once('value');
+            if (snapshot.exists()) {
+                listContainer.innerHTML = '';
+                 const historyData = [];
+                snapshot.forEach(child => {
+                    historyData.push(child.val());
+                });
+
+                historyData.reverse().forEach(item => {
+                    const date = new Date(item.date);
+                    const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                    const itemHtml = `
+                        <div class="history-item">
+                            <div class="history-item-details">
+                                <strong>Weekly Salary</strong>
+                                <div class="date">${formattedDate}</div>
+                            </div>
+                            <div class="history-item-amount" style="color: var(--gold)">+${item.amount.toFixed(2)} ZTR</div>
+                        </div>
+                    `;
+                    listContainer.innerHTML += itemHtml;
+                });
+            } else {
+                listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No salary payments have been recorded yet.</p>';
+            }
         }
 
-        // ========== STARS PAGES ==========
+        // ========== STARS & SALARY PAGES ==========
+        async function checkSalaryEligibility() {
+            const userLevel = await getUserLevel(userAddress);
+            const teamSize = await getTeamSize(userAddress);
+            const maxLevel = APP_LEVELS.length;
+            const requiredTeamSize = 10;
+            return (userLevel >= maxLevel && teamSize >= requiredTeamSize);
+        }
+
         function generateLargeStarsHTML(count, filledCount) {
             let starsHtml = '';
             for (let i = 0; i < count; i++) {
@@ -1872,32 +1992,34 @@
 
         async function openLevelStarsPage() {
             const container = document.getElementById('levelStarsContainer');
-            const salarySystem = document.getElementById('levelSalarySystem');
-            const salaryAmount = document.getElementById('levelSalaryAmount');
             const userLevel = await getUserLevel(userAddress);
-            const maxLevel = LEVELS.length;
+            const maxLevel = APP_LEVELS.length;
             container.innerHTML = generateLargeStarsHTML(maxLevel, userLevel);
-            if (userLevel >= maxLevel) {
-                const totalInvestment = LEVELS.reduce((acc, level) => acc + level.price, 0);
-                const salary = totalInvestment * 0.10; // Assuming 10% weekly salary
-                salaryAmount.innerText = `${salary.toFixed(2)} ZTR / Week`;
-                salarySystem.classList.remove('hidden');
+            
+            if(await checkSalaryEligibility()) {
+                document.getElementById('salaryEligibilitySystem').classList.remove('hidden');
             } else {
-                salarySystem.classList.add('hidden');
+                document.getElementById('salaryEligibilitySystem').classList.add('hidden');
             }
             levelStarsPage.classList.add('active');
         }
 
         async function openJoiningStarsPage() {
             const container = document.getElementById('joiningStarsContainer');
-            const salarySystem = document.getElementById('joiningSalarySystem');
             const teamSize = await getTeamSize(userAddress);
             const requiredTeamSize = 10;
-            container.innerHTML = generateLargeStarsHTML(requiredTeamSize, teamSize);
+            container.innerHTML = generateLargeStarsHTML(requiredTeamSize, Math.min(teamSize, requiredTeamSize));
+
             if (teamSize >= requiredTeamSize) {
-                salarySystem.classList.remove('hidden');
+                document.getElementById('joiningBonusSystem').classList.remove('hidden');
             } else {
-                salarySystem.classList.add('hidden');
+                 document.getElementById('joiningBonusSystem').classList.add('hidden');
+            }
+
+             if(await checkSalaryEligibility()) {
+                document.getElementById('salaryEligibilitySystem').classList.remove('hidden');
+            } else {
+                document.getElementById('salaryEligibilitySystem').classList.add('hidden');
             }
             joiningStarsPage.classList.add('active');
         }
@@ -1916,7 +2038,7 @@
             if (!viewer) return;
             const currentLevelId = await getUserLevel(userAddress);
             let cardsHTML = `<div class="level-card unlocked"><div><div class="level-icon">🌱</div><h2>Starter Level</h2><span class="rank-badge">CURRENTLY ACTIVE</span></div><p class="level-info">Your journey begins here. Upgrade to the next level to start earning.</p><button class="btn" disabled>ACHIEVED</button></div>`;
-            LEVELS.forEach(level => {
+            APP_LEVELS.forEach(level => {
                 const isUnlocked = currentLevelId >= level.id;
                 const canUpgrade = currentLevelId === level.id - 1;
                 cardsHTML += `<div class="level-card ${isUnlocked ? 'unlocked' : ''}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} Level</h2>${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}</div><div><h3 class="level-price">${level.price} USDT</h3></div><button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price})">${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}</button></div>`;
@@ -2043,6 +2165,112 @@
             showToast("Profile setup complete!", "success");
             
             await showDashboard();
+        });
+
+        // ========== WITHDRAWAL SYSTEM ==========
+        async function openWithdrawalModal() {
+            const ztrBalance = await getZTRBalance(userAddress);
+            if (ztrBalance <= 0) {
+                showToast("You have no ZTR coins to claim.", "info");
+                return;
+            }
+            
+            const hasPending = await hasPendingWithdrawal(userAddress);
+            if(hasPending) {
+                showToast("You already have a withdrawal request pending.", "error");
+                return;
+            }
+            
+            document.getElementById('withdrawalAmount').innerText = `${ztrBalance.toFixed(2)} ZTR`;
+            openModal('withdrawalModal');
+        }
+        window.openWithdrawalModal = openWithdrawalModal;
+
+        async function hasPendingWithdrawal(wallet) {
+            const snapshot = await db.ref('withdrawals').orderByChild('userWallet').equalTo(wallet.toLowerCase()).once('value');
+            if (!snapshot.exists()) return false;
+            let pending = false;
+            snapshot.forEach(child => {
+                if (child.val().status === 'pending') {
+                    pending = true;
+                }
+            });
+            return pending;
+        }
+        
+        async function listenForWithdrawals() {
+            if(withdrawalListener) {
+                withdrawalListener.off(); // Detach previous listener
+            }
+            const withdrawalRef = db.ref('withdrawals').orderByChild('userWallet').equalTo(userAddress.toLowerCase());
+            
+            withdrawalListener = withdrawalRef.on('value', (snapshot) => {
+                let latestWithdrawal = null;
+                if(snapshot.exists()){
+                    let allWithdrawals = [];
+                    snapshot.forEach(child => {
+                        allWithdrawals.push(child.val());
+                    });
+                    latestWithdrawal = allWithdrawals.sort((a,b) => new Date(b.requestDate) - new Date(a.requestDate))[0];
+                }
+                updateWithdrawalStatusUI(latestWithdrawal);
+            });
+        }
+        
+        function updateWithdrawalStatusUI(withdrawal) {
+            const statusDiv = document.getElementById('withdrawalStatus');
+            if(!withdrawal) {
+                statusDiv.innerHTML = "No withdrawal history.";
+                return;
+            }
+            const date = new Date(withdrawal.requestDate).toLocaleDateString();
+            if(withdrawal.status === 'pending') {
+                statusDiv.innerHTML = `<span class="status-info"><i class="fa-solid fa-clock"></i> Pending withdrawal of ${withdrawal.amount.toFixed(2)} ZTR requested on ${date}.</span>`;
+            } else if (withdrawal.status === 'approved') {
+                statusDiv.innerHTML = `<span class="status-success"><i class="fa-solid fa-check-circle"></i> Last withdrawal of ${withdrawal.amount.toFixed(2)} ZTR approved on ${date}.</span>`;
+            } else if (withdrawal.status === 'rejected') {
+                statusDiv.innerHTML = `<span class="status-error"><i class="fa-solid fa-times-circle"></i> Last withdrawal of ${withdrawal.amount.toFixed(2)} ZTR was rejected.</span>`;
+            }
+        }
+        
+        document.getElementById('confirmWithdrawalBtn').addEventListener('click', async () => {
+             if (isProcessing) return;
+            isProcessing = true;
+            const btn = document.getElementById('confirmWithdrawalBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Submitting...';
+            
+            try {
+                const ztrBalance = await getZTRBalance(userAddress);
+                const profile = await getUserProfile(userAddress);
+
+                if (ztrBalance > 0 && profile) {
+                    const withdrawalRequest = {
+                        userWallet: userAddress.toLowerCase(),
+                        userId: profile.userId,
+                        amount: ztrBalance,
+                        requestDate: new Date().toISOString(),
+                        status: 'pending'
+                    };
+                    await db.ref('withdrawals').push(withdrawalRequest);
+                    await updateZTRBalance(userAddress, 0, true);
+                    
+                    await updateDashboard();
+                    await updateAssetsPage();
+                    
+                    showToast("Withdrawal request submitted successfully!", "success");
+                    closeModal('withdrawalModal');
+                } else {
+                    showToast("Error: Not enough balance or profile not found.", "error");
+                }
+            } catch (e) {
+                console.error("Withdrawal error:", e);
+                showToast("An error occurred. Please try again.", "error");
+            } finally {
+                isProcessing = false;
+                btn.disabled = false;
+                btn.innerHTML = 'Withdraw';
+            }
         });
 
         // ========== WALLET CONNECTION LOGIC ==========
@@ -2256,6 +2484,8 @@
                 if (pageId === 'team') {
                     await renderBeautifulTree();
                     await updateInviteInfo();
+                } else if (pageId === 'assets') {
+                    await updateAssetsPage();
                 }
             });
         });
@@ -2282,6 +2512,8 @@
         }
 
         window.addEventListener('load', async () => {
+            await fetchAppConfig();
+            
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCodeFromUrl = urlParams.get('invite');
             const inviterNameFromUrl = urlParams.get('inviterName');
@@ -2301,3 +2533,4 @@
 </script>
 </body>
 </html>
+```
