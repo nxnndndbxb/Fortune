@@ -780,11 +780,11 @@
             display: flex;
             align-items: center;
             gap: 20px;
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         .level-viewer-container::-webkit-scrollbar {
-             display: none; /* Chrome, Safari, Opera */
+             display: none;
         }
         
         .level-card {
@@ -1059,7 +1059,7 @@
     <div class="modal-content">
         <i class="fa-solid fa-paper-plane" style="font-size: 50px; color: var(--primary);"></i>
         <h2 style="margin: 15px 0;">Claim ZTR Coins</h2>
-        <p style="color: rgba(255,255,255,0.7);">Your ZTR balance will be sent to your wallet after admin approval.</p>
+        <p style="color: rgba(255,255,255,0.7);">Your ZTR balance will be sent to your wallet.</p>
         
         <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; margin: 20px 0; text-align: left; font-size: 14px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
@@ -1355,6 +1355,10 @@
 <script>
     (async function() {
 
+        // ========== BACKEND API CONFIGURATION ==========
+        // IMPORTANT: Replace this URL with your actual backend server URL (e.g., https://your-backend.vercel.app)
+        const BACKEND_URL = 'https://ztr-backend.onrender.com'; // Replace with your actual backend URL
+        
         // ========== FIREBASE CONFIGURATION ==========
         const firebaseConfig = {
             apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
@@ -1719,6 +1723,168 @@
             if (levelId === 0) return { name: "Starter", price: 0, icon: "🌱" }; 
             return APP_LEVELS[levelId - 1]; 
         }
+
+        // ========== WITHDRAWAL SYSTEM WITH BACKEND API ==========
+        
+        // Call backend to process withdrawal automatically
+        async function processWithdrawalWithBackend(userWallet, amount, userId) {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/withdraw`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userWallet: userWallet,
+                        amount: amount,
+                        userId: userId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    return { success: true, txHash: data.txHash };
+                } else {
+                    return { success: false, error: data.error };
+                }
+            } catch (error) {
+                console.error("Backend withdrawal error:", error);
+                return { success: false, error: error.message };
+            }
+        }
+        
+        async function hasPendingWithdrawal(wallet) {
+            const snapshot = await db.ref('withdrawals').orderByChild('userWallet').equalTo(wallet.toLowerCase()).once('value');
+            if (!snapshot.exists()) return false;
+            let pending = false;
+            snapshot.forEach(child => {
+                if (child.val().status === 'pending') {
+                    pending = true;
+                }
+            });
+            return pending;
+        }
+        
+        async function listenForWithdrawals() {
+            if(withdrawalListener) {
+                withdrawalListener.off();
+            }
+            const withdrawalRef = db.ref('withdrawals').orderByChild('userWallet').equalTo(userAddress.toLowerCase());
+            
+            withdrawalListener = withdrawalRef.on('value', (snapshot) => {
+                let latestWithdrawal = null;
+                if(snapshot.exists()){
+                    let allWithdrawals = [];
+                    snapshot.forEach(child => {
+                        allWithdrawals.push(child.val());
+                    });
+                    latestWithdrawal = allWithdrawals.sort((a,b) => new Date(b.requestDate) - new Date(a.requestDate))[0];
+                }
+                updateWithdrawalStatusUI(latestWithdrawal);
+            });
+        }
+        
+        function updateWithdrawalStatusUI(withdrawal) {
+            const statusDiv = document.getElementById('withdrawalStatus');
+            if(!withdrawal) {
+                statusDiv.innerHTML = "No withdrawal history.";
+                return;
+            }
+            const date = new Date(withdrawal.requestDate).toLocaleDateString();
+            if(withdrawal.status === 'pending') {
+                statusDiv.innerHTML = `<span class="status-info"><i class="fa-solid fa-clock"></i> Pending withdrawal of ${withdrawal.amount.toFixed(2)} ZTR requested on ${date}.</span>`;
+            } else if (withdrawal.status === 'completed') {
+                statusDiv.innerHTML = `<span class="status-success"><i class="fa-solid fa-check-circle"></i> Withdrawal of ${withdrawal.amount.toFixed(2)} ZTR completed on ${date}. Tx: <a href="https://bscscan.com/tx/${withdrawal.txHash}" target="_blank" style="color:var(--primary);">View</a></span>`;
+            } else if (withdrawal.status === 'failed') {
+                statusDiv.innerHTML = `<span class="status-error"><i class="fa-solid fa-times-circle"></i> Withdrawal failed: ${withdrawal.error || 'Unknown error'}</span>`;
+            }
+        }
+        
+        async function openWithdrawalModal() {
+            const ztrBalance = await getZTRBalance(userAddress);
+            if (ztrBalance <= 0) {
+                showToast("You have no ZTR coins to claim.", "info");
+                return;
+            }
+            
+            const hasPending = await hasPendingWithdrawal(userAddress);
+            if(hasPending) {
+                showToast("You already have a withdrawal request pending.", "error");
+                return;
+            }
+            
+            document.getElementById('withdrawalAmount').innerText = `${ztrBalance.toFixed(2)} ZTR`;
+            openModal('withdrawalModal');
+        }
+        window.openWithdrawalModal = openWithdrawalModal;
+        
+        // Updated withdrawal handler - sends request to backend which processes automatically
+        document.getElementById('confirmWithdrawalBtn').addEventListener('click', async () => {
+             if (isProcessing) return;
+            isProcessing = true;
+            const btn = document.getElementById('confirmWithdrawalBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
+            
+            try {
+                const ztrBalance = await getZTRBalance(userAddress);
+                const profile = await getUserProfile(userAddress);
+
+                if (ztrBalance > 0 && profile) {
+                    // Create withdrawal request record
+                    const withdrawalRequest = {
+                        userWallet: userAddress.toLowerCase(),
+                        userId: profile.userId,
+                        amount: ztrBalance,
+                        requestDate: new Date().toISOString(),
+                        status: 'pending'
+                    };
+                    const withdrawalRef = await db.ref('withdrawals').push(withdrawalRequest);
+                    const withdrawalId = withdrawalRef.key;
+                    
+                    showToast("Processing withdrawal via backend...", "info");
+                    
+                    // Call backend to process the withdrawal automatically
+                    const result = await processWithdrawalWithBackend(userAddress, ztrBalance, profile.userId);
+                    
+                    if (result.success) {
+                        // Update withdrawal status to completed
+                        await db.ref(`withdrawals/${withdrawalId}`).update({
+                            status: 'completed',
+                            txHash: result.txHash,
+                            completedDate: new Date().toISOString()
+                        });
+                        
+                        // Reset user's ZTR balance after successful withdrawal
+                        await updateZTRBalance(userAddress, 0, true);
+                        
+                        await updateDashboard();
+                        await updateAssetsPage();
+                        
+                        showToast(`Withdrawal successful! Amount sent to your wallet. Tx: ${result.txHash.slice(0, 10)}...`, "success");
+                        closeModal('withdrawalModal');
+                    } else {
+                        // Update withdrawal status to failed
+                        await db.ref(`withdrawals/${withdrawalId}`).update({
+                            status: 'failed',
+                            error: result.error,
+                            failedDate: new Date().toISOString()
+                        });
+                        showToast(`Withdrawal failed: ${result.error}`, "error");
+                    }
+                } else {
+                    showToast("Error: Not enough balance or profile not found.", "error");
+                }
+            } catch (e) {
+                console.error("Withdrawal error:", e);
+                showToast("An error occurred. Please try again.", "error");
+            } finally {
+                isProcessing = false;
+                btn.disabled = false;
+                btn.innerHTML = 'Withdraw';
+            }
+        });
 
         // ========== BALANCE & UI UPDATES ==========
         async function updateBalances() {
@@ -2158,112 +2324,6 @@
             showToast("Profile setup complete!", "success");
             
             await showDashboard();
-        });
-
-        // ========== WITHDRAWAL SYSTEM ==========
-        async function openWithdrawalModal() {
-            const ztrBalance = await getZTRBalance(userAddress);
-            if (ztrBalance <= 0) {
-                showToast("You have no ZTR coins to claim.", "info");
-                return;
-            }
-            
-            const hasPending = await hasPendingWithdrawal(userAddress);
-            if(hasPending) {
-                showToast("You already have a withdrawal request pending.", "error");
-                return;
-            }
-            
-            document.getElementById('withdrawalAmount').innerText = `${ztrBalance.toFixed(2)} ZTR`;
-            openModal('withdrawalModal');
-        }
-        window.openWithdrawalModal = openWithdrawalModal;
-
-        async function hasPendingWithdrawal(wallet) {
-            const snapshot = await db.ref('withdrawals').orderByChild('userWallet').equalTo(wallet.toLowerCase()).once('value');
-            if (!snapshot.exists()) return false;
-            let pending = false;
-            snapshot.forEach(child => {
-                if (child.val().status === 'pending') {
-                    pending = true;
-                }
-            });
-            return pending;
-        }
-        
-        async function listenForWithdrawals() {
-            if(withdrawalListener) {
-                withdrawalListener.off(); // Detach previous listener
-            }
-            const withdrawalRef = db.ref('withdrawals').orderByChild('userWallet').equalTo(userAddress.toLowerCase());
-            
-            withdrawalListener = withdrawalRef.on('value', (snapshot) => {
-                let latestWithdrawal = null;
-                if(snapshot.exists()){
-                    let allWithdrawals = [];
-                    snapshot.forEach(child => {
-                        allWithdrawals.push(child.val());
-                    });
-                    latestWithdrawal = allWithdrawals.sort((a,b) => new Date(b.requestDate) - new Date(a.requestDate))[0];
-                }
-                updateWithdrawalStatusUI(latestWithdrawal);
-            });
-        }
-        
-        function updateWithdrawalStatusUI(withdrawal) {
-            const statusDiv = document.getElementById('withdrawalStatus');
-            if(!withdrawal) {
-                statusDiv.innerHTML = "No withdrawal history.";
-                return;
-            }
-            const date = new Date(withdrawal.requestDate).toLocaleDateString();
-            if(withdrawal.status === 'pending') {
-                statusDiv.innerHTML = `<span class="status-info"><i class="fa-solid fa-clock"></i> Pending withdrawal of ${withdrawal.amount.toFixed(2)} ZTR requested on ${date}.</span>`;
-            } else if (withdrawal.status === 'approved') {
-                statusDiv.innerHTML = `<span class="status-success"><i class="fa-solid fa-check-circle"></i> Last withdrawal of ${withdrawal.amount.toFixed(2)} ZTR approved on ${date}.</span>`;
-            } else if (withdrawal.status === 'rejected') {
-                statusDiv.innerHTML = `<span class="status-error"><i class="fa-solid fa-times-circle"></i> Last withdrawal of ${withdrawal.amount.toFixed(2)} ZTR was rejected.</span>`;
-            }
-        }
-        
-        document.getElementById('confirmWithdrawalBtn').addEventListener('click', async () => {
-             if (isProcessing) return;
-            isProcessing = true;
-            const btn = document.getElementById('confirmWithdrawalBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Submitting...';
-            
-            try {
-                const ztrBalance = await getZTRBalance(userAddress);
-                const profile = await getUserProfile(userAddress);
-
-                if (ztrBalance > 0 && profile) {
-                    const withdrawalRequest = {
-                        userWallet: userAddress.toLowerCase(),
-                        userId: profile.userId,
-                        amount: ztrBalance,
-                        requestDate: new Date().toISOString(),
-                        status: 'pending'
-                    };
-                    await db.ref('withdrawals').push(withdrawalRequest);
-                    await updateZTRBalance(userAddress, 0, true);
-                    
-                    await updateDashboard();
-                    await updateAssetsPage();
-                    
-                    showToast("Withdrawal request submitted successfully!", "success");
-                    closeModal('withdrawalModal');
-                } else {
-                    showToast("Error: Not enough balance or profile not found.", "error");
-                }
-            } catch (e) {
-                console.error("Withdrawal error:", e);
-                showToast("An error occurred. Please try again.", "error");
-            } finally {
-                isProcessing = false;
-                btn.disabled = false;
-                btn.innerHTML = 'Withdraw';
-            }
         });
 
         // ========== WALLET CONNECTION LOGIC ==========
