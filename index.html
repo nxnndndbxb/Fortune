@@ -780,11 +780,11 @@
             display: flex;
             align-items: center;
             gap: 20px;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
         }
         .level-viewer-container::-webkit-scrollbar {
-             display: none;
+             display: none; /* Chrome, Safari, Opera */
         }
         
         .level-card {
@@ -980,6 +980,7 @@
         <div style="width:20px;"></div>
     </div>
     <div class="level-viewer-container" id="levelViewer">
+        <!-- Level cards will be injected here by JavaScript -->
     </div>
 </div>
 
@@ -1037,6 +1038,7 @@
     </div>
 </div>
 
+
 <!-- Payment Modal for Node Activation -->
 <div class="modal-overlay" id="paymentModal">
     <div class="modal-content">
@@ -1057,7 +1059,7 @@
     <div class="modal-content">
         <i class="fa-solid fa-paper-plane" style="font-size: 50px; color: var(--primary);"></i>
         <h2 style="margin: 15px 0;">Claim ZTR Coins</h2>
-        <p style="color: rgba(255,255,255,0.7);">Your ZTR balance will be sent to your wallet automatically.</p>
+        <p style="color: rgba(255,255,255,0.7);">Your ZTR balance will be sent to your wallet after admin approval.</p>
         
         <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; margin: 20px 0; text-align: left; font-size: 14px;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
@@ -1066,7 +1068,7 @@
             </div>
             <div style="display: flex; justify-content: space-between;">
                 <span style="color: rgba(255,255,255,0.7);">Network Fee:</span>
-                <span style="font-weight: bold; color: var(--gold);">Auto deducted</span>
+                <span style="font-weight: bold; color: var(--gold);">~0.5 USDT</span>
             </div>
         </div>
         
@@ -1076,6 +1078,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- Level Upgrade Modal -->
 <div class="modal-overlay" id="levelUpgradePaymentModal">
@@ -1096,7 +1099,9 @@
 <div class="modal-overlay" id="incomeHistoryModal">
     <div class="modal-content history-modal-content">
         <h3><i class="fa-solid fa-chart-line" style="color:var(--success)"></i> Income History</h3>
-        <div class="history-list" id="incomeHistoryList"></div>
+        <div class="history-list" id="incomeHistoryList">
+            <!-- History items will be injected here -->
+        </div>
         <button class="btn" style="background:rgba(0,0,0,0.5); margin-top: 20px;" onclick="closeModal('incomeHistoryModal')">Close</button>
     </div>
 </div>
@@ -1104,10 +1109,13 @@
 <div class="modal-overlay" id="salaryHistoryModal">
     <div class="modal-content history-modal-content">
         <h3><i class="fa-solid fa-sack-dollar" style="color:var(--gold)"></i> Weekly Salary History</h3>
-        <div class="history-list" id="salaryHistoryList"></div>
+        <div class="history-list" id="salaryHistoryList">
+            <!-- History items will be injected here -->
+        </div>
         <button class="btn" style="background:rgba(0,0,0,0.5); margin-top: 20px;" onclick="closeModal('salaryHistoryModal')">Close</button>
     </div>
 </div>
+
 
 <div class="modal-overlay" id="editProfileModal">
     <div class="modal-content">
@@ -1130,6 +1138,7 @@
 </div>
 
 <div class="container">
+    <!-- State 1: Connect -->
     <div id="connectState">
         <div class="main-card">
             <div style="text-align:center;">
@@ -1141,6 +1150,7 @@
         </div>
     </div>
 
+    <!-- State 2: Invitation Code Verification -->
     <div id="invitationState" class="hidden">
         <div class="main-card">
             <div style="text-align:center;">
@@ -1168,6 +1178,7 @@
         </div>
     </div>
 
+    <!-- State 3: Dashboard Content -->
     <div id="dashboardState" class="hidden">
         <div id="pageDashboard" class="page active">
             <div class="main-card">
@@ -1344,11 +1355,8 @@
 <script>
     (async function() {
 
-        // ========== BACKEND CONFIGURATION ==========
-        const BACKEND_URL = 'https://ztr-withdrawal-backend-production.up.railway.app';
-        const API_SECRET_KEY = 'ztr_secure_api_key_2024_change_this_12345';
-
         // ========== FIREBASE CONFIGURATION ==========
+        // IMPORTANT: Replace with your own Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
             authDomain: "fortune-2cb70.firebaseapp.com",
@@ -1361,7 +1369,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Helper functions
+        // SECURITY: Validate and sanitize inputs
         function sanitizeInput(input) {
             if (!input) return '';
             const div = document.createElement('div');
@@ -1377,21 +1385,16 @@
             return /^[A-Z0-9]{8}$/.test(code);
         }
         
-        // Core configuration
+        // CORE CONFIGURATION
+        // IMPORTANT: Replace with your Admin Wallet Address
         const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
-        const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
-        const CHAIN_ID = "0x38";
-        const CHAIN_ID_DECIMAL = 56;
+        const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; // USDT BEP20 Contract
+        const CHAIN_ID = "0x38"; // BSC Mainnet
+        const CHAIN_ID_DECIMAL = 56; // BSC Mainnet
         const JOINING_FEE_USDT = 0.10;
-        const IMAGE_HOST_API_KEY = '5f4240b4c2aac947e10bb8cf49954bd2';
+        const IMAGE_HOST_API_KEY = '5f4240b4c2aac947e10bb8cf49954bd2'; // Replace with your freeimage.host API key
         
-        let APP_LEVELS = [
-            { id: 1, name: "Iron", price: 5, icon: "🛡️" },
-            { id: 2, name: "Bronze", price: 10, icon: "🥉" },
-            { id: 3, name: "Silver", price: 15, icon: "🥈" },
-            { id: 4, name: "Gold", price: 20, icon: "🥇" },
-            { id: 5, name: "Master", price: 25, icon: "👑" }
-        ];
+        let APP_LEVELS = []; // Will be fetched from Firebase
 
         const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
         
@@ -1406,7 +1409,7 @@
         let pendingLevelUpgrade = null;
         let withdrawalListener = null;
 
-        // UI elements
+        // UI ELEMENTS
         const connectState = document.getElementById('connectState');
         const invitationState = document.getElementById('invitationState');
         const dashboardState = document.getElementById('dashboardState');
@@ -1417,7 +1420,7 @@
         const loadingOverlay = document.getElementById('loadingOverlay');
         const profileSetupModal = document.getElementById('profileSetupModal');
 
-        // Toast function
+        // ========== HELPER FUNCTIONS ==========
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -1427,64 +1430,25 @@
             setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
         }
         
-        // Generate signature for API request
-        async function generateSignature(userWallet) {
-            const timestamp = Date.now().toString();
-            const encoder = new TextEncoder();
-            const keyData = encoder.encode(API_SECRET_KEY);
-            const messageData = encoder.encode(timestamp + userWallet);
-            
-            const cryptoKey = await crypto.subtle.importKey(
-                'raw',
-                keyData,
-                { name: 'HMAC', hash: 'SHA-256' },
-                false,
-                ['sign']
-            );
-            
-            const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
-            const signatureHex = Array.from(new Uint8Array(signature))
-                .map(b => b.toString(16).padStart(2, '0'))
-                .join('');
-            
-            return { timestamp, signature: signatureHex };
-        }
-
-        // Process withdrawal through backend
-        async function processWithdrawal(userWallet, amount, userId) {
+        async function fetchAppConfig() {
             try {
-                const { timestamp, signature } = await generateSignature(userWallet);
-                const requestId = `${userWallet}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                
-                const response = await fetch(`${BACKEND_URL}/api/withdraw/process`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-Key': API_SECRET_KEY,
-                        'X-Timestamp': timestamp,
-                        'X-Signature': signature
-                    },
-                    body: JSON.stringify({
-                        userWallet: userWallet,
-                        amount: amount,
-                        userId: userId,
-                        requestId: requestId
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showToast(`✅ Withdrawal successful! Tx: ${data.txHash.slice(0, 10)}...`, 'success');
-                    return true;
+                const snapshot = await db.ref('config/levels').once('value');
+                if (snapshot.exists() && Array.isArray(snapshot.val())) {
+                    APP_LEVELS = snapshot.val();
                 } else {
-                    showToast(`❌ Withdrawal failed: ${data.error}`, 'error');
-                    return false;
+                    // Fallback if config is missing in Firebase
+                    APP_LEVELS = [
+                        { id: 1, name: "Iron", price: 5, icon: "🛡️" },
+                        { id: 2, name: "Bronze", price: 10, icon: "🥉" },
+                        { id: 3, name: "Silver", price: 15, icon: "🥈" },
+                        { id: 4, name: "Gold", price: 20, icon: "🥇" },
+                        { id: 5, name: "Master", price: 25, icon: "👑" }
+                    ];
+                    console.warn("Using fallback level configuration.");
                 }
             } catch (error) {
-                console.error('Withdrawal API error:', error);
-                showToast('Network error. Please try again.', 'error');
-                return false;
+                console.error("Failed to fetch app config:", error);
+                showToast("Could not load app configuration.", "error");
             }
         }
 
@@ -1517,7 +1481,7 @@
             }
         }
         
-        // Invitation code functions
+        // ========== INVITATION CODE GENERATION (DATABASE) ==========
         function generateUniqueInviteCode() {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = '';
@@ -1557,7 +1521,7 @@
             return snapshot.exists() ? snapshot.val() : null;
         }
 
-        // User data management
+        // ========== USER DATA MANAGEMENT (DATABASE) ==========
         async function getNextUserId() {
             const counterRef = db.ref('nextUserId');
             const result = await counterRef.transaction(currentId => {
@@ -1648,7 +1612,7 @@
             await db.ref(`users/${wallet.toLowerCase()}/paid`).set(true);
         }
 
-        // Income logging
+        // ========== INCOME LOGGING ==========
         async function logIncome(wallet, amount, type) {
             if (!wallet || !isValidWalletAddress(wallet)) return;
             const incomeRef = db.ref(`users/${wallet.toLowerCase()}/incomeHistory`);
@@ -1660,13 +1624,14 @@
             await incomeRef.push(newLog);
         }
         
-        // Commission distribution
+        // ========== INVITATION SYSTEM (DATABASE) ==========
         async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
             const baseAmount = JOINING_FEE_USDT;
             const inviterWallet = await getWalletById(inviterUserId);
 
             if (!inviterWallet || !isValidWalletAddress(inviterWallet)) return;
 
+            // Direct inviter commission
             const directCommission = baseAmount * 0.40;
             await updateZTRBalance(inviterWallet, directCommission);
             await logIncome(inviterWallet, directCommission, 'Direct Commission');
@@ -1675,6 +1640,7 @@
             const teamSizeRef = db.ref(`users/${inviterWallet.toLowerCase()}/teamSize`);
             await teamSizeRef.transaction(currentSize => (currentSize || 0) + 1);
 
+            // Upliner commission
             const uplinerId = await getUplinerId(inviterWallet);
             if (uplinerId) {
                 const uplinerWallet = await getWalletById(uplinerId);
@@ -1686,6 +1652,7 @@
                 }
             }
 
+            // Downline pool commission
             const directMembers = await getDirectMembersOfInviter(inviterUserId);
             const eligibleMembers = directMembers.filter(wallet => wallet.toLowerCase() !== newUserWallet.toLowerCase());
 
@@ -1703,7 +1670,7 @@
             }
         }
         
-        // ZTR balance management
+        // ========== ZTR BALANCE MANAGEMENT (DATABASE) ==========
         async function getZTRBalance(wallet) { 
             if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const snapshot = await db.ref(`users/${wallet.toLowerCase()}/ztrBalance`).once('value');
@@ -1755,7 +1722,7 @@
             return APP_LEVELS[levelId - 1]; 
         }
 
-        // Balance updates
+        // ========== BALANCE & UI UPDATES ==========
         async function updateBalances() {
             if (!userAddress || !provider || !isValidWalletAddress(userAddress)) return;
             try {
@@ -1932,7 +1899,7 @@
             }
         }
 
-        // History pages
+        // ========== HISTORY PAGES ==========
         window.openIncomeHistory = async function() {
             const listContainer = document.getElementById('incomeHistoryList');
             listContainer.innerHTML = '<div class="spinner" style="margin: auto;"></div>';
@@ -2000,7 +1967,7 @@
             }
         }
 
-        // Stars & salary pages
+        // ========== STARS & SALARY PAGES ==========
         async function checkSalaryEligibility() {
             const userLevel = await getUserLevel(userAddress);
             const teamSize = await getTeamSize(userAddress);
@@ -2060,7 +2027,7 @@
         window.openLevelStarsPage = openLevelStarsPage;
         window.openJoiningStarsPage = openJoiningStarsPage;
 
-        // Level page
+        // ========== LEVEL PAGE ==========
         async function initializeLevelViewer() {
             const viewer = document.getElementById('levelViewer');
             if (!viewer) return;
@@ -2097,7 +2064,7 @@
             openModal('levelUpgradePaymentModal');
         };
 
-        // USDT transaction for level upgrade
+        // ========== USDT TRANSACTION FOR LEVEL UPGRADE ==========
         document.getElementById('confirmLevelUpgradeBtn').addEventListener('click', async () => {
             if (isProcessing || !pendingLevelUpgrade) return;
             isProcessing = true;
@@ -2134,7 +2101,7 @@
             }
         });
 
-        // Modal controls
+        // ========== MODAL CONTROLS ==========
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         window.closeModal = closeModal;
@@ -2149,7 +2116,7 @@
             }
         }
 
-        // Profile setup
+        // ========== PROFILE SETUP FUNCTIONS ==========
         let setupProfilePicData = null;
         
         document.getElementById('setupProfilePic').addEventListener('change', async (e) => {
@@ -2195,11 +2162,17 @@
             await showDashboard();
         });
 
-        // Withdrawal system
+        // ========== WITHDRAWAL SYSTEM (SECURE REQUEST-BASED) ==========
         async function openWithdrawalModal() {
             const ztrBalance = await getZTRBalance(userAddress);
             if (ztrBalance <= 0) {
                 showToast("You have no ZTR coins to claim.", "info");
+                return;
+            }
+            
+            const hasPending = await hasPendingWithdrawal(userAddress);
+            if(hasPending) {
+                showToast("You already have a withdrawal request pending.", "error");
                 return;
             }
             
@@ -2208,9 +2181,21 @@
         }
         window.openWithdrawalModal = openWithdrawalModal;
 
+        async function hasPendingWithdrawal(wallet) {
+            const snapshot = await db.ref('withdrawals').orderByChild('userWallet').equalTo(wallet.toLowerCase()).once('value');
+            if (!snapshot.exists()) return false;
+            let pending = false;
+            snapshot.forEach(child => {
+                if (child.val().status === 'pending') {
+                    pending = true;
+                }
+            });
+            return pending;
+        }
+        
         async function listenForWithdrawals() {
             if(withdrawalListener) {
-                withdrawalListener.off();
+                withdrawalListener.off(); // Detach previous listener
             }
             const withdrawalRef = db.ref('withdrawals').orderByChild('userWallet').equalTo(userAddress.toLowerCase());
             
@@ -2243,41 +2228,36 @@
             }
         }
         
-        // Updated withdrawal button handler - sends to backend for automatic processing
         document.getElementById('confirmWithdrawalBtn').addEventListener('click', async () => {
-            if (isProcessing) return;
+             if (isProcessing) return;
             isProcessing = true;
             const btn = document.getElementById('confirmWithdrawalBtn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing Withdrawal...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Submitting...';
             
             try {
                 const ztrBalance = await getZTRBalance(userAddress);
                 const profile = await getUserProfile(userAddress);
-                
-                if (ztrBalance <= 0) {
-                    showToast("No ZTR coins to withdraw", "error");
-                    return;
-                }
-                
-                if (!profile) {
-                    showToast("Profile not found", "error");
-                    return;
-                }
-                
-                // Process withdrawal through backend (automatic USDT transfer)
-                const success = await processWithdrawal(
-                    userAddress, 
-                    ztrBalance, 
-                    profile.userId
-                );
-                
-                if (success) {
-                    closeModal('withdrawalModal');
+
+                if (ztrBalance > 0 && profile) {
+                    const withdrawalRequest = {
+                        userWallet: userAddress.toLowerCase(),
+                        userId: profile.userId,
+                        amount: ztrBalance,
+                        requestDate: new Date().toISOString(),
+                        status: 'pending' // Status is pending for admin approval
+                    };
+                    await db.ref('withdrawals').push(withdrawalRequest);
+                    await updateZTRBalance(userAddress, 0, true); // Set user's balance to 0 after request
+                    
                     await updateDashboard();
                     await updateAssetsPage();
+                    
+                    showToast("Withdrawal request submitted successfully! Waiting for admin approval.", "success");
+                    closeModal('withdrawalModal');
+                } else {
+                    showToast("Error: Not enough balance or profile not found.", "error");
                 }
-                
             } catch (e) {
                 console.error("Withdrawal error:", e);
                 showToast("An error occurred. Please try again.", "error");
@@ -2288,7 +2268,7 @@
             }
         });
 
-        // Wallet connection logic
+        // ========== WALLET CONNECTION LOGIC ==========
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0 || !isValidWalletAddress(accounts[0])) {
                 showToast("Invalid wallet address", "error");
@@ -2359,7 +2339,7 @@
             }
         }
 
-        // Event listeners
+        // ========== EVENT LISTENERS ==========
         document.getElementById('connectBtn').addEventListener('click', async () => {
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
@@ -2527,6 +2507,8 @@
         }
 
         window.addEventListener('load', async () => {
+            await fetchAppConfig();
+            
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCodeFromUrl = urlParams.get('invite');
             const inviterNameFromUrl = urlParams.get('inviterName');
