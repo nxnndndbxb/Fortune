@@ -31,15 +31,32 @@
         html, body {
             overscroll-behavior: none;
             height: 100%;
+            overflow: hidden; /* Prevent scrolling of the body */
         }
 
         body {
-            background: url('https://iili.io/qmuYshF.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background-color: #000206; /* Fallback color */
             color: var(--text-main);
             min-height: 100vh;
+        }
+        
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Place it behind all content */
+        }
+        
+        .content-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto; /* Allow this wrapper to scroll */
             padding-bottom: 90px;
-            overflow-x: hidden;
         }
 
         .navbar {
@@ -51,6 +68,7 @@
             top: 0;
             z-index: 1000;
             background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
         }
 
         .logo-img {
@@ -85,6 +103,7 @@
             background: rgba(0, 0, 0, 0.3);
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
         }
 
         .income-grid {
@@ -192,6 +211,7 @@
             height: 70px;
             background: rgba(0, 0, 0, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
             border-radius: 25px;
             display: flex;
             justify-content: space-around;
@@ -332,8 +352,9 @@
         
         .modal-content {
             width: 90%; max-width: 360px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(10, 0, 20, 0.8);
             border: 1px solid var(--primary);
+            backdrop-filter: blur(15px);
             border-radius: 30px;
             padding: 30px;
             text-align: center;
@@ -925,393 +946,389 @@
             border-color: var(--primary) !important;
         }
         
-        .status-success {
-            color: var(--success);
-        }
-        
-        .status-info {
-            color: var(--gold);
-        }
-        
-        .status-error {
-            color: #ef4444;
-        }
+        .status-success { color: var(--success); }
+        .status-info { color: var(--gold); }
+        .status-error { color: #ef4444; }
     </style>
 </head>
 <body>
 
-<div id="loadingOverlay" class="loading-overlay">
-    <div class="spinner"></div>
-    <p>Connecting to blockchain...</p>
-</div>
+<canvas id="bg-canvas"></canvas>
 
-<div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
+<div class="content-wrapper">
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Connecting to blockchain...</p>
+    </div>
 
-<!-- LEVEL PAGE -->
-<div class="level-page-overlay" id="levelPageOverlay">
-    <div class="level-page-header">
-        <button class="level-page-back-btn" onclick="closeLevelPage()"><i class="fa-solid fa-arrow-left"></i></button>
-        <h2>Level Matrix</h2>
-        <div style="width:20px;"></div>
-    </div>
-    <div class="level-viewer-container" id="levelViewer">
-        <!-- Level cards will be injected here by JavaScript -->
-    </div>
-</div>
+    <div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
 
-<!-- STARS PAGES -->
-<div class="stars-page-overlay" id="levelStarsPage">
-    <div class="stars-page-header">
-        <button class="stars-page-back-btn" onclick="closeStarsPages()"><i class="fa-solid fa-arrow-left"></i></button>
-        <h2>Level Achievement Stars</h2>
-        <div style="width:20px;"></div>
-    </div>
-    <div class="stars-page-content">
-        <p class="stars-page-subtitle" style="color: rgba(255,255,255,0.7);">Achieve all level stars to become eligible for weekly salary.</p>
-        <div class="large-stars-container" id="levelStarsContainer">
+    <!-- LEVEL PAGE -->
+    <div class="level-page-overlay" id="levelPageOverlay">
+        <div class="level-page-header">
+            <button class="level-page-back-btn" onclick="closeLevelPage()"><i class="fa-solid fa-arrow-left"></i></button>
+            <h2>Level Matrix</h2>
+            <div style="width:20px;"></div>
         </div>
-        <div class="salary-system-box hidden" id="salaryEligibilitySystem" style="background: rgba(0,0,0,0.5); border-radius: 20px; padding: 20px;">
-            <h3><i class="fa-solid fa-crown" style="color:var(--gold);"></i> Weekly Salary Unlocked!</h3>
-            <p style="color: rgba(255,255,255,0.7);">Congratulations! You have achieved all Level Stars and invited 10+ members. You are now eligible to receive a weekly salary, distributed by the system.</p>
+        <div class="level-viewer-container" id="levelViewer">
+            <!-- Level cards will be injected here by JavaScript -->
         </div>
     </div>
-</div>
 
-<div class="stars-page-overlay" id="joiningStarsPage">
-    <div class="stars-page-header">
-        <button class="stars-page-back-btn" onclick="closeStarsPages()"><i class="fa-solid fa-arrow-left"></i></button>
-        <h2>Network Invitation Stars</h2>
-        <div style="width:20px;"></div>
-    </div>
-    <div class="stars-page-content">
-        <p class="stars-page-subtitle" style="color: rgba(255,255,255,0.7);">Invite 10 new members to become eligible for weekly salary.</p>
-        <div class="large-stars-container" id="joiningStarsContainer">
+    <!-- STARS PAGES -->
+    <div class="stars-page-overlay" id="levelStarsPage">
+        <div class="stars-page-header">
+            <button class="stars-page-back-btn" onclick="closeStarsPages()"><i class="fa-solid fa-arrow-left"></i></button>
+            <h2>Level Achievement Stars</h2>
+            <div style="width:20px;"></div>
         </div>
-         <div class="salary-system-box hidden" id="joiningBonusSystem" style="background: rgba(0,0,0,0.5); border-radius: 20px; padding: 20px;">
-            <h3><i class="fa-solid fa-people-group" style="color:var(--primary);"></i> Network Leader Bonus Unlocked!</h3>
-            <p style="color: rgba(255,255,255,0.7);">You have successfully invited 10 members and are now eligible for weekly salary if you have also achieved all level stars.</p>
-        </div>
-    </div>
-</div>
-
-<!-- Profile Setup Modal (First Time User) -->
-<div class="modal-overlay" id="profileSetupModal">
-    <div class="modal-content glass profile-setup-modal">
-        <i class="fa-solid fa-user-astronaut" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
-        <h2 style="margin-bottom: 15px;">Complete Your Profile</h2>
-        <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 20px;">Create your identity in the ZTR network.</p>
-        
-        <div class="avatar-preview" id="avatarPreview" onclick="document.getElementById('setupProfilePic').click()">
-            <i class="fa-solid fa-user-circle" id="avatarPreviewIcon"></i>
-            <img id="avatarPreviewImg" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
-        </div>
-        <input type="file" id="setupProfilePic" class="hidden" accept="image/*">
-        
-        <input type="text" id="setupUsername" placeholder="Enter your username" style="width:100%; padding:12px; border-radius:12px; margin-bottom:15px;">
-        
-        <button class="btn btn-success" id="completeProfileBtn">Complete Setup</button>
-    </div>
-</div>
-
-
-<!-- Payment Modal for Node Activation -->
-<div class="modal-overlay" id="paymentModal">
-    <div class="modal-content">
-        <i class="fa-solid fa-bolt" style="font-size: 50px; color: var(--primary);"></i>
-        <h2 style="margin: 15px 0;">Activate Node</h2>
-        <p style="color: rgba(255,255,255,0.7);">Joining Premium Network</p>
-        <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;">0.10 USDT</div>
-        <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: 0.0003 BNB</div>
-        <div style="display:flex; gap:10px;">
-            <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('paymentModal')">Cancel</button>
-            <button class="btn btn-success" id="confirmPaymentBtn">Confirm</button>
-        </div>
-    </div>
-</div>
-
-<!-- Withdrawal Modal -->
-<div class="modal-overlay" id="withdrawalModal">
-    <div class="modal-content">
-        <i class="fa-solid fa-paper-plane" style="font-size: 50px; color: var(--primary);"></i>
-        <h2 style="margin: 15px 0;">Claim ZTR Coins</h2>
-        <p style="color: rgba(255,255,255,0.7);">Your ZTR balance will be sent to your wallet after approval.</p>
-        
-        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; margin: 20px 0; text-align: left; font-size: 14px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span style="color: rgba(255,255,255,0.7);">Amount:</span>
-                <span id="withdrawalAmount" style="font-weight: bold; color: var(--primary);">0.00 ZTR</span>
+        <div class="stars-page-content">
+            <p class="stars-page-subtitle" style="color: rgba(255,255,255,0.7);">Achieve all level stars to become eligible for weekly salary.</p>
+            <div class="large-stars-container" id="levelStarsContainer">
             </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span style="color: rgba(255,255,255,0.7);">Network Fee:</span>
-                <span style="font-weight: bold; color: var(--gold);">~0.5 USDT</span>
-            </div>
-        </div>
-        
-        <div style="display:flex; gap:10px;">
-            <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('withdrawalModal')">Cancel</button>
-            <button class="btn btn-success" id="confirmWithdrawalBtn">Withdraw</button>
-        </div>
-    </div>
-</div>
-
-
-<!-- Level Upgrade Modal -->
-<div class="modal-overlay" id="levelUpgradePaymentModal">
-    <div class="modal-content">
-        <i class="fa-solid fa-up-long" style="font-size: 50px; color: var(--gold);"></i>
-        <h2 style="margin: 15px 0;">Level Upgrade</h2>
-        <p id="upgradeLevelNameDisplay" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">Level Name</p>
-        <p style="color: rgba(255,255,255,0.7);">Upgrade to a higher level to continue your progress!</p>
-        <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;" id="levelUpgradeAmount">0 USDT</div>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-            <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('levelUpgradePaymentModal')">Cancel</button>
-            <button class="btn btn-success" id="confirmLevelUpgradeBtn">Pay & Upgrade</button>
-        </div>
-    </div>
-</div>
-
-<!-- History Modals -->
-<div class="modal-overlay" id="incomeHistoryModal">
-    <div class="modal-content history-modal-content">
-        <h3><i class="fa-solid fa-chart-line" style="color:var(--success)"></i> Income History</h3>
-        <div class="history-list" id="incomeHistoryList">
-            <!-- History items will be injected here -->
-        </div>
-        <button class="btn" style="background:rgba(0,0,0,0.5); margin-top: 20px;" onclick="closeModal('incomeHistoryModal')">Close</button>
-    </div>
-</div>
-
-<div class="modal-overlay" id="salaryHistoryModal">
-    <div class="modal-content history-modal-content">
-        <h3><i class="fa-solid fa-sack-dollar" style="color:var(--gold)"></i> Weekly Salary History</h3>
-        <div class="history-list" id="salaryHistoryList">
-            <!-- History items will be injected here -->
-        </div>
-        <button class="btn" style="background:rgba(0,0,0,0.5); margin-top: 20px;" onclick="closeModal('salaryHistoryModal')">Close</button>
-    </div>
-</div>
-
-
-<div class="modal-overlay" id="editProfileModal">
-    <div class="modal-content">
-        <h3>Edit Identity</h3>
-        <p style="font-size:12px; color: rgba(255,255,255,0.7); margin-bottom:20px;">Your User ID cannot be changed.</p>
-        <input type="file" id="profilePicInput" class="hidden" accept="image/*">
-        <input type="text" id="profileNameInput" placeholder="Username" style="width:100%; padding:15px; border-radius:15px; margin-bottom:15px;">
-        <button class="btn" id="saveProfileBtn">Save Update</button>
-    </div>
-</div>
-
-<div class="navbar">
-    <img src="https://iili.io/BV7TpMF.jpg" alt="ZTR Logo" class="logo-img">
-    <div style="display:flex; align-items:center; gap:8px;">
-        <div class="wallet-address-badge" id="walletAddressBadge" onclick="copyWalletAddress()" style="display: none;">
-            <i class="fa-solid fa-wallet"></i> <span id="walletAddressShort">Not Connected</span>
-        </div>
-    </div>
-</div>
-
-<div class="container">
-    <!-- State 1: Connect -->
-    <div id="connectState">
-        <div class="main-card">
-            <div style="text-align:center;">
-                <div style="font-size:60px; color:var(--primary); margin-bottom:20px;"><i class="fa-solid fa-fingerprint"></i></div>
-                <h2 style="margin-bottom:10px;">Quantum Access</h2>
-                <p style="color:rgba(255,255,255,0.7); font-size:14px; margin-bottom:30px;">Initialize your decentralized protocol</p>
-                <button id="connectBtn" class="btn"><i class="fa-solid fa-link"></i> CONNECT WALLET</button>
+            <div class="salary-system-box hidden" id="salaryEligibilitySystem" style="background: rgba(0,0,0,0.5); border-radius: 20px; padding: 20px;">
+                <h3><i class="fa-solid fa-crown" style="color:var(--gold);"></i> Weekly Salary Unlocked!</h3>
+                <p style="color: rgba(255,255,255,0.7);">Congratulations! You have achieved all Level Stars and invited 10+ members. You are now eligible to receive a weekly salary, distributed by the system.</p>
             </div>
         </div>
     </div>
 
-    <!-- State 2: Invitation Code Verification -->
-    <div id="invitationState" class="hidden">
-        <div class="main-card">
-            <div style="text-align:center;">
-                <i class="fa-solid fa-user-check" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
-                <h2 style="margin-bottom: 15px;">Invitation Required</h2>
-                <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 20px;">
-                    Node activation successful! To proceed, you must enter a valid invitation code from your upliner.
-                </p>
-                
-                <div class="invite-code-input-group">
-                    <input type="text" id="verifyInviteCodeInput" placeholder="ENTER INVITER'S CODE" maxlength="8" style="text-transform: uppercase;">
-                    <button id="verifyInviteCodeBtn"><i class="fa-solid fa-check"></i> Verify</button>
-                </div>
-                <div id="inviterVerifyStatus" style="font-size: 11px; margin-bottom: 20px; text-align: left;"></div>
-
-                <div class="commission-breakdown">
-                    <p><i class="fa-solid fa-chart-simple"></i> <strong>Commission Structure:</strong></p>
-                    <p>• <span>40%</span> to Direct Inviter</p>
-                    <p>• <span>10%</span> to Upliner (Inviter's Inviter)</p>
-                    <p>• <span>20%</span> Split among all existing Direct Members of Inviter</p>
-                </div>
-                
-                <button class="btn btn-success" id="proceedToProfileBtn" disabled>Proceed to Profile Setup</button>
+    <div class="stars-page-overlay" id="joiningStarsPage">
+        <div class="stars-page-header">
+            <button class="stars-page-back-btn" onclick="closeStarsPages()"><i class="fa-solid fa-arrow-left"></i></button>
+            <h2>Network Invitation Stars</h2>
+            <div style="width:20px;"></div>
+        </div>
+        <div class="stars-page-content">
+            <p class="stars-page-subtitle" style="color: rgba(255,255,255,0.7);">Invite 10 new members to become eligible for weekly salary.</p>
+            <div class="large-stars-container" id="joiningStarsContainer">
+            </div>
+             <div class="salary-system-box hidden" id="joiningBonusSystem" style="background: rgba(0,0,0,0.5); border-radius: 20px; padding: 20px;">
+                <h3><i class="fa-solid fa-people-group" style="color:var(--primary);"></i> Network Leader Bonus Unlocked!</h3>
+                <p style="color: rgba(255,255,255,0.7);">You have successfully invited 10 members and are now eligible for weekly salary if you have also achieved all level stars.</p>
             </div>
         </div>
     </div>
 
-    <!-- State 3: Dashboard Content -->
-    <div id="dashboardState" class="hidden">
-        <div id="pageDashboard" class="page active">
-            <div class="main-card">
-                <div style="background: url(https://iili.io/q4VQShN.jpg); background-size: cover; border-radius:20px; height:160px; margin-bottom:20px;">
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3 style="font-size:18px;">Protocol Overview</h3>
-                    <span class="rank-badge" id="userRankBadge">Verified Member</span>
-                </div>
+    <!-- Profile Setup Modal (First Time User) -->
+    <div class="modal-overlay" id="profileSetupModal">
+        <div class="modal-content glass profile-setup-modal">
+            <i class="fa-solid fa-user-astronaut" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
+            <h2 style="margin-bottom: 15px;">Complete Your Profile</h2>
+            <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 20px;">Create your identity in the ZTR network.</p>
+            
+            <div class="avatar-preview" id="avatarPreview" onclick="document.getElementById('setupProfilePic').click()">
+                <i class="fa-solid fa-user-circle" id="avatarPreviewIcon"></i>
+                <img id="avatarPreviewImg" src="" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <input type="file" id="setupProfilePic" class="hidden" accept="image/*">
+            
+            <input type="text" id="setupUsername" placeholder="Enter your username" style="width:100%; padding:12px; border-radius:12px; margin-bottom:15px;">
+            
+            <button class="btn btn-success" id="completeProfileBtn">Complete Setup</button>
+        </div>
+    </div>
 
-                <div id="welcomeMessage" class="welcome-badge" style="margin: 10px 0;">
-                    Welcome!
-                </div>
 
-                <div class="income-grid">
-                    <div class="income-card" onclick="openIncomeHistory()">
-                        <p style="font-size:11px; color:rgba(255,255,255,0.7);">Core Profit</p>
-                        <h3 id="profitIncome">0.00 ZTR</h3>
-                        <small style="color:var(--success);">≈ $<span id="profitUSD">0</span></small>
-                    </div>
-                    <div class="income-card" style="cursor:default;">
-                        <p style="font-size:11px; color:rgba(255,255,255,0.7);">Network Size</p>
-                        <h3 id="teamIncome" style="color:var(--text-main);">0</h3>
-                        <small id="teamCount">Members</small>
-                    </div>
-                    <div class="income-card" onclick="openSalaryHistory()">
-                        <p style="font-size:11px; color:rgba(255,255,255,0.7);">Weekly Salary</p>
-                        <h3 id="salleryIncome" style="color:var(--gold);">0.00 ZTR</h3>
-                        <small>From System</small>
-                    </div>
-                     <div class="income-card" style="cursor:default;">
-                        <p style="font-size:11px; color:rgba(255,255,255,0.7);">Current Node</p>
-                        <h3 id="levelIncome" style="font-size: 18px; color: var(--text-main);">Starter</h3>
-                        <small id="levelNameDisplay" style="visibility: hidden;">Phase 1</small>
-                    </div>
-                </div>
-
-                <div class="node-button-container">
-                    <div class="node-button" onclick="openLevelPage()">
-                        <i class="fa-solid fa-layer-group"></i>
-                        <h3>Matrix</h3>
-                        <small>View Levels</small>
-                    </div>
-                </div>
-                
-                <div class="gas-info" style="margin-top: 15px;">
-                    <i class="fa-solid fa-wallet"></i> Wallet: <span id="dashboardWalletAddress">Not Connected</span>
-                </div>
+    <!-- Payment Modal for Node Activation -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal-content">
+            <i class="fa-solid fa-bolt" style="font-size: 50px; color: var(--primary);"></i>
+            <h2 style="margin: 15px 0;">Activate Node</h2>
+            <p style="color: rgba(255,255,255,0.7);">Joining Premium Network</p>
+            <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;">0.10 USDT</div>
+            <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: 0.0003 BNB</div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('paymentModal')">Cancel</button>
+                <button class="btn btn-success" id="confirmPaymentBtn">Confirm</button>
             </div>
         </div>
+    </div>
 
-        <div id="pageTeam" class="page">
-            <div class="main-card">
-                <h3><i class="fa-solid fa-share-alt"></i> Your Invitation Code</h3>
-                <p style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:15px;">
-                    Share this unique code with friends to invite them!
-                </p>
-                <div class="invite-code-wrapper" id="inviteCodeWrapper">
-                    <i class="fa-solid fa-ticket"></i>
-                    <input type="text" id="inviteCodeInput" readonly value="Loading...">
-                    <button id="copyInviteCodeBtn"><i class="fa-solid fa-copy"></i></button>
+    <!-- Withdrawal Modal -->
+    <div class="modal-overlay" id="withdrawalModal">
+        <div class="modal-content">
+            <i class="fa-solid fa-paper-plane" style="font-size: 50px; color: var(--primary);"></i>
+            <h2 style="margin: 15px 0;">Claim ZTR Coins</h2>
+            <p style="color: rgba(255,255,255,0.7);">Your ZTR balance will be sent to your wallet after approval.</p>
+            
+            <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; margin: 20px 0; text-align: left; font-size: 14px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="color: rgba(255,255,255,0.7);">Amount:</span>
+                    <span id="withdrawalAmount" style="font-weight: bold; color: var(--primary);">0.00 ZTR</span>
                 </div>
-                
-                <h3 style="margin-top: 20px;"><i class="fa-solid fa-link"></i> Your Invitation Link</h3>
-                <p style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:15px;">
-                    Share this link - your code will be automatically included!
-                </p>
-                <div class="invite-link-wrapper">
-                    <i class="fa-solid fa-link"></i>
-                    <input type="text" id="inviteLink" readonly value="Loading link...">
-                    <button id="copyInviteLinkBtn"><i class="fa-solid fa-copy"></i></button>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: rgba(255,255,255,0.7);">Network Fee:</span>
+                    <span style="font-weight: bold; color: var(--gold);">~0.5 USDT</span>
                 </div>
             </div>
             
-            <div class="main-card" style="margin-top:20px;">
-                <h3>Your Network Tree - Beautiful Hierarchy (<span id="teamPageTotalCount">0</span> members)</h3>
-                <div id="networkTreeContainer" class="network-tree-container">
-                    <p style="text-align:center; color:rgba(255,255,255,0.7); font-size:13px;">Loading network tree...</p>
+            <div style="display:flex; gap:10px;">
+                <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('withdrawalModal')">Cancel</button>
+                <button class="btn btn-success" id="confirmWithdrawalBtn">Withdraw</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Level Upgrade Modal -->
+    <div class="modal-overlay" id="levelUpgradePaymentModal">
+        <div class="modal-content">
+            <i class="fa-solid fa-up-long" style="font-size: 50px; color: var(--gold);"></i>
+            <h2 style="margin: 15px 0;">Level Upgrade</h2>
+            <p id="upgradeLevelNameDisplay" style="color: var(--gold); font-size: 20px; margin-bottom: 10px;">Level Name</p>
+            <p style="color: rgba(255,255,255,0.7);">Upgrade to a higher level to continue your progress!</p>
+            <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;" id="levelUpgradeAmount">0 USDT</div>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('levelUpgradePaymentModal')">Cancel</button>
+                <button class="btn btn-success" id="confirmLevelUpgradeBtn">Pay & Upgrade</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modals -->
+    <div class="modal-overlay" id="incomeHistoryModal">
+        <div class="modal-content history-modal-content">
+            <h3><i class="fa-solid fa-chart-line" style="color:var(--success)"></i> Income History</h3>
+            <div class="history-list" id="incomeHistoryList">
+                <!-- History items will be injected here -->
+            </div>
+            <button class="btn" style="background:rgba(0,0,0,0.5); margin-top: 20px;" onclick="closeModal('incomeHistoryModal')">Close</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="salaryHistoryModal">
+        <div class="modal-content history-modal-content">
+            <h3><i class="fa-solid fa-sack-dollar" style="color:var(--gold)"></i> Weekly Salary History</h3>
+            <div class="history-list" id="salaryHistoryList">
+                <!-- History items will be injected here -->
+            </div>
+            <button class="btn" style="background:rgba(0,0,0,0.5); margin-top: 20px;" onclick="closeModal('salaryHistoryModal')">Close</button>
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="editProfileModal">
+        <div class="modal-content">
+            <h3>Edit Identity</h3>
+            <p style="font-size:12px; color: rgba(255,255,255,0.7); margin-bottom:20px;">Your User ID cannot be changed.</p>
+            <input type="file" id="profilePicInput" class="hidden" accept="image/*">
+            <input type="text" id="profileNameInput" placeholder="Username" style="width:100%; padding:15px; border-radius:15px; margin-bottom:15px;">
+            <button class="btn" id="saveProfileBtn">Save Update</button>
+        </div>
+    </div>
+
+    <div class="navbar">
+        <img src="https://iili.io/BV7TpMF.jpg" alt="ZTR Logo" class="logo-img">
+        <div style="display:flex; align-items:center; gap:8px;">
+            <div class="wallet-address-badge" id="walletAddressBadge" onclick="copyWalletAddress()" style="display: none;">
+                <i class="fa-solid fa-wallet"></i> <span id="walletAddressShort">Not Connected</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- State 1: Connect -->
+        <div id="connectState">
+            <div class="main-card">
+                <div style="text-align:center;">
+                    <div style="font-size:60px; color:var(--primary); margin-bottom:20px;"><i class="fa-solid fa-fingerprint"></i></div>
+                    <h2 style="margin-bottom:10px;">Quantum Access</h2>
+                    <p style="color:rgba(255,255,255,0.7); font-size:14px; margin-bottom:30px;">Initialize your decentralized protocol</p>
+                    <button id="connectBtn" class="btn"><i class="fa-solid fa-link"></i> CONNECT WALLET</button>
                 </div>
             </div>
         </div>
 
-        <div id="pageStars" class="page">
-            <div class="stars-page-button" onclick="openLevelStarsPage()">
-                <i class="fa-solid fa-layer-group" style="color:var(--gold);"></i>
-                <h3>Level Achieve Stars</h3>
-                <p style="font-size:12px; color:rgba(255,255,255,0.7);">Track your upgrade progress and unlock mastery rewards.</p>
-            </div>
-            <div class="stars-page-button" onclick="openJoiningStarsPage()">
-                <i class="fa-solid fa-users" style="color:var(--primary);"></i>
-                <h3>Network Joining Stars</h3>
-                <p style="font-size:12px; color:rgba(255,255,255,0.7);">Track your network growth and unlock leader bonuses.</p>
+        <!-- State 2: Invitation Code Verification -->
+        <div id="invitationState" class="hidden">
+            <div class="main-card">
+                <div style="text-align:center;">
+                    <i class="fa-solid fa-user-check" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
+                    <h2 style="margin-bottom: 15px;">Invitation Required</h2>
+                    <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 20px;">
+                        Node activation successful! To proceed, you must enter a valid invitation code from your upliner.
+                    </p>
+                    
+                    <div class="invite-code-input-group">
+                        <input type="text" id="verifyInviteCodeInput" placeholder="ENTER INVITER'S CODE" maxlength="8" style="text-transform: uppercase;">
+                        <button id="verifyInviteCodeBtn"><i class="fa-solid fa-check"></i> Verify</button>
+                    </div>
+                    <div id="inviterVerifyStatus" style="font-size: 11px; margin-bottom: 20px; text-align: left;"></div>
+
+                    <div class="commission-breakdown">
+                        <p><i class="fa-solid fa-chart-simple"></i> <strong>Commission Structure:</strong></p>
+                        <p>• <span>40%</span> to Direct Inviter</p>
+                        <p>• <span>10%</span> to Upliner (Inviter's Inviter)</p>
+                        <p>• <span>20%</span> Split among all existing Direct Members of Inviter</p>
+                    </div>
+                    
+                    <button class="btn btn-success" id="proceedToProfileBtn" disabled>Proceed to Profile Setup</button>
+                </div>
             </div>
         </div>
 
-        <div id="pageAssets" class="page">
-            <div class="main-card" style="padding:0; overflow: visible;">
-                <div class="profile-header">
-                    <img src="https://iili.io/qsZGN6P.jpg" class="cover-photo" alt="Cover Photo">
-                </div>
-                <div style="padding: 25px; padding-top: 0;">
-                    <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('profilePicInput').click()">
-                        <i class="fa-solid fa-user-circle" id="avatarIcon"></i>
-                        <img src="" alt="Profile Picture" id="profileAvatarImg" class="profile-avatar-img hidden">
+        <!-- State 3: Dashboard Content -->
+        <div id="dashboardState" class="hidden">
+            <div id="pageDashboard" class="page active">
+                <div class="main-card">
+                    <div style="background: url(https://iili.io/q4VQShN.jpg); background-size: cover; border-radius:20px; height:160px; margin-bottom:20px;">
                     </div>
-                    <div style="text-align:center; margin-bottom:25px;">
-                        <h2 id="profileName">Genesis User</h2>
-                        <span style="font-size:12px; color:var(--primary);" id="userId">ID: ZTR-0000</span>
-                        <div style="font-size:11px; color:rgba(255,255,255,0.7); margin-top:5px;" id="profileInviteCode"></div>
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="font-size:18px;">Protocol Overview</h3>
+                        <span class="rank-badge" id="userRankBadge">Verified Member</span>
                     </div>
 
-                    <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:15px; font-family:monospace; font-size:11px; text-align:center; color:var(--primary); margin-bottom:20px; border:1px dashed var(--primary); cursor:pointer;" id="walletAddressDisplay" onclick="copyWalletAddress()">
-                        0x...
+                    <div id="welcomeMessage" class="welcome-badge" style="margin: 10px 0;">
+                        Welcome!
                     </div>
 
-                    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:25px;">
-                        <div class="balance-stat">
-                            <i class="fa-brands fa-bnb" style="color:#f3ba2f;"></i>
-                            <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statBNB">0.00</div>
-                            <div style="font-size:9px; color:rgba(255,255,255,0.7);">BNB</div>
+                    <div class="income-grid">
+                        <div class="income-card" onclick="openIncomeHistory()">
+                            <p style="font-size:11px; color:rgba(255,255,255,0.7);">Core Profit</p>
+                            <h3 id="profitIncome">0.00 ZTR</h3>
+                            <small style="color:var(--success);">≈ $<span id="profitUSD">0</span></small>
                         </div>
-                        <div class="balance-stat">
-                            <i class="fa-solid fa-dollar-sign" style="color:#26a17b;"></i>
-                            <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statUSDT">0.00</div>
-                            <div style="font-size:9px; color:rgba(255,255,255,0.7);">USDT</div>
+                        <div class="income-card" style="cursor:default;">
+                            <p style="font-size:11px; color:rgba(255,255,255,0.7);">Network Size</p>
+                            <h3 id="teamIncome" style="color:var(--text-main);">0</h3>
+                            <small id="teamCount">Members</small>
                         </div>
-                        <div class="balance-stat">
-                            <i class="fa-solid fa-coins" style="color:var(--primary);"></i>
-                            <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statZTR">0.00</div>
-                            <div style="font-size:9px; color:rgba(255,255,255,0.7);">ZTR</div>
-                            <button class="claim-btn" onclick="openWithdrawalModal()">Claim</button>
+                        <div class="income-card" onclick="openSalaryHistory()">
+                            <p style="font-size:11px; color:rgba(255,255,255,0.7);">Weekly Salary</p>
+                            <h3 id="salleryIncome" style="color:var(--gold);">0.00 ZTR</h3>
+                            <small>From System</small>
+                        </div>
+                         <div class="income-card" style="cursor:default;">
+                            <p style="font-size:11px; color:rgba(255,255,255,0.7);">Current Node</p>
+                            <h3 id="levelIncome" style="font-size: 18px; color: var(--text-main);">Starter</h3>
+                            <small id="levelNameDisplay" style="visibility: hidden;">Phase 1</small>
+                        </div>
+                    </div>
+
+                    <div class="node-button-container">
+                        <div class="node-button" onclick="openLevelPage()">
+                            <i class="fa-solid fa-layer-group"></i>
+                            <h3>Matrix</h3>
+                            <small>View Levels</small>
                         </div>
                     </div>
                     
-                    <div id="withdrawalStatus" style="font-size: 12px; text-align: center; color: var(--text-muted); margin-bottom: 20px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px;">
-                        No pending withdrawals.
+                    <div class="gas-info" style="margin-top: 15px;">
+                        <i class="fa-solid fa-wallet"></i> Wallet: <span id="dashboardWalletAddress">Not Connected</span>
                     </div>
+                </div>
+            </div>
 
-                    <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
-                            <span style="color:rgba(255,255,255,0.7);"><i class="fa-solid fa-calendar"></i> Deployment</span>
-                            <span id="joinDate">--/--/--</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
-                            <span style="color:rgba(255,255,255,0.7);"><i class="fa-solid fa-user-check"></i> Invited By</span>
-                            <span id="profileInviterId">None</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
-                            <span style="color:rgba(255,255,255,0.7);"><i class="fa-solid fa-chart-area"></i> Total Yield</span>
-                            <span id="totalEarningsStat" style="color:var(--success);">$0.00</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; font-size:14px;">
-                            <span style="color:rgba(255,255,255,0.7);"><i class="fa-solid fa-shield"></i> Level Status</span>
-                            <span id="userLevelStat" style="color:var(--primary);">Start</span>
-                        </div>
+            <div id="pageTeam" class="page">
+                <div class="main-card">
+                    <h3><i class="fa-solid fa-share-alt"></i> Your Invitation Code</h3>
+                    <p style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:15px;">
+                        Share this unique code with friends to invite them!
+                    </p>
+                    <div class="invite-code-wrapper" id="inviteCodeWrapper">
+                        <i class="fa-solid fa-ticket"></i>
+                        <input type="text" id="inviteCodeInput" readonly value="Loading...">
+                        <button id="copyInviteCodeBtn"><i class="fa-solid fa-copy"></i></button>
                     </div>
+                    
+                    <h3 style="margin-top: 20px;"><i class="fa-solid fa-link"></i> Your Invitation Link</h3>
+                    <p style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:15px;">
+                        Share this link - your code will be automatically included!
+                    </p>
+                    <div class="invite-link-wrapper">
+                        <i class="fa-solid fa-link"></i>
+                        <input type="text" id="inviteLink" readonly value="Loading link...">
+                        <button id="copyInviteLinkBtn"><i class="fa-solid fa-copy"></i></button>
+                    </div>
+                </div>
+                
+                <div class="main-card" style="margin-top:20px;">
+                    <h3>Your Network Tree - Beautiful Hierarchy (<span id="teamPageTotalCount">0</span> members)</h3>
+                    <div id="networkTreeContainer" class="network-tree-container">
+                        <p style="text-align:center; color:rgba(255,255,255,0.7); font-size:13px;">Loading network tree...</p>
+                    </div>
+                </div>
+            </div>
 
-                    <button class="btn" onclick="openModal('editProfileModal')" style="margin-top:25px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">MODIFY IDENTITY</button>
+            <div id="pageStars" class="page">
+                <div class="stars-page-button" onclick="openLevelStarsPage()">
+                    <i class="fa-solid fa-layer-group" style="color:var(--gold);"></i>
+                    <h3>Level Achieve Stars</h3>
+                    <p style="font-size:12px; color:rgba(255,255,255,0.7);">Track your upgrade progress and unlock mastery rewards.</p>
+                </div>
+                <div class="stars-page-button" onclick="openJoiningStarsPage()">
+                    <i class="fa-solid fa-users" style="color:var(--primary);"></i>
+                    <h3>Network Joining Stars</h3>
+                    <p style="font-size:12px; color:rgba(255,255,255,0.7);">Track your network growth and unlock leader bonuses.</p>
+                </div>
+            </div>
+
+            <div id="pageAssets" class="page">
+                <div class="main-card" style="padding:0; overflow: visible;">
+                    <div class="profile-header">
+                        <img src="https://iili.io/qsZGN6P.jpg" class="cover-photo" alt="Cover Photo">
+                    </div>
+                    <div style="padding: 25px; padding-top: 0;">
+                        <div class="profile-avatar" id="profileAvatar" onclick="document.getElementById('profilePicInput').click()">
+                            <i class="fa-solid fa-user-circle" id="avatarIcon"></i>
+                            <img src="" alt="Profile Picture" id="profileAvatarImg" class="profile-avatar-img hidden">
+                        </div>
+                        <div style="text-align:center; margin-bottom:25px;">
+                            <h2 id="profileName">Genesis User</h2>
+                            <span style="font-size:12px; color:var(--primary);" id="userId">ID: ZTR-0000</span>
+                            <div style="font-size:11px; color:rgba(255,255,255,0.7); margin-top:5px;" id="profileInviteCode"></div>
+                        </div>
+
+                        <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:15px; font-family:monospace; font-size:11px; text-align:center; color:var(--primary); margin-bottom:20px; border:1px dashed var(--primary); cursor:pointer;" id="walletAddressDisplay" onclick="copyWalletAddress()">
+                            0x...
+                        </div>
+
+                        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:25px;">
+                            <div class="balance-stat">
+                                <i class="fa-brands fa-bnb" style="color:#f3ba2f;"></i>
+                                <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statBNB">0.00</div>
+                                <div style="font-size:9px; color:rgba(255,255,255,0.7);">BNB</div>
+                            </div>
+                            <div class="balance-stat">
+                                <i class="fa-solid fa-dollar-sign" style="color:#26a17b;"></i>
+                                <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statUSDT">0.00</div>
+                                <div style="font-size:9px; color:rgba(255,255,255,0.7);">USDT</div>
+                            </div>
+                            <div class="balance-stat">
+                                <i class="fa-solid fa-coins" style="color:var(--primary);"></i>
+                                <div style="font-size:14px; font-weight:bold; margin-top:5px;" id="statZTR">0.00</div>
+                                <div style="font-size:9px; color:rgba(255,255,255,0.7);">ZTR</div>
+                                <button class="claim-btn" onclick="openWithdrawalModal()">Claim</button>
+                            </div>
+                        </div>
+                        
+                        <div id="withdrawalStatus" style="font-size: 12px; text-align: center; color: var(--text-muted); margin-bottom: 20px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                            No pending withdrawals.
+                        </div>
+
+                        <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
+                                <span style="color:rgba(255,255,255,0.7);"><i class="fa-solid fa-calendar"></i> Deployment</span>
+                                <span id="joinDate">--/--/--</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
+                                <span style="color:rgba(255,255,255,0.7);"><i class="fa-solid fa-user-check"></i> Invited By</span>
+                                <span id="profileInviterId">None</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
+                                <span style="color:rgba(255,255,255,0.7);"><i class="fa-solid fa-chart-area"></i> Total Yield</span>
+                                <span id="totalEarningsStat" style="color:var(--success);">$0.00</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:14px;">
+                                <span style="color:rgba(255,255,255,0.7);"><i class="fa-solid fa-shield"></i> Level Status</span>
+                                <span id="userLevelStat" style="color:var(--primary);">Start</span>
+                            </div>
+                        </div>
+
+                        <button class="btn" onclick="openModal('editProfileModal')" style="margin-top:25px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);">MODIFY IDENTITY</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1326,11 +1343,118 @@
     <div class="nav-item" data-page="assets"><i class="fa-solid fa-wallet"></i><span>Vault</span></div>
 </div>
 
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.151.3/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.151.3/examples/jsm/"
+        }
+    }
+</script>
+
+<script type="module">
+    // START OF 3D EARTH BACKGROUND SCRIPT
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    const canvas = document.getElementById('bg-canvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 0, 7);
+
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.04;
+    controls.autoRotate = true;
+    controls.enablePan = false;
+    controls.enableZoom = false; // Disable zoom for background
+    controls.minDistance = 4;
+    controls.maxDistance = 15;
+    controls.target.set(0, 0, 0);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.05));
+    const sunLight = new THREE.DirectionalLight(0xfffde5, 1.2);
+    sunLight.position.set(10, 5, 5);
+    scene.add(sunLight);
+
+    const starsGeometry = new THREE.BufferGeometry();
+    const starsPositions = new Float32Array(10000 * 3);
+    for (let i = 0; i < starsPositions.length; i++) {
+        starsPositions[i] = (Math.random() - 0.5) * 300;
+    }
+    starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
+    const stars = new THREE.Points(starsGeometry, new THREE.PointsMaterial({ color: 0xffffff, size: 0.15, transparent: true, opacity: 0.8 }));
+    scene.add(stars);
+
+    const earthGroup = new THREE.Group();
+    scene.add(earthGroup);
+
+    const textureLoader = new THREE.TextureLoader();
+    const earthMaterial = new THREE.MeshStandardMaterial({
+        map: textureLoader.load('https://unpkg.com/three-globe@2.24.4/example/img/earth-day.jpg'),
+        normalMap: textureLoader.load('https://unpkg.com/three-globe@2.24.4/example/img/earth-topology.png'),
+        specularMap: textureLoader.load('https://unpkg.com/three-globe@2.24.4/example/img/earth-water.png'),
+        emissiveMap: textureLoader.load('https://unpkg.com/three-globe@2.24.4/example/img/earth-night.jpg'),
+        emissive: 0xffffff,
+        emissiveIntensity: 1.0,
+        metalness: 0.1,
+        roughness: 0.7
+    });
+    const earth = new THREE.Mesh(new THREE.SphereGeometry(2, 256, 256), earthMaterial);
+    earthGroup.add(earth);
+
+    const cloudMaterial = new THREE.MeshStandardMaterial({
+        map: textureLoader.load('https://unpkg.com/three-globe@2.24.4/example/img/earth-clouds.png'),
+        transparent: true,
+        opacity: 0.25,
+        blending: THREE.AdditiveBlending
+    });
+    const clouds = new THREE.Mesh(new THREE.SphereGeometry(2.015, 256, 256), cloudMaterial);
+    earthGroup.add(clouds);
+
+    const atmosMaterial = new THREE.ShaderMaterial({
+        uniforms: { "c": { value: 0.5 }, "p": { value: 4.0 } },
+        vertexShader: `varying vec3 vNormal; void main() { vNormal = normalize(normalMatrix * normal); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+        fragmentShader: `varying vec3 vNormal; void main() { float i = pow(0.6 - dot(vNormal, vec3(0,0,1)), 4.0); gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * i; }`,
+        side: THREE.BackSide, blending: THREE.AdditiveBlending, transparent: true
+    });
+    const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(2.1, 256, 256), atmosMaterial);
+    earthGroup.add(atmosphere);
+    
+    const clock = new THREE.Clock();
+    function animate() {
+        requestAnimationFrame(animate);
+        const elapsedTime = clock.getElapsedTime();
+        
+        earth.rotation.y = elapsedTime * 0.05;
+        clouds.rotation.y = elapsedTime * 0.06;
+        
+        controls.autoRotateSpeed = 0.4 + Math.sin(elapsedTime * 0.2) * 0.3;
+        controls.update();
+
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }, false);
+    // END OF 3D EARTH BACKGROUND SCRIPT
+</script>
+
 <script>
+    // START OF PLATFORM SCRIPT
     (async function() {
 
         // ========== FIREBASE CONFIGURATION ==========
-        // IMPORTANT: Replace with your own Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
             authDomain: "fortune-2cb70.firebaseapp.com",
@@ -1343,7 +1467,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // SECURITY: Validate and sanitize inputs
         function sanitizeInput(input) {
             if (!input) return '';
             const div = document.createElement('div');
@@ -1359,16 +1482,14 @@
             return /^[A-Z0-9]{8}$/.test(code);
         }
         
-        // CORE CONFIGURATION
-        // IMPORTANT: Replace with your Admin Wallet Address
         const ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
-        const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; // USDT BEP20 Contract
-        const CHAIN_ID = "0x38"; // BSC Mainnet
-        const CHAIN_ID_DECIMAL = 56; // BSC Mainnet
+        const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
+        const CHAIN_ID = "0x38";
+        const CHAIN_ID_DECIMAL = 56;
         const JOINING_FEE_USDT = 0.10;
-        const IMAGE_HOST_API_KEY = '6d207e02198a847aa98d0a2a901485a5'; // Your updated freeimage.host API key
+        const IMAGE_HOST_API_KEY = '6d207e02198a847aa98d0a2a901485a5';
         
-        let APP_LEVELS = []; // Will be fetched from Firebase
+        let APP_LEVELS = [];
 
         const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
         
@@ -1383,7 +1504,6 @@
         let pendingLevelUpgrade = null;
         let withdrawalListener = null;
 
-        // UI ELEMENTS
         const connectState = document.getElementById('connectState');
         const invitationState = document.getElementById('invitationState');
         const dashboardState = document.getElementById('dashboardState');
@@ -1394,7 +1514,6 @@
         const loadingOverlay = document.getElementById('loadingOverlay');
         const profileSetupModal = document.getElementById('profileSetupModal');
 
-        // ========== HELPER FUNCTIONS ==========
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -1404,15 +1523,12 @@
             setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
         }
         
-        // This function fetches level configurations from Firebase.
-        // This allows prices/names to be edited in the database without changing the website code.
         async function fetchAppConfig() {
             try {
                 const snapshot = await db.ref('config/levels').once('value');
                 if (snapshot.exists() && Array.isArray(snapshot.val())) {
                     APP_LEVELS = snapshot.val();
                 } else {
-                    // Fallback if config is missing in Firebase
                     APP_LEVELS = [
                         { id: 1, name: "Iron", price: 5, icon: "🛡️" },
                         { id: 2, name: "Bronze", price: 10, icon: "🥉" },
@@ -1447,7 +1563,6 @@
         }
         window.copyWalletAddress = copyWalletAddress;
         
-        // ========== INVITATION CODE GENERATION (DATABASE) ==========
         function generateUniqueInviteCode() {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = '';
@@ -1487,7 +1602,6 @@
             return snapshot.exists() ? snapshot.val() : null;
         }
 
-        // ========== USER DATA MANAGEMENT (DATABASE) ==========
         async function getNextUserId() {
             const counterRef = db.ref('nextUserId');
             const result = await counterRef.transaction(currentId => {
@@ -1578,7 +1692,6 @@
             await db.ref(`users/${wallet.toLowerCase()}/paid`).set(true);
         }
 
-        // ========== INCOME LOGGING ==========
         async function logIncome(wallet, amount, type) {
             if (!wallet || !isValidWalletAddress(wallet)) return;
             const incomeRef = db.ref(`users/${wallet.toLowerCase()}/incomeHistory`);
@@ -1590,14 +1703,12 @@
             await incomeRef.push(newLog);
         }
         
-        // ========== INVITATION SYSTEM (DATABASE) ==========
         async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
             const baseAmount = JOINING_FEE_USDT;
             const inviterWallet = await getWalletById(inviterUserId);
 
             if (!inviterWallet || !isValidWalletAddress(inviterWallet)) return;
 
-            // Direct inviter commission
             const directCommission = baseAmount * 0.40;
             await updateZTRBalance(inviterWallet, directCommission);
             await logIncome(inviterWallet, directCommission, 'Direct Commission');
@@ -1606,7 +1717,6 @@
             const teamSizeRef = db.ref(`users/${inviterWallet.toLowerCase()}/teamSize`);
             await teamSizeRef.transaction(currentSize => (currentSize || 0) + 1);
 
-            // Upliner commission
             const uplinerId = await getUplinerId(inviterWallet);
             if (uplinerId) {
                 const uplinerWallet = await getWalletById(uplinerId);
@@ -1618,7 +1728,6 @@
                 }
             }
 
-            // Downline pool commission
             const directMembers = await getDirectMembersOfInviter(inviterUserId);
             const eligibleMembers = directMembers.filter(wallet => wallet.toLowerCase() !== newUserWallet.toLowerCase());
 
@@ -1636,7 +1745,6 @@
             }
         }
         
-        // ========== ZTR BALANCE MANAGEMENT (DATABASE) ==========
         async function getZTRBalance(wallet) { 
             if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const snapshot = await db.ref(`users/${wallet.toLowerCase()}/ztrBalance`).once('value');
@@ -1688,7 +1796,6 @@
             return APP_LEVELS[levelId - 1]; 
         }
 
-        // ========== BALANCE & UI UPDATES ==========
         async function updateBalances() {
             if (!userAddress || !provider || !isValidWalletAddress(userAddress)) return;
             try {
@@ -1865,7 +1972,6 @@
             }
         }
 
-        // ========== HISTORY PAGES ==========
         window.openIncomeHistory = async function() {
             const listContainer = document.getElementById('incomeHistoryList');
             listContainer.innerHTML = '<div class="spinner" style="margin: auto;"></div>';
@@ -1933,7 +2039,6 @@
             }
         }
 
-        // ========== STARS & SALARY PAGES ==========
         async function checkSalaryEligibility() {
             const userLevel = await getUserLevel(userAddress);
             const teamSize = await getTeamSize(userAddress);
@@ -1993,7 +2098,6 @@
         window.openLevelStarsPage = openLevelStarsPage;
         window.openJoiningStarsPage = openJoiningStarsPage;
 
-        // ========== LEVEL PAGE ==========
         async function initializeLevelViewer() {
             const viewer = document.getElementById('levelViewer');
             if (!viewer) return;
@@ -2030,7 +2134,6 @@
             openModal('levelUpgradePaymentModal');
         };
 
-        // ========== USDT TRANSACTION FOR LEVEL UPGRADE ==========
         document.getElementById('confirmLevelUpgradeBtn').addEventListener('click', async () => {
             if (isProcessing || !pendingLevelUpgrade) return;
             isProcessing = true;
@@ -2067,7 +2170,6 @@
             }
         });
 
-        // ========== MODAL CONTROLS ==========
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         window.closeModal = closeModal;
@@ -2082,7 +2184,6 @@
             }
         }
 
-        // ========== PROFILE SETUP FUNCTIONS ==========
         let setupProfilePicData = null;
         
         document.getElementById('setupProfilePic').addEventListener('change', async (e) => {
@@ -2128,7 +2229,6 @@
             await showDashboard();
         });
 
-        // ========== WITHDRAWAL SYSTEM (SECURE REQUEST-BASED) ==========
         async function openWithdrawalModal() {
             const ztrBalance = await getZTRBalance(userAddress);
             if (ztrBalance <= 0) {
@@ -2211,10 +2311,10 @@
                         userId: profile.userId,
                         amount: ztrBalance,
                         requestDate: new Date().toISOString(),
-                        status: 'pending' // Status is pending for approval
+                        status: 'pending'
                     };
                     await db.ref('withdrawals').push(withdrawalRequest);
-                    await updateZTRBalance(userAddress, 0, true); // Set user's balance to 0 after request
+                    await updateZTRBalance(userAddress, 0, true);
                     
                     await updateDashboard();
                     await updateAssetsPage();
@@ -2234,7 +2334,6 @@
             }
         });
 
-        // ========== WALLET CONNECTION LOGIC ==========
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0 || !isValidWalletAddress(accounts[0])) {
                 showToast("Invalid wallet address", "error");
@@ -2303,7 +2402,6 @@
             }
         }
 
-        // ========== EVENT LISTENERS ==========
         document.getElementById('connectBtn').addEventListener('click', async () => {
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
@@ -2489,6 +2587,7 @@
             await autoReconnect();
         });
     })();
+    // END OF PLATFORM SCRIPT
 </script>
 </body>
 </html>
