@@ -812,13 +812,14 @@
             margin-bottom: 15px;
         }
         
+        /* New Loading System Style */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
+            background-color: #000;
             z-index: 10000;
             display: flex;
             align-items: center;
@@ -826,20 +827,58 @@
             flex-direction: column;
             transition: 0.3s;
         }
-        
         .loading-overlay.hidden {
             display: none;
         }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+        .loading-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+        .loading-logo {
+            width: 60px;
+            height: 60px;
+            animation: logo-pulse 2s infinite ease-in-out;
+        }
+        .loading-ring {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            border: 2px solid transparent;
+        }
+        .loading-ring.r1 {
+            border-color: var(--primary);
+            animation: rotate-loader 4s linear infinite;
+        }
+        .loading-ring.r2 {
+            border-color: var(--secondary);
+            animation: rotate-loader 8s linear infinite reverse;
+            transform: scale(0.8);
+        }
+        .loading-text {
+            margin-top: 25px;
+            font-family: monospace;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary-glow);
+            letter-spacing: 2px;
+            animation: text-flicker 3s infinite;
+        }
+        @keyframes rotate-loader {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes logo-pulse {
+            0%, 100% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+        @keyframes text-flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        /* End of New Loading System Style */
         
         .profile-setup-modal {
             max-width: 400px;
@@ -997,10 +1036,15 @@
             50%, 100% { left: 100%; }
         }
         .airdrop-card .icon {
-            font-size: 50px;
-            color: var(--primary);
-            text-shadow: 0 0 20px var(--primary-glow);
+            height: 65px;
             margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .airdrop-logo {
+            height: 100%;
+            filter: drop-shadow(0 0 15px var(--primary-glow));
         }
         .airdrop-card h2 {
             font-size: 24px;
@@ -1017,8 +1061,12 @@
 <body>
 
 <div id="loadingOverlay" class="loading-overlay">
-    <div class="spinner"></div>
-    <p>Connecting to blockchain...</p>
+    <div class="loading-container">
+        <div class="loading-ring r1"></div>
+        <div class="loading-ring r2"></div>
+        <img src="https://iili.io/BV7TpMF.jpg" alt="Loading Logo" class="loading-logo">
+    </div>
+    <p class="loading-text">Connecting to Blockchain...</p>
 </div>
 
 <div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
@@ -1289,7 +1337,9 @@
             
             <!-- NEW AIRDROP SECTION -->
             <div class="airdrop-card">
-                <div class="icon"><i class="fa-solid fa-parachute-box"></i></div>
+                <div class="icon">
+                    <img src="https://iili.io/Bw13wP9.jpg" alt="Airdrop Logo" class="airdrop-logo">
+                </div>
                 <h2>ZTR Protocol Airdrop</h2>
                 <p>Exclusive rewards for our community are on the horizon. Stay tuned!</p>
                 <button class="btn" disabled><i class="fa-solid fa-clock"></i> COMING SOON</button>
@@ -1376,7 +1426,7 @@
                         </div>
                     </div>
                     
-                    <div id="withdrawalStatus" style="font-size: 12px; text-align: center; color: var(--text-muted); margin-bottom: 20px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                    <div id="withdrawalStatus" class="hidden" style="font-size: 12px; text-align: center; color: var(--text-muted); margin-bottom: 20px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px;">
                         No pending withdrawals.
                     </div>
 
@@ -2277,6 +2327,8 @@
         
         function updateWithdrawalStatusUI(withdrawal) {
             const statusDiv = document.getElementById('withdrawalStatus');
+            if(!statusDiv) return; // Gracefully handle if element is not found
+            
             if(!withdrawal) {
                 statusDiv.innerHTML = "No withdrawal history.";
                 return;
