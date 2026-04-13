@@ -967,6 +967,51 @@
             66%, 91% { transform: translateX(-66.666%); }
             100% { transform: translateX(0%); }
         }
+
+        /* New Airdrop Card Style */
+        .airdrop-card {
+            padding: 30px;
+            text-align: center;
+            border-radius: 20px;
+            background-image: linear-gradient(145deg, rgba(112, 0, 255, 0.4), rgba(0, 242, 255, 0.4)), url('https://i.imgur.com/Y0h3ZgC.jpeg');
+            background-size: cover;
+            background-position: center;
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 30px var(--primary-glow);
+            position: relative;
+            overflow: hidden;
+        }
+        .airdrop-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+            transform: skewX(-25deg);
+            animation: gleam 5s infinite;
+        }
+        @keyframes gleam {
+            0% { left: -100%; }
+            50%, 100% { left: 100%; }
+        }
+        .airdrop-card .icon {
+            font-size: 50px;
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary-glow);
+            margin-bottom: 15px;
+        }
+        .airdrop-card h2 {
+            font-size: 24px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .airdrop-card p {
+            color: var(--text-muted);
+            margin: 10px 0 25px 0;
+            font-size: 14px;
+        }
+
     </style>
 </head>
 <body>
@@ -1241,6 +1286,15 @@
                     <i class="fa-solid fa-wallet"></i> Wallet: <span id="dashboardWalletAddress">Not Connected</span>
                 </div>
             </div>
+            
+            <!-- NEW AIRDROP SECTION -->
+            <div class="airdrop-card">
+                <div class="icon"><i class="fa-solid fa-parachute-box"></i></div>
+                <h2>ZTR Protocol Airdrop</h2>
+                <p>Exclusive rewards for our community are on the horizon. Stay tuned!</p>
+                <button class="btn" disabled><i class="fa-solid fa-clock"></i> COMING SOON</button>
+            </div>
+
         </div>
 
         <div id="pageTeam" class="page">
@@ -1301,10 +1355,6 @@
                         <h2 id="profileName">Genesis User</h2>
                         <span style="font-size:12px; color:var(--primary);" id="userId">ID: ZTR-0000</span>
                         <div style="font-size:11px; color:rgba(255,255,255,0.7); margin-top:5px;" id="profileInviteCode"></div>
-                    </div>
-
-                    <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:15px; font-family:monospace; font-size:11px; text-align:center; color:var(--primary); margin-bottom:20px; border:1px dashed var(--primary); cursor:pointer;" id="walletAddressDisplay" onclick="copyWalletAddress()">
-                        0x...
                     </div>
 
                     <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:25px;">
@@ -1443,7 +1493,7 @@
         }
         
         // This function fetches level configurations from Firebase.
-        // This allows prices/names to be edited in the database without changing the website code.
+        // This allows prices/names/returns to be edited in the database without changing the website code.
         async function fetchAppConfig() {
             try {
                 const snapshot = await db.ref('config/levels').once('value');
@@ -1452,11 +1502,11 @@
                 } else {
                     // Fallback if config is missing in Firebase
                     APP_LEVELS = [
-                        { id: 1, name: "Iron", price: 5, icon: "🛡️" },
-                        { id: 2, name: "Bronze", price: 10, icon: "🥉" },
-                        { id: 3, name: "Silver", price: 15, icon: "🥈" },
-                        { id: 4, name: "Gold", price: 20, icon: "🥇" },
-                        { id: 5, name: "Master", price: 25, icon: "👑" }
+                        { id: 1, name: "Iron", price: 5, icon: "🛡️", returnPercentage: 5 },
+                        { id: 2, name: "Bronze", price: 10, icon: "🥉", returnPercentage: 5 },
+                        { id: 3, name: "Silver", price: 15, icon: "🥈", returnPercentage: 7 },
+                        { id: 4, name: "Gold", price: 20, icon: "🥇", returnPercentage: 7 },
+                        { id: 5, name: "Master", price: 25, icon: "👑", returnPercentage: 10 }
                     ];
                     console.warn("Using fallback level configuration.");
                 }
@@ -1473,7 +1523,6 @@
             document.getElementById('walletAddressBadge').style.display = 'flex';
             document.getElementById('walletAddressShort').innerText = shortAddress;
             document.getElementById('dashboardWalletAddress').innerText = shortAddress;
-            document.getElementById('walletAddressDisplay').innerText = fullAddress;
             window.currentWalletFullAddress = fullAddress;
         }
 
@@ -1722,8 +1771,8 @@
         
         async function getCurrentLevelInfo(wallet) { 
             const levelId = await getUserLevel(wallet); 
-            if (levelId === 0) return { name: "Starter", price: 0, icon: "🌱" }; 
-            return APP_LEVELS[levelId - 1]; 
+            if (levelId === 0) return { name: "Starter", price: 0, icon: "🌱", returnPercentage: 0 }; 
+            return APP_LEVELS.find(level => level.id === levelId) || APP_LEVELS[levelId - 1]; 
         }
 
         // ========== BALANCE & UI UPDATES ==========
@@ -1846,7 +1895,8 @@
             const getUserLevelName = async (wallet) => {
                 const levelId = await getUserLevel(wallet);
                 if (levelId === 0) return "Starter";
-                return APP_LEVELS[levelId - 1]?.name || "Starter";
+                const level = APP_LEVELS.find(l => l.id === levelId);
+                return level?.name || "Starter";
             };
 
             const buildNodeHTML = (profile, levelName, isCurrentUser = false, level = 0) => {
@@ -2040,7 +2090,7 @@
             APP_LEVELS.forEach(level => {
                 const isUnlocked = currentLevelId >= level.id;
                 const canUpgrade = currentLevelId === level.id - 1;
-                cardsHTML += `<div class="level-card ${isUnlocked ? 'unlocked' : ''}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} Level</h2>${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}</div><div><h3 class="level-price">${level.price} USDT</h3></div><button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price})">${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}</button></div>`;
+                cardsHTML += `<div class="level-card ${isUnlocked ? 'unlocked' : ''}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} Level</h2>${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}</div><div><h3 class="level-price">${level.price} USDT</h3><p class="level-info" style="color: var(--gold); margin-top: 10px; font-weight: bold;">Instant Return: ${level.returnPercentage}%</p></div><button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price})">${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}</button></div>`;
             });
             viewer.innerHTML = cardsHTML;
         }
@@ -2087,6 +2137,15 @@
                 
                 await setUserLevel(userAddress, pendingLevelUpgrade.levelId);
                 showToast(`✅ Successfully upgraded to ${pendingLevelUpgrade.levelName}!`, 'success');
+                
+                // Calculate and distribute instant return
+                const levelData = APP_LEVELS.find(l => l.id === pendingLevelUpgrade.levelId);
+                if (levelData && levelData.returnPercentage > 0) {
+                    const returnAmount = pendingLevelUpgrade.price * (levelData.returnPercentage / 100);
+                    await updateZTRBalance(userAddress, returnAmount);
+                    await logIncome(userAddress, returnAmount, `${levelData.name} Node Activation Return`);
+                    showToast(`💰 You received an instant return of ${returnAmount.toFixed(2)} ZTR!`, 'success');
+                }
                 
                 closeModal('levelUpgradePaymentModal');
                 await updateDashboard();
