@@ -51,7 +51,6 @@
             top: 0;
             z-index: 1000;
             background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
         }
 
         .logo-img {
@@ -86,7 +85,6 @@
             background: rgba(0, 0, 0, 0.3);
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
         }
 
         .income-grid {
@@ -193,7 +191,6 @@
             right: 15px;
             height: 70px;
             background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 25px;
             display: flex;
@@ -317,11 +314,6 @@
         .hidden { display: none !important; }
         .page { display: none; animation: fadeIn 0.4s ease; }
         .page.active { display: block; }
-        #pageDashboard.active {
-             overflow-y: auto;
-             max-height: calc(100vh - 150px); /* Adjust based on navbar and bottom nav height */
-        }
-
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -775,7 +767,7 @@
         .level-card {
             flex-shrink: 0;
             width: 280px;
-            height: 480px;
+            height: 450px;
             padding: 30px;
             text-align: center;
             display: flex;
@@ -795,13 +787,6 @@
         .level-card .level-icon {
             font-size: 80px;
             line-height: 1;
-            margin-bottom: 15px;
-        }
-
-        .level-card .level-icon img {
-            width: 100px;
-            height: 100px;
-            object-fit: contain;
         }
         
         .level-card .level-price {
@@ -813,17 +798,6 @@
         .level-card .level-info {
             font-size: 13px;
             color: rgba(255,255,255,0.7);
-        }
-        
-        .level-card .level-return-info {
-            background: rgba(0, 242, 255, 0.1);
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            font-size: 12px;
-            font-weight: bold;
-            padding: 8px;
-            border-radius: 12px;
-            margin-top: 15px;
         }
 
         .spin { animation: spin 1s linear infinite; }
@@ -963,7 +937,7 @@
             color: #ef4444;
         }
         
-        /* Slider Styles */
+        /* New Slider Styles */
         .slider-container {
             width: 100%;
             height: 160px;
@@ -994,55 +968,48 @@
             100% { transform: translateX(0%); }
         }
 
-        /* New Airdrop Section Styles */
-        #airdropSection {
-            margin-top: 20px;
+        /* New Airdrop Card Style */
+        .airdrop-card {
             padding: 30px;
-            background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), rgba(112, 0, 255, 0.1)), url('https://i.imgur.com/b2o0FfT.png');
+            text-align: center;
+            border-radius: 20px;
+            background-image: linear-gradient(145deg, rgba(112, 0, 255, 0.4), rgba(0, 242, 255, 0.4)), url('https://i.imgur.com/Y0h3ZgC.jpeg');
             background-size: cover;
             background-position: center;
-            border-radius: 20px;
             border: 1px solid var(--primary);
-            text-align: center;
-            animation: fadeIn 1s ease;
+            box-shadow: 0 0 30px var(--primary-glow);
             position: relative;
             overflow: hidden;
         }
-        #airdropSection::before {
+        .airdrop-card::before {
             content: '';
             position: absolute;
-            top: -50%;
+            top: 0;
             left: -50%;
             width: 200%;
-            height: 200%;
-            background: conic-gradient(transparent, rgba(0, 242, 255, 0.3), transparent 30%);
-            animation: rotate 8s linear infinite;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+            transform: skewX(-25deg);
+            animation: gleam 5s infinite;
         }
-        @keyframes rotate { 100% { transform: rotate(360deg); } }
-        
-        #airdropSection i {
+        @keyframes gleam {
+            0% { left: -100%; }
+            50%, 100% { left: 100%; }
+        }
+        .airdrop-card .icon {
             font-size: 50px;
             color: var(--primary);
             text-shadow: 0 0 20px var(--primary-glow);
             margin-bottom: 15px;
         }
-        #airdropSection h2 {
+        .airdrop-card h2 {
             font-size: 24px;
-            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
-        #airdropSection p {
-            font-size: 14px;
+        .airdrop-card p {
             color: var(--text-muted);
-            margin-bottom: 20px;
-        }
-        #airdropSection .coming-soon-badge {
-            display: inline-block;
-            background: var(--primary);
-            color: black;
-            font-weight: bold;
-            padding: 10px 25px;
-            border-radius: 50px;
-            font-size: 16px;
+            margin: 10px 0 25px 0;
+            font-size: 14px;
         }
 
     </style>
@@ -1319,13 +1286,13 @@
                     <i class="fa-solid fa-wallet"></i> Wallet: <span id="dashboardWalletAddress">Not Connected</span>
                 </div>
             </div>
-
-            <!-- AIRDROP SECTION -->
-            <div id="airdropSection">
-                <i class="fa-solid fa-parachute-box"></i>
+            
+            <!-- NEW AIRDROP SECTION -->
+            <div class="airdrop-card">
+                <div class="icon"><i class="fa-solid fa-parachute-box"></i></div>
                 <h2>ZTR Protocol Airdrop</h2>
-                <p>A special community airdrop event is being planned. Stay tuned for announcements!</p>
-                <div class="coming-soon-badge">Coming Soon</div>
+                <p>Exclusive rewards for our community are on the horizon. Stay tuned!</p>
+                <button class="btn" disabled><i class="fa-solid fa-clock"></i> COMING SOON</button>
             </div>
 
         </div>
@@ -1388,10 +1355,6 @@
                         <h2 id="profileName">Genesis User</h2>
                         <span style="font-size:12px; color:var(--primary);" id="userId">ID: ZTR-0000</span>
                         <div style="font-size:11px; color:rgba(255,255,255,0.7); margin-top:5px;" id="profileInviteCode"></div>
-                    </div>
-
-                    <div style="display: none; background:rgba(0,0,0,0.4); padding:12px; border-radius:15px; font-family:monospace; font-size:11px; text-align:center; color:var(--primary); margin-bottom:20px; border:1px dashed var(--primary); cursor:pointer;" id="walletAddressDisplay" onclick="copyWalletAddress()">
-                        0x...
                     </div>
 
                     <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:25px;">
@@ -1530,7 +1493,7 @@
         }
         
         // This function fetches level configurations from Firebase.
-        // This allows prices, names, logos, and returns to be edited in the database.
+        // This allows prices/names/returns to be edited in the database without changing the website code.
         async function fetchAppConfig() {
             try {
                 const snapshot = await db.ref('config/levels').once('value');
@@ -1539,11 +1502,11 @@
                 } else {
                     // Fallback if config is missing in Firebase
                     APP_LEVELS = [
-                        { id: 1, name: "Iron", price: 5, icon: "🛡️", logoUrl: null, returnPercentage: 5 },
-                        { id: 2, name: "Bronze", price: 10, icon: "🥉", logoUrl: null, returnPercentage: 8 },
-                        { id: 3, name: "Silver", price: 15, icon: "🥈", logoUrl: null, returnPercentage: 10 },
-                        { id: 4, name: "Gold", price: 20, icon: "🥇", logoUrl: null, returnPercentage: 12 },
-                        { id: 5, name: "Master", price: 25, icon: "👑", logoUrl: null, returnPercentage: 15 }
+                        { id: 1, name: "Iron", price: 5, icon: "🛡️", returnPercentage: 5 },
+                        { id: 2, name: "Bronze", price: 10, icon: "🥉", returnPercentage: 5 },
+                        { id: 3, name: "Silver", price: 15, icon: "🥈", returnPercentage: 7 },
+                        { id: 4, name: "Gold", price: 20, icon: "🥇", returnPercentage: 7 },
+                        { id: 5, name: "Master", price: 25, icon: "👑", returnPercentage: 10 }
                     ];
                     console.warn("Using fallback level configuration.");
                 }
@@ -1560,7 +1523,6 @@
             document.getElementById('walletAddressBadge').style.display = 'flex';
             document.getElementById('walletAddressShort').innerText = shortAddress;
             document.getElementById('dashboardWalletAddress').innerText = shortAddress;
-            // The full address display on the vault is now hidden via CSS, but we set this for the copy function
             window.currentWalletFullAddress = fullAddress;
         }
 
@@ -1608,7 +1570,7 @@
         
         async function getWalletByInviteCode(inviteCode) {
             if (!inviteCode || !isValidInviteCode(inviteCode)) return null;
-            const snapshot = await db.ref(`inviteCodeMap/${inviteCode.toUpperCase()}`).once('value');
+            const snapshot = await db.ref(`inviteCodeMap/${inviteCode}`).once('value');
             return snapshot.exists() ? snapshot.val() : null;
         }
 
@@ -1809,8 +1771,8 @@
         
         async function getCurrentLevelInfo(wallet) { 
             const levelId = await getUserLevel(wallet); 
-            if (levelId === 0) return { name: "Starter", price: 0, icon: "🌱", logoUrl: null, returnPercentage: 0 }; 
-            return APP_LEVELS[levelId - 1]; 
+            if (levelId === 0) return { name: "Starter", price: 0, icon: "🌱", returnPercentage: 0 }; 
+            return APP_LEVELS.find(level => level.id === levelId) || APP_LEVELS[levelId - 1]; 
         }
 
         // ========== BALANCE & UI UPDATES ==========
@@ -1933,7 +1895,8 @@
             const getUserLevelName = async (wallet) => {
                 const levelId = await getUserLevel(wallet);
                 if (levelId === 0) return "Starter";
-                return APP_LEVELS[levelId - 1]?.name || "Starter";
+                const level = APP_LEVELS.find(l => l.id === levelId);
+                return level?.name || "Starter";
             };
 
             const buildNodeHTML = (profile, levelName, isCurrentUser = false, level = 0) => {
@@ -2124,28 +2087,10 @@
             if (!viewer) return;
             const currentLevelId = await getUserLevel(userAddress);
             let cardsHTML = `<div class="level-card unlocked"><div><div class="level-icon">🌱</div><h2>Starter Level</h2><span class="rank-badge">CURRENTLY ACTIVE</span></div><p class="level-info">Your journey begins here. Upgrade to the next level to start earning.</p><button class="btn" disabled>ACHIEVED</button></div>`;
-            
             APP_LEVELS.forEach(level => {
                 const isUnlocked = currentLevelId >= level.id;
                 const canUpgrade = currentLevelId === level.id - 1;
-                const logoHtml = level.logoUrl ? `<img src="${level.logoUrl}" alt="${level.name} Logo">` : level.icon;
-                const returnInfo = (level.returnPercentage && level.returnPercentage > 0) ? `<div class="level-return-info"><i class="fa-solid fa-bolt"></i> Earn ${level.returnPercentage}% back instantly!</div>` : '';
-
-                cardsHTML += `
-                    <div class="level-card ${isUnlocked ? 'unlocked' : ''}">
-                        <div>
-                            <div class="level-icon">${logoHtml}</div>
-                            <h2>${level.name} Level</h2>
-                            ${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}
-                        </div>
-                        <div>
-                            <h3 class="level-price">${level.price} USDT</h3>
-                            ${returnInfo}
-                        </div>
-                        <button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price})">
-                            ${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}
-                        </button>
-                    </div>`;
+                cardsHTML += `<div class="level-card ${isUnlocked ? 'unlocked' : ''}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} Level</h2>${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}</div><div><h3 class="level-price">${level.price} USDT</h3><p class="level-info" style="color: var(--gold); margin-top: 10px; font-weight: bold;">Instant Return: ${level.returnPercentage}%</p></div><button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price})">${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}</button></div>`;
             });
             viewer.innerHTML = cardsHTML;
         }
@@ -2193,16 +2138,15 @@
                 await setUserLevel(userAddress, pendingLevelUpgrade.levelId);
                 showToast(`✅ Successfully upgraded to ${pendingLevelUpgrade.levelName}!`, 'success');
                 
-                // --- NEW: Calculate and award one-time return ---
-                const upgradedLevelInfo = APP_LEVELS.find(l => l.id === pendingLevelUpgrade.levelId);
-                if (upgradedLevelInfo && upgradedLevelInfo.returnPercentage > 0) {
-                    const returnAmount = upgradedLevelInfo.price * (upgradedLevelInfo.returnPercentage / 100);
+                // Calculate and distribute instant return
+                const levelData = APP_LEVELS.find(l => l.id === pendingLevelUpgrade.levelId);
+                if (levelData && levelData.returnPercentage > 0) {
+                    const returnAmount = pendingLevelUpgrade.price * (levelData.returnPercentage / 100);
                     await updateZTRBalance(userAddress, returnAmount);
-                    await logIncome(userAddress, returnAmount, 'Node Activation Return');
-                    showToast(`🎁 Bonus! You received ${returnAmount.toFixed(2)} ZTR back!`, 'success');
+                    await logIncome(userAddress, returnAmount, `${levelData.name} Node Activation Return`);
+                    showToast(`💰 You received an instant return of ${returnAmount.toFixed(2)} ZTR!`, 'success');
                 }
-                // --- END NEW ---
-
+                
                 closeModal('levelUpgradePaymentModal');
                 await updateDashboard();
                 await initializeLevelViewer();
