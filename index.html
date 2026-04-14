@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ZTR Coin - Premium Blockchain Hub</title>
-    <link rel="icon" href="https://iili.io/BO89VsV.png" type="image/png">
+    <link rel="icon" href="https://iili.io/BV7TpMF.jpg" type="image/jpeg">
     <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
@@ -31,7 +31,6 @@
         html, body {
             overscroll-behavior: none;
             height: 100%;
-            scroll-behavior: smooth;
         }
 
         body {
@@ -52,7 +51,6 @@
             top: 0;
             z-index: 1000;
             background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
         }
 
         .logo-img {
@@ -199,7 +197,6 @@
             justify-content: space-around;
             align-items: center;
             z-index: 1000;
-            backdrop-filter: blur(10px);
         }
 
         .nav-item {
@@ -315,22 +312,9 @@
         }
 
         .hidden { display: none !important; }
-        
-        /* Updated Page Styles for Scrolling */
-        .page {
-            display: block; /* Always display pages */
-            min-height: 80vh; /* Give some space */
-            padding-top: 40px; /* Add padding for separation */
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .page:first-of-type {
-             padding-top: 0;
-        }
-        .page:last-of-type {
-            border-bottom: none;
-            min-height: auto;
-        }
-        
+        .page { display: none; animation: fadeIn 0.4s ease; }
+        .page.active { display: block; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .modal-overlay {
@@ -828,7 +812,7 @@
             margin-bottom: 15px;
         }
         
-        /* === New Loading System Style === */
+        /* New Loading System Style */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -840,22 +824,62 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.5s;
+            flex-direction: column;
+            transition: 0.3s;
         }
         .loading-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
+            display: none;
+        }
+        .loading-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .loading-logo {
-            width: 150px; /* Larger logo */
-            height: 150px;
+            width: 120px;
+            height: 120px;
             animation: logo-pulse 2s infinite ease-in-out;
+            filter: drop-shadow(0 0 15px var(--primary-glow));
+        }
+        .loading-ring {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            border: 2px solid transparent;
+        }
+        .loading-ring.r1 {
+            border-color: var(--primary);
+            animation: rotate-loader 4s linear infinite;
+        }
+        .loading-ring.r2 {
+            border-color: var(--secondary);
+            animation: rotate-loader 8s linear infinite reverse;
+            transform: scale(0.8);
+        }
+        .loading-text {
+            margin-top: 25px;
+            font-family: monospace;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary-glow);
+            letter-spacing: 2px;
+            animation: text-flicker 3s infinite;
+        }
+        @keyframes rotate-loader {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         @keyframes logo-pulse {
             0%, 100% { transform: scale(0.95); opacity: 0.8; }
             50% { transform: scale(1.05); opacity: 1; }
         }
-        /* === End of New Loading System Style === */
+        @keyframes text-flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        /* End of New Loading System Style */
         
         .profile-setup-modal {
             max-width: 400px;
@@ -941,9 +965,17 @@
             border-color: var(--primary) !important;
         }
         
-        .status-success { color: var(--success); }
-        .status-info { color: var(--gold); }
-        .status-error { color: #ef4444; }
+        .status-success {
+            color: var(--success);
+        }
+        
+        .status-info {
+            color: var(--gold);
+        }
+        
+        .status-error {
+            color: #ef4444;
+        }
         
         /* New Slider Styles */
         .slider-container {
@@ -1020,7 +1052,12 @@
 <body>
 
 <div id="loadingOverlay" class="loading-overlay">
-    <img src="https://iili.io/BO89VsV.png" alt="Loading Logo" class="loading-logo">
+    <div class="loading-container">
+        <div class="loading-ring r1"></div>
+        <div class="loading-ring r2"></div>
+        <img src="https://iili.io/BOSY86Q.png" alt="Loading Logo" class="loading-logo">
+    </div>
+    <p class="loading-text">Connecting to Blockchain...</p>
 </div>
 
 <div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
@@ -1181,7 +1218,7 @@
 </div>
 
 <div class="navbar">
-    <img src="https://iili.io/BO89VsV.png" alt="ZTR Logo" class="logo-img">
+    <img src="https://iili.io/BV7TpMF.jpg" alt="ZTR Logo" class="logo-img">
     <div style="display:flex; align-items:center; gap:8px;">
         <div class="wallet-address-badge" id="walletAddressBadge" onclick="copyWalletAddress()" style="display: none;">
             <i class="fa-solid fa-wallet"></i> <span id="walletAddressShort">Not Connected</span>
@@ -1230,10 +1267,9 @@
         </div>
     </div>
 
-    <!-- State 3: Dashboard Content (Full Scroll) -->
+    <!-- State 3: Dashboard Content -->
     <div id="dashboardState" class="hidden">
-        
-        <div id="pageDashboard" class="page">
+        <div id="pageDashboard" class="page active">
             <div class="main-card">
                 <!-- SLIDER START -->
                 <div class="slider-container">
@@ -1494,12 +1530,15 @@
             setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
         }
         
+        // This function fetches level configurations from Firebase.
+        // This allows prices/names/returns to be edited in the database without changing the website code.
         async function fetchAppConfig() {
             try {
                 const snapshot = await db.ref('config/levels').once('value');
                 if (snapshot.exists() && Array.isArray(snapshot.val())) {
                     APP_LEVELS = snapshot.val();
                 } else {
+                    // Fallback if config is missing in Firebase
                     APP_LEVELS = [
                         { id: 1, name: "Iron", price: 5, icon: "🛡️", returnPercentage: 5 },
                         { id: 2, name: "Bronze", price: 10, icon: "🥉", returnPercentage: 5 },
@@ -1533,6 +1572,7 @@
         }
         window.copyWalletAddress = copyWalletAddress;
         
+        // ========== INVITATION CODE GENERATION (DATABASE) ==========
         function generateUniqueInviteCode() {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = '';
@@ -1572,6 +1612,7 @@
             return snapshot.exists() ? snapshot.val() : null;
         }
 
+        // ========== USER DATA MANAGEMENT (DATABASE) ==========
         async function getNextUserId() {
             const counterRef = db.ref('nextUserId');
             const result = await counterRef.transaction(currentId => {
@@ -1662,6 +1703,7 @@
             await db.ref(`users/${wallet.toLowerCase()}/paid`).set(true);
         }
 
+        // ========== INCOME LOGGING ==========
         async function logIncome(wallet, amount, type) {
             if (!wallet || !isValidWalletAddress(wallet)) return;
             const incomeRef = db.ref(`users/${wallet.toLowerCase()}/incomeHistory`);
@@ -1673,6 +1715,7 @@
             await incomeRef.push(newLog);
         }
         
+        // ========== INVITATION SYSTEM (DATABASE) ==========
         async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
             const baseAmount = JOINING_FEE_USDT;
             const inviterWallet = await getWalletById(inviterUserId);
@@ -1715,6 +1758,7 @@
             }
         }
         
+        // ========== ZTR BALANCE MANAGEMENT (DATABASE) ==========
         async function getZTRBalance(wallet) { 
             if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const snapshot = await db.ref(`users/${wallet.toLowerCase()}/ztrBalance`).once('value');
@@ -1766,6 +1810,7 @@
             return APP_LEVELS.find(level => level.id === levelId) || APP_LEVELS[levelId - 1]; 
         }
 
+        // ========== BALANCE & UI UPDATES ==========
         async function updateBalances() {
             if (!userAddress || !provider || !isValidWalletAddress(userAddress)) return;
             try {
@@ -1943,6 +1988,7 @@
             }
         }
 
+        // ========== HISTORY PAGES ==========
         window.openIncomeHistory = async function() {
             const listContainer = document.getElementById('incomeHistoryList');
             listContainer.innerHTML = '<div class="spinner" style="margin: auto;"></div>';
@@ -2010,6 +2056,7 @@
             }
         }
 
+        // ========== STARS & SALARY PAGES ==========
         async function checkSalaryEligibility() {
             const userLevel = await getUserLevel(userAddress);
             const teamSize = await getTeamSize(userAddress);
@@ -2069,6 +2116,7 @@
         window.openLevelStarsPage = openLevelStarsPage;
         window.openJoiningStarsPage = openJoiningStarsPage;
 
+        // ========== LEVEL PAGE ==========
         async function initializeLevelViewer() {
             const viewer = document.getElementById('levelViewer');
             if (!viewer) return;
@@ -2105,6 +2153,7 @@
             openModal('levelUpgradePaymentModal');
         };
 
+        // ========== USDT TRANSACTION FOR LEVEL UPGRADE ==========
         document.getElementById('confirmLevelUpgradeBtn').addEventListener('click', async () => {
             if (isProcessing || !pendingLevelUpgrade) return;
             isProcessing = true;
@@ -2123,6 +2172,7 @@
                 
                 await setUserLevel(userAddress, pendingLevelUpgrade.levelId);
                 
+                // Calculate and distribute instant return
                 const levelData = APP_LEVELS.find(l => l.id === pendingLevelUpgrade.levelId);
                 if (levelData && levelData.returnPercentage > 0) {
                     const returnAmount = pendingLevelUpgrade.price * (levelData.returnPercentage / 100);
@@ -2147,6 +2197,7 @@
             }
         });
 
+        // ========== MODAL CONTROLS ==========
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         window.closeModal = closeModal;
@@ -2161,6 +2212,7 @@
             }
         }
 
+        // ========== PROFILE SETUP FUNCTIONS ==========
         let setupProfilePicData = null;
         
         document.getElementById('setupProfilePic').addEventListener('change', async (e) => {
@@ -2206,6 +2258,7 @@
             await showDashboard();
         });
 
+        // ========== WITHDRAWAL SYSTEM (SECURE REQUEST-BASED) ==========
         async function openWithdrawalModal() {
             const ztrBalance = await getZTRBalance(userAddress);
             if (ztrBalance <= 0) {
@@ -2257,7 +2310,7 @@
         
         function updateWithdrawalStatusUI(withdrawal) {
             const statusDiv = document.getElementById('withdrawalStatus');
-            if(!statusDiv) return;
+            if(!statusDiv) return; // Gracefully handle if element is not found
             
             if(!withdrawal) {
                 statusDiv.innerHTML = "No withdrawal history.";
@@ -2290,10 +2343,10 @@
                         userId: profile.userId,
                         amount: ztrBalance,
                         requestDate: new Date().toISOString(),
-                        status: 'pending'
+                        status: 'pending' // Status is pending for approval
                     };
                     await db.ref('withdrawals').push(withdrawalRequest);
-                    await updateZTRBalance(userAddress, 0, true);
+                    await updateZTRBalance(userAddress, 0, true); // Set user's balance to 0 after request
                     
                     await updateDashboard();
                     await updateAssetsPage();
@@ -2312,6 +2365,7 @@
             }
         });
 
+        // ========== WALLET CONNECTION LOGIC ==========
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0 || !isValidWalletAddress(accounts[0])) {
                 showToast("Invalid wallet address", "error");
@@ -2369,17 +2423,18 @@
                         localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
                         await initConnection(accounts, true);
                     } else {
-                        setTimeout(() => loadingOverlay.classList.add('hidden'), 500);
+                        loadingOverlay.classList.add('hidden');
                     }
                 } catch (error) {
                     console.error("Auto-reconnect failed:", error);
-                    setTimeout(() => loadingOverlay.classList.add('hidden'), 500);
+                    loadingOverlay.classList.add('hidden');
                 }
             } else {
-                setTimeout(() => loadingOverlay.classList.add('hidden'), 500);
+                loadingOverlay.classList.add('hidden');
             }
         }
 
+        // ========== EVENT LISTENERS ==========
         document.getElementById('connectBtn').addEventListener('click', async () => {
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
@@ -2507,35 +2562,23 @@
             navigator.clipboard.writeText(document.getElementById('inviteCodeInput').value);
             showToast('Invitation code copied!', 'success');
         });
-        
-        // --- Navigation Logic for Scrollable Page ---
+
         document.querySelectorAll('.nav-item').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', async () => {
+                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
                 const pageId = btn.dataset.page;
-                const targetPage = document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
-                if (targetPage) {
-                    targetPage.scrollIntoView({ behavior: 'smooth' });
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
+                if (pageId === 'team') {
+                    await renderBeautifulTree();
+                    await updateInviteInfo();
+                } else if (pageId === 'assets') {
+                    await updateAssetsPage();
                 }
             });
         });
 
-        // --- Intersection Observer to highlight active nav item on scroll ---
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const pageId = entry.target.id.replace('page', '').toLowerCase();
-                    document.querySelectorAll('.nav-item').forEach(nav => {
-                        nav.classList.toggle('active', nav.dataset.page === pageId);
-                    });
-                }
-            });
-        }, { threshold: 0.4 }); // 40% of the section must be visible
-
-        document.querySelectorAll('.page').forEach(page => {
-            observer.observe(page);
-        });
-        
-        // --- Other event listeners and functions ---
         setInterval(async () => {
             if (userAddress && await isProfileComplete(userAddress)) {
                 await updateBalances();
