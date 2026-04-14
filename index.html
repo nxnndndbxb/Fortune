@@ -1012,7 +1012,7 @@
             padding: 30px;
             text-align: center;
             border-radius: 20px;
-            background-image: linear-gradient(145deg, rgba(112, 0, 255, 0.4), rgba(0, 242, 255, 0.4)), url('https://i.imgur.com/Y0h3ZgC.jpeg');
+            background-image: linear-gradient(145deg, rgba(112, 0, 255, 0.4), rgba(0, 242, 255, 0.4)), url('https://iili.io/Bw13wP9.jpg');
             background-size: cover;
             background-position: center;
             border: 1px solid var(--primary);
@@ -1035,20 +1035,10 @@
             0% { left: -100%; }
             50%, 100% { left: 100%; }
         }
-        .airdrop-card .icon {
-            height: 65px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .airdrop-logo {
-            height: 100%;
-            filter: drop-shadow(0 0 15px var(--primary-glow));
-        }
         .airdrop-card h2 {
             font-size: 24px;
             text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            margin-top: 20px;
         }
         .airdrop-card p {
             color: var(--text-muted);
@@ -1337,9 +1327,6 @@
             
             <!-- NEW AIRDROP SECTION -->
             <div class="airdrop-card">
-                <div class="icon">
-                    <img src="https://iili.io/Bw13wP9.jpg" alt="Airdrop Logo" class="airdrop-logo">
-                </div>
                 <h2>ZTR Protocol Airdrop</h2>
                 <p>Exclusive rewards for our community are on the horizon. Stay tuned!</p>
                 <button class="btn" disabled><i class="fa-solid fa-clock"></i> COMING SOON</button>
@@ -1738,7 +1725,6 @@
             const directCommission = baseAmount * 0.40;
             await updateZTRBalance(inviterWallet, directCommission);
             await logIncome(inviterWallet, directCommission, 'Direct Commission');
-            showToast(`Inviter ID:ZTR-${inviterUserId} received ${directCommission.toFixed(2)} ZTR!`, 'success');
             
             const teamSizeRef = db.ref(`users/${inviterWallet.toLowerCase()}/teamSize`);
             await teamSizeRef.transaction(currentSize => (currentSize || 0) + 1);
@@ -1751,7 +1737,6 @@
                     const uplinerCommission = baseAmount * 0.10;
                     await updateZTRBalance(uplinerWallet, uplinerCommission);
                     await logIncome(uplinerWallet, uplinerCommission, 'Upliner Commission');
-                    showToast(`Upliner ID:ZTR-${uplinerId} received ${uplinerCommission.toFixed(2)} ZTR!`, 'success');
                 }
             }
 
@@ -1767,7 +1752,6 @@
                     if (memberProfile) {
                        await updateZTRBalance(memberWallet, sharePerMember);
                        await logIncome(memberWallet, sharePerMember, 'Downline Pool Share');
-                       showToast(`Existing member ID:ZTR-${memberProfile.userId} received ${sharePerMember.toFixed(2)} ZTR!`, 'success');
                     }
                 }
             }
@@ -2186,7 +2170,6 @@
                 await tx.wait();
                 
                 await setUserLevel(userAddress, pendingLevelUpgrade.levelId);
-                showToast(`✅ Successfully upgraded to ${pendingLevelUpgrade.levelName}!`, 'success');
                 
                 // Calculate and distribute instant return
                 const levelData = APP_LEVELS.find(l => l.id === pendingLevelUpgrade.levelId);
@@ -2194,7 +2177,6 @@
                     const returnAmount = pendingLevelUpgrade.price * (levelData.returnPercentage / 100);
                     await updateZTRBalance(userAddress, returnAmount);
                     await logIncome(userAddress, returnAmount, `${levelData.name} Node Activation Return`);
-                    showToast(`💰 You received an instant return of ${returnAmount.toFixed(2)} ZTR!`, 'success');
                 }
                 
                 closeModal('levelUpgradePaymentModal');
@@ -2368,7 +2350,6 @@
                     await updateDashboard();
                     await updateAssetsPage();
                     
-                    showToast("Withdrawal request submitted successfully! Waiting for approval.", "success");
                     closeModal('withdrawalModal');
                 } else {
                     showToast("Error: Not enough balance or profile not found.", "error");
@@ -2484,7 +2465,6 @@
                 
                 await markUserAsPaid(userAddress);
                 closeModal('paymentModal');
-                showToast("✅ Node Activated! Please verify your inviter.", "success");
                 
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
