@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ZTR Coin - Premium Blockchain Hub</title>
-    <link rel="icon" href="https://iili.io/BV7TpMF.jpg" type="image/jpeg">
+    <link rel="icon" href="https://iili.io/BO89VsV.png" type="image/png">
     <!-- Ethers.js v6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <!-- FontAwesome -->
@@ -193,13 +193,13 @@
             right: 15px;
             height: 70px;
             background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 25px;
             display: flex;
             justify-content: space-around;
             align-items: center;
             z-index: 1000;
+            backdrop-filter: blur(10px);
         }
 
         .nav-item {
@@ -316,16 +316,22 @@
 
         .hidden { display: none !important; }
         
-        /* UPDATED: Pages are now scrollable sections */
+        /* Updated Page Styles for Scrolling */
         .page {
-            min-height: calc(100vh - 150px); /* Ensure page takes up significant space */
-            padding-top: 20px;
-            padding-bottom: 40px;
-            scroll-margin-top: 80px; /* Offset for sticky navbar */
-            animation: fadeIn 0.8s ease;
+            display: block; /* Always display pages */
+            min-height: 80vh; /* Give some space */
+            padding-top: 40px; /* Add padding for separation */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .page:first-of-type {
+             padding-top: 0;
+        }
+        .page:last-of-type {
+            border-bottom: none;
+            min-height: auto;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .modal-overlay {
             position: fixed;
@@ -822,7 +828,7 @@
             margin-bottom: 15px;
         }
         
-        /* === NEW LOADING SYSTEM STYLE === */
+        /* === New Loading System Style === */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -834,49 +840,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.3s;
-            overflow: hidden; /* Hide overflow from border */
-        }
-        .loading-overlay::before {
-            content: '';
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(
-                transparent,
-                var(--primary),
-                var(--secondary),
-                transparent 30%
-            );
-            animation: rotate-border 4s linear infinite;
-        }
-        @keyframes rotate-border {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            transition: opacity 0.5s;
         }
         .loading-overlay.hidden {
-            display: none;
-        }
-        .loading-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* Add a background to hide the border behind the content */
-            width: 100%;
-            height: 100%;
-            background-color: #000;
+            opacity: 0;
+            pointer-events: none;
         }
         .loading-logo {
-            width: 150px; /* Increased size */
-            height: 150px; /* Increased size */
+            width: 150px; /* Larger logo */
+            height: 150px;
             animation: logo-pulse 2s infinite ease-in-out;
         }
         @keyframes logo-pulse {
             0%, 100% { transform: scale(0.95); opacity: 0.8; }
             50% { transform: scale(1.05); opacity: 1; }
         }
-        /* End of New Loading System Style */
+        /* === End of New Loading System Style === */
         
         .profile-setup-modal {
             max-width: 400px;
@@ -962,17 +941,9 @@
             border-color: var(--primary) !important;
         }
         
-        .status-success {
-            color: var(--success);
-        }
-        
-        .status-info {
-            color: var(--gold);
-        }
-        
-        .status-error {
-            color: #ef4444;
-        }
+        .status-success { color: var(--success); }
+        .status-info { color: var(--gold); }
+        .status-error { color: #ef4444; }
         
         /* New Slider Styles */
         .slider-container {
@@ -1049,9 +1020,7 @@
 <body>
 
 <div id="loadingOverlay" class="loading-overlay">
-    <div class="loading-container">
-        <img src="https://iili.io/BV7TpMF.jpg" alt="Loading Logo" class="loading-logo">
-    </div>
+    <img src="https://iili.io/BO89VsV.png" alt="Loading Logo" class="loading-logo">
 </div>
 
 <div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
@@ -1212,7 +1181,7 @@
 </div>
 
 <div class="navbar">
-    <img src="https://iili.io/BV7TpMF.jpg" alt="ZTR Logo" class="logo-img">
+    <img src="https://iili.io/BO89VsV.png" alt="ZTR Logo" class="logo-img">
     <div style="display:flex; align-items:center; gap:8px;">
         <div class="wallet-address-badge" id="walletAddressBadge" onclick="copyWalletAddress()" style="display: none;">
             <i class="fa-solid fa-wallet"></i> <span id="walletAddressShort">Not Connected</span>
@@ -1261,8 +1230,9 @@
         </div>
     </div>
 
-    <!-- State 3: Dashboard Content -->
+    <!-- State 3: Dashboard Content (Full Scroll) -->
     <div id="dashboardState" class="hidden">
+        
         <div id="pageDashboard" class="page">
             <div class="main-card">
                 <!-- SLIDER START -->
@@ -1524,15 +1494,12 @@
             setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
         }
         
-        // This function fetches level configurations from Firebase.
-        // This allows prices/names/returns to be edited in the database without changing the website code.
         async function fetchAppConfig() {
             try {
                 const snapshot = await db.ref('config/levels').once('value');
                 if (snapshot.exists() && Array.isArray(snapshot.val())) {
                     APP_LEVELS = snapshot.val();
                 } else {
-                    // Fallback if config is missing in Firebase
                     APP_LEVELS = [
                         { id: 1, name: "Iron", price: 5, icon: "🛡️", returnPercentage: 5 },
                         { id: 2, name: "Bronze", price: 10, icon: "🥉", returnPercentage: 5 },
@@ -1566,7 +1533,6 @@
         }
         window.copyWalletAddress = copyWalletAddress;
         
-        // ========== INVITATION CODE GENERATION (DATABASE) ==========
         function generateUniqueInviteCode() {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = '';
@@ -1606,7 +1572,6 @@
             return snapshot.exists() ? snapshot.val() : null;
         }
 
-        // ========== USER DATA MANAGEMENT (DATABASE) ==========
         async function getNextUserId() {
             const counterRef = db.ref('nextUserId');
             const result = await counterRef.transaction(currentId => {
@@ -1697,7 +1662,6 @@
             await db.ref(`users/${wallet.toLowerCase()}/paid`).set(true);
         }
 
-        // ========== INCOME LOGGING ==========
         async function logIncome(wallet, amount, type) {
             if (!wallet || !isValidWalletAddress(wallet)) return;
             const incomeRef = db.ref(`users/${wallet.toLowerCase()}/incomeHistory`);
@@ -1709,7 +1673,6 @@
             await incomeRef.push(newLog);
         }
         
-        // ========== INVITATION SYSTEM (DATABASE) ==========
         async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
             const baseAmount = JOINING_FEE_USDT;
             const inviterWallet = await getWalletById(inviterUserId);
@@ -1752,7 +1715,6 @@
             }
         }
         
-        // ========== ZTR BALANCE MANAGEMENT (DATABASE) ==========
         async function getZTRBalance(wallet) { 
             if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const snapshot = await db.ref(`users/${wallet.toLowerCase()}/ztrBalance`).once('value');
@@ -1804,7 +1766,6 @@
             return APP_LEVELS.find(level => level.id === levelId) || APP_LEVELS[levelId - 1]; 
         }
 
-        // ========== BALANCE & UI UPDATES ==========
         async function updateBalances() {
             if (!userAddress || !provider || !isValidWalletAddress(userAddress)) return;
             try {
@@ -1900,7 +1861,6 @@
             await renderBeautifulTree();
             await updateInviteInfo();
             await listenForWithdrawals();
-            setupScrollObserver(); // Initialize scroll navigation
             
             localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
         }
@@ -1983,7 +1943,6 @@
             }
         }
 
-        // ========== HISTORY PAGES ==========
         window.openIncomeHistory = async function() {
             const listContainer = document.getElementById('incomeHistoryList');
             listContainer.innerHTML = '<div class="spinner" style="margin: auto;"></div>';
@@ -2051,7 +2010,6 @@
             }
         }
 
-        // ========== STARS & SALARY PAGES ==========
         async function checkSalaryEligibility() {
             const userLevel = await getUserLevel(userAddress);
             const teamSize = await getTeamSize(userAddress);
@@ -2111,7 +2069,6 @@
         window.openLevelStarsPage = openLevelStarsPage;
         window.openJoiningStarsPage = openJoiningStarsPage;
 
-        // ========== LEVEL PAGE ==========
         async function initializeLevelViewer() {
             const viewer = document.getElementById('levelViewer');
             if (!viewer) return;
@@ -2148,7 +2105,6 @@
             openModal('levelUpgradePaymentModal');
         };
 
-        // ========== USDT TRANSACTION FOR LEVEL UPGRADE ==========
         document.getElementById('confirmLevelUpgradeBtn').addEventListener('click', async () => {
             if (isProcessing || !pendingLevelUpgrade) return;
             isProcessing = true;
@@ -2167,7 +2123,6 @@
                 
                 await setUserLevel(userAddress, pendingLevelUpgrade.levelId);
                 
-                // Calculate and distribute instant return
                 const levelData = APP_LEVELS.find(l => l.id === pendingLevelUpgrade.levelId);
                 if (levelData && levelData.returnPercentage > 0) {
                     const returnAmount = pendingLevelUpgrade.price * (levelData.returnPercentage / 100);
@@ -2192,7 +2147,6 @@
             }
         });
 
-        // ========== MODAL CONTROLS ==========
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         window.closeModal = closeModal;
@@ -2207,7 +2161,6 @@
             }
         }
 
-        // ========== PROFILE SETUP FUNCTIONS ==========
         let setupProfilePicData = null;
         
         document.getElementById('setupProfilePic').addEventListener('change', async (e) => {
@@ -2253,7 +2206,6 @@
             await showDashboard();
         });
 
-        // ========== WITHDRAWAL SYSTEM (SECURE REQUEST-BASED) ==========
         async function openWithdrawalModal() {
             const ztrBalance = await getZTRBalance(userAddress);
             if (ztrBalance <= 0) {
@@ -2305,7 +2257,7 @@
         
         function updateWithdrawalStatusUI(withdrawal) {
             const statusDiv = document.getElementById('withdrawalStatus');
-            if(!statusDiv) return; // Gracefully handle if element is not found
+            if(!statusDiv) return;
             
             if(!withdrawal) {
                 statusDiv.innerHTML = "No withdrawal history.";
@@ -2338,10 +2290,10 @@
                         userId: profile.userId,
                         amount: ztrBalance,
                         requestDate: new Date().toISOString(),
-                        status: 'pending' // Status is pending for approval
+                        status: 'pending'
                     };
                     await db.ref('withdrawals').push(withdrawalRequest);
-                    await updateZTRBalance(userAddress, 0, true); // Set user's balance to 0 after request
+                    await updateZTRBalance(userAddress, 0, true);
                     
                     await updateDashboard();
                     await updateAssetsPage();
@@ -2360,7 +2312,6 @@
             }
         });
 
-        // ========== WALLET CONNECTION LOGIC ==========
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0 || !isValidWalletAddress(accounts[0])) {
                 showToast("Invalid wallet address", "error");
@@ -2418,18 +2369,17 @@
                         localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
                         await initConnection(accounts, true);
                     } else {
-                        loadingOverlay.classList.add('hidden');
+                        setTimeout(() => loadingOverlay.classList.add('hidden'), 500);
                     }
                 } catch (error) {
                     console.error("Auto-reconnect failed:", error);
-                    loadingOverlay.classList.add('hidden');
+                    setTimeout(() => loadingOverlay.classList.add('hidden'), 500);
                 }
             } else {
-                loadingOverlay.classList.add('hidden');
+                setTimeout(() => loadingOverlay.classList.add('hidden'), 500);
             }
         }
 
-        // ========== EVENT LISTENERS ==========
         document.getElementById('connectBtn').addEventListener('click', async () => {
             if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
@@ -2557,40 +2507,35 @@
             navigator.clipboard.writeText(document.getElementById('inviteCodeInput').value);
             showToast('Invitation code copied!', 'success');
         });
-
-        // ========== NEW: SCROLL-BASED NAVIGATION LOGIC ==========
+        
+        // --- Navigation Logic for Scrollable Page ---
         document.querySelectorAll('.nav-item').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
+            btn.addEventListener('click', () => {
                 const pageId = btn.dataset.page;
                 const targetPage = document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1));
                 if (targetPage) {
-                    targetPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    targetPage.scrollIntoView({ behavior: 'smooth' });
                 }
             });
         });
 
-        function setupScrollObserver() {
-            const pages = document.querySelectorAll('.page');
-            const navItems = document.querySelectorAll('.nav-item');
-            
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const pageId = entry.target.id;
-                        const pageName = pageId.replace('page', '').toLowerCase();
-                        
-                        navItems.forEach(item => {
-                            item.classList.toggle('active', item.dataset.page === pageName);
-                        });
-                    }
-                });
-            }, { threshold: 0.4 }); // 40% of the page must be visible
+        // --- Intersection Observer to highlight active nav item on scroll ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const pageId = entry.target.id.replace('page', '').toLowerCase();
+                    document.querySelectorAll('.nav-item').forEach(nav => {
+                        nav.classList.toggle('active', nav.dataset.page === pageId);
+                    });
+                }
+            });
+        }, { threshold: 0.4 }); // 40% of the section must be visible
 
-            pages.forEach(page => observer.observe(page));
-        }
-        // =========================================================
-
+        document.querySelectorAll('.page').forEach(page => {
+            observer.observe(page);
+        });
+        
+        // --- Other event listeners and functions ---
         setInterval(async () => {
             if (userAddress && await isProfileComplete(userAddress)) {
                 await updateBalances();
