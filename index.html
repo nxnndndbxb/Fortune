@@ -1455,6 +1455,7 @@
     (async function() {
 
         // ========== FIREBASE CONFIGURATION ==========
+        // IMPORTANT: Replace with your own Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
             authDomain: "fortune-2cb70.firebaseapp.com",
@@ -1484,17 +1485,13 @@
         }
         
         // CORE CONFIGURATION
+        // IMPORTANT: Replace with your Admin Wallet Address
         const ADMIN_WALLET = "0x97efeaa1da1108acff52840550ec51dc5bbfd812";
         const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; // USDT BEP20 Contract
         const CHAIN_ID = "0x38"; // BSC Mainnet
         const CHAIN_ID_DECIMAL = 56; // BSC Mainnet
         const JOINING_FEE_USDT = 5.25;
-        
-        // ================== [ IMPORTANT / ZAROORI ] ==================
-        // === Step 1: https://imgbb.com/ se apni free API key hasil karein.
-        // === Step 2: Us key ko neeche di gayi line mein paste karein.
-        const IMGBB_API_KEY = 'AAPKI_IMGBB_API_KEY_YAHAN_PASTE_KAREIN';
-        // =============================================================
+        const IMAGE_HOST_API_KEY = 'a3dcb8fbef24807068babb05b073a32f'; // Your updated freeimage.host API key
         
         let APP_LEVELS = []; // Will be fetched from Firebase
 
@@ -1532,12 +1529,15 @@
             setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
         }
         
+        // This function fetches level configurations from Firebase.
+        // This allows prices/names/returns to be edited in the database without changing the website code.
         async function fetchAppConfig() {
             try {
                 const snapshot = await db.ref('config/levels').once('value');
                 if (snapshot.exists() && Array.isArray(snapshot.val())) {
                     APP_LEVELS = snapshot.val();
                 } else {
+                    // Fallback if config is missing in Firebase
                     APP_LEVELS = [
                         { id: 1, name: "Iron", price: 5, icon: "🛡️", returnPercentage: 5 },
                         { id: 2, name: "Bronze", price: 10, icon: "🥉", returnPercentage: 5 },
@@ -1571,6 +1571,7 @@
         }
         window.copyWalletAddress = copyWalletAddress;
         
+        // ========== INVITATION CODE GENERATION (DATABASE) ==========
         function generateUniqueInviteCode() {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = '';
@@ -1583,10 +1584,12 @@
         async function getUniqueInviteCode(wallet) {
             if (!wallet || !isValidWalletAddress(wallet)) return null;
             const walletLower = wallet.toLowerCase();
+            
             const snapshot = await db.ref(`users/${walletLower}/inviteCode`).once('value');
             if (snapshot.exists()) {
                 return snapshot.val();
             }
+
             let newCode;
             let codeExists = true;
             while(codeExists) {
@@ -1596,6 +1599,7 @@
                     codeExists = false;
                 }
             }
+            
             await db.ref(`users/${walletLower}/inviteCode`).set(newCode);
             await db.ref(`inviteCodeMap/${newCode}`).set(walletLower);
             return newCode;
@@ -1607,9 +1611,15 @@
             return snapshot.exists() ? snapshot.val() : null;
         }
 
+        // ========== USER DATA MANAGEMENT (DATABASE) ==========
         async function getNextUserId() {
             const counterRef = db.ref('nextUserId');
-            const result = await counterRef.transaction(currentId => (currentId === null) ? 1000 : currentId + 1);
+            const result = await counterRef.transaction(currentId => {
+                if (currentId === null) {
+                    return 1000;
+                }
+                return currentId + 1;
+            });
             return result.snapshot.val();
         }
 
@@ -1628,8 +1638,10 @@
         async function createUserProfile(wallet, inviterId, username, profilePicUrl) {
             if (!wallet || !isValidWalletAddress(wallet) || !inviterId) return null;
             const walletLower = wallet.toLowerCase();
+            
             const userExists = await getUserProfile(walletLower);
             if(userExists) return userExists;
+
             const userId = await getNextUserId();
             const newProfile = { 
                 name: username ? sanitizeInput(username) : `User ${userId}`, 
@@ -1638,13 +1650,16 @@
                 userId: userId,
                 profilePicUrl: profilePicUrl ? sanitizeInput(profilePicUrl) : null
             };
+            
             const updates = {};
             updates[`/users/${walletLower}/profile`] = newProfile;
             updates[`/users/${walletLower}/inviterId`] = parseInt(inviterId);
             updates[`/users/${walletLower}/paid`] = true;
             updates[`/userIdMap/${userId}`] = walletLower;
+            
             await db.ref().update(updates);
             await getUniqueInviteCode(walletLower);
+            
             return newProfile;
         }
         
@@ -1687,22 +1702,34 @@
             await db.ref(`users/${wallet.toLowerCase()}/paid`).set(true);
         }
 
+        // ========== INCOME LOGGING ==========
         async function logIncome(wallet, amount, type) {
             if (!wallet || !isValidWalletAddress(wallet)) return;
             const incomeRef = db.ref(`users/${wallet.toLowerCase()}/incomeHistory`);
-            await incomeRef.push({ amount, type, date: new Date().toISOString() });
+            const newLog = {
+                amount: amount,
+                type: type,
+                date: new Date().toISOString()
+            };
+            await incomeRef.push(newLog);
         }
         
+        // ========== INVITATION SYSTEM (DATABASE) ==========
         async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
             const baseAmount = JOINING_FEE_USDT;
             const inviterWallet = await getWalletById(inviterUserId);
+
             if (!inviterWallet || !isValidWalletAddress(inviterWallet)) return;
 
+            // Direct inviter commission
             const directCommission = baseAmount * 0.40;
             await updateZTRBalance(inviterWallet, directCommission);
             await logIncome(inviterWallet, directCommission, 'Direct Commission');
-            await db.ref(`users/${inviterWallet.toLowerCase()}/teamSize`).transaction(currentSize => (currentSize || 0) + 1);
+            
+            const teamSizeRef = db.ref(`users/${inviterWallet.toLowerCase()}/teamSize`);
+            await teamSizeRef.transaction(currentSize => (currentSize || 0) + 1);
 
+            // Upliner commission
             const uplinerId = await getUplinerId(inviterWallet);
             if (uplinerId) {
                 const uplinerWallet = await getWalletById(uplinerId);
@@ -1713,13 +1740,16 @@
                 }
             }
 
+            // Downline pool commission
             const directMembers = await getDirectMembersOfInviter(inviterUserId);
             const eligibleMembers = directMembers.filter(wallet => wallet.toLowerCase() !== newUserWallet.toLowerCase());
+
             if (eligibleMembers.length > 0) {
                 const downlinePool = baseAmount * 0.20;
                 const sharePerMember = downlinePool / eligibleMembers.length;
                 for (const memberWallet of eligibleMembers) {
-                    if (await getUserProfile(memberWallet)) {
+                    const memberProfile = await getUserProfile(memberWallet);
+                    if (memberProfile) {
                        await updateZTRBalance(memberWallet, sharePerMember);
                        await logIncome(memberWallet, sharePerMember, 'Downline Pool Share');
                     }
@@ -1727,6 +1757,7 @@
             }
         }
         
+        // ========== ZTR BALANCE MANAGEMENT (DATABASE) ==========
         async function getZTRBalance(wallet) { 
             if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const snapshot = await db.ref(`users/${wallet.toLowerCase()}/ztrBalance`).once('value');
@@ -1761,11 +1792,13 @@
         }
         
         async function getSalleryEarnings(wallet) {
-            if (!wallet || !isValidWalletAddress(wallet)) return 0;
+             if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const snapshot = await db.ref(`users/${wallet.toLowerCase()}/salaryHistory`).once('value');
             let totalSalary = 0;
             if (snapshot.exists()) {
-                snapshot.forEach(child => { totalSalary += child.val().amount; });
+                snapshot.forEach(child => {
+                    totalSalary += child.val().amount;
+                });
             }
             return totalSalary;
         }
@@ -1776,6 +1809,7 @@
             return APP_LEVELS.find(level => level.id === levelId) || APP_LEVELS[levelId - 1]; 
         }
 
+        // ========== BALANCE & UI UPDATES ==========
         async function updateBalances() {
             if (!userAddress || !provider || !isValidWalletAddress(userAddress)) return;
             try {
@@ -1785,7 +1819,7 @@
                 const usdtBalWei = await usdtContract.balanceOf(userAddress);
                 rawUsdtBalance = ethers.formatUnits(usdtBalWei, usdtDecimals);
                 await updateAssetsPage();
-            } catch (e) { console.error("Balance update failed:", e); }
+            } catch (e) { console.error(e); }
         }
 
         async function updateAssetsPage() {
@@ -1811,7 +1845,7 @@
                 avatarImg.classList.remove('hidden');
                 avatarIcon.classList.add('hidden');
             } else {
-                avatarIcon.className = `fa-solid ${profile.avatar || 'fa-user-circle'}`;
+                avatarIcon.className = `fa-solid ${profile.avatar}`;
                 avatarIcon.classList.remove('hidden');
                 avatarImg.classList.add('hidden');
             }
@@ -1854,6 +1888,7 @@
             if (inviteCode && profile) {
                 const baseUrl = window.location.origin + window.location.pathname;
                 const inviteLink = `${baseUrl}?invite=${inviteCode}&inviterName=${encodeURIComponent(profile.name)}&inviterId=${profile.userId}`;
+                
                 document.getElementById('inviteLink').value = inviteLink;
                 document.getElementById('inviteCodeInput').value = inviteCode;
             }
@@ -1885,7 +1920,9 @@
             
             const getChildrenProfiles = async (userId) => {
                 const childrenWallets = await getDirectMembersOfInviter(userId);
-                const childrenProfiles = await Promise.all(childrenWallets.map(wallet => getUserProfile(wallet)));
+                const childrenProfiles = await Promise.all(
+                    childrenWallets.map(wallet => getUserProfile(wallet))
+                );
                 return childrenProfiles.filter(p => p !== null);
             };
 
@@ -1900,6 +1937,7 @@
                 const avatarHtml = profile.profilePicUrl 
                     ? `<img src="${profile.profilePicUrl}" alt="${profile.name}">` 
                     : `<i class="fa-solid fa-user-astronaut"></i>`;
+                
                 return `
                     <div class="tree-node-card ${isCurrentUser ? 'is-user' : ''}">
                         <div class="tree-node-avatar">${avatarHtml}</div>
@@ -1907,23 +1945,40 @@
                         <div class="tree-node-id">ID: ${profile.userId}</div>
                         <div class="tree-node-level"><i class="fa-solid fa-crown" style="font-size: 8px;"></i> ${levelName}</div>
                         ${level > 0 ? `<div class="tree-node-level" style="background: rgba(0,242,255,0.2);"><i class="fa-solid fa-level-down-alt"></i> Level ${level}</div>` : ''}
-                    </div>`;
+                    </div>
+                `;
             };
 
             const buildTree = async (userId, level = 1) => {
                 const children = await getChildrenProfiles(userId);
                 if (children.length === 0) return '';
+                
                 let childrenHTML = '';
                 for (const child of children) {
                     const childWallet = await getWalletById(child.userId);
                     const childLevelName = await getUserLevelName(childWallet);
-                    childrenHTML += `<li>${buildNodeHTML(child, childLevelName, false, level)}${await buildTree(child.userId, level + 1)}</li>`;
+                    childrenHTML += `
+                        <li>
+                            ${buildNodeHTML(child, childLevelName, false, level)}
+                            ${await buildTree(child.userId, level + 1)}
+                        </li>
+                    `;
                 }
+                
                 return `<ul>${childrenHTML}</ul>`;
             };
 
             const currentUserLevelName = await getUserLevelName(userAddress);
-            const treeHTML = `<div class="tree"><ul><li>${buildNodeHTML(currentUserProfile, currentUserLevelName, true, 0)}${await buildTree(currentUserProfile.userId, 1)}</li></ul></div>`;
+            let treeHTML = `
+                <div class="tree">
+                    <ul>
+                        <li>
+                            ${buildNodeHTML(currentUserProfile, currentUserLevelName, true, 0)}
+                            ${await buildTree(currentUserProfile.userId, 1)}
+                        </li>
+                    </ul>
+                </div>
+            `;
             
             if (teamSize === 0) {
                  treeContainer.innerHTML = `<div style="text-align:center; padding: 40px;"><i class="fa-solid fa-tree" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i><p style="color: rgba(255,255,255,0.7);">Your network is empty.</p><p style="color: rgba(255,255,255,0.7); font-size: 12px;">Share your invitation code to start building your tree!</p></div>`;
@@ -1932,6 +1987,7 @@
             }
         }
 
+        // ========== HISTORY PAGES ==========
         window.openIncomeHistory = async function() {
             const listContainer = document.getElementById('incomeHistoryList');
             listContainer.innerHTML = '<div class="spinner" style="margin: auto;"></div>';
@@ -1943,11 +1999,23 @@
             if (snapshot.exists()) {
                 listContainer.innerHTML = '';
                 const historyData = [];
-                snapshot.forEach(child => { historyData.push(child.val()); });
+                snapshot.forEach(child => {
+                    historyData.push(child.val());
+                });
+
                 historyData.reverse().forEach(item => {
                     const date = new Date(item.date);
                     const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-                    listContainer.innerHTML += `<div class="history-item"><div class="history-item-details"><strong>${sanitizeInput(item.type)}</strong><div class="date">${formattedDate}</div></div><div class="history-item-amount">+${item.amount.toFixed(4)} ZTR</div></div>`;
+                    const itemHtml = `
+                        <div class="history-item">
+                            <div class="history-item-details">
+                                <strong>${sanitizeInput(item.type)}</strong>
+                                <div class="date">${formattedDate}</div>
+                            </div>
+                            <div class="history-item-amount">+${item.amount.toFixed(4)} ZTR</div>
+                        </div>
+                    `;
+                    listContainer.innerHTML += itemHtml;
                 });
             } else {
                 listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No income history found.</p>';
@@ -1963,43 +2031,79 @@
             const snapshot = await salaryRef.orderByChild('date').once('value');
             if (snapshot.exists()) {
                 listContainer.innerHTML = '';
-                const historyData = [];
-                snapshot.forEach(child => { historyData.push(child.val()); });
+                 const historyData = [];
+                snapshot.forEach(child => {
+                    historyData.push(child.val());
+                });
+
                 historyData.reverse().forEach(item => {
                     const date = new Date(item.date);
                     const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-                    listContainer.innerHTML += `<div class="history-item"><div class="history-item-details"><strong>Weekly Salary</strong><div class="date">${formattedDate}</div></div><div class="history-item-amount" style="color: var(--gold)">+${item.amount.toFixed(2)} ZTR</div></div>`;
+                    const itemHtml = `
+                        <div class="history-item">
+                            <div class="history-item-details">
+                                <strong>Weekly Salary</strong>
+                                <div class="date">${formattedDate}</div>
+                            </div>
+                            <div class="history-item-amount" style="color: var(--gold)">+${item.amount.toFixed(2)} ZTR</div>
+                        </div>
+                    `;
+                    listContainer.innerHTML += itemHtml;
                 });
             } else {
                 listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No salary payments have been recorded yet.</p>';
             }
         }
 
+        // ========== STARS & SALARY PAGES ==========
         async function checkSalaryEligibility() {
             const userLevel = await getUserLevel(userAddress);
             const teamSize = await getTeamSize(userAddress);
-            return (userLevel >= APP_LEVELS.length && teamSize >= 10);
+            const maxLevel = APP_LEVELS.length;
+            const requiredTeamSize = 10;
+            return (userLevel >= maxLevel && teamSize >= requiredTeamSize);
         }
 
         function generateLargeStarsHTML(count, filledCount) {
             let starsHtml = '';
             for (let i = 0; i < count; i++) {
-                starsHtml += `<i class="fa-solid fa-star large-star-icon ${i < filledCount ? 'filled' : 'empty'}"></i>`;
+                const state = i < filledCount ? 'filled' : 'empty';
+                starsHtml += `<i class="fa-solid fa-star large-star-icon ${state}"></i>`;
             }
             return starsHtml;
         }
 
         async function openLevelStarsPage() {
-            document.getElementById('levelStarsContainer').innerHTML = generateLargeStarsHTML(APP_LEVELS.length, await getUserLevel(userAddress));
-            document.getElementById('salaryEligibilitySystem').classList.toggle('hidden', !(await checkSalaryEligibility()));
+            const container = document.getElementById('levelStarsContainer');
+            const userLevel = await getUserLevel(userAddress);
+            const maxLevel = APP_LEVELS.length;
+            container.innerHTML = generateLargeStarsHTML(maxLevel, userLevel);
+            
+            if(await checkSalaryEligibility()) {
+                document.getElementById('salaryEligibilitySystem').classList.remove('hidden');
+            } else {
+                document.getElementById('salaryEligibilitySystem').classList.add('hidden');
+            }
             levelStarsPage.classList.add('active');
         }
 
         async function openJoiningStarsPage() {
+            const container = document.getElementById('joiningStarsContainer');
             const teamSize = await getTeamSize(userAddress);
             const requiredTeamSize = 10;
-            document.getElementById('joiningStarsContainer').innerHTML = generateLargeStarsHTML(requiredTeamSize, Math.min(teamSize, requiredTeamSize));
-            document.getElementById('joiningBonusSystem').classList.toggle('hidden', teamSize < requiredTeamSize);
+            container.innerHTML = generateLargeStarsHTML(requiredTeamSize, Math.min(teamSize, requiredTeamSize));
+
+            if (teamSize >= requiredTeamSize) {
+                document.getElementById('joiningBonusSystem').classList.remove('hidden');
+            } else {
+                 document.getElementById('joiningBonusSystem').classList.add('hidden');
+            }
+
+             if(await checkSalaryEligibility()) {
+                document.getElementById('salaryEligibilitySystem').classList.remove('hidden');
+            } else {
+                document.getElementById('salaryEligibilitySystem').classList.add('hidden');
+            }
             joiningStarsPage.classList.add('active');
         }
 
@@ -2011,6 +2115,7 @@
         window.openLevelStarsPage = openLevelStarsPage;
         window.openJoiningStarsPage = openJoiningStarsPage;
 
+        // ========== LEVEL PAGE ==========
         async function initializeLevelViewer() {
             const viewer = document.getElementById('levelViewer');
             if (!viewer) return;
@@ -2041,11 +2146,13 @@
             if (currentId !== levelId - 1) { showToast(`Upgrade to the previous level first!`, 'info'); return; }
             
             pendingLevelUpgrade = { levelId, levelName, price };
+            
             document.getElementById('upgradeLevelNameDisplay').innerText = `Upgrade to ${levelName}`;
             document.getElementById('levelUpgradeAmount').innerHTML = `${price} USDT`;
             openModal('levelUpgradePaymentModal');
         };
 
+        // ========== USDT TRANSACTION FOR LEVEL UPGRADE ==========
         document.getElementById('confirmLevelUpgradeBtn').addEventListener('click', async () => {
             if (isProcessing || !pendingLevelUpgrade) return;
             isProcessing = true;
@@ -2056,6 +2163,7 @@
             try {
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
                 const amount = ethers.parseUnits(pendingLevelUpgrade.price.toString(), usdtDecimals);
+                
                 showToast("Waiting for approval...", "info");
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
                 showToast("Transaction sent! Confirming...", "info");
@@ -2063,6 +2171,7 @@
                 
                 await setUserLevel(userAddress, pendingLevelUpgrade.levelId);
                 
+                // Calculate and distribute instant return
                 const levelData = APP_LEVELS.find(l => l.id === pendingLevelUpgrade.levelId);
                 if (levelData && levelData.returnPercentage > 0) {
                     const returnAmount = pendingLevelUpgrade.price * (levelData.returnPercentage / 100);
@@ -2071,9 +2180,13 @@
                 }
                 
                 closeModal('levelUpgradePaymentModal');
-                await Promise.all([updateDashboard(), initializeLevelViewer(), updateAssetsPage(), renderBeautifulTree()]);
+                await updateDashboard();
+                await initializeLevelViewer();
+                await updateAssetsPage();
+                await renderBeautifulTree();
                 
             } catch (e) { 
+                console.error("Level upgrade failed:", e);
                 showToast("Transaction failed. Please try again.", "error"); 
             } finally { 
                 isProcessing = false; 
@@ -2083,6 +2196,7 @@
             }
         });
 
+        // ========== MODAL CONTROLS ==========
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         window.closeModal = closeModal;
@@ -2092,61 +2206,71 @@
             try { 
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); 
                 usdtDecimals = await usdtContract.decimals(); 
-            } catch { usdtDecimals = 18; }
+            } catch { 
+                usdtDecimals = 18; 
+            }
         }
 
+        // ========== PROFILE SETUP FUNCTIONS ==========
         let setupProfilePicData = null;
         
-        // ========== UPDATED PROFILE SETUP UPLOAD FUNCTION ==========
         document.getElementById('setupProfilePic').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-
-            if (!IMGBB_API_KEY || IMGBB_API_KEY === 'AAPKI_IMGBB_API_KEY_YAHAN_PASTE_KAREIN') {
-                showToast("Image hosting is not configured.", "error");
-                return;
-            }
-
+            
             showToast("Uploading profile picture...", "info");
             const formData = new FormData();
-            formData.append('key', IMGBB_API_KEY);
+            formData.append('key', IMAGE_HOST_API_KEY);
             formData.append('image', file);
-
+            
             try {
-                const response = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
+                const response = await fetch('https://freeimage.host/api/1/upload', { method: 'POST', body: formData });
                 const result = await response.json();
-                if (result.success) {
-                    setupProfilePicData = result.data.url;
+                if (result.status_code === 200) {
+                    setupProfilePicData = result.image.url;
                     document.getElementById('avatarPreviewImg').src = setupProfilePicData;
                     document.getElementById('avatarPreviewImg').style.display = 'block';
                     document.getElementById('avatarPreviewIcon').style.display = 'none';
                     showToast("Profile picture uploaded successfully!", "success");
                 } else {
-                    throw new Error(result.error.message || "Upload failed");
+                    throw new Error(result.status_txt || "Upload failed");
                 }
             } catch (error) {
-                console.error("Image upload error:", error);
-                showToast("Upload failed, please try again.", "error");
+                showToast("Upload failed, please try again", "error");
             }
         });
-
+        
         document.getElementById('completeProfileBtn').addEventListener('click', async () => {
             const username = document.getElementById('setupUsername').value.trim();
-            if (!username) { showToast("Please enter a username.", "error"); return; }
-            if (username.length < 3) { showToast("Username must be at least 3 characters.", "error"); return; }
+            if (!username) { showToast("Please enter a username", "error"); return; }
+            const sanitizedUsername = sanitizeInput(username);
+            if (sanitizedUsername.length < 3) { showToast("Username must be at least 3 characters", "error"); return; }
             
-            await createUserProfile(userAddress, verifiedInviterId, username, setupProfilePicData);
+            await createUserProfile(userAddress, verifiedInviterId, sanitizedUsername, setupProfilePicData);
             await distributeMultiLevelCommission(userAddress, verifiedInviterId);
+            
             sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
+            
             closeModal('profileSetupModal');
             showToast("Profile setup complete!", "success");
+            
             await showDashboard();
         });
 
+        // ========== WITHDRAWAL SYSTEM (SECURE REQUEST-BASED) ==========
         async function openWithdrawalModal() {
             const ztrBalance = await getZTRBalance(userAddress);
-            if (ztrBalance <= 0) { showToast("You have no ZTR coins to claim.", "info"); return; }
-            if (await hasPendingWithdrawal(userAddress)) { showToast("You already have a withdrawal request pending.", "error"); return; }
+            if (ztrBalance <= 0) {
+                showToast("You have no ZTR coins to claim.", "info");
+                return;
+            }
+            
+            const hasPending = await hasPendingWithdrawal(userAddress);
+            if(hasPending) {
+                showToast("You already have a withdrawal request pending.", "error");
+                return;
+            }
+            
             document.getElementById('withdrawalAmount').innerText = `${ztrBalance.toFixed(2)} ZTR`;
             openModal('withdrawalModal');
         }
@@ -2157,19 +2281,26 @@
             if (!snapshot.exists()) return false;
             let pending = false;
             snapshot.forEach(child => {
-                if (child.val().status === 'pending') { pending = true; }
+                if (child.val().status === 'pending') {
+                    pending = true;
+                }
             });
             return pending;
         }
         
         async function listenForWithdrawals() {
-            if(withdrawalListener) { withdrawalListener.off(); }
+            if(withdrawalListener) {
+                withdrawalListener.off(); // Detach previous listener
+            }
             const withdrawalRef = db.ref('withdrawals').orderByChild('userWallet').equalTo(userAddress.toLowerCase());
+            
             withdrawalListener = withdrawalRef.on('value', (snapshot) => {
                 let latestWithdrawal = null;
                 if(snapshot.exists()){
                     let allWithdrawals = [];
-                    snapshot.forEach(child => { allWithdrawals.push(child.val()); });
+                    snapshot.forEach(child => {
+                        allWithdrawals.push(child.val());
+                    });
                     latestWithdrawal = allWithdrawals.sort((a,b) => new Date(b.requestDate) - new Date(a.requestDate))[0];
                 }
                 updateWithdrawalStatusUI(latestWithdrawal);
@@ -2178,16 +2309,19 @@
         
         function updateWithdrawalStatusUI(withdrawal) {
             const statusDiv = document.getElementById('withdrawalStatus');
-            if(!statusDiv) return;
-            statusDiv.classList.remove('hidden');
-            if(!withdrawal) { statusDiv.innerHTML = "No withdrawal history."; return; }
+            if(!statusDiv) return; // Gracefully handle if element is not found
+            
+            if(!withdrawal) {
+                statusDiv.innerHTML = "No withdrawal history.";
+                return;
+            }
             const date = new Date(withdrawal.requestDate).toLocaleDateString();
             if(withdrawal.status === 'pending') {
-                statusDiv.innerHTML = `<span class="status-info"><i class="fa-solid fa-clock"></i> Pending: ${withdrawal.amount.toFixed(2)} ZTR requested on ${date}.</span>`;
+                statusDiv.innerHTML = `<span class="status-info"><i class="fa-solid fa-clock"></i> Pending withdrawal of ${withdrawal.amount.toFixed(2)} ZTR requested on ${date}.</span>`;
             } else if (withdrawal.status === 'approved') {
-                statusDiv.innerHTML = `<span class="status-success"><i class="fa-solid fa-check-circle"></i> Approved: ${withdrawal.amount.toFixed(2)} ZTR on ${date}.</span>`;
+                statusDiv.innerHTML = `<span class="status-success"><i class="fa-solid fa-check-circle"></i> Last withdrawal of ${withdrawal.amount.toFixed(2)} ZTR approved on ${date}.</span>`;
             } else if (withdrawal.status === 'rejected') {
-                statusDiv.innerHTML = `<span class="status-error"><i class="fa-solid fa-times-circle"></i> Rejected: ${withdrawal.amount.toFixed(2)} ZTR.</span>`;
+                statusDiv.innerHTML = `<span class="status-error"><i class="fa-solid fa-times-circle"></i> Last withdrawal of ${withdrawal.amount.toFixed(2)} ZTR was rejected.</span>`;
             }
         }
         
@@ -2197,18 +2331,31 @@
             const btn = document.getElementById('confirmWithdrawalBtn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Submitting...';
+            
             try {
                 const ztrBalance = await getZTRBalance(userAddress);
                 const profile = await getUserProfile(userAddress);
+
                 if (ztrBalance > 0 && profile) {
-                    const withdrawalRequest = { userWallet: userAddress.toLowerCase(), userId: profile.userId, amount: ztrBalance, requestDate: new Date().toISOString(), status: 'pending' };
+                    const withdrawalRequest = {
+                        userWallet: userAddress.toLowerCase(),
+                        userId: profile.userId,
+                        amount: ztrBalance,
+                        requestDate: new Date().toISOString(),
+                        status: 'pending' // Status is pending for approval
+                    };
                     await db.ref('withdrawals').push(withdrawalRequest);
-                    await updateZTRBalance(userAddress, 0, true);
-                    await Promise.all([updateDashboard(), updateAssetsPage()]);
+                    await updateZTRBalance(userAddress, 0, true); // Set user's balance to 0 after request
+                    
+                    await updateDashboard();
+                    await updateAssetsPage();
+                    
                     closeModal('withdrawalModal');
-                    showToast("Withdrawal request submitted!", "success");
-                } else { showToast("Error: Not enough balance or profile not found.", "error"); }
+                } else {
+                    showToast("Error: Not enough balance or profile not found.", "error");
+                }
             } catch (e) {
+                console.error("Withdrawal error:", e);
                 showToast("An error occurred. Please try again.", "error");
             } finally {
                 isProcessing = false;
@@ -2217,22 +2364,26 @@
             }
         });
 
+        // ========== WALLET CONNECTION LOGIC ==========
         async function initConnection(accounts, isAutoReconnect = false) {
             if (!accounts || accounts.length === 0 || !isValidWalletAddress(accounts[0])) {
                 showToast("Invalid wallet address", "error");
                 return false;
             }
             userAddress = accounts[0];
+            
             localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, userAddress);
             localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
+            
             provider = new ethers.BrowserProvider(window.ethereum);
             signer = await provider.getSigner();
+            
             updateAllWalletAddressDisplays();
             
             const network = await provider.getNetwork();
             if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
                 if (!isAutoReconnect) showToast("Please switch to BSC network.", "info");
-                try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) { console.error(e); }
+                try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {}
             }
             
             await getUSDTDecimals();
@@ -2243,6 +2394,7 @@
             } else if (await isPaidUser(userAddress)) {
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
+
                 const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
                 if (storedInviteInfo) {
                     document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code;
@@ -2251,6 +2403,7 @@
             } else {
                 openModal('paymentModal');
             }
+            
             loadingOverlay.classList.add('hidden');
             return true;
         }
@@ -2258,18 +2411,21 @@
         async function autoReconnect() {
             const savedWallet = localStorage.getItem(STORAGE_KEYS.CONNECTED_WALLET);
             const sessionActive = localStorage.getItem(STORAGE_KEYS.SESSION_ACTIVE);
+            
             if (savedWallet && isValidWalletAddress(savedWallet) && sessionActive === 'true' && window.ethereum) {
                 loadingOverlay.classList.remove('hidden');
                 try {
                     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
                     if (accounts.length > 0 && accounts[0].toLowerCase() === savedWallet.toLowerCase()) {
                         await initConnection(accounts, true);
+                    } else if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
+                        localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
+                        await initConnection(accounts, true);
                     } else {
-                        localStorage.clear();
-                        sessionStorage.clear();
                         loadingOverlay.classList.add('hidden');
                     }
                 } catch (error) {
+                    console.error("Auto-reconnect failed:", error);
                     loadingOverlay.classList.add('hidden');
                 }
             } else {
@@ -2277,14 +2433,15 @@
             }
         }
 
+        // ========== EVENT LISTENERS ==========
         document.getElementById('connectBtn').addEventListener('click', async () => {
-            if (!window.ethereum) return showToast("Please use a dApp browser like MetaMask or Trust Wallet.", "error");
+            if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
             try { 
                 loadingOverlay.classList.remove('hidden');
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
                 await initConnection(accounts, false); 
             } catch (err) { 
-                showToast("Connection rejected by user.", "error");
+                showToast("Connection rejected", "error");
                 loadingOverlay.classList.add('hidden');
             }
         });
@@ -2295,17 +2452,29 @@
             const confirmBtn = document.getElementById('confirmPaymentBtn');
             confirmBtn.disabled = true;
             confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
+            
             try {
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
                 const amount = ethers.parseUnits(JOINING_FEE_USDT.toString(), usdtDecimals);
+                
                 showToast("Waiting for approval...", "info");
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
+                
                 showToast("Transaction sent! Confirming...", "info");
                 await tx.wait();
+                
                 await markUserAsPaid(userAddress);
                 closeModal('paymentModal');
+                
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
+
+                const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
+                if (storedInviteInfo) {
+                    document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code;
+                    document.getElementById('verifyInviteCodeBtn').click();
+                }
+                
             } catch (e) { 
                 showToast("Transaction failed. Please try again.", "error"); 
             } finally { 
@@ -2326,12 +2495,14 @@
                 proceedBtn.disabled = true;
                 return;
             }
+
             const inviterWallet = await getWalletByInviteCode(inviteCode);
             if (inviterWallet) {
                 const inviterProfile = await getUserProfile(inviterWallet);
                 if (inviterProfile) {
                     verifiedInviterId = inviterProfile.userId;
                     statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by: ${sanitizeInput(inviterProfile.name)} (ID: ZTR-${verifiedInviterId})</span>`;
+                    showToast(`Inviter found: ${sanitizeInput(inviterProfile.name)}`, 'success');
                     proceedBtn.disabled = false;
                 }
             } else {
@@ -2342,45 +2513,40 @@
         });
 
         document.getElementById('proceedToProfileBtn').addEventListener('click', () => {
-            if (!verifiedInviterId) { showToast("You must verify an invitation code first.", "error"); return; }
+            if (!verifiedInviterId) {
+                showToast("You must verify an invitation code first.", "error");
+                return;
+            }
             invitationState.classList.add('hidden');
             openModal('profileSetupModal');
         });
 
-        // ========== UPDATED PROFILE EDIT UPLOAD FUNCTION ==========
         document.getElementById('profilePicInput').addEventListener('change', async (event) => {
             const file = event.target.files[0];
             if (!file) return;
-
-            if (!IMGBB_API_KEY || IMGBB_API_KEY === 'AAPKI_IMGBB_API_KEY_YAHAN_PASTE_KAREIN') {
-                showToast("Image hosting is not configured.", "error");
-                return;
-            }
-            
             showToast("Uploading new profile picture...", "info");
             const formData = new FormData();
-            formData.append('key', IMGBB_API_KEY);
+            formData.append('key', IMAGE_HOST_API_KEY);
             formData.append('image', file);
             try {
-                const response = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
+                const response = await fetch('https://freeimage.host/api/1/upload', { method: 'POST', body: formData });
                 const result = await response.json();
-                if (result.success) {
-                    const imageUrl = result.data.url;
+                if (result.status_code === 200) {
+                    const imageUrl = result.image.url;
                     await db.ref(`users/${userAddress.toLowerCase()}/profile/profilePicUrl`).set(imageUrl);
-                    await Promise.all([updateAssetsPage(), renderBeautifulTree()]);
+                    await updateAssetsPage();
+                    await renderBeautifulTree();
                     showToast("Profile picture updated successfully!", "success");
-                } else { throw new Error(result.error.message || "Upload failed"); }
-            } catch (error) {
-                console.error("Image upload error:", error);
-                showToast("Upload failed, please try again", "error");
-            }
+                } else { throw new Error("Upload failed"); }
+            } catch (error) { showToast("Upload failed, please try again", "error"); }
         });
 
         document.getElementById('saveProfileBtn').addEventListener('click', async () => {
             const name = document.getElementById('profileNameInput').value;
             if (name && userAddress) {
                 await db.ref(`users/${userAddress.toLowerCase()}/profile/name`).set(sanitizeInput(name));
-                await Promise.all([updateAssetsPage(), renderBeautifulTree(), updateDashboard()]);
+                await updateAssetsPage();
+                await renderBeautifulTree();
                 closeModal('editProfileModal');
                 showToast("Profile updated!", "success");
             }
@@ -2403,28 +2569,51 @@
                 const pageId = btn.dataset.page;
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                 document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
-                if (pageId === 'team') await Promise.all([renderBeautifulTree(), updateInviteInfo()]);
-                else if (pageId === 'assets') await updateAssetsPage();
+                if (pageId === 'team') {
+                    await renderBeautifulTree();
+                    await updateInviteInfo();
+                } else if (pageId === 'assets') {
+                    await updateAssetsPage();
+                }
             });
         });
 
         setInterval(async () => {
             if (userAddress && await isProfileComplete(userAddress)) {
                 await updateBalances();
+                await updateDashboard();
             }
         }, 15000);
 
         if (window.ethereum) {
-            window.ethereum.on('accountsChanged', () => { location.reload(); });
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
+                    localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
+                } else {
+                    localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
+                    localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE);
+                    sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
+                }
+                location.reload();
+            });
             window.ethereum.on('chainChanged', () => location.reload());
         }
 
         window.addEventListener('load', async () => {
             await fetchAppConfig();
+            
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCodeFromUrl = urlParams.get('invite');
-            if(inviteCodeFromUrl) {
-                sessionStorage.setItem(STORAGE_KEYS.INVITE_INFO, JSON.stringify({ code: inviteCodeFromUrl.toUpperCase() }));
+            const inviterNameFromUrl = urlParams.get('inviterName');
+            const inviterIdFromUrl = urlParams.get('inviterId');
+
+            if(inviteCodeFromUrl && inviterNameFromUrl && inviterIdFromUrl) {
+                const inviteInfo = {
+                    code: inviteCodeFromUrl.toUpperCase(),
+                    name: decodeURIComponent(inviterNameFromUrl),
+                    id: inviterIdFromUrl
+                };
+                sessionStorage.setItem(STORAGE_KEYS.INVITE_INFO, JSON.stringify(inviteInfo));
             }
             await autoReconnect();
         });
