@@ -1455,7 +1455,6 @@
     (async function() {
 
         // ========== FIREBASE CONFIGURATION ==========
-        // IMPORTANT: Replace with your own Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
             authDomain: "fortune-2cb70.firebaseapp.com",
@@ -1485,7 +1484,6 @@
         }
         
         // CORE CONFIGURATION
-        // IMPORTANT: Replace with your Admin Wallet Address
         const ADMIN_WALLET = "0x97efeaa1da1108acff52840550ec51dc5bbfd812";
         const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; // USDT BEP20 Contract
         const CHAIN_ID = "0x38"; // BSC Mainnet
@@ -1493,10 +1491,10 @@
         const JOINING_FEE_USDT = 5.25;
 
         // ===================================================================
-        // ===== EDIT THIS SECTION WITH YOUR CLOUDINARY DETAILS =====
+        // ===== YOUR CLOUDINARY DETAILS HAVE BEEN ADDED HERE =====
         // ===================================================================
         const CLOUDINARY_CLOUD_NAME = 'dfwonuz1a'; // From your screenshot
-        const CLOUDINARY_UPLOAD_PRESET = 'YOUR_UNSIGNED_PRESET_NAME'; // The preset you created in Step 1
+        const CLOUDINARY_UPLOAD_PRESET = 'Zentron'; // Your provided preset name
         // ===================================================================
         
         let APP_LEVELS = []; // Will be fetched from Firebase
@@ -1535,8 +1533,6 @@
             setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
         }
         
-        // This function fetches level configurations from Firebase.
-        // This allows prices/names/returns to be edited in the database without changing the website code.
         async function fetchAppConfig() {
             try {
                 const snapshot = await db.ref('config/levels').once('value');
@@ -1577,7 +1573,6 @@
         }
         window.copyWalletAddress = copyWalletAddress;
         
-        // ========== INVITATION CODE GENERATION (DATABASE) ==========
         function generateUniqueInviteCode() {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = '';
@@ -1708,7 +1703,6 @@
             await db.ref(`users/${wallet.toLowerCase()}/paid`).set(true);
         }
 
-        // ========== INCOME LOGGING ==========
         async function logIncome(wallet, amount, type) {
             if (!wallet || !isValidWalletAddress(wallet)) return;
             const incomeRef = db.ref(`users/${wallet.toLowerCase()}/incomeHistory`);
@@ -1720,7 +1714,6 @@
             await incomeRef.push(newLog);
         }
         
-        // ========== INVITATION SYSTEM (DATABASE) ==========
         async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
             const baseAmount = JOINING_FEE_USDT;
             const inviterWallet = await getWalletById(inviterUserId);
@@ -1763,7 +1756,6 @@
             }
         }
         
-        // ========== ZTR BALANCE MANAGEMENT (DATABASE) ==========
         async function getZTRBalance(wallet) { 
             if (!wallet || !isValidWalletAddress(wallet)) return 0;
             const snapshot = await db.ref(`users/${wallet.toLowerCase()}/ztrBalance`).once('value');
@@ -1815,7 +1807,6 @@
             return APP_LEVELS.find(level => level.id === levelId) || APP_LEVELS[levelId - 1]; 
         }
 
-        // ========== BALANCE & UI UPDATES ==========
         async function updateBalances() {
             if (!userAddress || !provider || !isValidWalletAddress(userAddress)) return;
             try {
@@ -1993,7 +1984,6 @@
             }
         }
 
-        // ========== HISTORY PAGES ==========
         window.openIncomeHistory = async function() {
             const listContainer = document.getElementById('incomeHistoryList');
             listContainer.innerHTML = '<div class="spinner" style="margin: auto;"></div>';
@@ -2061,7 +2051,6 @@
             }
         }
 
-        // ========== STARS & SALARY PAGES ==========
         async function checkSalaryEligibility() {
             const userLevel = await getUserLevel(userAddress);
             const teamSize = await getTeamSize(userAddress);
@@ -2121,7 +2110,6 @@
         window.openLevelStarsPage = openLevelStarsPage;
         window.openJoiningStarsPage = openJoiningStarsPage;
 
-        // ========== LEVEL PAGE ==========
         async function initializeLevelViewer() {
             const viewer = document.getElementById('levelViewer');
             if (!viewer) return;
@@ -2158,7 +2146,6 @@
             openModal('levelUpgradePaymentModal');
         };
 
-        // ========== USDT TRANSACTION FOR LEVEL UPGRADE ==========
         document.getElementById('confirmLevelUpgradeBtn').addEventListener('click', async () => {
             if (isProcessing || !pendingLevelUpgrade) return;
             isProcessing = true;
@@ -2177,7 +2164,6 @@
                 
                 await setUserLevel(userAddress, pendingLevelUpgrade.levelId);
                 
-                // Calculate and distribute instant return
                 const levelData = APP_LEVELS.find(l => l.id === pendingLevelUpgrade.levelId);
                 if (levelData && levelData.returnPercentage > 0) {
                     const returnAmount = pendingLevelUpgrade.price * (levelData.returnPercentage / 100);
@@ -2202,7 +2188,6 @@
             }
         });
 
-        // ========== MODAL CONTROLS ==========
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         window.closeModal = closeModal;
@@ -2220,7 +2205,6 @@
         // ========== PROFILE SETUP FUNCTIONS (IMAGE UPLOAD) ==========
         let setupProfilePicData = null;
         
-        // This is the new, single function to handle uploads to Cloudinary
         async function handleImageUpload(file) {
             if (!file) return null;
             if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET || CLOUDINARY_UPLOAD_PRESET === 'YOUR_UNSIGNED_PRESET_NAME') {
@@ -2281,7 +2265,6 @@
             await showDashboard();
         });
 
-        // ========== WITHDRAWAL SYSTEM (SECURE REQUEST-BASED) ==========
         async function openWithdrawalModal() {
             const ztrBalance = await getZTRBalance(userAddress);
             if (ztrBalance <= 0) {
@@ -2333,7 +2316,7 @@
         
         function updateWithdrawalStatusUI(withdrawal) {
             const statusDiv = document.getElementById('withdrawalStatus');
-            if(!statusDiv) return; // Gracefully handle if element is not found
+            if(!statusDiv) return; 
             
             if(!withdrawal) {
                 statusDiv.innerHTML = "No withdrawal history.";
@@ -2366,10 +2349,10 @@
                         userId: profile.userId,
                         amount: ztrBalance,
                         requestDate: new Date().toISOString(),
-                        status: 'pending' // Status is pending for approval
+                        status: 'pending' 
                     };
                     await db.ref('withdrawals').push(withdrawalRequest);
-                    await updateZTRBalance(userAddress, 0, true); // Set user's balance to 0 after request
+                    await updateZTRBalance(userAddress, 0, true); 
                     
                     await updateDashboard();
                     await updateAssetsPage();
