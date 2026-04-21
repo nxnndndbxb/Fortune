@@ -23,6 +23,7 @@
             --text-main: #ffffff;
             --text-muted: rgba(255, 255, 255, 0.8);
             --success: #10b981;
+            --danger: #ef4444;
             --gold: #ffb800;
         }
 
@@ -975,37 +976,70 @@
         .status-error {
             color: #ef4444;
         }
-        
-        /* New Slider Styles */
-        .slider-container {
-            width: 100%;
-            height: 160px;
+
+        /* New Trading Chart Style */
+        .trading-chart-container {
+            height: 180px;
             border-radius: 20px;
-            overflow: hidden;
-            position: relative;
             margin-bottom: 20px;
-        }
-        .slides {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
             display: flex;
-            width: 300%; /* 100% per slide */
-            height: 100%;
-            animation: slide-animation 15s infinite ease-in-out;
+            flex-direction: column;
         }
-        .slide {
-            width: 33.333%;
-            height: 100%;
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-shrink: 0;
         }
-        .slide img {
+        .coin-info { display: flex; align-items: center; gap: 10px; }
+        .coin-logo { height: 35px; }
+        .coin-symbol { font-size: 16px; font-weight: bold; display: block; }
+        .coin-name { font-size: 10px; color: var(--text-muted); }
+        .price-info { text-align: right; }
+        .live-price { font-size: 20px; font-weight: bold; display: block; font-family: monospace; }
+        .price-change { font-size: 12px; font-family: monospace; }
+        .price-change.up { color: var(--success); }
+        .price-change.down { color: var(--danger); }
+
+        .chart-area {
+            flex-grow: 1;
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            overflow: hidden;
+            border-radius: 10px;
+            padding: 5px;
+        }
+        .candle-container {
+            flex: 1;
+            height: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+        .candle {
+            position: absolute;
+            width: 70%;
+        }
+        .candle .wick {
+            width: 2px;
+            background-color: currentColor;
+            margin: 0 auto;
+            position: absolute;
+            left: 0; right: 0;
+        }
+        .candle .body {
+            position: absolute;
             width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
-        @keyframes slide-animation {
-            0%, 25% { transform: translateX(0%); }
-            33%, 58% { transform: translateX(-33.333%); }
-            66%, 91% { transform: translateX(-66.666%); }
-            100% { transform: translateX(0%); }
-        }
+        .candle.green { color: var(--success); }
+        .candle.red { color: var(--danger); }
+        .candle.green .body { background-color: var(--success); }
+        .candle.red .body { background-color: var(--danger); }
+        /* End Trading Chart Style */
 
         /* New Airdrop Card Style */
         .airdrop-card {
@@ -1134,7 +1168,7 @@
         <i class="fa-solid fa-bolt" style="font-size: 50px; color: var(--primary);"></i>
         <h2 style="margin: 15px 0;">Activate Node</h2>
         <p style="color: rgba(255,255,255,0.7);">Joining Premium Network</p>
-        <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;">5.25 USDT</div>
+        <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;" id="joiningFeeDisplay">5.25 USDT</div>
         <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: 0.0003 BNB</div>
         <div style="display:flex; gap:10px;">
             <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('paymentModal')">Cancel</button>
@@ -1270,15 +1304,26 @@
     <div id="dashboardState" class="hidden">
         <div id="pageDashboard" class="page active">
             <div class="main-card">
-                <!-- SLIDER START -->
-                <div class="slider-container">
-                    <div class="slides">
-                        <div class="slide"><img src="https://iili.io/BgnsA11.png" alt="Slide 1"></div>
-                        <div class="slide"><img src="https://iili.io/BgnsMBI.png" alt="Slide 2"></div>
-                        <div class="slide"><img src="https://iili.io/Bgnsj7s.png" alt="Slide 3"></div>
+                <!-- TRADING CHART START -->
+                <div class="trading-chart-container">
+                    <div class="chart-header">
+                        <div class="coin-info">
+                            <img src="https://iili.io/BOSY86Q.png" alt="ZTR Logo" class="coin-logo">
+                            <div>
+                                <span class="coin-symbol">ZTR/USDT</span>
+                                <span class="coin-name">ZTR COIN</span>
+                            </div>
+                        </div>
+                        <div class="price-info">
+                            <span class="live-price" id="liveZTRPrice">1.0000</span>
+                            <span class="price-change up" id="priceChange">+0.0000 (0.00%)</span>
+                        </div>
+                    </div>
+                    <div class="chart-area" id="tradingChart">
+                        <!-- Candles will be generated by JavaScript -->
                     </div>
                 </div>
-                <!-- SLIDER END -->
+                <!-- TRADING CHART END -->
                 
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3 style="font-size:18px;">Protocol Overview</h3>
@@ -1488,7 +1533,7 @@
         const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; // USDT BEP20 Contract
         const CHAIN_ID = "0x38"; // BSC Mainnet
         const CHAIN_ID_DECIMAL = 56; // BSC Mainnet
-        const JOINING_FEE_USDT = 5.25;
+        const JOINING_FEE_ZTR = 5.25; // Price in ZTR
 
         // ===================================================================
         // ===== YOUR CLOUDINARY DETAILS HAVE BEEN ADDED HERE =====
@@ -1511,6 +1556,12 @@
         let verifiedInviterId = null;
         let pendingLevelUpgrade = null;
         let withdrawalListener = null;
+
+        // NEW: ZTR Price and Chart State
+        let baseZTRPrice = 1.0;
+        let liveZTRPrice = 1.0;
+        let chartData = [];
+        let chartInterval = null;
 
         // UI ELEMENTS
         const connectState = document.getElementById('connectState');
@@ -1535,11 +1586,22 @@
         
         async function fetchAppConfig() {
             try {
+                // Fetch ZTR base price from Firebase, with a fallback to 1.0
+                const priceSnapshot = await db.ref('config/baseZTRPrice').once('value');
+                if (priceSnapshot.exists() && typeof priceSnapshot.val() === 'number') {
+                    baseZTRPrice = priceSnapshot.val();
+                } else {
+                    console.warn("Using fallback ZTR base price of 1.0.");
+                    baseZTRPrice = 1.0;
+                }
+                liveZTRPrice = baseZTRPrice; // Initialize live price
+
+                // Fetch level configuration
                 const snapshot = await db.ref('config/levels').once('value');
                 if (snapshot.exists() && Array.isArray(snapshot.val())) {
                     APP_LEVELS = snapshot.val();
                 } else {
-                    // Fallback if config is missing in Firebase
+                    // Fallback if config is missing in Firebase (prices are in ZTR)
                     APP_LEVELS = [
                         { id: 1, name: "Iron", price: 5, icon: "🛡️", returnPercentage: 5 },
                         { id: 2, name: "Bronze", price: 10, icon: "🥉", returnPercentage: 5 },
@@ -1715,13 +1777,13 @@
         }
         
         async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
-            const baseAmount = JOINING_FEE_USDT;
+            const baseAmountInZTR = JOINING_FEE_ZTR; // Commission is based on ZTR value
             const inviterWallet = await getWalletById(inviterUserId);
 
             if (!inviterWallet || !isValidWalletAddress(inviterWallet)) return;
 
             // Direct inviter commission
-            const directCommission = baseAmount * 0.40;
+            const directCommission = baseAmountInZTR * 0.40;
             await updateZTRBalance(inviterWallet, directCommission);
             await logIncome(inviterWallet, directCommission, 'Direct Commission');
             
@@ -1733,7 +1795,7 @@
             if (uplinerId) {
                 const uplinerWallet = await getWalletById(uplinerId);
                 if (uplinerWallet && isValidWalletAddress(uplinerWallet)) {
-                    const uplinerCommission = baseAmount * 0.10;
+                    const uplinerCommission = baseAmountInZTR * 0.10;
                     await updateZTRBalance(uplinerWallet, uplinerCommission);
                     await logIncome(uplinerWallet, uplinerCommission, 'Upliner Commission');
                 }
@@ -1744,7 +1806,7 @@
             const eligibleMembers = directMembers.filter(wallet => wallet.toLowerCase() !== newUserWallet.toLowerCase());
 
             if (eligibleMembers.length > 0) {
-                const downlinePool = baseAmount * 0.20;
+                const downlinePool = baseAmountInZTR * 0.20;
                 const sharePerMember = downlinePool / eligibleMembers.length;
                 for (const memberWallet of eligibleMembers) {
                     const memberProfile = await getUserProfile(memberWallet);
@@ -1853,7 +1915,7 @@
             document.getElementById('statBNB').innerText = parseFloat(rawBnbBalance).toFixed(4);
             document.getElementById('statUSDT').innerText = parseFloat(rawUsdtBalance).toFixed(2);
             document.getElementById('statZTR').innerText = ztrBalance.toFixed(2);
-            document.getElementById('totalEarningsStat').innerText = `$${ztrBalance.toFixed(2)}`;
+            document.getElementById('totalEarningsStat').innerText = `$${(ztrBalance * liveZTRPrice).toFixed(2)}`;
             document.getElementById('userLevelStat').innerText = levelInfo.name;
         }
 
@@ -1869,7 +1931,7 @@
             const team = await getTeamSize(userAddress);
             const salary = await getSalleryEarnings(userAddress);
             document.getElementById('profitIncome').innerText = `${ztr.toFixed(2)} ZTR`;
-            document.getElementById('profitUSD').innerText = ztr.toFixed(2);
+            document.getElementById('profitUSD').innerText = (ztr * liveZTRPrice).toFixed(2);
             document.getElementById('teamIncome').innerText = team;
             document.getElementById('teamCount').innerText = `Member${team === 1 ? '' : 's'}`;
             document.getElementById('salleryIncome').innerText = `${salary.toFixed(2)} ZTR`;
@@ -1890,13 +1952,15 @@
                 document.getElementById('inviteCodeInput').value = inviteCode;
             }
         }
-
+        
         async function showDashboard() {
             connectState.classList.add('hidden');
             invitationState.classList.add('hidden');
             dashboardState.classList.remove('hidden');
             bottomNav.style.display = 'flex';
             
+            initTradingChart(); // Start the live chart
+
             await updateDashboard();
             await updateAssetsPage();
             await renderBeautifulTree();
@@ -2118,7 +2182,9 @@
             APP_LEVELS.forEach(level => {
                 const isUnlocked = currentLevelId >= level.id;
                 const canUpgrade = currentLevelId === level.id - 1;
-                cardsHTML += `<div class="level-card ${isUnlocked ? 'unlocked' : ''}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} Level</h2>${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}</div><div><h3 class="level-price">${level.price} USDT</h3><p class="level-info" style="color: var(--gold); margin-top: 10px; font-weight: bold;">Instant Return: ${level.returnPercentage}%</p></div><button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price})">${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}</button></div>`;
+                // Price is now in ZTR, calculate USDT equivalent for display
+                const usdtPrice = (level.price * liveZTRPrice).toFixed(2);
+                cardsHTML += `<div class="level-card ${isUnlocked ? 'unlocked' : ''}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} Level</h2>${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}</div><div><h3 class="level-price">${level.price} ZTR</h3><p class="level-info">≈ ${usdtPrice} USDT</p><p class="level-info" style="color: var(--gold); margin-top: 10px; font-weight: bold;">Instant Return: ${level.returnPercentage}%</p></div><button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price})">${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}</button></div>`;
             });
             viewer.innerHTML = cardsHTML;
         }
@@ -2134,15 +2200,16 @@
             document.body.style.overflow = 'auto';
         }
 
-        window.upgradeLevel = async function(levelId, levelName, price) {
+        window.upgradeLevel = async function(levelId, levelName, priceInZTR) {
             const currentId = await getUserLevel(userAddress);
             if (currentId >= levelId) { showToast(`You already have the ${levelName} level!`, 'info'); return; }
             if (currentId !== levelId - 1) { showToast(`Upgrade to the previous level first!`, 'info'); return; }
             
-            pendingLevelUpgrade = { levelId, levelName, price };
+            pendingLevelUpgrade = { levelId, levelName, price: priceInZTR };
             
+            const usdtCost = (priceInZTR * liveZTRPrice).toFixed(2);
             document.getElementById('upgradeLevelNameDisplay').innerText = `Upgrade to ${levelName}`;
-            document.getElementById('levelUpgradeAmount').innerHTML = `${price} USDT`;
+            document.getElementById('levelUpgradeAmount').innerHTML = `${usdtCost} USDT`;
             openModal('levelUpgradePaymentModal');
         };
 
@@ -2155,7 +2222,8 @@
             
             try {
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-                const amount = ethers.parseUnits(pendingLevelUpgrade.price.toString(), usdtDecimals);
+                const usdtPrice = (pendingLevelUpgrade.price * liveZTRPrice).toFixed(2);
+                const amount = ethers.parseUnits(usdtPrice.toString(), usdtDecimals);
                 
                 showToast("Waiting for approval...", "info");
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
@@ -2166,6 +2234,7 @@
                 
                 const levelData = APP_LEVELS.find(l => l.id === pendingLevelUpgrade.levelId);
                 if (levelData && levelData.returnPercentage > 0) {
+                    // Return amount is based on ZTR price of the level
                     const returnAmount = pendingLevelUpgrade.price * (levelData.returnPercentage / 100);
                     await updateZTRBalance(userAddress, returnAmount);
                     await logIncome(userAddress, returnAmount, `${levelData.name} Node Activation Return`);
@@ -2201,6 +2270,110 @@
                 usdtDecimals = 18; 
             }
         }
+        
+        // ========== TRADING CHART FUNCTIONS ==========
+        function initTradingChart() {
+            if (chartInterval) clearInterval(chartInterval); // Clear any existing interval
+
+            let currentPrice = baseZTRPrice;
+            chartData = [];
+
+            // Generate some initial historical data
+            for (let i = 0; i < 50; i++) {
+                const open = currentPrice;
+                const fluctuation = (Math.random() - 0.5) * (currentPrice * 0.005); // 0.5% fluctuation
+                const close = open + fluctuation;
+                const high = Math.max(open, close) + Math.random() * (currentPrice * 0.002);
+                const low = Math.min(open, close) - Math.random() * (currentPrice * 0.002);
+                chartData.push({ open, high, low, close });
+                currentPrice = close;
+            }
+            liveZTRPrice = chartData[chartData.length - 1].close;
+            renderChart();
+
+            chartInterval = setInterval(updateChart, 3000); // Update every 3 seconds
+        }
+
+        function updateChart() {
+            const lastClose = chartData[chartData.length - 1].close;
+            
+            // Tendency to return towards the base price
+            const tendency = (baseZTRPrice - lastClose) * 0.1;
+            const fluctuation = (Math.random() - 0.49) * (baseZTRPrice * 0.002); // Small random move
+
+            const newPrice = lastClose + tendency + fluctuation;
+
+            const open = lastClose;
+            const close = newPrice;
+            const high = Math.max(open, close) + Math.random() * (baseZTRPrice * 0.001);
+            const low = Math.min(open, close) - Math.random() * (baseZTRPrice * 0.001);
+
+            chartData.push({ open, high, low, close });
+            if (chartData.length > 50) {
+                chartData.shift(); // Keep chart size constant
+            }
+
+            liveZTRPrice = newPrice;
+            updatePriceDisplay();
+            renderChart();
+        }
+
+        function updatePriceDisplay() {
+            const priceElement = document.getElementById('liveZTRPrice');
+            const changeElement = document.getElementById('priceChange');
+            const firstOpen = chartData[0].open;
+            
+            const change = liveZTRPrice - firstOpen;
+            const percentChange = (change / firstOpen) * 100;
+            
+            priceElement.innerText = liveZTRPrice.toFixed(4);
+            changeElement.innerText = `${change > 0 ? '+' : ''}${change.toFixed(4)} (${change > 0 ? '+' : ''}${percentChange.toFixed(2)}%)`;
+
+            if (change >= 0) {
+                priceElement.style.color = 'var(--success)';
+                changeElement.className = 'price-change up';
+            } else {
+                priceElement.style.color = 'var(--danger)';
+                changeElement.className = 'price-change down';
+            }
+        }
+
+        function renderChart() {
+            const chartArea = document.getElementById('tradingChart');
+            if(!chartArea) return;
+            chartArea.innerHTML = '';
+
+            const prices = chartData.flatMap(d => [d.high, d.low]);
+            const minPrice = Math.min(...prices);
+            const maxPrice = Math.max(...prices);
+            const priceRange = maxPrice - minPrice;
+
+            if(priceRange === 0) return; // Avoid division by zero
+
+            chartData.forEach(data => {
+                const container = document.createElement('div');
+                container.className = 'candle-container';
+
+                const candle = document.createElement('div');
+                candle.className = data.close >= data.open ? 'candle green' : 'candle red';
+
+                const wick = document.createElement('div');
+                wick.className = 'wick';
+                wick.style.top = `${((maxPrice - data.high) / priceRange) * 100}%`;
+                wick.style.height = `${((data.high - data.low) / priceRange) * 100}%`;
+                
+                const body = document.createElement('div');
+                body.className = 'body';
+                body.style.top = `${((maxPrice - Math.max(data.open, data.close)) / priceRange) * 100}%`;
+                body.style.height = `${(Math.abs(data.open - data.close) / priceRange) * 100}%`;
+
+                candle.appendChild(wick);
+                candle.appendChild(body);
+                container.appendChild(candle);
+                chartArea.appendChild(container);
+            });
+        }
+
 
         // ========== PROFILE SETUP FUNCTIONS (IMAGE UPLOAD) ==========
         let setupProfilePicData = null;
@@ -2408,6 +2581,8 @@
                     document.getElementById('verifyInviteCodeBtn').click();
                 }
             } else {
+                const usdtCost = (JOINING_FEE_ZTR * liveZTRPrice).toFixed(2);
+                document.getElementById('joiningFeeDisplay').innerText = `${usdtCost} USDT`;
                 openModal('paymentModal');
             }
             
@@ -2462,7 +2637,8 @@
             
             try {
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-                const amount = ethers.parseUnits(JOINING_FEE_USDT.toString(), usdtDecimals);
+                const usdtCost = (JOINING_FEE_ZTR * liveZTRPrice).toFixed(2);
+                const amount = ethers.parseUnits(usdtCost.toString(), usdtDecimals);
                 
                 showToast("Waiting for approval...", "info");
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
