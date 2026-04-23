@@ -12,6 +12,7 @@
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script> <!-- FIREBASE AUTH SDK ADDED -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <style>
@@ -2668,6 +2669,26 @@
             provider = new ethers.BrowserProvider(window.ethereum);
             signer = await provider.getSigner();
             
+            // ===================================
+            // ===== SECURITY UPDATE ADDED HERE =====
+            // ===================================
+            // Is code se aapki app Firebase se chupke se ek temporary ID card le legi
+            try {
+                // Check karein ke user pehle se logged in hai ya nahi
+                if (!firebase.auth().currentUser) {
+                    await firebase.auth().signInAnonymously();
+                    console.log("Firebase anonymous sign-in successful!");
+                }
+            } catch (error) {
+                console.error("Firebase Authentication Error:", error);
+                showToast("Session secure nahi ho saki. Dobara connect karein.", "error");
+                loadingOverlay.classList.add('hidden'); // Loading ko hata dein agar error aaye
+                return; // Function ko rok dein agar login fail ho
+            }
+            // ===================================
+            // =====    END OF UPDATE        =====
+            // ===================================
+
             updateAllWalletAddressDisplays();
             
             const network = await provider.getNetwork();
