@@ -11,7 +11,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <style>
-        /* [AAPKA ORIGINAL PREMIUM CSS - NO CHANGES] */
         :root {
             --primary: #00f2ff;
             --primary-glow: rgba(0, 242, 255, 0.5);
@@ -24,169 +23,192 @@
             --gold: #ffb800;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: url('https://iili.io/BWRY50v.jpg') no-repeat center center fixed; background-size: cover; color: var(--text-main); min-height: 100vh; padding-bottom: 90px; overflow-x: hidden; }
-        .navbar { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; background: rgba(0, 0, 0, 0.5); }
+        
+        .navbar { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.5); position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
         .logo-img { height: 40px; }
-        .wallet-address-badge { font-size: 10px; padding: 5px 12px; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--secondary); border-radius: 50px; color: var(--text-main); cursor: pointer; }
         .container { max-width: 480px; margin: 0 auto; padding: 20px; }
-        .main-card { margin-bottom: 20px; padding: 25px; background: rgba(0, 0, 0, 0.3); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
+        .main-card { margin-bottom: 20px; padding: 25px; background: rgba(0, 0, 0, 0.4); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
+        
         .income-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .income-card { padding: 20px 15px; text-align: center; border-radius: 20px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .income-card h3 { font-size: 22px; color: var(--primary); text-shadow: 0 0 10px var(--primary-glow); }
-        .btn { width: 100%; padding: 16px; border-radius: 16px; border: none; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, var(--secondary), #4f00b3); }
+        .income-card { padding: 20px 15px; text-align: center; border-radius: 20px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); transition: 0.3s; }
+        .income-card h3 { font-size: 20px; color: var(--primary); text-shadow: 0 0 10px var(--primary-glow); }
+        
+        .btn { width: 100%; padding: 16px; border-radius: 16px; border: none; color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, var(--secondary), #4f00b3); }
         .btn-success { background: linear-gradient(135deg, #059669, #10b981); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
         .bottom-nav { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 70px; background: rgba(0, 0, 0, 0.8); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 25px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
         .nav-item { color: rgba(255, 255, 255, 0.6); display: flex; flex-direction: column; align-items: center; font-size: 10px; cursor: pointer; width: 100%; }
         .nav-item.active { color: var(--primary); }
-        .nav-item-special { width: 65px; height: 65px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; color: white; font-size: 28px; transform: translateY(-20px); border: 3px solid #000; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px var(--primary-glow); }
+        .nav-item-special { width: 65px; height: 65px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; transform: translateY(-20px); border: 3px solid #000; box-shadow: 0 0 20px var(--primary-glow); }
+
         .hidden { display: none !important; }
         .page { display: none; animation: fadeIn 0.4s ease; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Modal Style */
+
+        /* Chart & Slider */
+        .trading-chart-container { height: 180px; background: rgba(0,0,0,0.5); border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .slider-container { width: 100%; height: 150px; border-radius: 20px; overflow: hidden; margin-bottom: 20px; position: relative; }
+        .slide { position: absolute; inset: 0; opacity: 0; transition: 0.8s; }
+        .slide.active { opacity: 1; }
+        .slide img { width: 100%; height: 100%; object-fit: cover; }
+
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
-        .modal-content { width: 90%; max-width: 360px; background: rgba(0, 0, 0, 0.8); border: 1px solid var(--primary); border-radius: 30px; padding: 30px; text-align: center; }
+        .modal-content { width: 90%; max-width: 360px; background: #000; border: 1px solid var(--primary); border-radius: 30px; padding: 30px; text-align: center; }
 
-        /* Trading Chart & Slider */
-        .trading-chart-container { height: 180px; border-radius: 20px; background: rgba(0,0,0,0.2); padding: 15px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
-        .slider-container { width: 100%; height: 150px; border-radius: 20px; overflow: hidden; margin-bottom: 20px; position: relative; }
-        .slide img { width: 100%; height: 100%; object-fit: cover; }
+        .tree-node { border: 1px solid var(--primary); padding: 10px; border-radius: 12px; margin: 5px; background: rgba(0,0,0,0.3); font-size: 11px; }
+        .star-icon { font-size: 25px; margin: 5px; color: rgba(255,255,255,0.2); }
+        .star-icon.active { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
     </style>
 </head>
 <body>
 
-<!-- Loading Overlay -->
-<div id="loadingOverlay" style="position:fixed; inset:0; background:#000; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-    <img src="https://iili.io/BOSY86Q.png" width="80" style="animation: pulse 2s infinite;">
-    <p style="margin-top:20px; color:var(--primary); font-family:monospace; letter-spacing:2px;">LINKING TO BLOCKCHAIN...</p>
+<div id="loadingOverlay" class="loading-overlay" style="position:fixed; inset:0; background:#000; z-index:10000; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+    <img src="https://iili.io/BOSY86Q.png" width="80" style="animation: pulse 1s infinite alternate;">
+    <p style="margin-top:20px; color:var(--primary); letter-spacing: 2px;">SECURE ACCESS INITIATING...</p>
 </div>
 
 <div class="navbar">
-    <img src="https://iili.io/BOSY86Q.png" alt="ZTR Logo" class="logo-img">
-    <div class="wallet-address-badge hidden" id="walletBadge">
-        <span id="shortAddr">Connect</span>
+    <img src="https://iili.io/BOSY86Q.png" class="logo-img">
+    <div id="walletBadge" class="hidden" style="font-size:10px; padding:5px 12px; border:1px solid var(--secondary); border-radius:50px; background:rgba(0,0,0,0.5);">
+        <span id="addrShort">0x00...0000</span>
     </div>
 </div>
 
 <div class="container">
     <!-- State 1: Connect -->
-    <div id="connectPage">
+    <div id="connectState">
         <div class="main-card" style="text-align:center;">
             <div style="font-size:60px; color:var(--primary); margin-bottom:20px;"><i class="fa-solid fa-fingerprint"></i></div>
             <h2>Quantum Access</h2>
-            <p style="color:var(--text-muted); font-size:14px; margin-bottom:30px;">Initialize your decentralized protocol</p>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:30px;">Authenticate your identity on the ZTR Protocol</p>
             <button class="btn" onclick="connectWallet()"><i class="fa-solid fa-link"></i> CONNECT WALLET</button>
         </div>
     </div>
 
     <!-- State 2: Registration -->
-    <div id="registerPage" class="hidden">
+    <div id="registrationState" class="hidden">
         <div class="main-card">
-            <h2 style="text-align:center;">Node Activation</h2>
-            <p style="font-size:12px; text-align:center; margin-bottom:20px; opacity:0.7;">Join Premium Network: 5.25 USDT</p>
-            <input type="text" id="regName" placeholder="Full Name" style="width:100%; padding:12px; margin-bottom:10px; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid #333; color:white;">
-            <input type="text" id="regInvite" placeholder="Inviter Code" style="width:100%; padding:12px; margin-bottom:20px; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid #333; color:white; text-transform:uppercase;">
-            <button class="btn btn-success" id="regBtn" onclick="handleRegistration()">ACTIVATE NODE</button>
+            <h2>Node Activation</h2>
+            <p style="font-size:12px; margin-bottom:20px; opacity:0.7;">Fee: 5.25 USDT (BSC Network)</p>
+            <input type="text" id="regName" placeholder="ENTER USERNAME" style="width:100%; padding:14px; margin-bottom:10px; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid #333; color:white;">
+            <input type="text" id="regInvite" placeholder="INVITER CODE" style="width:100%; padding:14px; margin-bottom:20px; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid #333; color:white; text-transform: uppercase;">
+            <button class="btn btn-success" id="btnReg" onclick="handleRegister()">ACTIVATE NODE</button>
         </div>
     </div>
 
     <!-- State 3: Dashboard -->
-    <div id="dashboardPage" class="hidden">
+    <div id="dashboardState" class="hidden">
         
         <!-- Dashboard Home -->
-        <div id="tabDashboard" class="page active">
-            <div class="main-card">
-                <!-- Trading Chart Placeholder -->
-                <div class="trading-chart-container">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div><span style="font-weight:bold;">ZTR/USDT</span><br><small style="font-size:10px; opacity:0.6;">LIVE FEED</small></div>
-                        <div style="text-align:right;"><span id="livePrice" style="font-size:18px; font-weight:bold; font-family:monospace; color:var(--success);">1.0425</span></div>
-                    </div>
-                </div>
+        <div id="pageHome" class="page active">
+            <div class="slider-container" id="slider">
+                <div class="slide active"><img src="https://iili.io/BgnsA11.png"></div>
+                <div class="slide"><img src="https://iili.io/BgnsMBI.png"></div>
+                <div class="slide"><img src="https://iili.io/Bgnsj7s.png"></div>
+            </div>
 
-                <div class="income-grid">
-                    <div class="income-card">
-                        <p style="font-size:10px; opacity:0.6;">VAULT BALANCE</p>
-                        <h3 id="dashBalance">0.00</h3>
-                        <small style="color:var(--success);">ZTR COINS</small>
-                    </div>
-                    <div class="income-card">
-                        <p style="font-size:10px; opacity:0.6;">CURRENT NODE</p>
-                        <h3 id="dashLevel">Starter</h3>
-                        <small id="dashLvlNum">Lvl 0</small>
-                    </div>
-                    <div class="income-card">
-                        <p style="font-size:10px; opacity:0.6;">NETWORK SIZE</p>
-                        <h3 id="dashTeam">0</h3>
-                        <small>MEMBERS</small>
-                    </div>
-                    <div class="income-card">
-                        <p style="font-size:10px; opacity:0.6;">PERSONAL ID</p>
-                        <h3 id="dashId" style="font-size:16px;">----</h3>
-                        <small id="dashInvite">CODE</small>
-                    </div>
+            <div class="trading-chart-container">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <div style="font-size:12px; font-weight:bold;">ZTR/USDT <span style="color:var(--success); font-size:10px;">LIVE</span></div>
+                    <div id="livePrice" style="font-family:monospace; color:var(--primary); font-size:18px;">1.0000</div>
+                </div>
+                <div id="chartArea" style="height:100px; display:flex; align-items:flex-end; gap:2px;"></div>
+            </div>
+
+            <div class="income-grid">
+                <div class="income-card">
+                    <p style="font-size:10px; opacity:0.6;">ZTR BALANCE</p>
+                    <h3 id="dashBal">0.00</h3>
+                </div>
+                <div class="income-card">
+                    <p style="font-size:10px; opacity:0.6;">TEAM SIZE</p>
+                    <h3 id="dashTeam">0</h3>
+                </div>
+                <div class="income-card">
+                    <p style="font-size:10px; opacity:0.6;">NODE LEVEL</p>
+                    <h3 id="dashLvl" style="font-size:16px;">Starter</h3>
+                </div>
+                <div class="income-card">
+                    <p style="font-size:10px; opacity:0.6;">INVITE CODE</p>
+                    <h3 id="dashCode" style="font-size:16px; color:var(--gold);">---</h3>
                 </div>
             </div>
         </div>
 
         <!-- Team Page -->
-        <div id="tabTeam" class="page">
+        <div id="pageTeam" class="page">
             <div class="main-card">
                 <h3>Invitation Link</h3>
-                <p id="inviteLink" style="font-size:11px; background:rgba(0,0,0,0.4); padding:10px; border-radius:10px; margin:10px 0; word-break:break-all;"></p>
+                <p id="inviteLinkText" style="font-size:10px; background:rgba(0,0,0,0.3); padding:12px; border-radius:10px; margin:10px 0; word-break:break-all; border:1px solid #222;"></p>
                 <button class="btn" style="padding:10px; font-size:12px;" onclick="copyLink()">COPY LINK</button>
             </div>
             <div class="main-card">
-                <h3>Network Tree</h3>
-                <div id="treeContainer" style="overflow-x:auto; padding:10px;"></div>
+                <h3>Your Tree</h3>
+                <div id="treeList" style="margin-top:15px; text-align:left;"></div>
+            </div>
+        </div>
+
+        <!-- Stars Achievement Page -->
+        <div id="pageStars" class="page">
+            <div class="main-card" style="text-align:center;">
+                <h3>Achievement Stars</h3>
+                <p style="font-size:12px; opacity:0.6; margin-bottom:15px;">Unlock all stars for Weekly Salary</p>
+                <div id="starContainer">
+                    <i class="fa-solid fa-star star-icon"></i>
+                    <i class="fa-solid fa-star star-icon"></i>
+                    <i class="fa-solid fa-star star-icon"></i>
+                    <i class="fa-solid fa-star star-icon"></i>
+                    <i class="fa-solid fa-star star-icon"></i>
+                </div>
+                <div id="salaryEligible" class="hidden" style="margin-top:15px; color:var(--success); font-size:12px; font-weight:bold;">
+                    <i class="fa-solid fa-crown"></i> ELIGIBLE FOR WEEKLY SALARY
+                </div>
             </div>
         </div>
 
         <!-- Vault Page -->
-        <div id="tabVault" class="page">
+        <div id="pageVault" class="page">
             <div class="main-card" style="text-align:center;">
                 <i class="fa-solid fa-vault" style="font-size:50px; color:var(--gold);"></i>
-                <h2 style="margin:15px 0;" id="vaultAmt">0.00 ZTR</h2>
-                <button class="btn btn-success" onclick="handleWithdraw()"><i class="fa-solid fa-paper-plane"></i> CLAIM TO WALLET</button>
+                <h2 style="margin-top:20px;" id="vaultAmt">0.00 ZTR</h2>
+                <p style="opacity:0.6; font-size:12px;">Accumulated Node Earnings</p>
+                <button class="btn btn-success" style="margin-top:20px;" onclick="withdrawZTR()"><i class="fa-solid fa-paper-plane"></i> WITHDRAW ZTR</button>
             </div>
         </div>
+
     </div>
 </div>
 
-<!-- Bottom Navigation -->
+<!-- Bottom Nav -->
 <div class="bottom-nav hidden" id="bottomNav">
-    <div class="nav-item active" onclick="switchTab('Dashboard', this)"><i class="fa-solid fa-house"></i><span>Home</span></div>
-    <div class="nav-item" onclick="switchTab('Team', this)"><i class="fa-solid fa-diagram-project"></i><span>Network</span></div>
-    <div class="nav-item-special" onclick="openUpgradeModal()"><i class="fa-solid fa-layer-group"></i></div>
-    <div class="nav-item" onclick="switchTab('Vault', this)"><i class="fa-solid fa-wallet"></i><span>Vault</span></div>
-    <div class="nav-item" onclick="location.reload()"><i class="fa-solid fa-rotate"></i><span>Refresh</span></div>
+    <div class="nav-item active" onclick="switchPage('Home', this)"><i class="fa-solid fa-house"></i><span>Home</span></div>
+    <div class="nav-item" onclick="switchPage('Team', this)"><i class="fa-solid fa-diagram-project"></i><span>Network</span></div>
+    <div class="nav-item-special" onclick="openMatrix()"><i class="fa-solid fa-layer-group"></i></div>
+    <div class="nav-item" onclick="switchPage('Stars', this)"><i class="fa-solid fa-star"></i><span>Stars</span></div>
+    <div class="nav-item" onclick="switchPage('Vault', this)"><i class="fa-solid fa-wallet"></i><span>Vault</span></div>
 </div>
 
-<!-- Upgrade Modal -->
-<div class="modal-overlay" id="upgradeModal">
-    <div class="modal-content">
-        <h2 id="nextLvlName">Upgrade</h2>
-        <p id="nextLvlPrice" style="color:var(--gold); margin:15px 0;">Price: 0 USDT</p>
-        <button class="btn btn-success" id="upgradeConfirmBtn" onclick="handleUpgrade()">PAY & UPGRADE</button>
-        <button class="btn" style="background:none; border:1px solid #333; margin-top:10px;" onclick="closeModal()">Cancel</button>
+<!-- Matrix Modal -->
+<div class="modal-overlay" id="matrixModal">
+    <div class="modal-content" style="max-width:400px; height:80vh; overflow-y:auto;">
+        <h3>ZTR Matrix Upgrades</h3>
+        <div id="matrixList" style="margin-top:20px;"></div>
+        <button class="btn" style="margin-top:20px; background:none; border:1px solid #333;" onclick="closeMatrix()">Close</button>
     </div>
 </div>
 
 <script>
-    // --- CONFIGURATION ---
+    // --- CORE CONFIGURATION ---
     const API_URL = "https://ztr-backend.vercel.app";
     const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
     const ADMIN_WALLET = "0x97efeaa1da1108acff52840550ec51dc5bbfd812";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
-        authDomain: "fortune-2cb70.firebaseapp.com",
-        databaseURL: "https://fortune-2cb70-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "fortune-2cb70"
-    };
+    const firebaseConfig = { databaseURL: "https://fortune-2cb70-default-rtdb.asia-southeast1.firebasedatabase.app" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -200,162 +222,211 @@
         { id: 5, name: "Master", price: 25 }
     ];
 
-    // --- CORE LOGIC ---
-
+    // --- CONNECT & AUTHENTICATE ---
     async function connectWallet() {
-        if (!window.ethereum) return alert("Please use Trust Wallet/MetaMask Browser");
+        if (!window.ethereum) return alert("Open in Trust Wallet / MetaMask");
         try {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
             provider = new ethers.BrowserProvider(window.ethereum);
             const accounts = await provider.send("eth_requestAccounts", []);
             userWallet = accounts[0].toLowerCase();
 
-            // Security Signature (Needed for Backend)
-            const message = "ZTR SECURE LOGIN: " + Date.now();
+            // Secure Signature Auth
+            const message = "ZTR LOGIN AUTHENTICATION: " + Date.now();
             signer = await provider.getSigner();
             const signature = await signer.signMessage(message);
             userAuth = { address: userWallet, signature, message };
 
-            checkUserStatus();
-        } catch (e) { alert("Auth Failed"); }
-    }
-
-    function checkUserStatus() {
-        db.ref(`users/${userWallet}`).on('value', (snap) => {
-            const data = snap.val();
-            if (data && data.paid) {
-                initDashboard(data);
-            } else {
-                showPage('registerPage');
-                const urlParams = new URLSearchParams(window.location.search);
-                if(urlParams.get('invite')) document.getElementById('regInvite').value = urlParams.get('invite');
-            }
+            // Check Account in DB
+            db.ref(`users/${userWallet}`).on('value', (snap) => {
+                const data = snap.val();
+                if (data) {
+                    initDashboard(data);
+                } else {
+                    showRegistration();
+                }
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            });
+        } catch (e) {
+            console.error(e);
             document.getElementById('loadingOverlay').classList.add('hidden');
-        });
+        }
     }
 
-    async function handleRegistration() {
-        const username = document.getElementById('regName').value;
-        const inviteCode = document.getElementById('regInvite').value.toUpperCase();
-        if(!username || !inviteCode) return alert("Fill all fields");
+    function initDashboard(data) {
+        document.getElementById('connectState').classList.add('hidden');
+        document.getElementById('registrationState').classList.add('hidden');
+        document.getElementById('dashboardState').classList.remove('hidden');
+        document.getElementById('bottomNav').classList.remove('hidden');
+        document.getElementById('walletBadge').classList.remove('hidden');
+        document.getElementById('addrShort').innerText = userWallet.slice(0,6)+"..."+userWallet.slice(-4);
 
-        const btn = document.getElementById('regBtn');
+        // Stats
+        document.getElementById('dashBal').innerText = data.ztrBalance.toFixed(2);
+        document.getElementById('vaultAmt').innerText = data.ztrBalance.toFixed(2) + " ZTR";
+        document.getElementById('dashTeam').innerText = data.teamSize || 0;
+        document.getElementById('dashCode').innerText = data.inviteCode;
+        
+        const lvlName = data.level === 0 ? "Starter" : LEVELS[data.level-1].name;
+        document.getElementById('dashLvl').innerText = lvlName;
+
+        const link = window.location.origin + "?invite=" + data.inviteCode;
+        document.getElementById('inviteLinkText').innerText = link;
+
+        // Stars Logic
+        const stars = document.querySelectorAll('.star-icon');
+        stars.forEach((s, i) => i < data.level ? s.classList.add('active') : s.classList.remove('active'));
+        if(data.level >= 5 && data.teamSize >= 10) document.getElementById('salaryEligible').classList.remove('hidden');
+
+        fetchTree(userWallet);
+    }
+
+    // --- REGISTRATION ---
+    function showRegistration() {
+        document.getElementById('connectState').classList.add('hidden');
+        document.getElementById('registrationState').classList.remove('hidden');
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('invite')) document.getElementById('regInvite').value = urlParams.get('invite');
+    }
+
+    async function handleRegister() {
+        const name = document.getElementById('regName').value;
+        const invite = document.getElementById('regInvite').value.trim();
+        if(!name || !invite) return alert("Fill all fields");
+
+        const btn = document.getElementById('btnReg');
         btn.disabled = true;
-        btn.innerText = "Processing Payment...";
+        btn.innerText = "Processing USDT...";
 
         try {
-            // 1. Send USDT to Admin
             const usdtAbi = ["function transfer(address to, uint256 amount) returns (bool)"];
             const contract = new ethers.Contract(USDT_CONTRACT, usdtAbi, signer);
             const tx = await contract.transfer(ADMIN_WALLET, ethers.parseUnits("5.25", 18));
-            alert("Payment Sent! Confirming on Blockchain...");
+            alert("Payment Sent. Confirming on Protocol...");
             await tx.wait();
 
-            // 2. Notify Backend
             const res = await fetch(`${API_URL}/api/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', ...userAuth },
-                body: JSON.stringify({ username, inviteCode, txHash: tx.hash })
+                body: JSON.stringify({ username: name, inviteCode: invite, txHash: tx.hash })
             });
             const result = await res.json();
             if(result.success) {
-                alert("Account Activated!");
+                alert("Welcome to ZTR Network!");
                 location.reload();
             } else alert(result.error);
-
         } catch (e) { alert("Registration Error"); }
         btn.disabled = false;
         btn.innerText = "ACTIVATE NODE";
     }
 
-    function initDashboard(data) {
-        showPage('dashboardPage');
-        document.getElementById('bottomNav').classList.remove('hidden');
-        document.getElementById('walletBadge').classList.remove('hidden');
-        document.getElementById('shortAddr').innerText = userWallet.slice(0,6)+'...'+userWallet.slice(-4);
+    // --- MATRIX UPGRADES ---
+    async function openMatrix() {
+        const snap = await db.ref(`users/${userWallet}/level`).once('value');
+        const currentLvl = snap.val() || 0;
+        const list = document.getElementById('matrixList');
+        list.innerHTML = "";
 
-        // Data Update
-        document.getElementById('dashBalance').innerText = data.ztrBalance.toFixed(2);
-        document.getElementById('vaultAmt').innerText = data.ztrBalance.toFixed(2) + " ZTR";
-        document.getElementById('dashLevel').innerText = LEVELS[data.level-1]?.name || "Starter";
-        document.getElementById('dashLvlNum').innerText = "Level " + data.level;
-        document.getElementById('dashTeam').innerText = data.teamSize || 0;
-        document.getElementById('dashId').innerText = "ZTR-" + data.profile.userId;
-        document.getElementById('dashInvite').innerText = data.inviteCode;
-
-        const link = window.location.origin + "?invite=" + data.inviteCode;
-        document.getElementById('inviteLink').innerText = link;
+        LEVELS.forEach(lvl => {
+            const isUnlocked = currentLvl >= lvl.id;
+            const canBuy = currentLvl === lvl.id - 1;
+            list.innerHTML += `
+                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; margin-bottom:10px; border:1px solid ${isUnlocked?'var(--primary)':'#222'};">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div><b>${lvl.name} Level</b><br><small>${lvl.price} USDT</small></div>
+                        <button class="btn" style="width:auto; padding:8px 15px; font-size:12px;" 
+                            ${!canBuy ? 'disabled' : ''} onclick="buyLevel(${lvl.id}, ${lvl.price})">
+                            ${isUnlocked ? 'ACTIVATED' : 'UPGRADE'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        document.getElementById('matrixModal').classList.add('active');
     }
 
-    async function handleUpgrade() {
-        const snap = await db.ref(`users/${userWallet}/level`).once('value');
-        const current = snap.val() || 0;
-        if(current >= 5) return alert("Max level reached!");
-
-        const next = LEVELS[current];
-        const btn = document.getElementById('upgradeConfirmBtn');
-        btn.disabled = true;
-
+    async function buyLevel(id, price) {
+        if(!confirm(`Upgrade to this level for ${price} USDT?`)) return;
         try {
             const usdtAbi = ["function transfer(address to, uint256 amount) returns (bool)"];
             const contract = new ethers.Contract(USDT_CONTRACT, usdtAbi, signer);
-            const tx = await contract.transfer(ADMIN_WALLET, ethers.parseUnits(next.price.toString(), 18));
+            const tx = await contract.transfer(ADMIN_WALLET, ethers.parseUnits(price.toString(), 18));
             await tx.wait();
 
             const res = await fetch(`${API_URL}/api/upgrade`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', ...userAuth },
-                body: JSON.stringify({ levelId: next.id, txHash: tx.hash })
+                body: JSON.stringify({ levelId: id, txHash: tx.hash })
             });
             const result = await res.json();
-            if(result.success) alert("Upgrade Successful!");
-            else alert(result.error);
-        } catch (e) { alert("Upgrade Failed"); }
-        closeModal();
-        btn.disabled = false;
+            if(result.success) {
+                alert("Level Upgraded Successfully!");
+                location.reload();
+            } else alert(result.error);
+        } catch (e) { alert("Transaction Failed"); }
     }
 
-    async function handleWithdraw() {
-        if(!confirm("Claim your ZTR coins?")) return;
+    // --- WITHDRAWAL ---
+    async function withdrawZTR() {
+        if(!confirm("Claim ZTR rewards to your wallet?")) return;
         try {
             const res = await fetch(`${API_URL}/api/withdraw`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', ...userAuth }
             });
             const result = await res.json();
-            if(result.success) alert("Request Sent to Admin!");
+            if(result.success) alert("Withdrawal request sent to admin.");
             else alert(result.error);
-        } catch (e) { alert("Server Error"); }
+        } catch (e) { alert("API Error"); }
     }
 
-    // --- UI HELPERS ---
-    function showPage(id) {
-        document.getElementById('connectPage').classList.add('hidden');
-        document.getElementById('registerPage').classList.add('hidden');
-        document.getElementById('dashboardPage').classList.add('hidden');
-        document.getElementById(id).classList.remove('hidden');
+    // --- UTILS & UI ---
+    async function fetchTree(wallet) {
+        const snap = await db.ref('users').orderByChild('inviterWallet').equalTo(wallet).once('value');
+        const area = document.getElementById('treeList');
+        if(snap.exists()) {
+            area.innerHTML = "";
+            snap.forEach(child => {
+                const u = child.val();
+                area.innerHTML += `<div class="tree-node"><b>${u.profile.name}</b> (Lvl ${u.level})</div>`;
+            });
+        } else area.innerHTML = "<small>No direct members yet.</small>";
     }
 
-    function switchTab(tab, el) {
+    function switchPage(page, el) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('tab' + tab).classList.add('active');
+        document.getElementById('page' + page).classList.add('active');
         el.classList.add('active');
     }
 
-    async function openUpgradeModal() {
-        const snap = await db.ref(`users/${userWallet}/level`).once('value');
-        const current = snap.val() || 0;
-        if(current >= 5) return alert("Max level reached");
-        const next = LEVELS[current];
-        document.getElementById('nextLvlName').innerText = "Upgrade to " + next.name;
-        document.getElementById('nextLvlPrice').innerText = "Price: " + next.price + " USDT";
-        document.getElementById('upgradeModal').classList.add('active');
-    }
+    function closeMatrix() { document.getElementById('matrixModal').classList.remove('active'); }
+    function copyLink() { navigator.clipboard.writeText(document.getElementById('inviteLinkText').innerText); alert("Copied!"); }
 
-    function closeModal() { document.getElementById('upgradeModal').classList.remove('active'); }
-    function copyLink() { navigator.clipboard.writeText(document.getElementById('inviteLink').innerText); alert("Copied!"); }
+    // Slider Logic
+    setInterval(() => {
+        const slides = document.querySelectorAll('.slide');
+        let active = 0;
+        slides.forEach((s, i) => { if(s.classList.contains('active')) active = i; });
+        slides[active].classList.remove('active');
+        slides[(active + 1) % slides.length].classList.add('active');
+    }, 5000);
 
-    window.onload = () => { if(!window.ethereum) document.getElementById('loadingOverlay').classList.add('hidden'); };
+    // Live Chart Logic
+    setInterval(() => {
+        const price = (1 + (Math.random() * 0.05)).toFixed(4);
+        document.getElementById('livePrice').innerText = price;
+        const bar = document.createElement('div');
+        bar.style.cssText = `width:4px; height:${Math.random()*80}px; background:var(--primary); opacity:0.5;`;
+        const area = document.getElementById('chartArea');
+        area.appendChild(bar);
+        if(area.children.length > 50) area.removeChild(area.firstChild);
+    }, 3000);
+
+    window.onload = () => {
+        if(window.ethereum && window.ethereum.selectedAddress) connectWallet();
+        else setTimeout(() => document.getElementById('loadingOverlay').classList.add('hidden'), 1500);
+    };
 </script>
 </body>
 </html>
