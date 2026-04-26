@@ -1563,9 +1563,15 @@
 
 <script>
     (async function() {
-        const BACKEND_URL = 'https://ztr-backend-1sie.vercel.app/api'; // Your backend URL
+        // ===================================================================
+        // ================== IMPORTANT CONFIGURATION ======================
+        // ===================================================================
+        // Replace this with the actual URL of your deployed Vercel backend
+        const BACKEND_URL = 'https://your-backend-url.vercel.app'; 
+        // ===================================================================
 
-        // ========== FIREBASE CONFIGURATION (Still used for some configs not managed by backend) ==========
+
+        // ========== FIREBASE CONFIGURATION ==========
         const firebaseConfig = {
             apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
             authDomain: "fortune-2cb70.firebaseapp.com",
@@ -1599,7 +1605,7 @@
         const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; // USDT BEP20 Contract
         const CHAIN_ID = "0x38"; // BSC Mainnet
         const CHAIN_ID_DECIMAL = 56; // BSC Mainnet
-        const JOINING_FEE_ZTR = 5.25; // Price in ZTR (this will now be fetched or calculated from backend)
+        const JOINING_FEE_ZTR = 5.25; // Price in ZTR
 
         // ===================================================================
         // ===== YOUR CLOUDINARY DETAILS HAVE BEEN ADDED HERE =====
@@ -1608,15 +1614,15 @@
         const CLOUDINARY_UPLOAD_PRESET = 'Zentron'; // Your provided preset name
         // ===================================================================
         
-        let APP_LEVELS = []; // Will be fetched from backend
-        let ZTR_PRICE_CONFIG = {}; // Will be fetched from backend
+        let APP_LEVELS = []; // Will be fetched from Firebase
 
         const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
         
         const STORAGE_KEYS = {
             CONNECTED_WALLET: 'ztr_connected_wallet',
             SESSION_ACTIVE: 'ztr_session_active',
-            INVITE_INFO: 'ztr_invite_info'
+            INVITE_INFO: 'ztr_invite_info',
+            REGISTRATION_TX_HASH: 'ztr_reg_tx_hash'
         };
 
         let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false;
@@ -1645,271 +1651,6 @@
         const loadingOverlay = document.getElementById('loadingOverlay');
         const profileSetupModal = document.getElementById('profileSetupModal');
 
-        // ========== BACKEND API CALLS ==========
-        async function callBackend(endpoint, method = 'GET', data = null) {
-            try {
-                const options = {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                };
-                if (data) {
-                    options.body = JSON.stringify(data);
-                }
-                const response = await fetch(`${BACKEND_URL}${endpoint}`, options);
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `Backend error: ${response.status}`);
-                }
-                return await response.json();
-            } catch (error) {
-                console.error(`Error calling backend ${endpoint}:`, error);
-                showToast(error.message || "An unexpected error occurred with the backend.", "error");
-                throw error;
-            }
-        }
-
-        async function fetchAppConfig() {
-            try {
-                const config = await callBackend('/config');
-                APP_LEVELS = config.levels;
-                ZTR_PRICE_CONFIG = config.ztrPrice;
-                baseZTRPrice = ZTR_PRICE_CONFIG.basePrice;
-                liveZTRPrice = baseZTRPrice; // Initialize live price
-            } catch (error) {
-                console.error("Failed to fetch app config from backend:", error);
-                showToast("Could not load app configuration from backend.", "error");
-                // Fallback to local if backend fails
-                APP_LEVELS = [
-                    { id: 1, name: "Iron", price: 5, icon: "🛡️", returnPercentage: 5 },
-                    { id: 2, name: "Bronze", price: 10, icon: "🥉", returnPercentage: 5 },
-                    { id: 3, name: "Silver", price: 15, icon: "🥈", returnPercentage: 7 },
-                    { id: 4, name: "Gold", price: 20, icon: "🥇", returnPercentage: 7 },
-                    { id: 5, name: "Master", price: 25, icon: "👑", returnPercentage: 10 }
-                ];
-                baseZTRPrice = 1.0;
-                liveZTRPrice = 1.0;
-                console.warn("Using fallback configuration.");
-            }
-        }
-
-        async function getNextUserId() {
-            // This should now come from the backend
-            try {
-                const response = await callBackend('/user/next-id');
-                return response.nextUserId;
-            } catch (error) {
-                console.error("Failed to get next user ID from backend:", error);
-                throw error;
-            }
-        }
-
-        async function getWalletById(id) {
-            try {
-                const response = await callBackend(`/user/${id}/wallet`);
-                return response.walletAddress;
-            } catch (error) {
-                console.error("Failed to get wallet by ID from backend:", error);
-                return null;
-            }
-        }
-        
-        async function getUserProfile(wallet) {
-            if(!wallet || !isValidWalletAddress(wallet)) return null;
-            try {
-                const response = await callBackend(`/user/${wallet}/profile`);
-                return response.profile;
-            } catch (error) {
-                // Profile not found is a valid scenario for new users
-                if (error.message && error.message.includes('not found')) {
-                    return null;
-                }
-                console.error("Failed to get user profile from backend:", error);
-                return null;
-            }
-        }
-
-        async function createUserProfile(wallet, inviterId, username, profilePicUrl) {
-            if (!wallet || !isValidWalletAddress(wallet) || !inviterId) return null;
-            try {
-                const data = { walletAddress: wallet, inviterId: inviterId, username: username, profilePicUrl: profilePicUrl };
-                const response = await callBackend('/user/register', 'POST', data);
-                return response.profile;
-            } catch (error) {
-                console.error("Failed to create user profile via backend:", error);
-                throw error;
-            }
-        }
-        
-        async function getInviterId(wallet) {
-            if (!wallet || !isValidWalletAddress(wallet)) return null;
-            try {
-                const response = await callBackend(`/user/${wallet}/inviter`);
-                return response.inviterId;
-            } catch (error) {
-                console.error("Failed to get inviter ID from backend:", error);
-                return null;
-            }
-        }
-        
-        async function getUplinerId(inviterWallet) {
-            if (!inviterWallet) return null;
-            return await getInviterId(inviterWallet);
-        }
-        
-        async function getDirectMembersOfInviter(inviterUserId) {
-            if (!inviterUserId) return [];
-            try {
-                const response = await callBackend(`/user/${inviterUserId}/direct-members`);
-                return response.members;
-            } catch (error) {
-                console.error("Failed to get direct members from backend:", error);
-                return [];
-            }
-        }
-
-        async function isPaidUser(wallet) { 
-            if (!wallet || !isValidWalletAddress(wallet)) return false;
-            try {
-                const response = await callBackend(`/user/${wallet}/status`);
-                return response.paid;
-            } catch (error) {
-                console.error("Failed to check paid status from backend:", error);
-                return false;
-            }
-        }
-        
-        async function markUserAsPaid(wallet) {
-            if (!wallet || !isValidWalletAddress(wallet)) return;
-            try {
-                await callBackend(`/user/${wallet}/mark-paid`, 'POST');
-            } catch (error) {
-                console.error("Failed to mark user as paid via backend:", error);
-                throw error;
-            }
-        }
-
-        async function logIncome(wallet, amount, type) {
-            if (!wallet || !isValidWalletAddress(wallet)) return;
-            try {
-                const data = { walletAddress: wallet, amount: amount, type: type };
-                await callBackend('/transactions/log-income', 'POST', data);
-            } catch (error) {
-                console.error("Failed to log income via backend:", error);
-                throw error;
-            }
-        }
-        
-        async function distributeMultiLevelCommission(newUserWallet, inviterUserId) {
-            try {
-                const data = { newUserWallet: newUserWallet, inviterUserId: inviterUserId, joiningFee: JOINING_FEE_ZTR };
-                await callBackend('/transactions/distribute-commission', 'POST', data);
-            } catch (error) {
-                console.error("Failed to distribute commission via backend:", error);
-                throw error;
-            }
-        }
-        
-        async function getZTRBalance(wallet) { 
-            if (!wallet || !isValidWalletAddress(wallet)) return 0;
-            try {
-                const response = await callBackend(`/user/${wallet}/ztr-balance`);
-                return response.balance;
-            } catch (error) {
-                console.error("Failed to get ZTR balance from backend:", error);
-                return 0;
-            }
-        }
-        
-        async function updateZTRBalance(wallet, amount, isWithdrawal = false) { 
-            if (!wallet || !isValidWalletAddress(wallet)) return;
-            try {
-                const endpoint = isWithdrawal ? `/user/${wallet}/clear-ztr-balance` : `/user/${wallet}/add-ztr-balance`;
-                const data = isWithdrawal ? null : { amount: amount };
-                await callBackend(endpoint, 'POST', data);
-            } catch (error) {
-                console.error("Failed to update ZTR balance via backend:", error);
-                throw error;
-            }
-        }
-        
-        async function getUserLevel(wallet) { 
-            if (!wallet || !isValidWalletAddress(wallet)) return 0;
-            try {
-                const response = await callBackend(`/user/${wallet}/level`);
-                return response.level;
-            } catch (error) {
-                console.error("Failed to get user level from backend:", error);
-                return 0;
-            }
-        }
-        
-        async function setUserLevel(wallet, level) { 
-            if (!wallet || !isValidWalletAddress(wallet)) return;
-            try {
-                const data = { level: level };
-                await callBackend(`/user/${wallet}/set-level`, 'POST', data);
-            } catch (error) {
-                console.error("Failed to set user level via backend:", error);
-                throw error;
-            }
-        }
-        
-        async function getTeamSize(wallet) { 
-            if (!wallet || !isValidWalletAddress(wallet)) return 0;
-            try {
-                const response = await callBackend(`/user/${wallet}/team-size`);
-                return response.teamSize;
-            } catch (error) {
-                console.error("Failed to get team size from backend:", error);
-                return 0;
-            }
-        }
-        
-        async function getSalleryEarnings(wallet) {
-            if (!wallet || !isValidWalletAddress(wallet)) return 0;
-            try {
-                const response = await callBackend(`/user/${wallet}/salary-earnings`);
-                return response.totalSalary;
-            } catch (error) {
-                console.error("Failed to get salary earnings from backend:", error);
-                return 0;
-            }
-        }
-        
-        async function getUniqueInviteCode(wallet) {
-            if (!wallet || !isValidWalletAddress(wallet)) return null;
-            try {
-                const response = await callBackend(`/user/${wallet}/invite-code`);
-                return response.inviteCode;
-            } catch (error) {
-                console.error("Failed to get unique invite code from backend:", error);
-                return null;
-            }
-        }
-        
-        async function getWalletByInviteCode(inviteCode) {
-            if (!inviteCode || !isValidInviteCode(inviteCode)) return null;
-            try {
-                const response = await callBackend(`/invite/${inviteCode}/wallet`);
-                return response.walletAddress;
-            } catch (error) {
-                console.error("Failed to get wallet by invite code from backend:", error);
-                return null;
-            }
-        }
-
-        async function isProfileComplete(wallet) {
-            return await getUserProfile(wallet) !== null;
-        }
-
-        async function getCurrentLevelInfo(wallet) { 
-            const levelId = await getUserLevel(wallet); 
-            if (levelId === 0) return { name: "Starter", price: 0, icon: "🌱", returnPercentage: 0 }; 
-            return APP_LEVELS.find(level => level.id === levelId) || APP_LEVELS[levelId - 1]; 
-        }
-
         // ========== HELPER FUNCTIONS ==========
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
@@ -1920,6 +1661,39 @@
             setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
         }
         
+        async function fetchAppConfig() {
+            try {
+                // Fetch ZTR base price from Firebase, with a fallback to 1.0
+                const priceSnapshot = await db.ref('config/baseZTRPrice').once('value');
+                if (priceSnapshot.exists() && typeof priceSnapshot.val() === 'number') {
+                    baseZTRPrice = priceSnapshot.val();
+                } else {
+                    console.warn("Using fallback ZTR base price of 1.0.");
+                    baseZTRPrice = 1.0;
+                }
+                liveZTRPrice = baseZTRPrice; // Initialize live price
+
+                // Fetch level configuration
+                const snapshot = await db.ref('config/levels').once('value');
+                if (snapshot.exists() && Array.isArray(snapshot.val())) {
+                    APP_LEVELS = snapshot.val();
+                } else {
+                    // Fallback if config is missing in Firebase (prices are in ZTR)
+                    APP_LEVELS = [
+                        { id: 1, name: "Iron", price: 5, icon: "🛡️", returnPercentage: 5 },
+                        { id: 2, name: "Bronze", price: 10, icon: "🥉", returnPercentage: 5 },
+                        { id: 3, name: "Silver", price: 15, icon: "🥈", returnPercentage: 7 },
+                        { id: 4, name: "Gold", price: 20, icon: "🥇", returnPercentage: 7 },
+                        { id: 5, name: "Master", price: 25, icon: "👑", returnPercentage: 10 }
+                    ];
+                    console.warn("Using fallback level configuration.");
+                }
+            } catch (error) {
+                console.error("Failed to fetch app config:", error);
+                showToast("Could not load app configuration.", "error");
+            }
+        }
+
         function updateAllWalletAddressDisplays() {
             if (!userAddress) return;
             const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
@@ -1938,6 +1712,107 @@
         }
         window.copyWalletAddress = copyWalletAddress;
         
+        async function getUniqueInviteCode(wallet) {
+            if (!wallet || !isValidWalletAddress(wallet)) return null;
+            const walletLower = wallet.toLowerCase();
+            const snapshot = await db.ref(`users/${walletLower}/inviteCode`).once('value');
+            if (snapshot.exists()) {
+                return snapshot.val();
+            }
+            // Fallback for getting code for a newly registered user who doesn't have it yet.
+            // This case should be handled by the backend on registration, but this is a safe read.
+            return "Generating...";
+        }
+        
+        async function getWalletByInviteCode(inviteCode) {
+            if (!inviteCode || !isValidInviteCode(inviteCode)) return null;
+            const snapshot = await db.ref(`inviteCodeMap/${inviteCode}`).once('value');
+            return snapshot.exists() ? snapshot.val() : null;
+        }
+
+        // ========== READ-ONLY USER DATA FUNCTIONS (DATABASE) ==========
+        async function getWalletById(id) {
+            if (!id) return null;
+            const snapshot = await db.ref(`userIdMap/${id}`).once('value');
+            return snapshot.exists() ? snapshot.val() : null;
+        }
+        
+        async function getUserProfile(wallet) {
+            if(!wallet || !isValidWalletAddress(wallet)) return null;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/profile`).once('value');
+            return snapshot.exists() ? snapshot.val() : null;
+        }
+
+        async function getInviterId(wallet) {
+            if (!wallet || !isValidWalletAddress(wallet)) return null;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/inviterId`).once('value');
+            return snapshot.exists() ? snapshot.val() : null;
+        }
+        
+        async function getDirectMembersOfInviter(inviterUserId) {
+            if (!inviterUserId) return [];
+            const usersRef = db.ref('users');
+            const snapshot = await usersRef.orderByChild('inviterId').equalTo(parseInt(inviterUserId)).once('value');
+            const members = [];
+            if(snapshot.exists()) {
+                snapshot.forEach(childSnapshot => {
+                    members.push(childSnapshot.key);
+                });
+            }
+            return members;
+        }
+
+        async function isPaidUser(wallet) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return false;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/paid`).once('value');
+            return snapshot.exists() ? snapshot.val() : false;
+        }
+        
+        async function isProfileComplete(wallet) {
+            return await getUserProfile(wallet) !== null;
+        }
+        
+        async function markUserAsPaid(wallet) {
+            if (!wallet || !isValidWalletAddress(wallet)) return;
+            await db.ref(`users/${wallet.toLowerCase()}/paid`).set(true);
+        }
+        
+        async function getZTRBalance(wallet) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return 0;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/ztrBalance`).once('value');
+            return snapshot.exists() ? snapshot.val() : 0;
+        }
+        
+        async function getUserLevel(wallet) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return 0;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/level`).once('value');
+            return snapshot.exists() ? snapshot.val() : 0;
+        }
+        
+        async function getTeamSize(wallet) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return 0;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/teamSize`).once('value');
+            return snapshot.exists() ? snapshot.val() : 0;
+        }
+        
+        async function getSalleryEarnings(wallet) {
+             if (!wallet || !isValidWalletAddress(wallet)) return 0;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/salaryHistory`).once('value');
+            let totalSalary = 0;
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    totalSalary += child.val().amount;
+                });
+            }
+            return totalSalary;
+        }
+        
+        async function getCurrentLevelInfo(wallet) { 
+            const levelId = await getUserLevel(wallet); 
+            if (levelId === 0) return { name: "Starter", price: 0, icon: "🌱", returnPercentage: 0 }; 
+            return APP_LEVELS.find(level => level.id === levelId) || APP_LEVELS[levelId - 1]; 
+        }
+
         async function updateBalances() {
             if (!userAddress || !provider || !isValidWalletAddress(userAddress)) return;
             try {
@@ -1973,7 +1848,7 @@
                 avatarImg.classList.remove('hidden');
                 avatarIcon.classList.add('hidden');
             } else {
-                avatarIcon.className = `fa-solid ${profile.avatar}`;
+                avatarIcon.className = `fa-solid ${profile.avatar || 'fa-user-astronaut'}`;
                 avatarIcon.classList.remove('hidden');
                 avatarImg.classList.add('hidden');
             }
@@ -2092,14 +1967,7 @@
             const getChildrenProfiles = async (userId) => {
                 const childrenWallets = await getDirectMembersOfInviter(userId);
                 const childrenProfiles = await Promise.all(
-                    childrenWallets.map(async wallet => {
-                        // Assuming getWalletById can return profile directly from backend for a given wallet
-                        const profile = await getUserProfile(wallet);
-                        if (profile) return profile;
-                        // Fallback to old getWalletById if necessary, then get profile
-                        const walletAddress = await getWalletById(wallet); 
-                        return walletAddress ? await getUserProfile(walletAddress) : null;
-                    })
+                    childrenWallets.map(wallet => getUserProfile(wallet))
                 );
                 return childrenProfiles.filter(p => p !== null);
             };
@@ -2133,7 +2001,7 @@
                 
                 let childrenHTML = '';
                 for (const child of children) {
-                    const childWallet = await getWalletById(child.userId); // Get wallet for level lookup
+                    const childWallet = await getWalletById(child.userId);
                     const childLevelName = await getUserLevelName(childWallet);
                     childrenHTML += `
                         <li>
@@ -2170,32 +2038,32 @@
             listContainer.innerHTML = '<div class="spinner" style="margin: auto;"></div>';
             openModal('incomeHistoryModal');
 
-            try {
-                const response = await callBackend(`/user/${userAddress}/income-history`);
-                const historyData = response.history;
+            const incomeRef = db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`);
+            const snapshot = await incomeRef.orderByChild('date').once('value');
+            
+            if (snapshot.exists()) {
+                listContainer.innerHTML = '';
+                const historyData = [];
+                snapshot.forEach(child => {
+                    historyData.push(child.val());
+                });
 
-                if (historyData && historyData.length > 0) {
-                    listContainer.innerHTML = '';
-                    historyData.reverse().forEach(item => {
-                        const date = new Date(item.date);
-                        const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-                        const itemHtml = `
-                            <div class="history-item">
-                                <div class="history-item-details">
-                                    <strong>${sanitizeInput(item.type)}</strong>
-                                    <div class="date">${formattedDate}</div>
-                                </div>
-                                <div class="history-item-amount">+${item.amount.toFixed(4)} ZTR</div>
+                historyData.reverse().forEach(item => {
+                    const date = new Date(item.date);
+                    const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                    const itemHtml = `
+                        <div class="history-item">
+                            <div class="history-item-details">
+                                <strong>${sanitizeInput(item.type)}</strong>
+                                <div class="date">${formattedDate}</div>
                             </div>
-                        `;
-                        listContainer.innerHTML += itemHtml;
-                    });
-                } else {
-                    listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No income history found.</p>';
-                }
-            } catch (error) {
-                console.error("Failed to fetch income history from backend:", error);
-                listContainer.innerHTML = '<p style="text-align:center; color: var(--danger); padding: 20px;">Error loading income history.</p>';
+                            <div class="history-item-amount">+${item.amount.toFixed(4)} ZTR</div>
+                        </div>
+                    `;
+                    listContainer.innerHTML += itemHtml;
+                });
+            } else {
+                listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No income history found.</p>';
             }
         }
 
@@ -2204,32 +2072,31 @@
             listContainer.innerHTML = '<div class="spinner" style="margin: auto;"></div>';
             openModal('salaryHistoryModal');
             
-            try {
-                const response = await callBackend(`/user/${userAddress}/salary-history`);
-                const salaryHistoryData = response.history;
+            const salaryRef = db.ref(`users/${userAddress.toLowerCase()}/salaryHistory`);
+            const snapshot = await salaryRef.orderByChild('date').once('value');
+            if (snapshot.exists()) {
+                listContainer.innerHTML = '';
+                 const historyData = [];
+                snapshot.forEach(child => {
+                    historyData.push(child.val());
+                });
 
-                if (salaryHistoryData && salaryHistoryData.length > 0) {
-                    listContainer.innerHTML = '';
-                    salaryHistoryData.reverse().forEach(item => {
-                        const date = new Date(item.date);
-                        const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-                        const itemHtml = `
-                            <div class="history-item">
-                                <div class="history-item-details">
-                                    <strong>Weekly Salary</strong>
-                                    <div class="date">${formattedDate}</div>
-                                </div>
-                                <div class="history-item-amount" style="color: var(--gold)">+${item.amount.toFixed(2)} ZTR</div>
+                historyData.reverse().forEach(item => {
+                    const date = new Date(item.date);
+                    const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                    const itemHtml = `
+                        <div class="history-item">
+                            <div class="history-item-details">
+                                <strong>Weekly Salary</strong>
+                                <div class="date">${formattedDate}</div>
                             </div>
-                        `;
-                        listContainer.innerHTML += itemHtml;
-                    });
-                } else {
-                    listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No salary payments have been recorded yet.</p>';
-                }
-            } catch (error) {
-                console.error("Failed to fetch salary history from backend:", error);
-                listContainer.innerHTML = '<p style="text-align:center; color: var(--danger); padding: 20px;">Error loading salary history.</p>';
+                            <div class="history-item-amount" style="color: var(--gold)">+${item.amount.toFixed(2)} ZTR</div>
+                        </div>
+                    `;
+                    listContainer.innerHTML += itemHtml;
+                });
+            } else {
+                listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No salary payments have been recorded yet.</p>';
             }
         }
 
@@ -2237,7 +2104,7 @@
             const userLevel = await getUserLevel(userAddress);
             const teamSize = await getTeamSize(userAddress);
             const maxLevel = APP_LEVELS.length;
-            const requiredTeamSize = ZTR_PRICE_CONFIG.minTeamForSalary;
+            const requiredTeamSize = 10;
             return (userLevel >= maxLevel && teamSize >= requiredTeamSize);
         }
 
@@ -2267,7 +2134,7 @@
         async function openJoiningStarsPage() {
             const container = document.getElementById('joiningStarsContainer');
             const teamSize = await getTeamSize(userAddress);
-            const requiredTeamSize = ZTR_PRICE_CONFIG.minTeamForSalary;
+            const requiredTeamSize = 10;
             container.innerHTML = generateLargeStarsHTML(requiredTeamSize, Math.min(teamSize, requiredTeamSize));
 
             if (teamSize >= requiredTeamSize) {
@@ -2346,12 +2213,26 @@
                 showToast("Waiting for approval...", "info");
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
                 showToast("Transaction sent! Confirming...", "info");
-                await tx.wait();
+                const receipt = await tx.wait();
+
+                // Call the backend to finalize the upgrade
+                const response = await fetch(`${BACKEND_URL}/api/upgrade`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        wallet: userAddress,
+                        txHash: receipt.hash,
+                        levelId: pendingLevelUpgrade.levelId
+                    })
+                });
+
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || "Upgrade verification failed on server.");
+                }
                 
-                // Call backend to update level and distribute return
-                const data = { walletAddress: userAddress, levelId: pendingLevelUpgrade.levelId, pricePaid: usdtPrice };
-                await callBackend('/transactions/upgrade-level', 'POST', data);
-                
+                // Backend handles setting level and distributing returns. Frontend just updates UI.
+                showToast("Upgrade successful!", "success");
                 closeModal('levelUpgradePaymentModal');
                 await updateDashboard();
                 await initializeLevelViewer();
@@ -2360,7 +2241,7 @@
                 
             } catch (e) { 
                 console.error("Level upgrade failed:", e);
-                showToast("Transaction failed. Please try again.", "error"); 
+                showToast(e.message || "Transaction failed. Please try again.", "error"); 
             } finally { 
                 isProcessing = false; 
                 confirmBtn.disabled = false;
@@ -2539,15 +2420,41 @@
             const sanitizedUsername = sanitizeInput(username);
             if (sanitizedUsername.length < 3) { showToast("Username must be at least 3 characters", "error"); return; }
             
-            await createUserProfile(userAddress, verifiedInviterId, sanitizedUsername, setupProfilePicData);
-            await distributeMultiLevelCommission(userAddress, verifiedInviterId);
-            
-            sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
-            
-            closeModal('profileSetupModal');
-            showToast("Profile setup complete!", "success");
-            
-            await showDashboard();
+            // Retrieve the txHash from session storage
+            const txHash = sessionStorage.getItem(STORAGE_KEYS.REGISTRATION_TX_HASH);
+            if (!txHash) {
+                showToast("Transaction hash not found. Please start over.", "error");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        wallet: userAddress,
+                        txHash: txHash,
+                        inviterId: verifiedInviterId,
+                        username: sanitizedUsername,
+                        profilePic: setupProfilePicData // This is the Cloudinary URL or null
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
+                    sessionStorage.removeItem(STORAGE_KEYS.REGISTRATION_TX_HASH);
+                    closeModal('profileSetupModal');
+                    showToast("Profile setup complete!", "success");
+                    await showDashboard();
+                } else {
+                    throw new Error(result.error || "Registration failed");
+                }
+            } catch (error) {
+                console.error('Registration failed:', error);
+                showToast(error.message, 'error');
+            }
         });
 
         async function openWithdrawalModal() {
@@ -2569,54 +2476,50 @@
         window.openWithdrawalModal = openWithdrawalModal;
 
         async function hasPendingWithdrawal(wallet) {
-            try {
-                const response = await callBackend(`/user/${wallet}/pending-withdrawal`);
-                return response.hasPending;
-            } catch (error) {
-                console.error("Failed to check pending withdrawals from backend:", error);
-                return false;
-            }
+            const snapshot = await db.ref('withdrawals').orderByChild('userWallet').equalTo(wallet.toLowerCase()).once('value');
+            if (!snapshot.exists()) return false;
+            let pending = false;
+            snapshot.forEach(child => {
+                if (child.val().status === 'pending') {
+                    pending = true;
+                }
+            });
+            return pending;
         }
         
         async function listenForWithdrawals() {
-            // Firebase listener is still used here for real-time updates for withdrawals
             if(withdrawalListener) {
                 withdrawalListener.off(); // Detach previous listener
             }
-            // Pointing directly to the withdrawals ref in Firebase
             const withdrawalRef = db.ref('withdrawals').orderByChild('userWallet').equalTo(userAddress.toLowerCase());
             
             withdrawalListener = withdrawalRef.on('value', (snapshot) => {
                 let latestWithdrawal = null;
+                const statusDiv = document.getElementById('withdrawalStatus');
+                if(!statusDiv) return;
+                
+                statusDiv.classList.remove('hidden');
+
                 if(snapshot.exists()){
                     let allWithdrawals = [];
                     snapshot.forEach(child => {
                         allWithdrawals.push(child.val());
                     });
-                    latestWithdrawal = allWithdrawals.sort((a,b) => new Date(b.requestDate) - new Date(a.requestDate))[0];
+                    latestWithdrawal = allWithdrawals.sort((a,b) => new Date(b.date) - new Date(a.date))[0];
+                    
+                    const date = new Date(latestWithdrawal.date).toLocaleDateString();
+                    if(latestWithdrawal.status === 'pending') {
+                        statusDiv.innerHTML = `<span class="status-info"><i class="fa-solid fa-clock"></i> Pending withdrawal of ${latestWithdrawal.amount.toFixed(2)} ZTR requested on ${date}.</span>`;
+                    } else if (latestWithdrawal.status === 'approved') {
+                        statusDiv.innerHTML = `<span class="status-success"><i class="fa-solid fa-check-circle"></i> Last withdrawal of ${latestWithdrawal.amount.toFixed(2)} ZTR was approved.</span>`;
+                    } else if (latestWithdrawal.status === 'rejected') {
+                         statusDiv.innerHTML = `<span class="status-error"><i class="fa-solid fa-times-circle"></i> Last withdrawal of ${latestWithdrawal.amount.toFixed(2)} ZTR was rejected.</span>`;
+                    }
+
+                } else {
+                     statusDiv.innerHTML = "No withdrawal history.";
                 }
-                updateWithdrawalStatusUI(latestWithdrawal);
             });
-        }
-        
-        function updateWithdrawalStatusUI(withdrawal) {
-            const statusDiv = document.getElementById('withdrawalStatus');
-            if(!statusDiv) return; 
-            
-            if(!withdrawal) {
-                statusDiv.innerHTML = "No withdrawal history.";
-                statusDiv.classList.add('hidden'); // Ensure it's hidden if no history
-                return;
-            }
-            statusDiv.classList.remove('hidden'); // Show if there's a withdrawal
-            const date = new Date(withdrawal.requestDate).toLocaleDateString();
-            if(withdrawal.status === 'pending') {
-                statusDiv.innerHTML = `<span class="status-info"><i class="fa-solid fa-clock"></i> Pending withdrawal of ${withdrawal.amount.toFixed(2)} ZTR requested on ${date}.</span>`;
-            } else if (withdrawal.status === 'approved') {
-                statusDiv.innerHTML = `<span class="status-success"><i class="fa-solid fa-check-circle"></i> Last withdrawal of ${withdrawal.amount.toFixed(2)} ZTR approved on ${date}.</span>`;
-            } else if (withdrawal.status === 'rejected') {
-                statusDiv.innerHTML = `<span class="status-error"><i class="fa-solid fa-times-circle"></i> Last withdrawal of ${withdrawal.amount.toFixed(2)} ZTR was rejected.</span>`;
-            }
         }
         
         document.getElementById('confirmWithdrawalBtn').addEventListener('click', async () => {
@@ -2627,29 +2530,25 @@
             btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Submitting...';
             
             try {
-                const ztrBalance = await getZTRBalance(userAddress);
-                const profile = await getUserProfile(userAddress);
+                const response = await fetch(`${BACKEND_URL}/api/withdraw`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ wallet: userAddress })
+                });
 
-                if (ztrBalance > 0 && profile) {
-                    const data = {
-                        userWallet: userAddress,
-                        userId: profile.userId,
-                        amount: ztrBalance,
-                    };
-                    await callBackend('/transactions/request-withdrawal', 'POST', data);
-                    await updateZTRBalance(userAddress, 0, true); // Clear balance locally and on backend
-                    
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showToast("Withdrawal request submitted!", "success");
                     await updateDashboard();
                     await updateAssetsPage();
-                    
                     closeModal('withdrawalModal');
-                    showToast("Withdrawal request submitted!", "success");
                 } else {
-                    showToast("Error: Not enough balance or profile not found.", "error");
+                    throw new Error(result.error || "Withdrawal request failed.");
                 }
             } catch (e) {
                 console.error("Withdrawal error:", e);
-                showToast("An error occurred. Please try again.", "error");
+                showToast(e.message, "error");
             } finally {
                 isProcessing = false;
                 btn.disabled = false;
@@ -2676,9 +2575,7 @@
             const network = await provider.getNetwork();
             if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
                 if (!isAutoReconnect) showToast("Please switch to BSC network.", "info");
-                try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {
-                    showToast("Failed to switch network. Please do it manually.", "error");
-                }
+                try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {}
             }
             
             await getUSDTDecimals();
@@ -2759,9 +2656,12 @@
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
                 
                 showToast("Transaction sent! Confirming...", "info");
-                await tx.wait();
+                const receipt = await tx.wait();
+
+                // IMPORTANT: Store the txHash for the registration step
+                sessionStorage.setItem(STORAGE_KEYS.REGISTRATION_TX_HASH, receipt.hash);
                 
-                await markUserAsPaid(userAddress); // Mark user as paid on backend
+                await markUserAsPaid(userAddress);
                 closeModal('paymentModal');
                 
                 connectState.classList.add('hidden');
@@ -2822,33 +2722,21 @@
         document.getElementById('profilePicInput').addEventListener('change', async (event) => {
             const imageUrl = await handleImageUpload(event.target.files[0]);
             if (imageUrl) {
-                try {
-                    const data = { walletAddress: userAddress, profilePicUrl: imageUrl };
-                    await callBackend('/user/update-profile-pic', 'POST', data);
-                    await updateAssetsPage();
-                    await renderBeautifulTree();
-                    showToast("Profile picture updated successfully!", "success");
-                } catch (error) {
-                    console.error("Failed to update profile picture on backend:", error);
-                    showToast("Failed to update profile picture.", "error");
-                }
+                await db.ref(`users/${userAddress.toLowerCase()}/profile/profilePicUrl`).set(imageUrl);
+                await updateAssetsPage();
+                await renderBeautifulTree();
+                showToast("Profile picture updated successfully!", "success");
             }
         });
 
         document.getElementById('saveProfileBtn').addEventListener('click', async () => {
             const name = document.getElementById('profileNameInput').value;
             if (name && userAddress) {
-                try {
-                    const data = { walletAddress: userAddress, name: sanitizeInput(name) };
-                    await callBackend('/user/update-name', 'POST', data);
-                    await updateAssetsPage();
-                    await renderBeautifulTree();
-                    closeModal('editProfileModal');
-                    showToast("Profile updated!", "success");
-                } catch (error) {
-                    console.error("Failed to update profile name on backend:", error);
-                    showToast("Failed to update profile name.", "error");
-                }
+                await db.ref(`users/${userAddress.toLowerCase()}/profile/name`).set(sanitizeInput(name));
+                await updateAssetsPage();
+                await renderBeautifulTree();
+                closeModal('editProfileModal');
+                showToast("Profile updated!", "success");
             }
         });
 
@@ -2900,7 +2788,7 @@
         }
 
         window.addEventListener('load', async () => {
-            await fetchAppConfig(); // Fetch config from backend
+            await fetchAppConfig();
             
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCodeFromUrl = urlParams.get('invite');
