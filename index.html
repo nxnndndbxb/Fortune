@@ -15,7 +15,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <style>
-        /* Your existing CSS styles go here... copy them from your original file */
         :root {
             --primary: #00f2ff;
             --primary-glow: rgba(0, 242, 255, 0.5);
@@ -44,8 +43,6 @@
             overflow-x: hidden;
         }
 
-        /* PASTE ALL OF YOUR OTHER CSS RULES HERE */
-        /* ... from .navbar to .slider-dots .dot.active ... */
         .navbar {
             padding: 15px 20px;
             display: flex;
@@ -1138,12 +1135,11 @@
         .slider-dots .dot.active {
             background-color: var(--primary);
         }
+
     </style>
 </head>
 <body>
 
-<!-- ALL YOUR HTML BODY CONTENT GOES HERE... -->
-<!-- from <div id="loadingOverlay"... to ...<div class="bottom-nav" ... -->
 <div id="loadingOverlay" class="loading-overlay">
     <div class="loading-container">
         <div class="loading-ring r1"></div>
@@ -1228,8 +1224,8 @@
         <i class="fa-solid fa-bolt" style="font-size: 50px; color: var(--primary);"></i>
         <h2 style="margin: 15px 0;">Activate Node</h2>
         <p style="color: rgba(255,255,255,0.7);">Joining Premium Network</p>
-        <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;" id="joiningFeeDisplay">Loading...</div>
-        <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: ~0.0003 BNB</div>
+        <div style="font-size: 32px; color: var(--primary); font-weight: 900; margin: 15px 0;" id="joiningFeeDisplay">5.25 USDT</div>
+        <div class="gas-info"><i class="fa-solid fa-gas-pump"></i> Est. Gas: 0.0003 BNB</div>
         <div style="display:flex; gap:10px;">
             <button class="btn" style="background:rgba(0,0,0,0.5);" onclick="closeModal('paymentModal')">Cancel</button>
             <button class="btn btn-success" id="confirmPaymentBtn">Confirm</button>
@@ -1565,11 +1561,16 @@
     <div class="nav-item" data-page="assets"><i class="fa-solid fa-wallet"></i><span>Vault</span></div>
 </div>
 
-
 <script>
     (async function() {
+        // ===================================================================
+        // ================== IMPORTANT CONFIGURATION ======================
+        // ===================================================================
         const BACKEND_URL = 'https://ztr-backend-1sie.vercel.app'; 
-        
+        // ===================================================================
+
+
+        // ========== FIREBASE CONFIGURATION ==========
         const firebaseConfig = {
             apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
             authDomain: "fortune-2cb70.firebaseapp.com",
@@ -1582,51 +1583,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- START OF FIXES ---
-        
-        // CORE CONFIGURATION & DYNAMIC VALUES
-        const ADMIN_WALLET = "0x97efeaa1da1108acff52840550ec51dc5bbfd812";
-        const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
-        const CHAIN_ID = "0x38";
-        const CHAIN_ID_DECIMAL = 56;
-        
-        // These will be fetched from Firebase
-        let baseZTRPrice = 1.0; // ZTR to USDT conversion rate
-        let joiningFeeZTR = 5.25; // Joining fee in ZTR
-        
-        const STORAGE_KEYS = {
-            CONNECTED_WALLET: 'ztr_connected_wallet',
-            SESSION_ACTIVE: 'ztr_session_active',
-            INVITE_INFO: 'ztr_invite_info',
-            REGISTRATION_TX_HASH: 'ztr_reg_tx_hash',
-            // Key to store the exact USDT amount paid by the user
-            REGISTRATION_AMOUNT: 'ztr_registration_amount'
-        };
-
-        // --- END OF FIXES ---
-
-        const CLOUDINARY_CLOUD_NAME = 'dfwonuz1a'; 
-        const CLOUDINARY_UPLOAD_PRESET = 'Zentron';
-        
-        let APP_LEVELS = [];
-        const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
-        
-        let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false;
-        let verifiedInviterId = null;
-        let pendingLevelUpgrade = null;
-        let withdrawalListener = null;
-        let liveZTRPrice = 1.0; // This is for the chart simulation
-        let chartData = [];
-        let chartInterval = null;
-        let currentSlide = 0;
-        let slideInterval;
-
-        const connectState = document.getElementById('connectState');
-        const invitationState = document.getElementById('invitationState');
-        const dashboardState = document.getElementById('dashboardState');
-        const bottomNav = document.getElementById('bottomNav');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-
+        // SECURITY: Validate and sanitize inputs
         function sanitizeInput(input) {
             if (!input) return '';
             const div = document.createElement('div');
@@ -1634,6 +1591,59 @@
             return div.innerHTML;
         }
         
+        function isValidWalletAddress(address) {
+            return /^0x[a-fA-F0-9]{40}$/.test(address);
+        }
+        
+        function isValidInviteCode(code) {
+            return /^[A-Z0-9]{8}$/.test(code);
+        }
+        
+        // CORE CONFIGURATION
+        const ADMIN_WALLET = "0x97efeaa1da1108acff52840550ec51dc5bbfd812";
+        const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; // USDT BEP20 Contract
+        const CHAIN_ID = "0x38"; // BSC Mainnet
+        const CHAIN_ID_DECIMAL = 56; // BSC Mainnet
+        const JOINING_FEE_ZTR = 5.25; // Price in ZTR
+
+        const CLOUDINARY_CLOUD_NAME = 'dfwonuz1a'; 
+        const CLOUDINARY_UPLOAD_PRESET = 'Zentron';
+        
+        let APP_LEVELS = [];
+
+        const USDT_ABI = ["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
+        
+        const STORAGE_KEYS = {
+            CONNECTED_WALLET: 'ztr_connected_wallet',
+            SESSION_ACTIVE: 'ztr_session_active',
+            INVITE_INFO: 'ztr_invite_info',
+            REGISTRATION_TX_HASH: 'ztr_reg_tx_hash',
+            REGISTRATION_USDT_COST: 'ztr_reg_usdt_cost' // NEW KEY
+        };
+
+        let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false;
+        let verifiedInviterId = null;
+        let pendingLevelUpgrade = null;
+        let withdrawalListener = null;
+
+        let baseZTRPrice = 1.0;
+        let liveZTRPrice = 1.0;
+        let chartData = [];
+        let chartInterval = null;
+
+        let currentSlide = 0;
+        let slideInterval;
+
+        const connectState = document.getElementById('connectState');
+        const invitationState = document.getElementById('invitationState');
+        const dashboardState = document.getElementById('dashboardState');
+        const bottomNav = document.getElementById('bottomNav');
+        const levelPageOverlay = document.getElementById('levelPageOverlay');
+        const levelStarsPage = document.getElementById('levelStarsPage');
+        const joiningStarsPage = document.getElementById('joiningStarsPage');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const profileSetupModal = document.getElementById('profileSetupModal');
+
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -1643,10 +1653,8 @@
             setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
         }
         
-        // --- START OF FIXES ---
         async function fetchAppConfig() {
             try {
-                // Fetch ZTR-to-USDT conversion rate from Firebase
                 const priceSnapshot = await db.ref('config/baseZTRPrice').once('value');
                 if (priceSnapshot.exists() && typeof priceSnapshot.val() === 'number') {
                     baseZTRPrice = priceSnapshot.val();
@@ -1654,23 +1662,19 @@
                     console.warn("Using fallback ZTR base price of 1.0.");
                     baseZTRPrice = 1.0;
                 }
-                liveZTRPrice = baseZTRPrice; // Initialize live price for chart
+                liveZTRPrice = baseZTRPrice;
 
-                // Fetch joining fee in ZTR from Firebase
-                const feeSnapshot = await db.ref('config/joiningFeeZTR').once('value');
-                if (feeSnapshot.exists() && typeof feeSnapshot.val() === 'number') {
-                    joiningFeeZTR = feeSnapshot.val();
-                } else {
-                    console.warn(`Using fallback joining fee of 5.25 ZTR.`);
-                    joiningFeeZTR = 5.25;
-                }
-
-                // Fetch level configuration
                 const snapshot = await db.ref('config/levels').once('value');
                 if (snapshot.exists() && Array.isArray(snapshot.val())) {
                     APP_LEVELS = snapshot.val();
                 } else {
-                    APP_LEVELS = [ { id: 1, name: "Iron", price: 5, icon: "🛡️", returnPercentage: 5 } ];
+                    APP_LEVELS = [
+                        { id: 1, name: "Iron", price: 5, icon: "🛡️", returnPercentage: 5 },
+                        { id: 2, name: "Bronze", price: 10, icon: "🥉", returnPercentage: 5 },
+                        { id: 3, name: "Silver", price: 15, icon: "🥈", returnPercentage: 7 },
+                        { id: 4, name: "Gold", price: 20, icon: "🥇", returnPercentage: 7 },
+                        { id: 5, name: "Master", price: 25, icon: "👑", returnPercentage: 10 }
+                    ];
                     console.warn("Using fallback level configuration.");
                 }
             } catch (error) {
@@ -1678,87 +1682,676 @@
                 showToast("Could not load app configuration.", "error");
             }
         }
-        // --- END OF FIXES ---
 
-        async function initConnection(accounts, isAutoReconnect = false) {
-            // ... (rest of the function is the same)
-            userAddress = accounts[0];
-            localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, userAddress);
-            localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
-            provider = new ethers.BrowserProvider(window.ethereum);
-            signer = await provider.getSigner();
-            
-            // ... (rest of the function is the same)
-            
-            if (await isProfileComplete(userAddress)) {
-                await showDashboard();
-            } else if (await isPaidUser(userAddress)) {
-                // ... (rest of the function is the same)
-            } else {
-                // --- START OF FIXES ---
-                // Calculate the final USDT price based on Firebase values
-                const usdtCost = (joiningFeeZTR * baseZTRPrice).toFixed(4); // Use more precision for small values
-                document.getElementById('joiningFeeDisplay').innerText = `${usdtCost} USDT`;
-                openModal('paymentModal');
-                // --- END OF FIXES ---
-            }
-            loadingOverlay.classList.add('hidden');
+        function updateAllWalletAddressDisplays() {
+            if (!userAddress) return;
+            const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
+            const fullAddress = userAddress;
+            document.getElementById('walletAddressBadge').style.display = 'flex';
+            document.getElementById('walletAddressShort').innerText = shortAddress;
+            document.getElementById('dashboardWalletAddress').innerText = shortAddress;
+            window.currentWalletFullAddress = fullAddress;
         }
 
-        // --- START OF FIXES for Payment Button ---
-        document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
-            if (isProcessing) return;
+        function copyWalletAddress() {
+            if (window.currentWalletFullAddress && isValidWalletAddress(window.currentWalletFullAddress)) {
+                navigator.clipboard.writeText(window.currentWalletFullAddress);
+                showToast("Wallet address copied!", "success");
+            }
+        }
+        window.copyWalletAddress = copyWalletAddress;
+        
+        async function getUniqueInviteCode(wallet) {
+            if (!wallet || !isValidWalletAddress(wallet)) return null;
+            const walletLower = wallet.toLowerCase();
+            const snapshot = await db.ref(`users/${walletLower}/inviteCode`).once('value');
+            if (snapshot.exists()) {
+                return snapshot.val();
+            }
+            return "Generating...";
+        }
+        
+        async function getWalletByInviteCode(inviteCode) {
+            if (!inviteCode || !isValidInviteCode(inviteCode)) return null;
+            const snapshot = await db.ref(`inviteCodeMap/${inviteCode}`).once('value');
+            return snapshot.exists() ? snapshot.val() : null;
+        }
+
+        async function getWalletById(id) {
+            if (!id) return null;
+            const snapshot = await db.ref(`userIdMap/${id}`).once('value');
+            return snapshot.exists() ? snapshot.val() : null;
+        }
+        
+        async function getUserProfile(wallet) {
+            if(!wallet || !isValidWalletAddress(wallet)) return null;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/profile`).once('value');
+            return snapshot.exists() ? snapshot.val() : null;
+        }
+
+        async function getInviterId(wallet) {
+            if (!wallet || !isValidWalletAddress(wallet)) return null;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/inviterId`).once('value');
+            return snapshot.exists() ? snapshot.val() : null;
+        }
+        
+        async function getDirectMembersOfInviter(inviterUserId) {
+            if (!inviterUserId) return [];
+            const usersRef = db.ref('users');
+            const snapshot = await usersRef.orderByChild('inviterId').equalTo(parseInt(inviterUserId)).once('value');
+            const members = [];
+            if(snapshot.exists()) {
+                snapshot.forEach(childSnapshot => {
+                    members.push(childSnapshot.key);
+                });
+            }
+            return members;
+        }
+
+        async function isPaidUser(wallet) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return false;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/paid`).once('value');
+            return snapshot.exists() ? snapshot.val() : false;
+        }
+        
+        async function isProfileComplete(wallet) {
+            return await getUserProfile(wallet) !== null;
+        }
+        
+        async function markUserAsPaid(wallet) {
+            if (!wallet || !isValidWalletAddress(wallet)) return;
+            await db.ref(`users/${wallet.toLowerCase()}/paid`).set(true);
+        }
+        
+        async function getZTRBalance(wallet) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return 0;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/ztrBalance`).once('value');
+            return snapshot.exists() ? snapshot.val() : 0;
+        }
+        
+        async function getUserLevel(wallet) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return 0;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/level`).once('value');
+            return snapshot.exists() ? snapshot.val() : 0;
+        }
+        
+        async function getTeamSize(wallet) { 
+            if (!wallet || !isValidWalletAddress(wallet)) return 0;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/teamSize`).once('value');
+            return snapshot.exists() ? snapshot.val() : 0;
+        }
+        
+        async function getSalleryEarnings(wallet) {
+             if (!wallet || !isValidWalletAddress(wallet)) return 0;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/salaryHistory`).once('value');
+            let totalSalary = 0;
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    totalSalary += child.val().amount;
+                });
+            }
+            return totalSalary;
+        }
+        
+        async function getCurrentLevelInfo(wallet) { 
+            const levelId = await getUserLevel(wallet); 
+            if (levelId === 0) return { name: "Starter", price: 0, icon: "🌱", returnPercentage: 0 }; 
+            return APP_LEVELS.find(level => level.id === levelId) || APP_LEVELS[levelId - 1]; 
+        }
+
+        async function updateBalances() {
+            if (!userAddress || !provider || !isValidWalletAddress(userAddress)) return;
+            try {
+                const bnbBalanceWei = await provider.getBalance(userAddress);
+                rawBnbBalance = ethers.formatEther(bnbBalanceWei);
+                const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
+                const usdtBalWei = await usdtContract.balanceOf(userAddress);
+                rawUsdtBalance = ethers.formatUnits(usdtBalWei, usdtDecimals);
+                await updateAssetsPage();
+            } catch (e) { console.error(e); }
+        }
+
+        async function updateAssetsPage() {
+            if (!userAddress) return;
+            const profile = await getUserProfile(userAddress);
+            if (!profile) return;
+            
+            const inviteCode = await getUniqueInviteCode(userAddress);
+            document.getElementById('userId').innerText = `ID: ZTR-${profile.userId}`;
+            document.getElementById('profileName').innerText = profile.name;
+            document.getElementById('joinDate').innerText = profile.joinDate;
+            document.getElementById('profileInviteCode').innerHTML = `<i class="fa-solid fa-ticket"></i> Invite Code: ${inviteCode}`;
+
+            const inviterId = await getInviterId(userAddress);
+            if(inviterId) {
+                document.getElementById('profileInviterId').innerText = `ID: ZTR-${inviterId}`;
+            }
+            
+            const avatarIcon = document.getElementById('avatarIcon');
+            const avatarImg = document.getElementById('profileAvatarImg');
+            if (profile.profilePicUrl) {
+                avatarImg.src = profile.profilePicUrl;
+                avatarImg.classList.remove('hidden');
+                avatarIcon.classList.add('hidden');
+            } else {
+                avatarIcon.className = `fa-solid ${profile.avatar || 'fa-user-astronaut'}`;
+                avatarIcon.classList.remove('hidden');
+                avatarImg.classList.add('hidden');
+            }
+            
+            const ztrBalance = await getZTRBalance(userAddress);
+            const levelInfo = await getCurrentLevelInfo(userAddress);
+            
+            document.getElementById('statBNB').innerText = parseFloat(rawBnbBalance).toFixed(4);
+            document.getElementById('statUSDT').innerText = parseFloat(rawUsdtBalance).toFixed(2);
+            document.getElementById('statZTR').innerText = ztrBalance.toFixed(2);
+            document.getElementById('totalEarningsStat').innerText = `$${(ztrBalance * liveZTRPrice).toFixed(2)}`;
+            document.getElementById('userLevelStat').innerText = levelInfo.name;
+        }
+
+        async function updateDashboard() {
+            if (!userAddress) return;
+            const profile = await getUserProfile(userAddress);
+            if (!profile) return;
+            
+            const ztr = await getZTRBalance(userAddress);
+            const level = await getCurrentLevelInfo(userAddress);
+            const team = await getTeamSize(userAddress);
+            const salary = await getSalleryEarnings(userAddress);
+            document.getElementById('profitIncome').innerText = `${ztr.toFixed(2)} ZTR`;
+            document.getElementById('profitUSD').innerText = (ztr * liveZTRPrice).toFixed(2);
+            document.getElementById('teamIncome').innerText = team;
+            document.getElementById('teamCount').innerText = `Member${team === 1 ? '' : 's'}`;
+            document.getElementById('salleryIncome').innerText = `${salary.toFixed(2)} ZTR`;
+            document.getElementById('levelIncome').innerText = level.name;
+        }
+        
+        async function updateInviteInfo() {
+            if (!userAddress) return;
+            const inviteCode = await getUniqueInviteCode(userAddress);
+            const profile = await getUserProfile(userAddress);
+            
+            if (inviteCode && profile) {
+                const baseUrl = window.location.origin + window.location.pathname;
+                const inviteLink = `${baseUrl}?invite=${inviteCode}&inviterName=${encodeURIComponent(profile.name)}&inviterId=${profile.userId}`;
+                
+                document.getElementById('inviteLink').value = inviteLink;
+                document.getElementById('inviteCodeInput').value = inviteCode;
+            }
+        }
+        
+        function initSlider() {
+            const slider = document.getElementById('homeSlider');
+            if (!slider) return;
+
+            const slides = slider.querySelectorAll('.slide');
+            const dotsContainer = document.getElementById('sliderDots');
+            dotsContainer.innerHTML = ''; 
+
+            if (slides.length === 0) return;
+
+            slides.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                dot.dataset.index = index;
+                dot.addEventListener('click', () => {
+                    showSlide(index);
+                    clearInterval(slideInterval);
+                    slideInterval = setInterval(nextSlide, 5000);
+                });
+                dotsContainer.appendChild(dot);
+            });
+
+            function showSlide(index) {
+                slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+                dotsContainer.querySelectorAll('.dot').forEach((dot, i) => dot.classList.toggle('active', i === index));
+                currentSlide = index;
+            }
+
+            function nextSlide() {
+                let next = (currentSlide + 1) % slides.length;
+                showSlide(next);
+            }
+
+            showSlide(0); 
+            if (slideInterval) clearInterval(slideInterval);
+            slideInterval = setInterval(nextSlide, 5000);
+        }
+
+        async function showDashboard() {
+            connectState.classList.add('hidden');
+            invitationState.classList.add('hidden');
+            dashboardState.classList.remove('hidden');
+            bottomNav.style.display = 'flex';
+            
+            initSlider();
+            initTradingChart();
+
+            await updateDashboard();
+            await updateAssetsPage();
+            await renderBeautifulTree();
+            await updateInviteInfo();
+            await listenForWithdrawals();
+            
+            localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
+        }
+        
+        async function renderBeautifulTree() {
+            if (!userAddress) return;
+            const currentUserProfile = await getUserProfile(userAddress);
+            if (!currentUserProfile) return;
+
+            const teamSize = await getTeamSize(userAddress);
+            document.getElementById('teamPageTotalCount').innerText = teamSize;
+            const treeContainer = document.getElementById('networkTreeContainer');
+            
+            const getChildrenProfiles = async (userId) => {
+                const childrenWallets = await getDirectMembersOfInviter(userId);
+                const childrenProfiles = await Promise.all(
+                    childrenWallets.map(wallet => getUserProfile(wallet))
+                );
+                return childrenProfiles.filter(p => p !== null);
+            };
+
+            const getUserLevelName = async (wallet) => {
+                const levelId = await getUserLevel(wallet);
+                if (levelId === 0) return "Starter";
+                const level = APP_LEVELS.find(l => l.id === levelId);
+                return level?.name || "Starter";
+            };
+
+            const buildNodeHTML = (profile, levelName, isCurrentUser = false, level = 0) => {
+                const avatarHtml = profile.profilePicUrl 
+                    ? `<img src="${profile.profilePicUrl}" alt="${profile.name}">` 
+                    : `<i class="fa-solid fa-user-astronaut"></i>`;
+                
+                return `
+                    <div class="tree-node-card ${isCurrentUser ? 'is-user' : ''}">
+                        <div class="tree-node-avatar">${avatarHtml}</div>
+                        <div class="tree-node-name">${sanitizeInput(profile.name)}</div>
+                        <div class="tree-node-id">ID: ${profile.userId}</div>
+                        <div class="tree-node-level"><i class="fa-solid fa-crown" style="font-size: 8px;"></i> ${levelName}</div>
+                        ${level > 0 ? `<div class="tree-node-level" style="background: rgba(0,242,255,0.2);"><i class="fa-solid fa-level-down-alt"></i> Level ${level}</div>` : ''}
+                    </div>
+                `;
+            };
+
+            const buildTree = async (userId, level = 1) => {
+                const children = await getChildrenProfiles(userId);
+                if (children.length === 0) return '';
+                
+                let childrenHTML = '';
+                for (const child of children) {
+                    const childWallet = await getWalletById(child.userId);
+                    const childLevelName = await getUserLevelName(childWallet);
+                    childrenHTML += `
+                        <li>
+                            ${buildNodeHTML(child, childLevelName, false, level)}
+                            ${await buildTree(child.userId, level + 1)}
+                        </li>
+                    `;
+                }
+                
+                return `<ul>${childrenHTML}</ul>`;
+            };
+
+            const currentUserLevelName = await getUserLevelName(userAddress);
+            let treeHTML = `
+                <div class="tree">
+                    <ul>
+                        <li>
+                            ${buildNodeHTML(currentUserProfile, currentUserLevelName, true, 0)}
+                            ${await buildTree(currentUserProfile.userId, 1)}
+                        </li>
+                    </ul>
+                </div>
+            `;
+            
+            if (teamSize === 0) {
+                 treeContainer.innerHTML = `<div style="text-align:center; padding: 40px;"><i class="fa-solid fa-tree" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i><p style="color: rgba(255,255,255,0.7);">Your network is empty.</p><p style="color: rgba(255,255,255,0.7); font-size: 12px;">Share your invitation code to start building your tree!</p></div>`;
+            } else {
+                 treeContainer.innerHTML = treeHTML;
+            }
+        }
+
+        window.openIncomeHistory = async function() {
+            const listContainer = document.getElementById('incomeHistoryList');
+            listContainer.innerHTML = '<div class="spinner" style="margin: auto;"></div>';
+            openModal('incomeHistoryModal');
+
+            const incomeRef = db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`);
+            const snapshot = await incomeRef.orderByChild('date').once('value');
+            
+            if (snapshot.exists()) {
+                listContainer.innerHTML = '';
+                const historyData = [];
+                snapshot.forEach(child => historyData.push(child.val()));
+                historyData.reverse().forEach(item => {
+                    const date = new Date(item.date);
+                    const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                    const itemHtml = `<div class="history-item"><div class="history-item-details"><strong>${sanitizeInput(item.type)}</strong><div class="date">${formattedDate}</div></div><div class="history-item-amount">+${item.amount.toFixed(4)} ZTR</div></div>`;
+                    listContainer.innerHTML += itemHtml;
+                });
+            } else {
+                listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No income history found.</p>';
+            }
+        }
+
+        window.openSalaryHistory = async function() {
+            const listContainer = document.getElementById('salaryHistoryList');
+            listContainer.innerHTML = '<div class="spinner" style="margin: auto;"></div>';
+            openModal('salaryHistoryModal');
+            
+            const salaryRef = db.ref(`users/${userAddress.toLowerCase()}/salaryHistory`);
+            const snapshot = await salaryRef.orderByChild('date').once('value');
+            if (snapshot.exists()) {
+                listContainer.innerHTML = '';
+                const historyData = [];
+                snapshot.forEach(child => historyData.push(child.val()));
+                historyData.reverse().forEach(item => {
+                    const date = new Date(item.date);
+                    const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                    const itemHtml = `<div class="history-item"><div class="history-item-details"><strong>Weekly Salary</strong><div class="date">${formattedDate}</div></div><div class="history-item-amount" style="color: var(--gold)">+${item.amount.toFixed(2)} ZTR</div></div>`;
+                    listContainer.innerHTML += itemHtml;
+                });
+            } else {
+                listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No salary payments have been recorded yet.</p>';
+            }
+        }
+
+        async function checkSalaryEligibility() {
+            const userLevel = await getUserLevel(userAddress);
+            const teamSize = await getTeamSize(userAddress);
+            const maxLevel = APP_LEVELS.length;
+            const requiredTeamSize = 10;
+            return (userLevel >= maxLevel && teamSize >= requiredTeamSize);
+        }
+
+        function generateLargeStarsHTML(count, filledCount) {
+            let starsHtml = '';
+            for (let i = 0; i < count; i++) {
+                const state = i < filledCount ? 'filled' : 'empty';
+                starsHtml += `<i class="fa-solid fa-star large-star-icon ${state}"></i>`;
+            }
+            return starsHtml;
+        }
+
+        async function openLevelStarsPage() {
+            const container = document.getElementById('levelStarsContainer');
+            const userLevel = await getUserLevel(userAddress);
+            const maxLevel = APP_LEVELS.length;
+            container.innerHTML = generateLargeStarsHTML(maxLevel, userLevel);
+            
+            if(await checkSalaryEligibility()) {
+                document.getElementById('salaryEligibilitySystem').classList.remove('hidden');
+            } else {
+                document.getElementById('salaryEligibilitySystem').classList.add('hidden');
+            }
+            levelStarsPage.classList.add('active');
+        }
+
+        async function openJoiningStarsPage() {
+            const container = document.getElementById('joiningStarsContainer');
+            const teamSize = await getTeamSize(userAddress);
+            const requiredTeamSize = 10;
+            container.innerHTML = generateLargeStarsHTML(requiredTeamSize, Math.min(teamSize, requiredTeamSize));
+
+            if (teamSize >= requiredTeamSize) {
+                document.getElementById('joiningBonusSystem').classList.remove('hidden');
+            } else {
+                 document.getElementById('joiningBonusSystem').classList.add('hidden');
+            }
+
+             if(await checkSalaryEligibility()) {
+                document.getElementById('salaryEligibilitySystem').classList.remove('hidden');
+            } else {
+                document.getElementById('salaryEligibilitySystem').classList.add('hidden');
+            }
+            joiningStarsPage.classList.add('active');
+        }
+
+        function closeStarsPages() {
+            levelStarsPage.classList.remove('active');
+            joiningStarsPage.classList.remove('active');
+        }
+        window.closeStarsPages = closeStarsPages;
+        window.openLevelStarsPage = openLevelStarsPage;
+        window.openJoiningStarsPage = openJoiningStarsPage;
+
+        async function initializeLevelViewer() {
+            const viewer = document.getElementById('levelViewer');
+            if (!viewer) return;
+            const currentLevelId = await getUserLevel(userAddress);
+            let cardsHTML = `<div class="level-card unlocked"><div><div class="level-icon">🌱</div><h2>Starter Level</h2><span class="rank-badge">CURRENTLY ACTIVE</span></div><p class="level-info">Your journey begins here. Upgrade to the next level to start earning.</p><button class="btn" disabled>ACHIEVED</button></div>`;
+            APP_LEVELS.forEach(level => {
+                const isUnlocked = currentLevelId >= level.id;
+                const canUpgrade = currentLevelId === level.id - 1;
+                const usdtPrice = (level.price * liveZTRPrice).toFixed(2);
+                cardsHTML += `<div class="level-card ${isUnlocked ? 'unlocked' : ''}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} Level</h2>${isUnlocked ? '<span class="rank-badge">ACHIEVED</span>' : canUpgrade ? '<span class="rank-badge" style="background:var(--primary); color:black;">NEXT UPGRADE</span>' : ''}</div><div><h3 class="level-price">${level.price} ZTR</h3><p class="level-info">≈ ${usdtPrice} USDT</p><p class="level-info" style="color: var(--gold); margin-top: 10px; font-weight: bold;">Instant Return: ${level.returnPercentage}%</p></div><button class="btn" ${!canUpgrade ? 'disabled' : ''} onclick="upgradeLevel(${level.id}, '${level.name}', ${level.price})">${isUnlocked ? 'UNLOCKED' : canUpgrade ? 'UPGRADE NOW' : 'LOCKED'}</button></div>`;
+            });
+            viewer.innerHTML = cardsHTML;
+        }
+        
+        window.openLevelPage = async function() {
+            levelPageOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            await initializeLevelViewer();
+        }
+        
+        window.closeLevelPage = function() {
+            levelPageOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        window.upgradeLevel = async function(levelId, levelName, priceInZTR) {
+            const currentId = await getUserLevel(userAddress);
+            if (currentId >= levelId) { showToast(`You already have the ${levelName} level!`, 'info'); return; }
+            if (currentId !== levelId - 1) { showToast(`Upgrade to the previous level first!`, 'info'); return; }
+            
+            // --- FIX FOR UPGRADE COST ---
+            const usdtCost = (priceInZTR * liveZTRPrice).toFixed(2);
+            pendingLevelUpgrade = { levelId, levelName, price: priceInZTR, usdtCost: usdtCost };
+            
+            document.getElementById('upgradeLevelNameDisplay').innerText = `Upgrade to ${levelName}`;
+            document.getElementById('levelUpgradeAmount').innerHTML = `${usdtCost} USDT`;
+            openModal('levelUpgradePaymentModal');
+        };
+
+        document.getElementById('confirmLevelUpgradeBtn').addEventListener('click', async () => {
+            if (isProcessing || !pendingLevelUpgrade) return;
             isProcessing = true;
-            const confirmBtn = document.getElementById('confirmPaymentBtn');
+            const confirmBtn = document.getElementById('confirmLevelUpgradeBtn');
             confirmBtn.disabled = true;
             confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
             
             try {
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-                
-                // Calculate the final amount again to be sure
-                const amountToPay = (joiningFeeZTR * baseZTRPrice).toFixed(4);
-                const amount = ethers.parseUnits(amountToPay.toString(), usdtDecimals);
+                const amount = ethers.parseUnits(pendingLevelUpgrade.usdtCost, usdtDecimals);
                 
                 showToast("Waiting for approval...", "info");
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
-                
                 showToast("Transaction sent! Confirming...", "info");
                 const receipt = await tx.wait();
 
-                // CRITICAL FIX: Store the exact amount paid and the hash
-                sessionStorage.setItem(STORAGE_KEYS.REGISTRATION_TX_HASH, receipt.hash);
-                sessionStorage.setItem(STORAGE_KEYS.REGISTRATION_AMOUNT, amountToPay);
-                
-                await markUserAsPaid(userAddress);
-                closeModal('paymentModal');
-                
-                connectState.classList.add('hidden');
-                invitationState.classList.remove('hidden');
+                const response = await fetch(`${BACKEND_URL}/api/upgrade`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        wallet: userAddress,
+                        txHash: receipt.hash,
+                        levelId: pendingLevelUpgrade.levelId,
+                        upgradeCost: pendingLevelUpgrade.usdtCost // --- FIX FOR UPGRADE COST ---
+                    })
+                });
 
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || "Upgrade verification failed on server.");
+                }
+                
+                showToast("Upgrade successful!", "success");
+                closeModal('levelUpgradePaymentModal');
+                await updateDashboard();
+                await initializeLevelViewer();
+                await updateAssetsPage();
+                await renderBeautifulTree();
+                
             } catch (e) { 
-                console.error("Payment failed:", e);
-                showToast("Transaction failed. Please try again.", "error"); 
+                console.error("Level upgrade failed:", e);
+                showToast(e.message || "Transaction failed. Please try again.", "error"); 
             } finally { 
                 isProcessing = false; 
                 confirmBtn.disabled = false;
-                confirmBtn.innerHTML = 'Confirm';
+                confirmBtn.innerHTML = 'Pay & Upgrade';
+                pendingLevelUpgrade = null;
             }
         });
-        // --- END OF FIXES ---
 
-        // --- START OF FIXES for Profile Completion Button ---
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+        window.closeModal = closeModal;
+        window.openModal = openModal;
+
+        async function getUSDTDecimals() {
+            try { 
+                const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider); 
+                usdtDecimals = await usdtContract.decimals(); 
+            } catch { 
+                usdtDecimals = 18; 
+            }
+        }
+        
+        function initTradingChart() {
+            if (chartInterval) clearInterval(chartInterval);
+            let currentPrice = baseZTRPrice;
+            chartData = [];
+            for (let i = 0; i < 50; i++) {
+                const open = currentPrice;
+                const fluctuation = (Math.random() - 0.5) * (currentPrice * 0.005);
+                const close = open + fluctuation;
+                const high = Math.max(open, close) + Math.random() * (currentPrice * 0.002);
+                const low = Math.min(open, close) - Math.random() * (currentPrice * 0.002);
+                chartData.push({ open, high, low, close });
+                currentPrice = close;
+            }
+            liveZTRPrice = chartData[chartData.length - 1].close;
+            renderChart();
+            chartInterval = setInterval(updateChart, 3000);
+        }
+
+        function updateChart() {
+            const lastClose = chartData[chartData.length - 1].close;
+            const tendency = (baseZTRPrice - lastClose) * 0.1;
+            const fluctuation = (Math.random() - 0.49) * (baseZTRPrice * 0.002);
+            const newPrice = lastClose + tendency + fluctuation;
+            const open = lastClose;
+            const close = newPrice;
+            const high = Math.max(open, close) + Math.random() * (baseZTRPrice * 0.001);
+            const low = Math.min(open, close) - Math.random() * (baseZTRPrice * 0.001);
+            chartData.push({ open, high, low, close });
+            if (chartData.length > 50) chartData.shift();
+            liveZTRPrice = newPrice;
+            updatePriceDisplay();
+            renderChart();
+        }
+
+        function updatePriceDisplay() {
+            const priceElement = document.getElementById('liveZTRPrice');
+            const changeElement = document.getElementById('priceChange');
+            const firstOpen = chartData[0].open;
+            const change = liveZTRPrice - firstOpen;
+            const percentChange = (change / firstOpen) * 100;
+            priceElement.innerText = liveZTRPrice.toFixed(4);
+            changeElement.innerText = `${change > 0 ? '+' : ''}${change.toFixed(4)} (${change > 0 ? '+' : ''}${percentChange.toFixed(2)}%)`;
+            if (change >= 0) {
+                priceElement.style.color = 'var(--success)';
+                changeElement.className = 'price-change up';
+            } else {
+                priceElement.style.color = 'var(--danger)';
+                changeElement.className = 'price-change down';
+            }
+        }
+
+        function renderChart() {
+            const chartArea = document.getElementById('tradingChart');
+            if(!chartArea) return;
+            chartArea.innerHTML = '';
+            const prices = chartData.flatMap(d => [d.high, d.low]);
+            const minPrice = Math.min(...prices);
+            const maxPrice = Math.max(...prices);
+            const priceRange = maxPrice - minPrice;
+            if(priceRange === 0) return;
+            chartData.forEach(data => {
+                const container = document.createElement('div');
+                container.className = 'candle-container';
+                const candle = document.createElement('div');
+                candle.className = data.close >= data.open ? 'candle green' : 'candle red';
+                const wick = document.createElement('div');
+                wick.className = 'wick';
+                wick.style.top = `${((maxPrice - data.high) / priceRange) * 100}%`;
+                wick.style.height = `${((data.high - data.low) / priceRange) * 100}%`;
+                const body = document.createElement('div');
+                body.className = 'body';
+                body.style.top = `${((maxPrice - Math.max(data.open, data.close)) / priceRange) * 100}%`;
+                body.style.height = `${(Math.abs(data.open - data.close) / priceRange) * 100}%`;
+                candle.appendChild(wick);
+                candle.appendChild(body);
+                container.appendChild(candle);
+                chartArea.appendChild(container);
+            });
+        }
+
+        let setupProfilePicData = null;
+        async function handleImageUpload(file) {
+            if (!file) return null;
+            if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+                showToast("Image hosting is not configured.", "error");
+                return null;
+            }
+            showToast("Uploading profile picture...", "info");
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            try {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (result.secure_url) {
+                    showToast("Upload successful!", "success");
+                    return result.secure_url;
+                } else {
+                    throw new Error(result.error.message || "Unknown Cloudinary error");
+                }
+            } catch (error) {
+                console.error("Cloudinary upload error:", error);
+                showToast(`Upload failed: ${error.message}`, "error");
+                return null;
+            }
+        }
+
+        document.getElementById('setupProfilePic').addEventListener('change', async (e) => {
+            const imageUrl = await handleImageUpload(e.target.files[0]);
+            if (imageUrl) {
+                setupProfilePicData = imageUrl;
+                document.getElementById('avatarPreviewImg').src = imageUrl;
+                document.getElementById('avatarPreviewImg').style.display = 'block';
+                document.getElementById('avatarPreviewIcon').style.display = 'none';
+            }
+        });
+        
         document.getElementById('completeProfileBtn').addEventListener('click', async () => {
             const username = document.getElementById('setupUsername').value.trim();
             if (!username) { showToast("Please enter a username", "error"); return; }
             const sanitizedUsername = sanitizeInput(username);
+            if (sanitizedUsername.length < 3) { showToast("Username must be at least 3 characters", "error"); return; }
             
-            // Retrieve both the txHash and the amountPaid from storage
+            // --- MAIN FIX FOR REGISTRATION COST ---
             const txHash = sessionStorage.getItem(STORAGE_KEYS.REGISTRATION_TX_HASH);
-            const amountPaid = sessionStorage.getItem(STORAGE_KEYS.REGISTRATION_AMOUNT);
-
-            if (!txHash || !amountPaid) {
-                showToast("Transaction data not found. Please start over.", "error");
+            const registrationCost = sessionStorage.getItem(STORAGE_KEYS.REGISTRATION_USDT_COST);
+            if (!txHash || !registrationCost) {
+                showToast("Transaction details not found. Please start over.", "error");
                 return;
             }
 
@@ -1771,17 +2364,17 @@
                         txHash: txHash,
                         inviterId: verifiedInviterId,
                         username: sanitizedUsername,
-                        profilePic: null, // This gets handled separately
-                        amountPaid: amountPaid // Send the exact amount to the backend
+                        profilePic: setupProfilePicData,
+                        registrationCost: registrationCost // --- MAIN FIX FOR REGISTRATION COST ---
                     })
                 });
 
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    // Clear the stored data after successful registration
+                    sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
                     sessionStorage.removeItem(STORAGE_KEYS.REGISTRATION_TX_HASH);
-                    sessionStorage.removeItem(STORAGE_KEYS.REGISTRATION_AMOUNT);
+                    sessionStorage.removeItem(STORAGE_KEYS.REGISTRATION_USDT_COST);
                     closeModal('profileSetupModal');
                     showToast("Profile setup complete!", "success");
                     await showDashboard();
@@ -1793,30 +2386,344 @@
                 showToast(error.message, 'error');
             }
         });
-        // --- END OF FIXES ---
 
-        // All other functions (updateDashboard, updateAssetsPage, openLevelPage, etc.)
-        // remain the same as in your original file. You don't need to change them.
-        // Just make sure the entire script block is replaced with this corrected version.
+        async function openWithdrawalModal() {
+            const ztrBalance = await getZTRBalance(userAddress);
+            if (ztrBalance <= 0) {
+                showToast("You have no ZTR coins to claim.", "info");
+                return;
+            }
+            
+            const hasPending = await hasPendingWithdrawal(userAddress);
+            if(hasPending) {
+                showToast("You already have a withdrawal request pending.", "error");
+                return;
+            }
+            
+            document.getElementById('withdrawalAmount').innerText = `${ztrBalance.toFixed(2)} ZTR`;
+            openModal('withdrawalModal');
+        }
+        window.openWithdrawalModal = openWithdrawalModal;
+
+        async function hasPendingWithdrawal(wallet) {
+            const snapshot = await db.ref('withdrawals').orderByChild('userWallet').equalTo(wallet.toLowerCase()).once('value');
+            if (!snapshot.exists()) return false;
+            let pending = false;
+            snapshot.forEach(child => {
+                if (child.val().status === 'pending') pending = true;
+            });
+            return pending;
+        }
         
-        // [PASTE THE REST OF YOUR JAVASCRIPT FUNCTIONS HERE]
-        // Example: isPaidUser, getUserProfile, getWalletById, etc. all stay the same.
-        // The provided code above contains the key fixes. Make sure to integrate it
-        // correctly with the rest of your JS functions.
+        async function listenForWithdrawals() {
+            if(withdrawalListener) withdrawalListener.off();
+            const withdrawalRef = db.ref('withdrawals').orderByChild('userWallet').equalTo(userAddress.toLowerCase());
+            
+            withdrawalListener = withdrawalRef.on('value', (snapshot) => {
+                let latestWithdrawal = null;
+                const statusDiv = document.getElementById('withdrawalStatus');
+                if(!statusDiv) return;
+                statusDiv.classList.remove('hidden');
+
+                if(snapshot.exists()){
+                    let allWithdrawals = [];
+                    snapshot.forEach(child => allWithdrawals.push(child.val()));
+                    latestWithdrawal = allWithdrawals.sort((a,b) => new Date(b.date) - new Date(a.date))[0];
+                    
+                    const date = new Date(latestWithdrawal.date).toLocaleDateString();
+                    if(latestWithdrawal.status === 'pending') {
+                        statusDiv.innerHTML = `<span class="status-info"><i class="fa-solid fa-clock"></i> Pending withdrawal of ${latestWithdrawal.amount.toFixed(2)} ZTR requested on ${date}.</span>`;
+                    } else if (latestWithdrawal.status === 'approved') {
+                        statusDiv.innerHTML = `<span class="status-success"><i class="fa-solid fa-check-circle"></i> Last withdrawal of ${latestWithdrawal.amount.toFixed(2)} ZTR was approved.</span>`;
+                    } else if (latestWithdrawal.status === 'rejected') {
+                         statusDiv.innerHTML = `<span class="status-error"><i class="fa-solid fa-times-circle"></i> Last withdrawal of ${latestWithdrawal.amount.toFixed(2)} ZTR was rejected.</span>`;
+                    }
+                } else {
+                     statusDiv.innerHTML = "No withdrawal history.";
+                }
+            });
+        }
         
+        document.getElementById('confirmWithdrawalBtn').addEventListener('click', async () => {
+             if (isProcessing) return;
+            isProcessing = true;
+            const btn = document.getElementById('confirmWithdrawalBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Submitting...';
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/withdraw`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ wallet: userAddress })
+                });
+
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    showToast("Withdrawal request submitted!", "success");
+                    await updateDashboard();
+                    await updateAssetsPage();
+                    closeModal('withdrawalModal');
+                } else {
+                    throw new Error(result.error || "Withdrawal request failed.");
+                }
+            } catch (e) {
+                console.error("Withdrawal error:", e);
+                showToast(e.message, "error");
+            } finally {
+                isProcessing = false;
+                btn.disabled = false;
+                btn.innerHTML = 'Withdraw';
+            }
+        });
+
+        async function initConnection(accounts, isAutoReconnect = false) {
+            if (!accounts || accounts.length === 0 || !isValidWalletAddress(accounts[0])) {
+                showToast("Invalid wallet address", "error");
+                return false;
+            }
+            userAddress = accounts[0];
+            
+            localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, userAddress);
+            localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
+            
+            provider = new ethers.BrowserProvider(window.ethereum);
+            signer = await provider.getSigner();
+            
+            updateAllWalletAddressDisplays();
+            
+            const network = await provider.getNetwork();
+            if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
+                if (!isAutoReconnect) showToast("Please switch to BSC network.", "info");
+                try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_ID }] }); } catch(e) {}
+            }
+            
+            await getUSDTDecimals();
+            await updateBalances();
+            
+            if (await isProfileComplete(userAddress)) {
+                await showDashboard();
+            } else if (await isPaidUser(userAddress)) {
+                connectState.classList.add('hidden');
+                invitationState.classList.remove('hidden');
+                const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
+                if (storedInviteInfo) {
+                    document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code;
+                    document.getElementById('verifyInviteCodeBtn').click();
+                }
+            } else {
+                const usdtCost = (JOINING_FEE_ZTR * liveZTRPrice).toFixed(2);
+                document.getElementById('joiningFeeDisplay').innerText = `${usdtCost} USDT`;
+                openModal('paymentModal');
+            }
+            
+            loadingOverlay.classList.add('hidden');
+            return true;
+        }
+
+        async function autoReconnect() {
+            const savedWallet = localStorage.getItem(STORAGE_KEYS.CONNECTED_WALLET);
+            const sessionActive = localStorage.getItem(STORAGE_KEYS.SESSION_ACTIVE);
+            
+            if (savedWallet && isValidWalletAddress(savedWallet) && sessionActive === 'true' && window.ethereum) {
+                loadingOverlay.classList.remove('hidden');
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0 && accounts[0].toLowerCase() === savedWallet.toLowerCase()) {
+                        await initConnection(accounts, true);
+                    } else if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
+                        localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
+                        await initConnection(accounts, true);
+                    } else {
+                        loadingOverlay.classList.add('hidden');
+                    }
+                } catch (error) {
+                    console.error("Auto-reconnect failed:", error);
+                    loadingOverlay.classList.add('hidden');
+                }
+            } else {
+                loadingOverlay.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('connectBtn').addEventListener('click', async () => {
+            if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
+            try { 
+                loadingOverlay.classList.remove('hidden');
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); 
+                await initConnection(accounts, false); 
+            } catch (err) { 
+                showToast("Connection rejected", "error");
+                loadingOverlay.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
+            if (isProcessing) return;
+            isProcessing = true;
+            const confirmBtn = document.getElementById('confirmPaymentBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
+            
+            try {
+                const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
+                const usdtCost = (JOINING_FEE_ZTR * liveZTRPrice).toFixed(2);
+                const amount = ethers.parseUnits(usdtCost.toString(), usdtDecimals);
+                
+                showToast("Waiting for approval...", "info");
+                const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
+                
+                showToast("Transaction sent! Confirming...", "info");
+                const receipt = await tx.wait();
+                
+                // --- MAIN FIX FOR REGISTRATION COST ---
+                sessionStorage.setItem(STORAGE_KEYS.REGISTRATION_TX_HASH, receipt.hash);
+                sessionStorage.setItem(STORAGE_KEYS.REGISTRATION_USDT_COST, usdtCost);
+                
+                await markUserAsPaid(userAddress);
+                closeModal('paymentModal');
+                
+                connectState.classList.add('hidden');
+                invitationState.classList.remove('hidden');
+
+                const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
+                if (storedInviteInfo) {
+                    document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code;
+                    document.getElementById('verifyInviteCodeBtn').click();
+                }
+                
+            } catch (e) { 
+                showToast("Transaction failed. Please try again.", "error"); 
+            } finally { 
+                isProcessing = false; 
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = 'Confirm';
+            }
+        });
+        
+        document.getElementById('verifyInviteCodeBtn').addEventListener('click', async () => {
+            const inviteCode = document.getElementById('verifyInviteCodeInput').value.trim().toUpperCase();
+            const statusDiv = document.getElementById('inviterVerifyStatus');
+            const proceedBtn = document.getElementById('proceedToProfileBtn');
+            
+            if (!isValidInviteCode(inviteCode)) {
+                statusDiv.innerHTML = '<span class="status-error">❌ Invalid code format.</span>';
+                verifiedInviterId = null;
+                proceedBtn.disabled = true;
+                return;
+            }
+
+            const inviterWallet = await getWalletByInviteCode(inviteCode);
+            if (inviterWallet) {
+                const inviterProfile = await getUserProfile(inviterWallet);
+                if (inviterProfile) {
+                    verifiedInviterId = inviterProfile.userId;
+                    statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by: ${sanitizeInput(inviterProfile.name)} (ID: ZTR-${verifiedInviterId})</span>`;
+                    showToast(`Inviter found: ${sanitizeInput(inviterProfile.name)}`, 'success');
+                    proceedBtn.disabled = false;
+                }
+            } else {
+                statusDiv.innerHTML = '<span class="status-error">❌ Invitation code not found.</span>';
+                verifiedInviterId = null;
+                proceedBtn.disabled = true;
+            }
+        });
+
+        document.getElementById('proceedToProfileBtn').addEventListener('click', () => {
+            if (!verifiedInviterId) {
+                showToast("You must verify an invitation code first.", "error");
+                return;
+            }
+            invitationState.classList.add('hidden');
+            openModal('profileSetupModal');
+        });
+
+        document.getElementById('profilePicInput').addEventListener('change', async (event) => {
+            const imageUrl = await handleImageUpload(event.target.files[0]);
+            if (imageUrl) {
+                await db.ref(`users/${userAddress.toLowerCase()}/profile/profilePicUrl`).set(imageUrl);
+                await updateAssetsPage();
+                await renderBeautifulTree();
+                showToast("Profile picture updated successfully!", "success");
+            }
+        });
+
+        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+            const name = document.getElementById('profileNameInput').value;
+            if (name && userAddress) {
+                await db.ref(`users/${userAddress.toLowerCase()}/profile/name`).set(sanitizeInput(name));
+                await updateAssetsPage();
+                await renderBeautifulTree();
+                closeModal('editProfileModal');
+                showToast("Profile updated!", "success");
+            }
+        });
+
+        document.getElementById('copyInviteLinkBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText(document.getElementById('inviteLink').value);
+            showToast('Invitation link copied!', 'success');
+        });
+        
+        document.getElementById('copyInviteCodeBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText(document.getElementById('inviteCodeInput').value);
+            showToast('Invitation code copied!', 'success');
+        });
+
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const pageId = btn.dataset.page;
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).classList.add('active');
+                if (pageId === 'team') {
+                    await renderBeautifulTree();
+                    await updateInviteInfo();
+                } else if (pageId === 'assets') {
+                    await updateAssetsPage();
+                }
+            });
+        });
+
+        setInterval(async () => {
+            if (userAddress && await isProfileComplete(userAddress)) {
+                await updateBalances();
+                await updateDashboard();
+            }
+        }, 15000);
+
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length > 0 && isValidWalletAddress(accounts[0])) {
+                    localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, accounts[0]);
+                } else {
+                    localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
+                    localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE);
+                    sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
+                }
+                location.reload();
+            });
+            window.ethereum.on('chainChanged', () => location.reload());
+        }
+
         window.addEventListener('load', async () => {
-            await fetchAppConfig(); // This is the crucial first step
+            await fetchAppConfig();
             
             const urlParams = new URLSearchParams(window.location.search);
             const inviteCodeFromUrl = urlParams.get('invite');
-            if(inviteCodeFromUrl) {
-                //... handle invite code logic
+            const inviterNameFromUrl = urlParams.get('inviterName');
+            const inviterIdFromUrl = urlParams.get('inviterId');
+
+            if(inviteCodeFromUrl && inviterNameFromUrl && inviterIdFromUrl) {
+                const inviteInfo = {
+                    code: inviteCodeFromUrl.toUpperCase(),
+                    name: decodeURIComponent(inviterNameFromUrl),
+                    id: inviterIdFromUrl
+                };
+                sessionStorage.setItem(STORAGE_KEYS.INVITE_INFO, JSON.stringify(inviteInfo));
             }
             await autoReconnect();
         });
-
-        // Make sure to include ALL other javascript functions from your original file
-        // I have only provided the functions that needed to be changed.
     })();
 </script>
 </body>
