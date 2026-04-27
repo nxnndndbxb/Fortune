@@ -1405,8 +1405,9 @@
                         <h3 id="profitIncome">0.00 ZTR</h3>
                         <small style="color:var(--success);">≈ $<span id="profitUSD">0</span></small>
                     </div>
+                    <!-- CHANGE 1: Title changed from "Network Size" to "Direct Team" -->
                     <div class="income-card" style="cursor:default;">
-                        <p style="font-size:11px; color:rgba(255,255,255,0.7);">Network Size</p>
+                        <p style="font-size:11px; color:rgba(255,255,255,0.7);">Direct Team</p>
                         <h3 id="teamIncome" style="color:var(--text-main);">0</h3>
                         <small id="teamCount">Members</small>
                     </div>
@@ -1523,9 +1524,7 @@
                         </div>
                     </div>
                     
-                    <div id="withdrawalStatus" class="hidden" style="font-size: 12px; text-align: center; color: var(--text-muted); margin-bottom: 20px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px;">
-                        No pending withdrawals.
-                    </div>
+                    <!-- CHANGE 2: Withdrawal Status div has been completely removed -->
 
                     <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
                         <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:14px;">
@@ -1618,13 +1617,13 @@
             SESSION_ACTIVE: 'ztr_session_active',
             INVITE_INFO: 'ztr_invite_info',
             REGISTRATION_TX_HASH: 'ztr_reg_tx_hash',
-            REGISTRATION_USDT_COST: 'ztr_reg_usdt_cost' // NEW KEY
+            REGISTRATION_USDT_COST: 'ztr_reg_usdt_cost'
         };
 
         let provider, signer, userAddress, rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false;
         let verifiedInviterId = null;
         let pendingLevelUpgrade = null;
-        let withdrawalListener = null;
+        // let withdrawalListener = null; // No longer needed
 
         let baseZTRPrice = 1.0;
         let liveZTRPrice = 1.0;
@@ -1760,7 +1759,8 @@
         
         async function markUserAsPaid(wallet) {
             if (!wallet || !isValidWalletAddress(wallet)) return;
-            await db.ref(`users/${wallet.toLowerCase()}/paid`).set(true);
+            // This function is now only handled by the backend to avoid race conditions.
+            // We can leave this function here empty or remove it. For safety, let's keep it but it does nothing.
         }
         
         async function getZTRBalance(wallet) { 
@@ -1849,6 +1849,7 @@
             document.getElementById('userLevelStat').innerText = levelInfo.name;
         }
 
+        // CHANGE 3: Dashboard now shows direct team count
         async function updateDashboard() {
             if (!userAddress) return;
             const profile = await getUserProfile(userAddress);
@@ -1856,12 +1857,18 @@
             
             const ztr = await getZTRBalance(userAddress);
             const level = await getCurrentLevelInfo(userAddress);
-            const team = await getTeamSize(userAddress);
+            
+            // Get direct team count instead of total team
+            const directMembers = await getDirectMembersOfInviter(profile.userId);
+            const directTeamCount = directMembers.length;
+
             const salary = await getSalleryEarnings(userAddress);
             document.getElementById('profitIncome').innerText = `${ztr.toFixed(2)} ZTR`;
             document.getElementById('profitUSD').innerText = (ztr * liveZTRPrice).toFixed(2);
-            document.getElementById('teamIncome').innerText = team;
-            document.getElementById('teamCount').innerText = `Member${team === 1 ? '' : 's'}`;
+            
+            document.getElementById('teamIncome').innerText = directTeamCount;
+            document.getElementById('teamCount').innerText = `Direct Member${directTeamCount === 1 ? '' : 's'}`;
+            
             document.getElementById('salleryIncome').innerText = `${salary.toFixed(2)} ZTR`;
             document.getElementById('levelIncome').innerText = level.name;
         }
@@ -1931,7 +1938,7 @@
             await updateAssetsPage();
             await renderBeautifulTree();
             await updateInviteInfo();
-            await listenForWithdrawals();
+            // CHANGE 4: Call to listenForWithdrawals has been removed
             
             localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
         }
@@ -2148,7 +2155,6 @@
             if (currentId >= levelId) { showToast(`You already have the ${levelName} level!`, 'info'); return; }
             if (currentId !== levelId - 1) { showToast(`Upgrade to the previous level first!`, 'info'); return; }
             
-            // --- FIX FOR UPGRADE COST ---
             const usdtCost = (priceInZTR * liveZTRPrice).toFixed(2);
             pendingLevelUpgrade = { levelId, levelName, price: priceInZTR, usdtCost: usdtCost };
             
@@ -2168,9 +2174,7 @@
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
                 const amount = ethers.parseUnits(pendingLevelUpgrade.usdtCost, usdtDecimals);
                 
-                showToast("Waiting for approval...", "info");
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
-                showToast("Transaction sent! Confirming...", "info");
                 const receipt = await tx.wait();
 
                 const response = await fetch(`${BACKEND_URL}/api/upgrade`, {
@@ -2180,7 +2184,7 @@
                         wallet: userAddress,
                         txHash: receipt.hash,
                         levelId: pendingLevelUpgrade.levelId,
-                        upgradeCost: pendingLevelUpgrade.usdtCost // --- FIX FOR UPGRADE COST ---
+                        upgradeCost: pendingLevelUpgrade.usdtCost
                     })
                 });
 
@@ -2347,7 +2351,6 @@
             const sanitizedUsername = sanitizeInput(username);
             if (sanitizedUsername.length < 3) { showToast("Username must be at least 3 characters", "error"); return; }
             
-            // --- MAIN FIX FOR REGISTRATION COST ---
             const txHash = sessionStorage.getItem(STORAGE_KEYS.REGISTRATION_TX_HASH);
             const registrationCost = sessionStorage.getItem(STORAGE_KEYS.REGISTRATION_USDT_COST);
             if (!txHash || !registrationCost) {
@@ -2365,7 +2368,7 @@
                         inviterId: verifiedInviterId,
                         username: sanitizedUsername,
                         profilePic: setupProfilePicData,
-                        registrationCost: registrationCost // --- MAIN FIX FOR REGISTRATION COST ---
+                        registrationCost: registrationCost
                     })
                 });
 
@@ -2415,35 +2418,8 @@
             return pending;
         }
         
-        async function listenForWithdrawals() {
-            if(withdrawalListener) withdrawalListener.off();
-            const withdrawalRef = db.ref('withdrawals').orderByChild('userWallet').equalTo(userAddress.toLowerCase());
-            
-            withdrawalListener = withdrawalRef.on('value', (snapshot) => {
-                let latestWithdrawal = null;
-                const statusDiv = document.getElementById('withdrawalStatus');
-                if(!statusDiv) return;
-                statusDiv.classList.remove('hidden');
+        // CHANGE 5: listenForWithdrawals function is now completely removed.
 
-                if(snapshot.exists()){
-                    let allWithdrawals = [];
-                    snapshot.forEach(child => allWithdrawals.push(child.val()));
-                    latestWithdrawal = allWithdrawals.sort((a,b) => new Date(b.date) - new Date(a.date))[0];
-                    
-                    const date = new Date(latestWithdrawal.date).toLocaleDateString();
-                    if(latestWithdrawal.status === 'pending') {
-                        statusDiv.innerHTML = `<span class="status-info"><i class="fa-solid fa-clock"></i> Pending withdrawal of ${latestWithdrawal.amount.toFixed(2)} ZTR requested on ${date}.</span>`;
-                    } else if (latestWithdrawal.status === 'approved') {
-                        statusDiv.innerHTML = `<span class="status-success"><i class="fa-solid fa-check-circle"></i> Last withdrawal of ${latestWithdrawal.amount.toFixed(2)} ZTR was approved.</span>`;
-                    } else if (latestWithdrawal.status === 'rejected') {
-                         statusDiv.innerHTML = `<span class="status-error"><i class="fa-solid fa-times-circle"></i> Last withdrawal of ${latestWithdrawal.amount.toFixed(2)} ZTR was rejected.</span>`;
-                    }
-                } else {
-                     statusDiv.innerHTML = "No withdrawal history.";
-                }
-            });
-        }
-        
         document.getElementById('confirmWithdrawalBtn').addEventListener('click', async () => {
              if (isProcessing) return;
             isProcessing = true;
@@ -2501,9 +2477,10 @@
             await getUSDTDecimals();
             await updateBalances();
             
-            if (await isProfileComplete(userAddress)) {
+            const profile = await getUserProfile(userAddress);
+            if(profile) { // If profile exists, go to dashboard
                 await showDashboard();
-            } else if (await isPaidUser(userAddress)) {
+            } else if (await isPaidUser(userAddress)) { // If paid but no profile, go to invitation step
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
                 const storedInviteInfo = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.INVITE_INFO) || 'null');
@@ -2511,7 +2488,7 @@
                     document.getElementById('verifyInviteCodeInput').value = storedInviteInfo.code;
                     document.getElementById('verifyInviteCodeBtn').click();
                 }
-            } else {
+            } else { // Not paid and no profile, show payment modal
                 const usdtCost = (JOINING_FEE_ZTR * liveZTRPrice).toFixed(2);
                 document.getElementById('joiningFeeDisplay').innerText = `${usdtCost} USDT`;
                 openModal('paymentModal');
@@ -2570,17 +2547,16 @@
                 const usdtCost = (JOINING_FEE_ZTR * liveZTRPrice).toFixed(2);
                 const amount = ethers.parseUnits(usdtCost.toString(), usdtDecimals);
                 
-                showToast("Waiting for approval...", "info");
+                // CHANGE 6: Payment process toasts removed
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
-                
-                showToast("Transaction sent! Confirming...", "info");
                 const receipt = await tx.wait();
                 
-                // --- MAIN FIX FOR REGISTRATION COST ---
                 sessionStorage.setItem(STORAGE_KEYS.REGISTRATION_TX_HASH, receipt.hash);
                 sessionStorage.setItem(STORAGE_KEYS.REGISTRATION_USDT_COST, usdtCost);
                 
-                await markUserAsPaid(userAddress);
+                // We no longer mark user as paid from frontend. Backend will do everything.
+                // await markUserAsPaid(userAddress); 
+                
                 closeModal('paymentModal');
                 
                 connectState.classList.add('hidden');
