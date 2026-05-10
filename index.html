@@ -10,7 +10,7 @@
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Firebase SDKs (Required ONLY for invite code verification until a backend endpoint is made) -->
+    <!-- Firebase SDKs (Required for real-time features not yet migrated to backend endpoints) -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
@@ -1632,7 +1632,7 @@
     <div class="full-page-content" style="padding: 0; text-align: center;">
         <img src="https://iili.io/BLI6ZiX.jpg" alt="Tasks Banner" style="width: 100%; height: auto; border-radius: 0 0 25px 25px; margin-bottom: 20px;">
         <div style="padding: 0 20px 30px 20px;">
-             <h3 style="text-align: left; margin-bottom: 15px;">Complete tasks to earn ZTR!</h3>
+             <h3 style="text-align: left; margin-bottom: 15px;">Complete tasks to earn Airdrop Points!</h3>
              <div class="task-list" id="invitationTasksList">
                 <!-- Tasks will be injected here by JS -->
              </div>
@@ -1800,7 +1800,7 @@
                 </p>
 
                 <div class="invite-code-input-group">
-                    <input type="text" id="verifyInviteCodeInput" placeholder="ENTER INVITER'S CODE" maxlength="9" style="text-transform: uppercase;">
+                    <input type="text" id="verifyInviteCodeInput" placeholder="ENTER INVITER'S CODE" maxlength="8" style="text-transform: uppercase;">
                     <button id="verifyInviteCodeBtn"><i class="fa-solid fa-check"></i></button>
                 </div>
                 <div id="inviterVerifyStatus" style="font-size: 11px; margin-bottom: 20px; text-align: left;"></div>
@@ -2072,7 +2072,7 @@
         // ===================================================================
 
 
-        // ========== FIREBASE CONFIGURATION (FOR INVITE CODE VERIFICATION ONLY) ==========
+        // ========== FIREBASE CONFIGURATION (FOR REAL-TIME DATA ONLY) ==========
         const firebaseConfig = {
             apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
             authDomain: "fortune-2cb70.firebaseapp.com",
@@ -2097,7 +2097,7 @@
         }
 
         function isValidInviteCode(code) {
-             return /^[A-Z0-9]{8,9}$/.test(code);
+            return /^[A-Z0-9]{8}$/.test(code);
         }
 
         let ADMIN_WALLET = "0x97efeaa1da1108acff52840550ec51dc5bbfd812";
@@ -2105,7 +2105,7 @@
         const CHAIN_ID = "0x38"; 
         const CHAIN_ID_DECIMAL = 56; 
         
-        let registrationFee = 5;
+        let registrationFee = 5.25;
 
         const CLOUDINARY_CLOUD_NAME = 'dfwonuz1a';
         const CLOUDINARY_UPLOAD_PRESET = 'Zentron';
@@ -2155,20 +2155,35 @@
 
         async function fetchAppConfig() {
             try {
-                // NOTE: The backend provided does not have a /api/config endpoint. Using fallback.
-                console.warn("Backend does not have /api/config. Using hardcoded fallback for levels.");
-                throw new Error('Using fallback');
+                const response = await fetch(`${BACKEND_URL}/api/config`);
+                if (!response.ok) throw new Error('Failed to fetch config from backend');
+                const result = await response.json();
+
+                if (result.success && result.config) {
+                    baseZTRPrice = result.config.ztrPrice || 1.0;
+                    liveZTRPrice = baseZTRPrice;
+                    APP_LEVELS = result.config.levels;
+                    registrationFee = result.config.registrationFee;
+                    ADMIN_WALLET = result.config.adminWallet;
+                    USDT_CONTRACT = result.config.usdtContract;
+                } else {
+                    throw new Error('Backend config response was not successful');
+                }
             } catch (error) {
+                console.error("Failed to fetch app config:", error);
+                showToast("Could not load app configuration. Using fallbacks.", "error");
                 baseZTRPrice = 1.0;
                 liveZTRPrice = 1.0;
-                registrationFee = 5.0; // Corresponds to Level 0 price
-                APP_LEVELS = [
-                    { id: 0, name: "Starter", price: 5, salary: 0, icon: "🌱" },
-                    { id: 1, name: "Iron", price: 10, salary: 1, icon: "🛡️" },
-                    { id: 2, name: "Bronze", price: 20, salary: 2, icon: "🥉" },
-                    { id: 3, name: "Silver", price: 50, salary: 5, icon: "🥈" },
-                    { id: 4, name: "Gold", price: 100, salary: 10, icon: "🥇" },
-                    { id: 5, name: "Master", price: 200, salary: 20, icon: "👑" }
+                registrationFee = 5.25;
+                APP_LEVELS =[
+                    { id: 0, name: "Starter", price: 5, salaryFund: 0.25, fee: 0, icon: "🌱", salary: 0, airdropPoints: 100 },
+                    { id: 1, name: "Iron", price: 5, salaryFund: 1, fee: 0.18, icon: "🛡️", airdropPoints: 100 },
+                    { id: 2, name: "Bronze", price: 10, salaryFund: 2, fee: 0.36, icon: "🥉", airdropPoints: 200 },
+                    { id: 3, name: "Silver", price: 15, salaryFund: 3, fee: 0.54, icon: "🥈", airdropPoints: 300 },
+                    { id: 4, name: "Gold", price: 20, salaryFund: 4, fee: 0.72, icon: "🥇", airdropPoints: 400 },
+                    { id: 5, name: "Master", price: 25, salaryFund: 5, fee: 0.9, icon: "👑", salary: 10, airdropPoints: 500 },
+                    { id: 6, name: "Grandmaster", price: 50, salaryFund: 10, fee: 1.8, icon: "⚔️", salary: 25, airdropPoints: 1000 },
+                    { id: 7, name: "Legend", price: 100, salaryFund: 20, fee: 3.6, icon: "🌟", salary: 60, airdropPoints: 2000 }
                 ];
             }
         }
@@ -2186,11 +2201,8 @@
                 }
                 const result = await response.json();
                 if (result.success && result.user) {
-                    const user = result.user;
-                    // Backend sends level as number, frontend expects levelInfo object. Let's map it.
-                    user.levelInfo = APP_LEVELS.find(l => l.id === user.level) || APP_LEVELS[0];
-                    currentUserData = user;
-                    return user;
+                    currentUserData = result.user; 
+                    return result.user;
                 }
                 return null;
             } catch (error) {
@@ -2217,25 +2229,16 @@
         }
         window.copyWalletAddress = copyWalletAddress;
 
-        async function getWalletByInviteCode(inviteCode) {
-            if (!inviteCode || !isValidInviteCode(inviteCode)) return null;
-            try {
-                const snapshot = await db.ref(`inviteCodeMap/${inviteCode}`).once('value');
-                return snapshot.exists() ? snapshot.val() : null;
-            } catch(e) { return null; }
-        }
-
-        async function getUserProfileFromDB(wallet) {
-            if(!wallet || !isValidWalletAddress(wallet)) return null;
-             try {
-                const snapshot = await db.ref(`users/${wallet.toLowerCase()}/profile`).once('value');
-                return snapshot.exists() ? snapshot.val() : null;
-            } catch(e) { return null; }
-        }
-
-        function getTotalSalaryEarnings(user) {
-            if (!user || !user.salaryHistory) return 0;
-            return user.salaryHistory.reduce((total, record) => total + (record.amount || 0), 0);
+        async function getSalleryEarnings(wallet) {
+             if (!wallet || !isValidWalletAddress(wallet)) return 0;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/salaryHistory`).once('value');
+            let totalSalary = 0;
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    totalSalary += child.val().amount;
+                });
+            }
+            return totalSalary;
         }
 
         async function updateBalances() {
@@ -2252,15 +2255,14 @@
 
         async function updateAssetsPage() {
             if (!currentUserData || !currentUserData.profile) return;
-            const { profile, ztrBalance, inviterId, inviteCode } = currentUserData;
+            const { profile, ztrBalance, levelInfo, inviterId, inviteCode } = currentUserData;
             
-            document.getElementById('userId').innerText = `ID: ${profile.userId}`;
+            document.getElementById('userId').innerText = `ID: ZTR-${profile.userId}`;
             document.getElementById('profileName').innerText = profile.name;
-            const joinDate = new Date(profile.joinDate);
-            document.getElementById('joinDate').innerText = joinDate.toLocaleDateString();
+            document.getElementById('joinDate').innerText = profile.joinDate || '--/--/--';
             document.getElementById('profileInviteCode').innerHTML = `<i class="fa-solid fa-ticket"></i> Invite Code: ${inviteCode}`;
 
-            document.getElementById('profileInviterId').innerText = inviterId ? `ID: ${inviterId}` : 'None';
+            document.getElementById('profileInviterId').innerText = inviterId ? `ID: ZTR-${inviterId}` : 'None';
 
             const avatarIcon = document.getElementById('avatarIcon');
             const avatarImg = document.getElementById('profileAvatarImg');
@@ -2278,18 +2280,17 @@
             document.getElementById('statUSDT').innerText = parseFloat(rawUsdtBalance).toFixed(2);
             document.getElementById('statZTR').innerText = (ztrBalance || 0).toFixed(2);
             document.getElementById('totalEarningsStat').innerText = `$${((ztrBalance || 0) * liveZTRPrice).toFixed(2)}`;
-            document.getElementById('userLevelStat').innerText = currentUserData.levelInfo?.name || 'Starter';
+            document.getElementById('userLevelStat').innerText = levelInfo?.name || 'Starter';
         }
 
         async function updateDashboard() {
             if (!currentUserData || !currentUserData.profile) return;
             const { ztrBalance, teamSize, levelInfo } = currentUserData;
             
-            const salary = getTotalSalaryEarnings(currentUserData);
-            const profit = (ztrBalance || 0) - salary;
+            const salary = await getSalleryEarnings(userAddress);
             
-            document.getElementById('profitIncome').innerText = `${profit.toFixed(2)} ZTR`;
-            document.getElementById('profitUSD').innerText = (profit * liveZTRPrice).toFixed(2);
+            document.getElementById('profitIncome').innerText = `${(ztrBalance || 0).toFixed(2)} ZTR`;
+            document.getElementById('profitUSD').innerText = ((ztrBalance || 0) * liveZTRPrice).toFixed(2);
 
             document.getElementById('teamIncome').innerText = teamSize || 0;
             document.getElementById('teamCount').innerText = `Direct Member${(teamSize || 0) === 1 ? '' : 's'}`;
@@ -2304,7 +2305,7 @@
 
             if (inviteCode && profile) {
                 const baseUrl = window.location.origin + window.location.pathname;
-                const inviteLink = `${baseUrl}?invite=${inviteCode}`;
+                const inviteLink = `${baseUrl}?invite=${inviteCode}&inviterName=${encodeURIComponent(profile.name)}&inviterId=${profile.userId}`;
                 document.getElementById('inviteLink').value = inviteLink;
                 document.getElementById('inviteCodeInput').value = inviteCode;
             }
@@ -2367,35 +2368,84 @@
         }
         
         async function getChildrenViaApi(userId) {
-            // The backend provided does not have the /api/team/:userId endpoint.
-            // This function will return an empty array to prevent errors.
-            console.error("Backend endpoint for getChildrenViaApi (/api/team/:userId) not found.");
-            return [];
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/team/${userId}`);
+                if (!response.ok) return[];
+                const result = await response.json();
+                return (result.success && result.team) ? result.team :[];
+            } catch (error) {
+                return[];
+            }
         }
         
         async function renderBeautifulTree() {
             if (!currentUserData || !currentUserData.profile) return;
+
             const treeContainer = document.getElementById('networkTreeContainer');
             document.getElementById('teamPageTotalCount').innerText = currentUserData.teamSize || 0;
             
-             // As getChildrenViaApi is not available on the backend, we will show a message.
+            const buildNodeHTML = (profile, levelName, isCurrentUser = false, level = 0) => {
+                const avatarHtml = profile.profilePicUrl
+                    ? `<img src="${profile.profilePicUrl}" alt="${sanitizeInput(profile.name)}">`
+                    : `<i class="fa-solid fa-user-astronaut"></i>`;
+
+                return `
+                    <div class="tree-node-card ${isCurrentUser ? 'is-user' : ''}">
+                        <div class="tree-node-avatar">${avatarHtml}</div>
+                        <div class="tree-node-name">${sanitizeInput(profile.name)}</div>
+                        <div class="tree-node-id">ID: ${profile.userId}</div>
+                        <div class="tree-node-level"><i class="fa-solid fa-crown" style="font-size: 8px;"></i> ${levelName}</div>
+                    </div>
+                `;
+            };
+            
+            const buildTree = async (userId, maxDepth = 2) => {
+                let treeHTML = '';
+                const children = await getChildrenViaApi(userId);
+                if (children.length > 0) {
+                    treeHTML += '<ul>';
+                    for (const child of children) {
+                        const levelInfo = APP_LEVELS.find(l => l.id === child.level) || { name: 'Starter' };
+                        treeHTML += `<li>${buildNodeHTML(child.profile, levelInfo.name, false)}</li>`;
+                    }
+                    treeHTML += '</ul>';
+                }
+                return treeHTML;
+            };
+
+            const currentUserLevelName = currentUserData.levelInfo?.name || 'Starter';
+            let treeHTML = `
+                <div class="tree">
+                    <ul>
+                        <li>
+                            ${buildNodeHTML(currentUserData.profile, currentUserLevelName, true, 0)}
+                            ${await buildTree(currentUserData.profile.userId)}
+                        </li>
+                    </ul>
+                </div>
+            `;
+
             if ((currentUserData.teamSize || 0) === 0) {
                  treeContainer.innerHTML = `<div style="text-align:center; padding: 40px;"><i class="fa-solid fa-tree" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i><p style="color: rgba(255,255,255,0.7);">Your network is empty.</p><p style="color: rgba(255,255,255,0.7); font-size: 12px;">Share your invitation code to start building your tree!</p></div>`;
             } else {
-                 treeContainer.innerHTML = `<div style="text-align:center; padding: 40px;"><i class="fa-solid fa-triangle-exclamation" style="font-size: 60px; color: var(--gold); margin-bottom: 20px;"></i><p style="color: rgba(255,255,255,0.7);">The Network Tree view is currently unavailable.</p><p style="color: rgba(255,255,255,0.7); font-size: 12px;">You have ${currentUserData.teamSize} members in your direct team.</p></div>`;
+                 treeContainer.innerHTML = treeHTML;
             }
         }
 
-        window.openIncomeHistory = function() {
+        window.openIncomeHistory = async function() {
             const listContainer = document.getElementById('incomeHistoryList');
+            listContainer.innerHTML = '<div class="spinner"></div>';
             openModal('incomeHistoryModal');
 
-            const historyData = currentUserData.incomeHistory || [];
+            const incomeRef = db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`);
+            const snapshot = await incomeRef.orderByChild('timestamp').once('value');
 
-            if (historyData.length > 0) {
+            if (snapshot.exists()) {
                 listContainer.innerHTML = '';
-                historyData.forEach(item => {
-                    const date = new Date(item.createdAt);
+                const historyData =[];
+                snapshot.forEach(child => historyData.push(child.val()));
+                historyData.reverse().forEach(item => {
+                    const date = new Date(item.date);
                     const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
                     const itemHtml = `<div class="history-item"><div class="history-item-details"><strong>${sanitizeInput(item.type)}</strong><div class="date">${formattedDate}</div></div><div class="history-item-amount">+${item.amount.toFixed(4)} ZTR</div></div>`;
                     listContainer.innerHTML += itemHtml;
@@ -2405,15 +2455,19 @@
             }
         }
 
-        window.openSalaryHistory = function() {
+        window.openSalaryHistory = async function() {
             const listContainer = document.getElementById('salaryHistoryList');
+            listContainer.innerHTML = '<div class="spinner"></div>';
             openModal('salaryHistoryModal');
             
-            const historyData = currentUserData.salaryHistory || [];
-            if (historyData.length > 0) {
+            const salaryRef = db.ref(`users/${userAddress.toLowerCase()}/salaryHistory`);
+            const snapshot = await salaryRef.orderByChild('timestamp').once('value');
+            if (snapshot.exists()) {
                 listContainer.innerHTML = '';
-                 historyData.forEach(item => {
-                    const date = new Date(item.createdAt);
+                const historyData =[];
+                snapshot.forEach(child => historyData.push(child.val()));
+                historyData.reverse().forEach(item => {
+                    const date = new Date(item.date);
                     const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
                     const itemHtml = `<div class="history-item"><div class="history-item-details"><strong>Weekly Salary</strong><div class="date">${formattedDate}</div></div><div class="history-item-amount" style="color: var(--gold)">+${item.amount.toFixed(2)} ZTR</div></div>`;
                     listContainer.innerHTML += itemHtml;
@@ -2424,7 +2478,11 @@
         }
 
         async function renderStarsForLevel(levelId) {
-            const starsData = currentUserData?.levelStars?.[levelId] || [];
+            const snapshot = await db.ref(`users/${userAddress.toLowerCase()}/levelStars/level_${levelId}`).once('value');
+            if (!snapshot.exists()) {
+                 return Array(10).fill('<div class="star-node"><i class="fa-regular fa-star"></i></div>').join('');
+            }
+            const starsData = Object.values(snapshot.val());
             let starsHTML = '';
             const starSlots = Array(10).fill(null);
             
@@ -2437,7 +2495,7 @@
                     starsHTML += `
                         <div class="star-node filled ${star.type}">
                             <i class="fa-solid fa-star"></i>
-                            <div class="tooltip">ID: ${star.sourceUserId}</div>
+                            <div class="tooltip">ID: ZTR-${star.sourceUserId}</div>
                         </div>
                     `;
                 } else {
@@ -2458,8 +2516,12 @@
             const currentLevelId = currentUserData.level || 0;
             let cardsHTML = '';
             let stepperHTML = '';
-            
+
+            // Map and parse identically level arrays guaranteeing zero ID included organically securely
             let allLevels = [...APP_LEVELS].sort((a, b) => a.id - b.id);
+            if (!allLevels.some(l => l.id === 0)) {
+                allLevels.unshift({ id: 0, name: "Starter", price: 5, salaryFund: 0.25, fee: 0, icon: "🌱", salary: 0, airdropPoints: 100 });
+            }
 
             for (const level of allLevels) {
                 const isUnlocked = currentLevelId >= level.id;
@@ -2469,7 +2531,7 @@
                 stepperHTML += `<div class="level-stepper-item" data-level-id="${level.id}"><span>${level.id}</span><div class="dot"></div></div>`;
                 
                 const starsHTML = await renderStarsForLevel(level.id);
-                const totalCost = (level.price || 0);
+                const totalCost = (level.price || 0) + (level.salaryFund || 0) + (level.fee || 0);
                 const usdtPrice = (totalCost * liveZTRPrice).toFixed(2);
                 
                 let buttonHTML;
@@ -2490,8 +2552,13 @@
                         </div>
                         <div class="level-stars-container">${starsHTML}</div>
                         <div>
-                            <h3 class="level-price" style="margin-top: 15px;">${totalCost.toFixed(2)} USDT</h3>
-                            <p class="level-info">Activation Cost</p>
+                            <div class="price-breakdown-container">
+                                <p>Plan Price: <span>${(level.price || 0).toFixed(2)} ZTR</span></p>
+                                <p>Salary Fund: <span>${(level.salaryFund || 0).toFixed(2)} ZTR</span></p>
+                                <p>System Fee: <span>${(level.fee || 0).toFixed(2)} ZTR</span></p>
+                            </div>
+                            <h3 class="level-price" style="margin-top: 15px;">Total: ${totalCost.toFixed(2)} ZTR</h3>
+                            <p class="level-info">≈ ${usdtPrice} USDT</p>
                             ${(level.salary && level.salary > 0) ? `<p class="level-info" style="color: var(--gold); margin-top: 10px; font-weight: bold;">Unlocks ${level.salary} ZTR Weekly Salary</p>`: ''}
                         </div>
                         ${buttonHTML}
@@ -2565,10 +2632,11 @@
                 const level = APP_LEVELS.find(l => l.id === levelId);
                 if (!level) throw new Error("Level configuration not found.");
 
-                const usdtCost = (level.price || 0).toFixed(2);
+                const totalCostZTR = (level.price || 0) + (level.salaryFund || 0) + (level.fee || 0);
+                const usdtCost = (totalCostZTR * liveZTRPrice).toFixed(2);
                 
                 if (parseFloat(rawUsdtBalance) < parseFloat(usdtCost)) {
-                    throw new Error(`Insufficient USDT. You need ${usdtCost}, but have ${parseFloat(rawUsdtBalance).toFixed(2)}.`);
+                    throw new Error(`Insufficient USDT. You need ${usdtCost}, but have ${rawUsdtBalance}.`);
                 }
 
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
@@ -2581,13 +2649,15 @@
 
                 showToast("Transaction confirmed! Verifying with server...", "success");
 
-                const response = await fetch(`${BACKEND_URL}/api/upgrade-level`, {
+                const response = await fetch(`${BACKEND_URL}/api/upgrade`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         wallet: userAddress,
-                        level: levelId,
-                        txHash: receipt.hash
+                        txHash: receipt.hash,
+                        levelId: levelId,
+                        upgradeCost: usdtCost,
+                        levelPrice: level.price 
                     })
                 });
 
@@ -2614,10 +2684,12 @@
                 showToast(errorMessage, "error");
             } finally {
                 isProcessing = false;
-                setTimeout(async () => {
-                    // We need to refetch data to get latest level to correctly update button state
-                    await fetchUserData(userAddress);
-                    await initializeLevelViewer();
+                setTimeout(() => {
+                    const freshBtn = document.getElementById(`upgradeBtn-${levelId}`);
+                    if (freshBtn) {
+                        freshBtn.disabled = false;
+                        freshBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> ACTIVATE';
+                    }
                 }, 1000);
             }
         };
@@ -2804,10 +2876,35 @@
         window.openWithdrawalModal = openWithdrawalModal;
 
         document.getElementById('confirmWithdrawalBtn').addEventListener('click', async () => {
-            // The backend provided does not have a /api/withdraw endpoint.
-            // This functionality cannot be implemented without backend changes.
-            showToast("Withdrawal feature is coming soon.", "info");
-            return;
+            if (isProcessing) return;
+            isProcessing = true;
+            const btn = document.getElementById('confirmWithdrawalBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Submitting...';
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/withdraw`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ wallet: userAddress })
+                });
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    showToast("Withdrawal request submitted!", "success");
+                    await fetchUserData(userAddress);
+                    await updateDashboard();
+                    await updateAssetsPage();
+                    closeModal('withdrawalModal');
+                } else {
+                    throw new Error(result.error || "Withdrawal request failed.");
+                }
+            } catch (e) {
+                console.error("Withdrawal error:", e);
+                showToast(e.message, "error");
+            } finally {
+                isProcessing = false;
+                btn.disabled = false;
+                btn.innerHTML = 'Withdraw';
+            }
         });
         
         async function initConnection(accounts, isAutoReconnect = false) {
@@ -2917,24 +3014,39 @@
             const inviteCode = document.getElementById('verifyInviteCodeInput').value.trim().toUpperCase();
             const statusDiv = document.getElementById('inviterVerifyStatus');
             const proceedBtn = document.getElementById('proceedToProfileBtn');
+            const verifyBtn = document.getElementById('verifyInviteCodeBtn');
             
             if (!isValidInviteCode(inviteCode)) {
                 statusDiv.innerHTML = '<span class="status-error">❌ Invalid code format.</span>';
                 return;
             }
 
-            const inviterWallet = await getWalletByInviteCode(inviteCode);
-            if (inviterWallet) {
-                const inviterProfile = await getUserProfileFromDB(inviterWallet);
-                if (inviterProfile) {
+            verifyBtn.disabled = true;
+            statusDiv.innerHTML = '<span class="status-info">Verifying...</span>';
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/verify-invite`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ inviteCode: inviteCode })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    const inviterProfile = result.inviter;
                     verifiedInviterId = inviterProfile.userId;
-                    statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by: ${sanitizeInput(inviterProfile.name)} (ID: ${verifiedInviterId})</span>`;
+                    statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by: ${sanitizeInput(inviterProfile.name)} (ID: ZTR-${verifiedInviterId})</span>`;
                     proceedBtn.disabled = false;
+                } else {
+                    throw new Error(result.error || "Invitation code not found.");
                 }
-            } else {
-                statusDiv.innerHTML = '<span class="status-error">❌ Invitation code not found.</span>';
+            } catch (error) {
+                statusDiv.innerHTML = `<span class="status-error">❌ ${sanitizeInput(error.message)}</span>`;
                 verifiedInviterId = null;
                 proceedBtn.disabled = true;
+            } finally {
+                verifyBtn.disabled = false;
             }
         });
 
@@ -2994,7 +3106,7 @@
 
             const range = activePhase.target - activePhase.start;
             const relativeDist = Math.max(0, phaseTotalDist - activePhase.start);
-            const percentage = Math.min(100, (range > 0 ? (relativeDist / range) * 100 : 0));
+            const percentage = Math.min(100, (relativeDist / range) * 100);
             
             const fill = document.getElementById('airdropProgressFill');
             if (fill) fill.style.width = `${percentage}%`;
@@ -3019,19 +3131,19 @@
 
         async function updateOmniViewPage() {
             try {
-                const response = await fetch(`${BACKEND_URL}/api/stats`);
+                const response = await fetch(`${BACKEND_URL}/api/platform-data`);
                 if (!response.ok) throw new Error("Could not fetch platform data.");
-                const result = await response.json();
+                const data = await response.json();
 
-                if (result.success) {
-                    const { stats } = result;
+                if (data.success) {
+                    const { stats, leaderboard } = data;
                     document.getElementById('totalParticipants').innerText = stats.totalParticipants || 0;
-                    document.getElementById('salaryActiveMembers').innerText = 'N/A'; // Not available from backend
+                    document.getElementById('salaryActiveMembers').innerText = stats.salaryActiveMembers || 0;
                     document.getElementById('totalZTRDistributed').innerText = (stats.totalZTRDistributed || 0).toLocaleString();
                     document.getElementById('totalWeeklySalaryFund').innerText = `${(stats.totalWeeklySalaryFund || 0).toLocaleString()} ZTR`;
                     
-                    updateAirdropProgress(0); // Not available from backend
-                    renderLeaderboard([]); // Not available from backend
+                    updateAirdropProgress(stats.totalAirdropDistributed || 0);
+                    renderLeaderboard(leaderboard);
                 }
             } catch (error) {
                 console.error("Error updating OmniView:", error);
@@ -3041,9 +3153,21 @@
         function renderLeaderboard(users) {
             const listContainer = document.getElementById('topUsersList');
             if (!users || users.length === 0) {
-                return listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">Leaderboard data is currently unavailable.</p>';
+                return listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">Leaderboard is empty.</p>';
             }
-            // This part of the code will not be reached as an empty array is passed.
+            listContainer.innerHTML = users.map((user, index) => `
+                <div class="top-user-item">
+                    <div class="top-user-rank">#${index + 1}</div>
+                    ${user.profilePicUrl ? 
+                        `<div class="top-user-avatar" style="background-image: url(${user.profilePicUrl});"></div>` :
+                        `<div class="top-user-avatar"><i class="fa-solid fa-user-astronaut"></i></div>`
+                    }
+                    <div class="top-user-info">
+                        <div class="top-user-name">${sanitizeInput(user.name)}</div>
+                        <div class="top-user-id">ID: ZTR-${user.userId}</div>
+                    </div>
+                    <div class="top-user-earnings">${user.earnings.toFixed(2)} ZTR</div>
+                </div>`).join('');
         }
         
         document.querySelectorAll('.nav-item').forEach(btn => {
@@ -3069,8 +3193,7 @@
 
         if (window.ethereum) {
             window.ethereum.on('accountsChanged', (accounts) => {
-                localStorage.clear();
-                sessionStorage.clear();
+                localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
                 location.reload();
             });
             window.ethereum.on('chainChanged', () => location.reload());
@@ -3082,7 +3205,6 @@
             const inviteCodeFromUrl = urlParams.get('invite');
             if(inviteCodeFromUrl) {
                 sessionStorage.setItem(STORAGE_KEYS.INVITE_INFO, JSON.stringify({ code: inviteCodeFromUrl.toUpperCase() }));
-                document.getElementById('verifyInviteCodeInput').value = inviteCodeFromUrl.toUpperCase();
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
             await autoReconnect();
@@ -3096,6 +3218,7 @@
             closeModal('dropsModal');
             
             const salaryInfoContainer = document.getElementById('salaryInfo');
+            const salaryHistoryContainer = document.getElementById('salaryHistoryListWeekFlow');
 
             const level = APP_LEVELS.find(l => l.id === (currentUserData.level || 0));
 
@@ -3105,7 +3228,7 @@
                  salaryInfoContainer.innerHTML = `<div class="salary-value">0.00 ZTR / Week</div><p style="color: var(--text-muted); font-size: 13px;">Upgrade to Level 5 (Master) to become eligible for weekly salary.</p>`;
             }
             
-            openSalaryHistory(); 
+            await openSalaryHistory(); 
             document.getElementById('salaryHistoryListWeekFlow').innerHTML = document.getElementById('salaryHistoryList').innerHTML;
         }
 
@@ -3127,22 +3250,22 @@
             const taskListContainer = document.getElementById('invitationTasksList');
             taskListContainer.innerHTML = '<div class="spinner"></div>';
             
-            const claimedTasks = currentUserData.claimedTasks || {};
+            const snapshot = await db.ref(`users/${userAddress.toLowerCase()}/claimedTasks`).once('value');
+            const claimedTasks = snapshot.val() || {};
 
             const directTeamCount = currentUserData.teamSize || 0;
             const tasks =[
-                { required: 3, reward: 5 }, { required: 6, reward: 15 },
-                { required: 10, reward: 30 }, { required: 15, reward: 50 },
-                { required: 25, reward: 100 }, { required: 50, reward: 250 }
+                { required: 3, points: 500 }, { required: 6, points: 1500 },
+                { required: 10, points: 3000 }, { required: 15, points: 5000 },
+                { required: 25, points: 10000 }, { required: 50, points: 25000 }
             ];
 
             taskListContainer.innerHTML = tasks.map(task => {
-                const taskId = `task_invite_${task.required}`;
                 const isCompleted = directTeamCount >= task.required;
-                const isClaimed = claimedTasks[taskId] === true;
+                const isClaimed = claimedTasks[`task_${task.required}`] === true;
                 let buttonHTML;
                 if (isClaimed) buttonHTML = `<button class="btn btn-success" disabled><i class="fa-solid fa-check"></i> Claimed</button>`;
-                else if (isCompleted) buttonHTML = `<button class="btn btn-success" onclick="claimTaskReward(event, '${taskId}', ${task.reward}, ${task.required})">Claim</button>`;
+                else if (isCompleted) buttonHTML = `<button class="btn btn-success" onclick="claimTaskReward(event, ${task.required}, ${task.points})">Claim</button>`;
                 else buttonHTML = `<button class="btn" disabled>${directTeamCount} / ${task.required}</button>`;
                 return `
                     <div class="task-item" style="flex-direction: column; align-items: stretch; gap: 10px;">
@@ -3151,22 +3274,22 @@
                                 <strong>Invite ${task.required} Members</strong>
                                 <p style="font-size: 12px; color: var(--text-muted);">Activate ${task.required} users.</p>
                             </div>
-                            <div class="task-reward" style="font-size:16px;">+${task.reward.toLocaleString()} ZTR</div>
+                            <div class="task-reward" style="font-size:16px;">+${task.points.toLocaleString()} Pts</div>
                         </div>
                         ${buttonHTML}
                     </div>`;
             }).join('');
         }
 
-        window.claimTaskReward = async function(event, taskId, reward, required) {
-            const btn = event.target.closest('button');
+        window.claimTaskReward = async function(event, required, points) {
+            const btn = event.target;
             btn.disabled = true;
             btn.innerHTML = `<i class="fa-solid fa-spinner spin"></i>`;
             try {
-                const response = await fetch(`${BACKEND_URL}/api/claim-task`, {
+                const response = await fetch(`${BACKEND_URL}/api/claim-task-reward`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ wallet: userAddress, taskId: taskId, reward: reward })
+                    body: JSON.stringify({ wallet: userAddress, taskRequired: required, taskPoints: points })
                 });
                 const result = await response.json();
                 if (response.ok && result.success) {
