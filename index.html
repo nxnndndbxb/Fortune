@@ -10,7 +10,7 @@
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Firebase SDKs (Required for real-time features not yet migrated to backend endpoints) -->
+    <!-- Firebase SDKs (Required ONLY for invite code verification until a backend endpoint is made) -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
@@ -2072,7 +2072,7 @@
         // ===================================================================
 
 
-        // ========== FIREBASE CONFIGURATION (FOR REAL-TIME DATA ONLY) ==========
+        // ========== FIREBASE CONFIGURATION (FOR INVITE CODE VERIFICATION ONLY) ==========
         const firebaseConfig = {
             apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
             authDomain: "fortune-2cb70.firebaseapp.com",
@@ -2155,6 +2155,46 @@
 
         async function fetchAppConfig() {
             try {
+                // ===================================================================
+                // =========== TEMPORARY FIX: USING HARDCODED CONFIG =================
+                // ===================================================================
+                // NOTE: Backend /api/config is failing. Using default values for now.
+                // Once backend is fixed, you can remove this block and uncomment the 'fetch' block below.
+                
+                showToast("Using default configuration.", "info");
+                baseZTRPrice = 1.0;
+                liveZTRPrice = 1.0;
+                registrationFee = 5.25; // This is a fallback value
+                ADMIN_WALLET = "0x97efeaa1da1108acff52840550ec51dc5bbfd812";
+                USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
+                APP_LEVELS =[
+                    { id: 0, name: "Starter", price: 5, salaryFund: 0.25, fee: 0, icon: "🌱", salary: 0, airdropPoints: 100 },
+                    { id: 1, name: "Iron", price: 5, salaryFund: 1, fee: 0.18, icon: "🛡️", airdropPoints: 100 },
+                    { id: 2, name: "Bronze", price: 10, salaryFund: 2, fee: 0.36, icon: "🥉", airdropPoints: 200 },
+                    { id: 3, name: "Silver", price: 15, salaryFund: 3, fee: 0.54, icon: "🥈", airdropPoints: 300 },
+                    { id: 4, name: "Gold", price: 20, salaryFund: 4, fee: 0.72, icon: "🥇", airdropPoints: 400 },
+                    { id: 5, name: "Master", price: 25, salaryFund: 5, fee: 0.9, icon: "👑", salary: 10, airdropPoints: 500 },
+                    { id: 6, name: "Grandmaster", price: 50, salaryFund: 10, fee: 1.8, icon: "⚔️", salary: 25, airdropPoints: 1000 },
+                    { id: 7, name: "Legend", price: 100, salaryFund: 20, fee: 3.6, icon: "🌟", salary: 60, airdropPoints: 2000 }
+                ];
+
+                // This part is important. We need to fetch the real registration amount from the backend if it's available
+                try {
+                    const regAmountResponse = await fetch(`${BACKEND_URL}/api/check-registration-amount`);
+                    if (regAmountResponse.ok) {
+                        const regResult = await regAmountResponse.json();
+                        if (regResult.success) {
+                            registrationFee = regResult.amount;
+                        }
+                    }
+                } catch(e) {
+                    console.warn("Could not fetch registration amount, using fallback.");
+                }
+
+                // ===================================================================
+                // ============= ORIGINAL CODE (UNCOMMENT WHEN BACKEND IS FIXED) =====
+                // ===================================================================
+                /*
                 const response = await fetch(`${BACKEND_URL}/api/config`);
                 if (!response.ok) throw new Error('Failed to fetch config from backend');
                 const result = await response.json();
@@ -2163,12 +2203,14 @@
                     baseZTRPrice = result.config.ztrPrice || 1.0;
                     liveZTRPrice = baseZTRPrice;
                     APP_LEVELS = result.config.levels;
-                    registrationFee = result.config.registrationFee;
+                    registrationFee = result.config.registrationAmount;
                     ADMIN_WALLET = result.config.adminWallet;
                     USDT_CONTRACT = result.config.usdtContract;
                 } else {
                     throw new Error('Backend config response was not successful');
                 }
+                */
+
             } catch (error) {
                 console.error("Failed to fetch app config:", error);
                 showToast("Could not load app configuration. Using fallbacks.", "error");
@@ -2187,6 +2229,7 @@
                 ];
             }
         }
+
 
         async function fetchUserData(wallet) {
             if (!wallet || !isValidWalletAddress(wallet)) return null;
@@ -2228,6 +2271,22 @@
             }
         }
         window.copyWalletAddress = copyWalletAddress;
+
+        async function getWalletByInviteCode(inviteCode) {
+            if (!inviteCode || !isValidInviteCode(inviteCode)) return null;
+            try {
+                const snapshot = await db.ref(`inviteCodeMap/${inviteCode}`).once('value');
+                return snapshot.exists() ? snapshot.val() : null;
+            } catch(e) { return null; }
+        }
+
+        async function getUserProfileFromDB(wallet) {
+            if(!wallet || !isValidWalletAddress(wallet)) return null;
+             try {
+                const snapshot = await db.ref(`users/${wallet.toLowerCase()}/profile`).once('value');
+                return snapshot.exists() ? snapshot.val() : null;
+            } catch(e) { return null; }
+        }
 
         async function getSalleryEarnings(wallet) {
              if (!wallet || !isValidWalletAddress(wallet)) return 0;
@@ -2437,21 +2496,27 @@
             listContainer.innerHTML = '<div class="spinner"></div>';
             openModal('incomeHistoryModal');
 
-            const incomeRef = db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`);
-            const snapshot = await incomeRef.orderByChild('timestamp').once('value');
-
-            if (snapshot.exists()) {
-                listContainer.innerHTML = '';
-                const historyData =[];
-                snapshot.forEach(child => historyData.push(child.val()));
-                historyData.reverse().forEach(item => {
-                    const date = new Date(item.date);
-                    const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-                    const itemHtml = `<div class="history-item"><div class="history-item-details"><strong>${sanitizeInput(item.type)}</strong><div class="date">${formattedDate}</div></div><div class="history-item-amount">+${item.amount.toFixed(4)} ZTR</div></div>`;
-                    listContainer.innerHTML += itemHtml;
-                });
-            } else {
-                listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No income history found.</p>';
+            // --- YAHAN HISTORY BACKEND SE AYEGI ---
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/user-income/${userAddress}`);
+                const result = await response.json();
+                if (result.success && result.history) {
+                     if (result.history.length > 0) {
+                        listContainer.innerHTML = '';
+                        result.history.forEach(item => {
+                            const date = new Date(item.date);
+                            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                            const itemHtml = `<div class="history-item"><div class="history-item-details"><strong>${sanitizeInput(item.type)}</strong><div class="date">${formattedDate}</div></div><div class="history-item-amount">+${item.amount.toFixed(4)} ZTR</div></div>`;
+                            listContainer.innerHTML += itemHtml;
+                        });
+                     } else {
+                         listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No income history found.</p>';
+                     }
+                } else {
+                    throw new Error("Could not load history");
+                }
+            } catch(e) {
+                 listContainer.innerHTML = '<p style="text-align:center; color: var(--danger); padding: 20px;">Error loading history.</p>';
             }
         }
 
@@ -2460,29 +2525,33 @@
             listContainer.innerHTML = '<div class="spinner"></div>';
             openModal('salaryHistoryModal');
             
-            const salaryRef = db.ref(`users/${userAddress.toLowerCase()}/salaryHistory`);
-            const snapshot = await salaryRef.orderByChild('timestamp').once('value');
-            if (snapshot.exists()) {
+            // --- Salary history user data ke andar se aati hai jo pehle hi fetch ho chuka hai ---
+            if (currentUserData && currentUserData.salaryHistory) {
                 listContainer.innerHTML = '';
-                const historyData =[];
-                snapshot.forEach(child => historyData.push(child.val()));
-                historyData.reverse().forEach(item => {
-                    const date = new Date(item.date);
-                    const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-                    const itemHtml = `<div class="history-item"><div class="history-item-details"><strong>Weekly Salary</strong><div class="date">${formattedDate}</div></div><div class="history-item-amount" style="color: var(--gold)">+${item.amount.toFixed(2)} ZTR</div></div>`;
-                    listContainer.innerHTML += itemHtml;
-                });
+                const historyData = Object.values(currentUserData.salaryHistory).sort((a,b) => b.timestamp - a.timestamp);
+                
+                if (historyData.length > 0) {
+                    historyData.forEach(item => {
+                        const date = new Date(item.date);
+                        const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                        const itemHtml = `<div class="history-item"><div class="history-item-details"><strong>Weekly Salary</strong><div class="date">${formattedDate}</div></div><div class="history-item-amount" style="color: var(--gold)">+${item.amount.toFixed(2)} ZTR</div></div>`;
+                        listContainer.innerHTML += itemHtml;
+                    });
+                } else {
+                     listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No salary payments have been recorded yet.</p>';
+                }
             } else {
                 listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No salary payments have been recorded yet.</p>';
             }
         }
 
         async function renderStarsForLevel(levelId) {
-            const snapshot = await db.ref(`users/${userAddress.toLowerCase()}/levelStars/level_${levelId}`).once('value');
-            if (!snapshot.exists()) {
+            // This data comes from the main user object, no need for a separate DB call
+            const levelStarsData = currentUserData?.levelStars?.[`level_${levelId}`];
+            if (!levelStarsData) {
                  return Array(10).fill('<div class="star-node"><i class="fa-regular fa-star"></i></div>').join('');
             }
-            const starsData = Object.values(snapshot.val());
+            const starsData = Object.values(levelStarsData);
             let starsHTML = '';
             const starSlots = Array(10).fill(null);
             
@@ -2532,7 +2601,6 @@
                 
                 const starsHTML = await renderStarsForLevel(level.id);
                 const totalCost = (level.price || 0) + (level.salaryFund || 0) + (level.fee || 0);
-                const usdtPrice = (totalCost * liveZTRPrice).toFixed(2);
                 
                 let buttonHTML;
                 if(isUnlocked) {
@@ -2558,7 +2626,7 @@
                                 <p>System Fee: <span>${(level.fee || 0).toFixed(2)} ZTR</span></p>
                             </div>
                             <h3 class="level-price" style="margin-top: 15px;">Total: ${totalCost.toFixed(2)} ZTR</h3>
-                            <p class="level-info">≈ ${usdtPrice} USDT</p>
+                            <p class="level-info">≈ ${(totalCost * liveZTRPrice).toFixed(2)} USDT</p>
                             ${(level.salary && level.salary > 0) ? `<p class="level-info" style="color: var(--gold); margin-top: 10px; font-weight: bold;">Unlocks ${level.salary} ZTR Weekly Salary</p>`: ''}
                         </div>
                         ${buttonHTML}
@@ -2655,9 +2723,7 @@
                     body: JSON.stringify({
                         wallet: userAddress,
                         txHash: receipt.hash,
-                        levelId: levelId,
-                        upgradeCost: usdtCost,
-                        levelPrice: level.price 
+                        levelId: levelId
                     })
                 });
 
@@ -2833,8 +2899,7 @@
             if (username.length < 3) return showToast("Username must be at least 3 characters", "error");
 
             const txHash = sessionStorage.getItem(STORAGE_KEYS.REGISTRATION_TX_HASH);
-            const registrationCost = sessionStorage.getItem(STORAGE_KEYS.REGISTRATION_USDT_COST);
-            if (!txHash || !registrationCost) return showToast("Transaction details not found. Please start over.", "error");
+            if (!txHash) return showToast("Transaction details not found. Please start over.", "error");
             
             try {
                 const response = await fetch(`${BACKEND_URL}/api/register`, {
@@ -2845,15 +2910,13 @@
                         txHash: txHash,
                         inviterId: verifiedInviterId,
                         username: sanitizeInput(username),
-                        profilePic: setupProfilePicData,
-                        registrationCost: registrationCost
+                        profilePic: setupProfilePicData
                     })
                 });
                 const result = await response.json();
                 if (response.ok && result.success) {
                     sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
                     sessionStorage.removeItem(STORAGE_KEYS.REGISTRATION_TX_HASH);
-                    sessionStorage.removeItem(STORAGE_KEYS.REGISTRATION_USDT_COST);
                     closeModal('profileSetupModal');
                     showToast("Profile setup complete! Welcome!", "success");
                     await fetchUserData(userAddress);
@@ -2885,7 +2948,7 @@
                 const response = await fetch(`${BACKEND_URL}/api/withdraw`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ wallet: userAddress })
+                    body: JSON.stringify({ wallet: userAddress, amount: currentUserData?.ztrBalance })
                 });
                 const result = await response.json();
                 if (response.ok && result.success) {
@@ -2936,8 +2999,7 @@
                     connectState.classList.add('hidden');
                     invitationState.classList.remove('hidden');
                 } else {
-                    const usdtCost = (registrationFee * liveZTRPrice).toFixed(2);
-                    document.getElementById('joiningFeeDisplay').innerText = `${usdtCost} USDT`;
+                    document.getElementById('joiningFeeDisplay').innerText = `${registrationFee.toFixed(2)} USDT`;
                     openModal('paymentModal');
                 }
             }
@@ -2981,7 +3043,7 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
             try {
-                const usdtCost = (registrationFee * liveZTRPrice).toFixed(2);
+                const usdtCost = registrationFee.toFixed(2);
                 if (parseFloat(rawUsdtBalance) < parseFloat(usdtCost)) throw new Error(`Insufficient USDT. You need ${usdtCost}.`);
                 
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
@@ -2993,8 +3055,7 @@
                 showToast("Transaction confirmed!", "success");
 
                 sessionStorage.setItem(STORAGE_KEYS.REGISTRATION_TX_HASH, receipt.hash);
-                sessionStorage.setItem(STORAGE_KEYS.REGISTRATION_USDT_COST, usdtCost);
-
+                
                 closeModal('paymentModal');
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
@@ -3014,39 +3075,24 @@
             const inviteCode = document.getElementById('verifyInviteCodeInput').value.trim().toUpperCase();
             const statusDiv = document.getElementById('inviterVerifyStatus');
             const proceedBtn = document.getElementById('proceedToProfileBtn');
-            const verifyBtn = document.getElementById('verifyInviteCodeBtn');
             
             if (!isValidInviteCode(inviteCode)) {
                 statusDiv.innerHTML = '<span class="status-error">❌ Invalid code format.</span>';
                 return;
             }
 
-            verifyBtn.disabled = true;
-            statusDiv.innerHTML = '<span class="status-info">Verifying...</span>';
-
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/verify-invite`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ inviteCode: inviteCode })
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.success) {
-                    const inviterProfile = result.inviter;
+            const inviterWallet = await getWalletByInviteCode(inviteCode);
+            if (inviterWallet) {
+                const inviterProfile = await getUserProfileFromDB(inviterWallet);
+                if (inviterProfile) {
                     verifiedInviterId = inviterProfile.userId;
                     statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by: ${sanitizeInput(inviterProfile.name)} (ID: ZTR-${verifiedInviterId})</span>`;
                     proceedBtn.disabled = false;
-                } else {
-                    throw new Error(result.error || "Invitation code not found.");
                 }
-            } catch (error) {
-                statusDiv.innerHTML = `<span class="status-error">❌ ${sanitizeInput(error.message)}</span>`;
+            } else {
+                statusDiv.innerHTML = '<span class="status-error">❌ Invitation code not found.</span>';
                 verifiedInviterId = null;
                 proceedBtn.disabled = true;
-            } finally {
-                verifyBtn.disabled = false;
             }
         });
 
@@ -3089,6 +3135,7 @@
             showToast('Invitation code copied!', 'success');
         });
         
+        // --- Core Render Routine For Airdrop Distribution Visual Update ---
         function updateAirdropProgress(totalDistributed = 0) {
             const phases =[
                 { title: 'Phase 1: Genesis', target: 10000, start: 0 },
@@ -3250,8 +3297,7 @@
             const taskListContainer = document.getElementById('invitationTasksList');
             taskListContainer.innerHTML = '<div class="spinner"></div>';
             
-            const snapshot = await db.ref(`users/${userAddress.toLowerCase()}/claimedTasks`).once('value');
-            const claimedTasks = snapshot.val() || {};
+            const claimedTasks = currentUserData.claimedTasks || {};
 
             const directTeamCount = currentUserData.teamSize || 0;
             const tasks =[
@@ -3262,7 +3308,7 @@
 
             taskListContainer.innerHTML = tasks.map(task => {
                 const isCompleted = directTeamCount >= task.required;
-                const isClaimed = claimedTasks[`task_${task.required}`] === true;
+                const isClaimed = !!claimedTasks[`task_${task.required}`];
                 let buttonHTML;
                 if (isClaimed) buttonHTML = `<button class="btn btn-success" disabled><i class="fa-solid fa-check"></i> Claimed</button>`;
                 else if (isCompleted) buttonHTML = `<button class="btn btn-success" onclick="claimTaskReward(event, ${task.required}, ${task.points})">Claim</button>`;
