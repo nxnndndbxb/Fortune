@@ -1624,14 +1624,14 @@
             </div>
         </div>
 
-        <!-- CHANGE START: Airdrop History List -->
+        <!-- Airdrop History List -->
         <div class="main-card">
             <h3>Points History</h3>
             <div class="history-list" id="airdropHistoryList" style="max-height: 400px;">
                 <p style="text-align:center; color: var(--text-muted); padding: 20px;">No points history yet.</p>
             </div>
         </div>
-        <!-- CHANGE END: Airdrop History List -->
+        <!-- END: Airdrop History List -->
 
     </div>
 </div>
@@ -2289,11 +2289,9 @@
                     starType: starType || null, levelId: levelId !== undefined ? levelId : null, sourceUserId: sourceUserId || null
                 });
                 
-                // CHANGE START: Ensure starLevelId is correctly passed for star filling
                 if (starType && starLevelId !== undefined && sourceUserId) {
                     await addStarToLevel(wallet, starLevelId, starType, sourceUserId);
                 }
-                // CHANGE END
                 return true;
             } catch (e) {
                 console.error(`Failed to add commission for user ${userId}:`, e);
@@ -2301,7 +2299,6 @@
             }
         }
 
-        // CHANGE START: New function to log airdrop history
         async function logAirdropPoints(wallet, points, reason, details = {}) {
             if (!wallet || !isValidWalletAddress(wallet) || points <= 0) return;
             const walletLower = wallet.toLowerCase();
@@ -2316,7 +2313,6 @@
                 console.error(`Failed to log airdrop points for ${walletLower}:`, e);
             }
         }
-        // CHANGE END
         
         async function distributeAirdropPoints(userWallet, levelId, source = 'self_upgrade') {
             const levelConfig = APP_LEVELS.find(l => l.id === levelId) || {};
@@ -2331,9 +2327,7 @@
                 updates[`users/${walletLower}/airdropPoints`] = firebase.database.ServerValue.increment(pointsToDistribute);
                 updates[`platformStats/totalAirdropDistributed`] = firebase.database.ServerValue.increment(pointsToDistribute);
                 await db.ref().update(updates);
-                // CHANGE START: Logging points
                 await logAirdropPoints(wallet, pointsToDistribute, reason, details);
-                // CHANGE END
             };
             
             const userData = await fetchUserData(userWallet);
@@ -2360,9 +2354,7 @@
             const uplineCommissionType = 'Upline Commission';
             const teamCommissionType = 'Team Commission';
 
-            // CHANGE START: Ensure starLevelId is 0 for registration
             await addCommission(inviterId, commissionableAmount * 0.55, directCommissionType, 'direct', 0, newUserId, 0);
-            // CHANGE END
 
             const inviterWallet = await getWalletByUserId(inviterId);
             if (inviterWallet) {
@@ -2403,22 +2395,18 @@
                  const inviterData = await fetchUserData(inviterWallet);
                  const inviterLevel = inviterData.level !== undefined ? inviterData.level : 0;
 
-                 // CHANGE START: Conditional Earning Logic
                  if (inviterLevel >= levelId) {
                     await addCommission(inviterId, levelPrice * 0.55, `Level ${levelId + 1} Direct Commission`, 'direct', levelId, sourceUserId, levelId);
                  }
-                 // CHANGE END
 
                  if (inviterData && inviterData.inviterId) {
                     const uplineWallet = await getWalletByUserId(inviterData.inviterId);
                      if (uplineWallet) {
                         const uplineData = await fetchUserData(uplineWallet);
                         const uplineLevel = uplineData.level !== undefined ? uplineData.level : 0;
-                        // CHANGE START: Conditional Earning Logic for Upline
                         if (uplineLevel >= levelId) {
                             await addCommission(inviterData.inviterId, levelPrice * 0.07, `Level ${levelId + 1} Upline Commission`, 'upline', levelId, sourceUserId, levelId);
                         }
-                        // CHANGE END
                     }
                  }
             }
@@ -2768,9 +2756,7 @@
             let cardsHTML = '';
             let stepperHTML = '';
             
-            // CHANGE START: Removed filter to show all levels including starter level 0
             let allLevels = [...APP_LEVELS].sort((a, b) => a.id - b.id);
-            // CHANGE END
 
             for (const level of allLevels) {
                 const isUnlocked = currentLevelId >= level.id;
@@ -2778,9 +2764,7 @@
                 const isCurrentLevel = currentLevelId === level.id;
                 const teamSizeOk = (currentUserData.teamSize || 0) >= (level.requiredTeamSize || 0);
 
-                // CHANGE START: Display level number as id + 1
                 stepperHTML += `<div class="level-stepper-item" data-level-id="${level.id}"><span>${level.id + 1}</span><div class="dot"></div></div>`;
-                // CHANGE END
                 
                 const starsHTML = await renderStarsForLevel(level.id);
                 const totalCost = (level.price || 0) + (level.salaryFund || 0) + (level.fee || 0);
@@ -2799,9 +2783,7 @@
                      buttonHTML = `<button class="btn" disabled><i class="fa-solid fa-lock"></i> LOCKED</button>`;
                 }
 
-                // CHANGE START: Level card title shows Level number (id+1)
                 cardsHTML += `<div class="level-card ${isUnlocked ? 'unlocked' : ''}" id="level-card-${level.id}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} (Level ${level.id + 1})</h2>${isCurrentLevel ? '<span class="rank-badge">CURRENTLY ACTIVE</span>' : ''}</div><div class="level-stars-container">${starsHTML}</div><div><div class="price-breakdown-container"><p>Plan Price: <span>${(level.price || 0).toFixed(2)} ZTR</span></p><p>Salary Fund: <span>${(level.salaryFund || 0).toFixed(2)} ZTR</span></p><p>System Fee: <span>${(level.fee || 0).toFixed(2)} ZTR</span></p></div><h3 class="level-price" style="margin-top: 15px;">Total: ${totalCost.toFixed(2)} ZTR</h3><p class="level-info">≈ ${usdtPrice} USDT</p>${(level.salary && level.salary > 0) ? `<p class="level-info" style="color: var(--gold); margin-top: 10px; font-weight: bold;">Unlocks ${level.salary} ZTR Weekly Salary</p>`: ''}${(level.requiredTeamSize && level.requiredTeamSize > 0) ? `<p class="level-info" style="color: var(--primary); margin-top: 5px;">Requires ${level.requiredTeamSize} team members</p>`: ''}</div>${buttonHTML}</div>`;
-                // CHANGE END
             }
             viewer.innerHTML = cardsHTML;
             stepper.innerHTML = stepperHTML;
@@ -3349,7 +3331,6 @@
         });
         
         function updateAirdropProgress(totalDistributed = 0) {
-            // CHANGE START: New airdrop phase values
             const phases =[
                 { title: 'Phase 1: Genesis', target: 200000, start: 0 },
                 { title: 'Phase 2: Discovery', target: 500000, start: 200000 },
@@ -3358,7 +3339,6 @@
                 { title: 'Phase 5: Zenith', target: 2000000, start: 1500000 },
                 { title: 'Phase 6: Infinity', target: 3000000, start: 2000000 }
             ];
-            // CHANGE END
 
             let activePhase = phases.find(p => totalDistributed < p.target) || phases[phases.length - 1]; 
             const range = activePhase.target - activePhase.start;
@@ -3466,7 +3446,6 @@
             }
         }
 
-        // CHANGE START: Updated function to open tokens page and render history
         window.openTokensPage = async () => {
             document.body.style.overflow = 'hidden';
             tokensPage.classList.add('active');
@@ -3504,7 +3483,6 @@
                 listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No points history yet.</p>';
             }
         }
-        // CHANGE END
 
         window.openTasksPage = async () => {
             document.body.style.overflow = 'hidden';
@@ -3546,9 +3524,7 @@
                 updates['platformStats/totalAirdropDistributed'] = firebase.database.ServerValue.increment(points);
                 await db.ref().update(updates);
 
-                // CHANGE START: Log airdrop points from tasks
                 await logAirdropPoints(walletLower, points, 'Invitation Task Reward', { requiredInvites: required });
-                // CHANGE END
 
                 showToast(`Claimed ${points.toLocaleString()} airdrop points!`, "success");
                 await fetchUserData(userAddress);
