@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +10,7 @@
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Firebase SDKs (Required ONLY for invite code verification until a backend endpoint is made) -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
@@ -2069,11 +2068,11 @@
         // ===================================================================
         // ================== IMPORTANT CONFIGURATION ======================
         // ===================================================================
-        const BACKEND_URL = 'https://ztr-backend.vercel.app';
+        // NO BACKEND URL - ALL LOGIC IS NOW IN THIS SCRIPT
         // ===================================================================
 
 
-        // ========== FIREBASE CONFIGURATION (FOR INVITE CODE VERIFICATION ONLY) ==========
+        // ========== FIREBASE CONFIGURATION ==========
         const firebaseConfig = {
             apiKey: "AIzaSyBbrToB9q01xSfRR21e5XaeGJGhVHmBN1w",
             authDomain: "fortune-2cb70.firebaseapp.com",
@@ -2085,6 +2084,7 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const serverValue = firebase.database.ServerValue;
 
         function sanitizeInput(input) {
             if (!input) return '';
@@ -2113,7 +2113,7 @@
 
         let APP_LEVELS =[];
 
-        const USDT_ABI =["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)"];
+        const USDT_ABI =["function balanceOf(address owner) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)", "function decimals() view returns (uint8)", "event Transfer(address indexed from, address indexed to, uint256 value)"];
 
         const STORAGE_KEYS = {
             CONNECTED_WALLET: 'ztr_connected_wallet',
@@ -2156,19 +2156,19 @@
 
         async function fetchAppConfig() {
             try {
-                const response = await fetch(`${BACKEND_URL}/api/config`);
-                if (!response.ok) throw new Error('Failed to fetch config from backend');
-                const result = await response.json();
+                const configSnap = await db.ref('config').once('value');
+                const config = configSnap.val();
 
-                if (result.success && result.config) {
-                    baseZTRPrice = result.config.ztrPrice || 1.0;
+                if (config) {
+                    baseZTRPrice = config.baseZTRPrice || 1.0;
                     liveZTRPrice = baseZTRPrice;
-                    APP_LEVELS = result.config.levels;
-                    registrationFee = result.config.registrationFee;
-                    ADMIN_WALLET = result.config.adminWallet;
-                    USDT_CONTRACT = result.config.usdtContract;
+                    APP_LEVELS = config.levels || [];
+                    const starterLevel = APP_LEVELS.find(l => l.id === 0);
+                    registrationFee = (starterLevel.price || 5) + (starterLevel.salaryFund || 0.25) + (starterLevel.fee || 0);
+                    ADMIN_WALLET = (config.adminWallet || "0x97efeaa1da1108acff52840550ec51dc5bbfd812").toLowerCase();
+                    USDT_CONTRACT = (config.usdtContract || "0x55d398326f99059fF775485246999027B3197955").toLowerCase();
                 } else {
-                    throw new Error('Backend config response was not successful');
+                     throw new Error('No config found in Firebase');
                 }
             } catch (error) {
                 console.error("Failed to fetch app config:", error);
@@ -2177,14 +2177,14 @@
                 liveZTRPrice = 1.0;
                 registrationFee = 5.25;
                 APP_LEVELS =[
-                    { id: 0, name: "Starter", price: 5, salaryFund: 0.25, fee: 0, icon: "🌱", salary: 0, airdropPoints: 100 },
-                    { id: 1, name: "Iron", price: 5, salaryFund: 1, fee: 0.18, icon: "🛡️", airdropPoints: 100 },
-                    { id: 2, name: "Bronze", price: 10, salaryFund: 2, fee: 0.36, icon: "🥉", airdropPoints: 200 },
-                    { id: 3, name: "Silver", price: 15, salaryFund: 3, fee: 0.54, icon: "🥈", airdropPoints: 300 },
-                    { id: 4, name: "Gold", price: 20, salaryFund: 4, fee: 0.72, icon: "🥇", airdropPoints: 400 },
-                    { id: 5, name: "Master", price: 25, salaryFund: 5, fee: 0.9, icon: "👑", salary: 10, airdropPoints: 500 },
-                    { id: 6, name: "Grandmaster", price: 50, salaryFund: 10, fee: 1.8, icon: "⚔️", salary: 25, airdropPoints: 1000 },
-                    { id: 7, name: "Legend", price: 100, salaryFund: 20, fee: 3.6, icon: "🌟", salary: 60, airdropPoints: 2000 }
+                    { id: 0, name: "Starter", price: 5, salaryFund: 0.25, fee: 0, icon: "🌱", salary: 0, airdropPoints: 100, requiredTeamSize: 0 },
+                    { id: 1, name: "Iron", price: 5, salaryFund: 1, fee: 0.18, icon: "🛡️", airdropPoints: 100, requiredTeamSize: 0 },
+                    { id: 2, name: "Bronze", price: 10, salaryFund: 2, fee: 0.36, icon: "🥉", airdropPoints: 200, requiredTeamSize: 3 },
+                    { id: 3, name: "Silver", price: 15, salaryFund: 3, fee: 0.54, icon: "🥈", airdropPoints: 300, requiredTeamSize: 5 },
+                    { id: 4, name: "Gold", price: 20, salaryFund: 4, fee: 0.72, icon: "🥇", airdropPoints: 400, requiredTeamSize: 10 },
+                    { id: 5, name: "Master", price: 25, salaryFund: 5, fee: 0.9, icon: "👑", salary: 10, airdropPoints: 500, requiredTeamSize: 15 },
+                    { id: 6, name: "Grandmaster", price: 50, salaryFund: 10, fee: 1.8, icon: "⚔️", salary: 25, airdropPoints: 1000, requiredTeamSize: 25 },
+                    { id: 7, name: "Legend", price: 100, salaryFund: 20, fee: 3.6, icon: "🌟", salary: 60, airdropPoints: 2000, requiredTeamSize: 50 }
                 ];
             }
         }
@@ -2193,19 +2193,28 @@
             if (!wallet || !isValidWalletAddress(wallet)) return null;
             const walletLower = wallet.toLowerCase();
             try {
-                const response = await fetch(`${BACKEND_URL}/api/user/${walletLower}`);
-                if (response.status === 404) {
+                const userSnap = await db.ref(`users/${walletLower}`).once('value');
+                if (!userSnap.exists()) {
                     return { notFound: true };
                 }
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch user data`);
-                }
-                const result = await response.json();
-                if (result.success && result.user) {
-                    currentUserData = result.user; 
-                    return result.user;
-                }
-                return null;
+                const userData = userSnap.val();
+                
+                // Synthesize data for frontend consistency
+                const fullUserData = {
+                    profile: userData.profile,
+                    level: userData.level || 0,
+                    levelInfo: APP_LEVELS.find(l => l.id === (userData.level || 0)) || APP_LEVELS[0],
+                    ztrBalance: userData.ztrBalance || 0,
+                    airdropPoints: userData.airdropPoints || 0,
+                    teamSize: userData.teamSize || 0,
+                    inviteCode: userData.inviteCode || '',
+                    inviterId: userData.inviterId || null,
+                    levelStars: userData.levelStars || {},
+                    claimedTasks: userData.claimedTasks || {},
+                    paid: userData.paid || false
+                };
+                currentUserData = fullUserData;
+                return fullUserData;
             } catch (error) {
                 console.error(error);
                 return null;
@@ -2384,13 +2393,24 @@
             localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
         }
         
-        async function getChildrenViaApi(userId) {
+        async function getChildrenFromDB(userId) {
             try {
-                const response = await fetch(`${BACKEND_URL}/api/team/${userId}`);
-                if (!response.ok) return[];
-                const result = await response.json();
-                return (result.success && result.team) ? result.team :[];
+                const teamSnap = await db.ref('users').orderByChild('inviterId').equalTo(userId).once('value');
+                if(!teamSnap.exists()) return [];
+                const team = [];
+                teamSnap.forEach(child => {
+                    const userData = child.val();
+                    if (userData.profile) {
+                         team.push({
+                            wallet: child.key,
+                            profile: userData.profile,
+                            level: userData.level || 0
+                        });
+                    }
+                });
+                return team;
             } catch (error) {
+                console.error("Error fetching team:", error);
                 return[];
             }
         }
@@ -2416,9 +2436,9 @@
                 `;
             };
             
-            const buildTree = async (userId, maxDepth = 2) => {
+            const buildTree = async (userId) => {
                 let treeHTML = '';
-                const children = await getChildrenViaApi(userId);
+                const children = await getChildrenFromDB(userId);
                 if (children.length > 0) {
                     treeHTML += '<ul>';
                     for (const child of children) {
@@ -2534,7 +2554,6 @@
             let cardsHTML = '';
             let stepperHTML = '';
 
-            // Map and parse identically level arrays guaranteeing zero ID included organically securely
             let allLevels = [...APP_LEVELS].sort((a, b) => a.id - b.id);
             if (!allLevels.some(l => l.id === 0)) {
                 allLevels.unshift({ id: 0, name: "Starter", price: 5, salaryFund: 0.25, fee: 0, icon: "🌱", salary: 0, airdropPoints: 100 });
@@ -2635,6 +2654,235 @@
             document.body.style.overflow = 'auto';
         }
 
+        // ===============================================
+        // FRONTEND-ONLY BUSINESS LOGIC
+        // ===============================================
+
+        async function verifyTransactionClientSide(txHash, fromWallet, toWallet, expectedAmount) {
+            try {
+                if (!txHash || !ethers.isHexString(txHash, 32)) return false;
+
+                // 1. Check if transaction has already been used
+                const usedTxSnap = await db.ref(`usedTransactions/${txHash}`).once('value');
+                if (usedTxSnap.exists()) {
+                    showToast("Transaction has already been processed.", "error");
+                    return false;
+                }
+
+                // 2. Get transaction receipt from the blockchain
+                const receipt = await provider.getTransactionReceipt(txHash);
+                if (!receipt || receipt.status !== 1) {
+                     showToast("Transaction failed or not found.", "error");
+                     return false;
+                }
+                
+                // 3. Wait for 3 confirmations
+                const tx = await provider.getTransaction(txHash);
+                if (!tx) return false;
+                await tx.wait(3);
+
+
+                // 4. Parse logs to verify the transfer
+                const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
+                const transferEvents = usdtContract.filters.Transfer(fromWallet, toWallet);
+                const logs = await provider.getLogs({
+                    fromBlock: receipt.blockNumber,
+                    toBlock: receipt.blockNumber,
+                    address: USDT_CONTRACT,
+                    topics: transferEvents.topics
+                });
+
+                const expectedAmountWei = ethers.parseUnits(expectedAmount.toString(), usdtDecimals);
+                const tolerance = expectedAmountWei * BigInt(5) / BigInt(1000); // 0.5% tolerance
+                const minAmount = expectedAmountWei - tolerance;
+                const maxAmount = expectedAmountWei + tolerance;
+
+                const matchingLog = logs.find(log => {
+                    if (log.transactionHash !== txHash) return false;
+                    try {
+                        const parsedLog = usdtContract.interface.parseLog(log);
+                        if (parsedLog.name === "Transfer") {
+                            const { from, to, value } = parsedLog.args;
+                            return from.toLowerCase() === fromWallet.toLowerCase() &&
+                                   to.toLowerCase() === toWallet.toLowerCase() &&
+                                   value >= minAmount && value <= maxAmount;
+                        }
+                    } catch (e) { return false; }
+                    return false;
+                });
+
+                if (matchingLog) {
+                    await db.ref(`usedTransactions/${txHash}`).set(true);
+                    return true;
+                }
+                
+                showToast("Could not verify the USDT transfer amount.", "error");
+                return false;
+
+            } catch (e) {
+                console.error("Transaction verification failed:", e);
+                showToast("An error occurred during transaction verification.", "error");
+                return false;
+            }
+        }
+        
+        async function addStarToLevel(wallet, levelId, type, sourceUserId) {
+            if (!wallet || sourceUserId === undefined || levelId === undefined) return;
+            try {
+                const ref = db.ref(`users/${wallet.toLowerCase()}/levelStars/level_${levelId}`);
+                await ref.push({ type, sourceUserId, timestamp: serverValue.TIMESTAMP });
+                const snap = await ref.once('value');
+                if(snap.exists() && snap.numChildren() > 10) {
+                    const stars = [];
+                    snap.forEach(c => stars.push({ key: c.key, ts: c.val().timestamp || 0 }));
+                    stars.sort((a,b) => a.ts - b.ts);
+                    const toDelete = stars.slice(0, stars.length - 10);
+                    for(const star of toDelete) {
+                        await ref.child(star.key).remove();
+                    }
+                }
+            } catch (e) { console.error("addStarToLevel failed:", e); }
+        }
+
+        async function addCommission(userId, amount, type, starType, starLevelId, sourceUserId) {
+             if (!userId || !amount || amount <= 0) return;
+             try {
+                const walletSnap = await db.ref(`userIdMap/${userId}`).once('value');
+                if (!walletSnap.exists()) return;
+                const wallet = walletSnap.val().toLowerCase();
+
+                const userRef = db.ref(`users/${wallet}`);
+                await userRef.child('ztrBalance').transaction(bal => (bal || 0) + amount);
+                await userRef.child('incomeHistory').push({ amount, type, date: new Date().toISOString(), timestamp: serverValue.TIMESTAMP });
+                await db.ref('platformStats/totalZTRDistributed').transaction(total => (total || 0) + amount);
+
+                if (starType && starLevelId !== undefined && sourceUserId !== undefined) {
+                    await addStarToLevel(wallet, starLevelId, starType, sourceUserId);
+                }
+
+             } catch(e) { console.error("addCommission failed:", e); }
+        }
+
+        async function distributeAirdropPoints(wallet, levelId) {
+            const levelConfig = APP_LEVELS.find(l => l.id === levelId);
+            if (!levelConfig || !levelConfig.airdropPoints) return;
+            
+            const points = levelConfig.airdropPoints;
+            const ztrBonus = points * 0.001; // 10k points = 10 ZTR
+
+            const awardPoints = async (w) => {
+                if (!w) return;
+                const userRef = db.ref(`users/${w.toLowerCase()}`);
+                await userRef.child('airdropPoints').transaction(p => (p || 0) + points);
+                if(ztrBonus > 0) {
+                     await userRef.child('ztrBalance').transaction(b => (b || 0) + ztrBonus);
+                     await userRef.child('incomeHistory').push({ amount: ztrBonus, type: `Level ${levelId} Airdrop Bonus`, date: new Date().toISOString(), timestamp: serverValue.TIMESTAMP });
+                }
+            };
+
+            await awardPoints(wallet);
+            await db.ref('platformStats/totalAirdropDistributed').transaction(p => (p || 0) + points);
+            if(ztrBonus > 0) {
+                await db.ref('platformStats/totalZTRDistributed').transaction(t => (t || 0) + ztrBonus);
+            }
+
+            // Award to inviter as well
+            const userSnap = await db.ref(`users/${wallet.toLowerCase()}`).once('value');
+            const userData = userSnap.val();
+            if(userData && userData.inviterId) {
+                const inviterWalletSnap = await db.ref(`userIdMap/${userData.inviterId}`).once('value');
+                if(inviterWalletSnap.exists()) {
+                    await awardPoints(inviterWalletSnap.val());
+                }
+            }
+        }
+
+        async function distributeRegistrationCommissions(inviterId, newUserId) {
+            const starterLevel = APP_LEVELS.find(l => l.id === 0);
+            if (!starterLevel) return;
+            
+            const commissionableAmount = starterLevel.price || 5;
+
+            // 1. Direct inviter (55%)
+            await addCommission(inviterId, commissionableAmount * 0.55, 'Starter Direct Commission', 'direct', 0, newUserId);
+
+            const inviterWalletSnap = await db.ref(`userIdMap/${inviterId}`).once('value');
+            if(!inviterWalletSnap.exists()) return;
+            const inviterWallet = inviterWalletSnap.val();
+
+            const inviterDataSnap = await db.ref(`users/${inviterWallet.toLowerCase()}`).once('value');
+            const inviterData = inviterDataSnap.val();
+
+            // 2. Upline (7%)
+            if(inviterData && inviterData.inviterId) {
+                await addCommission(inviterData.inviterId, commissionableAmount * 0.07, 'Starter Upline Commission', 'upline', 0, newUserId);
+            }
+
+            // 3. Team split (20%)
+            const teamSnap = await db.ref('users').orderByChild('inviterId').equalTo(inviterId).once('value');
+            if(teamSnap.exists()){
+                const teamMembers = [];
+                teamSnap.forEach(child => {
+                    const memberData = child.val();
+                    if(memberData.profile.userId !== newUserId) {
+                        teamMembers.push(memberData.profile.userId);
+                    }
+                });
+                
+                if (teamMembers.length > 0) {
+                    const share = (commissionableAmount * 0.20) / teamMembers.length;
+                    for (const memberId of teamMembers) {
+                        await addCommission(memberId, share, 'Starter Team Commission', 'downline', 0, newUserId);
+                    }
+                }
+            }
+        }
+        
+        async function distributeUpgradeCommissions(upgraderWallet, levelId) {
+            const upgraderSnap = await db.ref(`users/${upgraderWallet.toLowerCase()}`).once('value');
+            const upgraderData = upgraderSnap.val();
+            if(!upgraderData || !upgraderData.inviterId) return;
+
+            const upgraderUserId = upgraderData.profile.userId;
+            const inviterId = upgraderData.inviterId;
+
+            const levelConfig = APP_LEVELS.find(l => l.id === levelId);
+            if (!levelConfig || !levelConfig.price) return;
+            const commissionableAmount = levelConfig.price;
+
+            // 1. Direct inviter (55%)
+            await addCommission(inviterId, commissionableAmount * 0.55, `Level ${levelId} Direct Commission`, 'direct', levelId, upgraderUserId);
+            
+            const inviterWalletSnap = await db.ref(`userIdMap/${inviterId}`).once('value');
+            if(!inviterWalletSnap.exists()) return;
+            const inviterWallet = inviterWalletSnap.val();
+            const inviterDataSnap = await db.ref(`users/${inviterWallet.toLowerCase()}`).once('value');
+            const inviterData = inviterDataSnap.val();
+
+            // 2. Upline (7%)
+            if(inviterData && inviterData.inviterId) {
+                 await addCommission(inviterData.inviterId, commissionableAmount * 0.07, `Level ${levelId} Upline Commission`, 'upline', levelId, upgraderUserId);
+            }
+
+            // 3. Team split (20%)
+            const teamSnap = await db.ref('users').orderByChild('inviterId').equalTo(inviterId).once('value');
+            if(teamSnap.exists()){
+                const teamMembers = [];
+                teamSnap.forEach(child => {
+                     if(child.key !== upgraderWallet.toLowerCase()) {
+                        teamMembers.push(child.val().profile.userId);
+                    }
+                });
+                if(teamMembers.length > 0){
+                    const share = (commissionableAmount * 0.20) / teamMembers.length;
+                    for(const memberId of teamMembers){
+                        await addCommission(memberId, share, `Level ${levelId} Team Commission`, 'downline', levelId, upgraderUserId);
+                    }
+                }
+            }
+        }
+
+
         window.initiateLevelUpgrade = async function(levelId) {
             if (isProcessing) return;
             isProcessing = true;
@@ -2648,6 +2896,10 @@
 
                 const level = APP_LEVELS.find(l => l.id === levelId);
                 if (!level) throw new Error("Level configuration not found.");
+                
+                if (level.requiredTeamSize && (currentUserData.teamSize || 0) < level.requiredTeamSize) {
+                    throw new Error(`Need ${level.requiredTeamSize} direct members to unlock this level. You have ${currentUserData.teamSize || 0}.`);
+                }
 
                 const totalCostZTR = (level.price || 0) + (level.salaryFund || 0) + (level.fee || 0);
                 const usdtCost = (totalCostZTR * liveZTRPrice).toFixed(2);
@@ -2664,24 +2916,26 @@
                 showToast("Transaction sent, waiting for confirmation...", "info");
                 const receipt = await tx.wait();
 
-                showToast("Transaction confirmed! Verifying with server...", "success");
+                showToast("Transaction confirmed! Verifying payment...", "success");
 
-                const response = await fetch(`${BACKEND_URL}/api/upgrade`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        wallet: userAddress,
-                        txHash: receipt.hash,
-                        levelId: levelId,
-                        upgradeCost: usdtCost,
-                        levelPrice: level.price 
-                    })
-                });
+                const isVerified = await verifyTransactionClientSide(receipt.hash, userAddress, ADMIN_WALLET, usdtCost);
 
-                const result = await response.json();
-                if (!response.ok || !result.success) {
-                    throw new Error(result.error || "Upgrade verification failed on server.");
+                if (!isVerified) {
+                    throw new Error("Payment verification failed. Please contact support if the funds were sent.");
                 }
+
+                showToast("Payment verified! Upgrading level...", "success");
+                
+                // Perform upgrade logic
+                await db.ref(`users/${userAddress.toLowerCase()}/level`).set(levelId);
+                if(level.salaryFund > 0) {
+                    await db.ref('platformStats/totalWeeklySalaryFund').transaction(fund => (fund || 0) + level.salaryFund);
+                }
+
+                await distributeAirdropPoints(userAddress, levelId);
+                await distributeUpgradeCommissions(userAddress, levelId);
+                
+                await db.ref('upgradeLogs').push({ wallet: userAddress.toLowerCase(), userId: currentUserData.profile?.userId, fromLevel: currentUserData.level, toLevel: levelId, txHash: receipt.hash, timestamp: serverValue.TIMESTAMP });
 
                 showToast(`Level ${level.name} Activated!`, "success");
                 
@@ -2701,13 +2955,11 @@
                 showToast(errorMessage, "error");
             } finally {
                 isProcessing = false;
-                setTimeout(() => {
-                    const freshBtn = document.getElementById(`upgradeBtn-${levelId}`);
-                    if (freshBtn) {
-                        freshBtn.disabled = false;
-                        freshBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> ACTIVATE';
-                    }
-                }, 1000);
+                const freshBtn = document.getElementById(`upgradeBtn-${levelId}`);
+                if (freshBtn) {
+                     freshBtn.disabled = false;
+                     freshBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> ACTIVATE';
+                }
             }
         };
 
@@ -2844,8 +3096,21 @@
             }
         });
 
+        async function generateInviteCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            for (let i = 0; i < 20; i++) { // Try 20 times
+                let code = '';
+                for (let j = 0; j < 8; j++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                const snap = await db.ref(`inviteCodeMap/${code}`).once('value');
+                if (!snap.exists()) return code;
+            }
+            throw new Error("Failed to generate a unique invite code.");
+        }
+
         document.getElementById('completeProfileBtn').addEventListener('click', async () => {
-            const username = document.getElementById('setupUsername').value.trim();
+            const username = sanitizeInput(document.getElementById('setupUsername').value.trim());
             if (!username) return showToast("Please enter a username", "error");
             if (username.length < 3) return showToast("Username must be at least 3 characters", "error");
 
@@ -2854,30 +3119,56 @@
             if (!txHash || !registrationCost) return showToast("Transaction details not found. Please start over.", "error");
             
             try {
-                const response = await fetch(`${BACKEND_URL}/api/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        wallet: userAddress,
-                        txHash: txHash,
-                        inviterId: verifiedInviterId,
-                        username: sanitizeInput(username),
-                        profilePic: setupProfilePicData,
-                        registrationCost: registrationCost
-                    })
-                });
-                const result = await response.json();
-                if (response.ok && result.success) {
-                    sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
-                    sessionStorage.removeItem(STORAGE_KEYS.REGISTRATION_TX_HASH);
-                    sessionStorage.removeItem(STORAGE_KEYS.REGISTRATION_USDT_COST);
-                    closeModal('profileSetupModal');
-                    showToast("Profile setup complete! Welcome!", "success");
-                    await fetchUserData(userAddress);
-                    await showDashboard();
-                } else {
-                    throw new Error(result.error || "Registration failed");
+                // Client-side Registration Logic
+                const walletLower = userAddress.toLowerCase();
+
+                // 1. Generate new User ID atomically
+                const nextUserIdRef = db.ref('nextUserId');
+                const transactionResult = await nextUserIdRef.transaction(currentId => (currentId || 1000) + 1);
+                if (!transactionResult.committed) throw new Error("Could not generate a unique user ID.");
+                const newUserId = transactionResult.snapshot.val();
+                
+                // 2. Generate unique invite code
+                const inviteCode = await generateInviteCode();
+
+                // 3. Prepare user data object
+                const starterLevel = APP_LEVELS.find(l => l.id === 0);
+                const userData = {
+                    profile: { name: username, userId: newUserId, joinDate: new Date().toLocaleDateString(), profilePicUrl: setupProfilePicData || null },
+                    inviteCode, inviterId: verifiedInviterId, paid: true, ztrBalance: 0, airdropPoints: 0, level: 0, teamSize: 0,
+                    registeredAt: serverValue.TIMESTAMP, registrationTxHash: txHash
+                };
+
+                // 4. Create user and map entries
+                await db.ref(`users/${walletLower}`).set(userData);
+                await db.ref(`userIdMap/${newUserId}`).set(walletLower);
+                await db.ref(`inviteCodeMap/${inviteCode}`).set(walletLower);
+
+                // 5. Update inviter's team size
+                const inviterWalletSnap = await db.ref(`userIdMap/${verifiedInviterId}`).once('value');
+                if (inviterWalletSnap.exists()) {
+                    await db.ref(`users/${inviterWalletSnap.val().toLowerCase()}/teamSize`).transaction(size => (size || 0) + 1);
                 }
+                
+                // 6. Update platform stats
+                await db.ref('platformStats/totalParticipants').transaction(count => (count || 0) + 1);
+                if(starterLevel && starterLevel.salaryFund > 0) {
+                     await db.ref('platformStats/totalWeeklySalaryFund').transaction(fund => (fund || 0) + starterLevel.salaryFund);
+                }
+                
+                // 7. Distribute commissions and points
+                await distributeRegistrationCommissions(verifiedInviterId, newUserId);
+                await distributeAirdropPoints(userAddress, 0); // Level 0 airdrop
+
+                // 8. Clean up and proceed
+                sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
+                sessionStorage.removeItem(STORAGE_KEYS.REGISTRATION_TX_HASH);
+                sessionStorage.removeItem(STORAGE_KEYS.REGISTRATION_USDT_COST);
+                closeModal('profileSetupModal');
+                showToast("Profile setup complete! Welcome!", "success");
+                await fetchUserData(userAddress);
+                await showDashboard();
+
             } catch (error) {
                 console.error('Registration failed:', error);
                 showToast(error.message, 'error');
@@ -2899,21 +3190,48 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Submitting...';
             try {
-                const response = await fetch(`${BACKEND_URL}/api/withdraw`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ wallet: userAddress })
-                });
-                const result = await response.json();
-                if (response.ok && result.success) {
-                    showToast("Withdrawal request submitted!", "success");
-                    await fetchUserData(userAddress);
-                    await updateDashboard();
-                    await updateAssetsPage();
-                    closeModal('withdrawalModal');
-                } else {
-                    throw new Error(result.error || "Withdrawal request failed.");
+                // Client-side withdrawal request logic
+                const walletLower = userAddress.toLowerCase();
+                const balance = currentUserData.ztrBalance || 0;
+                
+                if (balance < 10) throw new Error("Minimum withdrawal amount is 10 ZTR.");
+                
+                // Check for existing pending withdrawal
+                const pendingSnap = await db.ref('withdrawals').orderByChild('userWallet').equalTo(walletLower).once('value');
+                let hasPending = false;
+                if(pendingSnap.exists()){
+                    pendingSnap.forEach(snap => {
+                        if(snap.val().status === 'pending') hasPending = true;
+                    });
                 }
+                if (hasPending) throw new Error("You already have a pending withdrawal request.");
+
+                // Create withdrawal request and deduct balance
+                const withdrawalRef = db.ref('withdrawals').push();
+                await withdrawalRef.set({
+                    userWallet: walletLower,
+                    userId: currentUserData.profile.userId,
+                    amount: balance,
+                    status: 'pending',
+                    requestedAt: serverValue.TIMESTAMP,
+                    date: new Date().toISOString()
+                });
+                
+                await db.ref(`users/${walletLower}/ztrBalance`).set(0);
+                await db.ref(`users/${walletLower}/incomeHistory`).push({
+                    amount: -balance,
+                    type: 'Withdrawal Request',
+                    date: new Date().toISOString(),
+                    timestamp: serverValue.TIMESTAMP,
+                    withdrawalId: withdrawalRef.key
+                });
+
+                showToast("Withdrawal request submitted!", "success");
+                await fetchUserData(userAddress);
+                await updateDashboard();
+                await updateAssetsPage();
+                closeModal('withdrawalModal');
+
             } catch (e) {
                 console.error("Withdrawal error:", e);
                 showToast(e.message, "error");
@@ -3007,7 +3325,11 @@
                 const tx = await usdtContract.transfer(ADMIN_WALLET, amount);
                 showToast("Transaction sent, please wait...", "info");
                 const receipt = await tx.wait();
-                showToast("Transaction confirmed!", "success");
+                
+                const isVerified = await verifyTransactionClientSide(receipt.hash, userAddress, ADMIN_WALLET, usdtCost);
+                if(!isVerified) throw new Error("Payment could not be verified on the blockchain.");
+
+                showToast("Transaction confirmed and verified!", "success");
 
                 sessionStorage.setItem(STORAGE_KEYS.REGISTRATION_TX_HASH, receipt.hash);
                 sessionStorage.setItem(STORAGE_KEYS.REGISTRATION_USDT_COST, usdtCost);
@@ -3091,7 +3413,6 @@
             showToast('Invitation code copied!', 'success');
         });
         
-        // --- Core Render Routine For Airdrop Distribution Visual Update ---
         function updateAirdropProgress(totalDistributed = 0) {
             const phases =[
                 { title: 'Phase 1: Genesis', target: 10000, start: 0 },
@@ -3134,20 +3455,36 @@
 
         async function updateOmniViewPage() {
             try {
-                const response = await fetch(`${BACKEND_URL}/api/platform-data`);
-                if (!response.ok) throw new Error("Could not fetch platform data.");
-                const data = await response.json();
+                const statsSnap = await db.ref('platformStats').once('value');
+                const stats = statsSnap.val() || {};
 
-                if (data.success) {
-                    const { stats, leaderboard } = data;
-                    document.getElementById('totalParticipants').innerText = stats.totalParticipants || 0;
-                    document.getElementById('salaryActiveMembers').innerText = stats.salaryActiveMembers || 0;
-                    document.getElementById('totalZTRDistributed').innerText = (stats.totalZTRDistributed || 0).toLocaleString();
-                    document.getElementById('totalWeeklySalaryFund').innerText = `${(stats.totalWeeklySalaryFund || 0).toLocaleString()} ZTR`;
-                    
-                    updateAirdropProgress(stats.totalAirdropDistributed || 0);
-                    renderLeaderboard(leaderboard);
+                const salaryActiveSnap = await db.ref('users').orderByChild('level').startAt(5).once('value');
+                stats.salaryActiveMembers = salaryActiveSnap.numChildren();
+                
+                document.getElementById('totalParticipants').innerText = stats.totalParticipants || 0;
+                document.getElementById('salaryActiveMembers').innerText = stats.salaryActiveMembers || 0;
+                document.getElementById('totalZTRDistributed').innerText = (stats.totalZTRDistributed || 0).toLocaleString();
+                document.getElementById('totalWeeklySalaryFund').innerText = `${(stats.totalWeeklySalaryFund || 0).toLocaleString()} ZTR`;
+                
+                updateAirdropProgress(stats.totalAirdropDistributed || 0);
+
+                const leaderboardSnap = await db.ref('users').orderByChild('ztrBalance').limitToLast(100).once('value');
+                const leaderboard = [];
+                if (leaderboardSnap.exists()) {
+                    leaderboardSnap.forEach(snap => {
+                        const user = snap.val();
+                        if(user.profile && (user.ztrBalance || 0) > 0) {
+                            leaderboard.push({
+                                name: user.profile.name,
+                                userId: user.profile.userId,
+                                profilePicUrl: user.profile.profilePicUrl || null,
+                                earnings: user.ztrBalance || 0
+                            });
+                        }
+                    });
                 }
+                leaderboard.sort((a,b) => b.earnings - a.earnings);
+                renderLeaderboard(leaderboard);
             } catch (error) {
                 console.error("Error updating OmniView:", error);
             }
@@ -3253,8 +3590,7 @@
             const taskListContainer = document.getElementById('invitationTasksList');
             taskListContainer.innerHTML = '<div class="spinner"></div>';
             
-            const snapshot = await db.ref(`users/${userAddress.toLowerCase()}/claimedTasks`).once('value');
-            const claimedTasks = snapshot.val() || {};
+            const claimedTasks = currentUserData.claimedTasks || {};
 
             const directTeamCount = currentUserData.teamSize || 0;
             const tasks =[
@@ -3289,20 +3625,26 @@
             btn.disabled = true;
             btn.innerHTML = `<i class="fa-solid fa-spinner spin"></i>`;
             try {
-                const response = await fetch(`${BACKEND_URL}/api/claim-task-reward`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ wallet: userAddress, taskRequired: required, taskPoints: points })
-                });
-                const result = await response.json();
-                if (response.ok && result.success) {
-                    showToast(result.message, "success");
-                    await fetchUserData(userAddress);
-                    await renderInvitationTasks(); 
-                    document.getElementById('airdropPointsDisplay').innerText = (currentUserData.airdropPoints || 0).toLocaleString();
-                } else {
-                    throw new Error(result.error || "Failed to claim reward.");
-                }
+                // Client-side task claim logic
+                if ((currentUserData.teamSize || 0) < required) throw new Error("You have not met the task requirements.");
+                const taskKey = `task_${required}`;
+                if (currentUserData.claimedTasks && currentUserData.claimedTasks[taskKey]) throw new Error("Task reward already claimed.");
+
+                const walletLower = userAddress.toLowerCase();
+                const ztrBonus = points * 0.001;
+                
+                await db.ref(`users/${walletLower}/claimedTasks/${taskKey}`).set(true);
+                await db.ref(`users/${walletLower}/airdropPoints`).transaction(p => (p || 0) + points);
+                await db.ref(`users/${walletLower}/ztrBalance`).transaction(b => (b || 0) + ztrBonus);
+
+                await db.ref('platformStats/totalAirdropDistributed').transaction(p => (p || 0) + points);
+                await db.ref('platformStats/totalZTRDistributed').transaction(t => (t || 0) + ztrBonus);
+
+                showToast(`Claimed ${points} points and ${ztrBonus} ZTR!`, "success");
+                await fetchUserData(userAddress);
+                await renderInvitationTasks(); 
+                document.getElementById('airdropPointsDisplay').innerText = (currentUserData.airdropPoints || 0).toLocaleString();
+                
             } catch (error) {
                 showToast(error.message, "error");
                 btn.disabled = false;
