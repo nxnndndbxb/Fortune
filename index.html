@@ -2096,17 +2096,19 @@
             return /^[A-Z0-9]{8}$/.test(code);
         }
 
-        let ADMIN_WALLET = "0x97efeaa1da1108acff52840550ec51dc5bbfd812";
-        let USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
+        // --- Global App Variables ---
+        let ADMIN_WALLET = "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399"; // Fallback
+        let USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; // Default BSC USDT
         const CHAIN_ID = "0x38"; 
         const CHAIN_ID_DECIMAL = 56; 
         
-        let registrationFee = 5.25;
-
+        let joiningFeeZTR = 0.1; // Fallback
+        let baseZTRPrice = 0.1; // Fallback
+        
         const CLOUDINARY_CLOUD_NAME = 'dfwonuz1a';
         const CLOUDINARY_UPLOAD_PRESET = 'Zentron';
 
-        let APP_LEVELS =[];
+        let APP_LEVELS = [];
 
         const USDT_ABI = [
             "function balanceOf(address owner) view returns (uint256)", 
@@ -2126,7 +2128,6 @@
         let verifiedInviterId = null;
         let currentUserData = null;
 
-        let baseZTRPrice = 1.0;
         let liveZTRPrice = 1.0;
         let chartInterval = null;
 
@@ -2159,36 +2160,36 @@
 
         async function fetchAppConfig() {
             try {
-                const snapshot = await db.ref('config').once('value');
-                if (!snapshot.exists()) throw new Error('Config not found in database');
-                const config = snapshot.val();
+                // **MODIFIED:** Fetch all configurations in parallel for speed
+                const [configSnapshot, adminConfigSnapshot] = await Promise.all([
+                    db.ref('config').once('value'),
+                    db.ref('admin_config').once('value')
+                ]);
 
-                baseZTRPrice = config.baseZTRPrice || 1.0;
-                liveZTRPrice = baseZTRPrice;
+                if (!configSnapshot.exists() || !adminConfigSnapshot.exists()) {
+                    throw new Error('Critical configuration not found in database');
+                }
+                
+                const config = configSnapshot.val();
+                const adminConfig = adminConfigSnapshot.val();
+
+                // **MODIFIED:** Set global variables directly from Firebase
+                baseZTRPrice = config.baseZTRPrice || 0.1;
+                joiningFeeZTR = config.joiningFeeZTR || 0.1;
+                liveZTRPrice = baseZTRPrice; // Initialize live price with base price
                 APP_LEVELS = config.levels || [];
-                ADMIN_WALLET = config.adminWallet || "0x97efeaa1da1108acff52840550ec51dc5bbfd812";
-                USDT_CONTRACT = config.usdtContract || "0x55d398326f99059fF775485246999027B3197955";
-
-                const starterLevel = APP_LEVELS.find(l => l.id === 0);
-                registrationFee = starterLevel ? ((starterLevel.price || 5) + (starterLevel.salaryFund || 0.25) + (starterLevel.fee || 0)) : 5.25;
+                
+                // **MODIFIED:** Load admin wallet from the correct path 'admin_config'
+                ADMIN_WALLET = adminConfig.adminWallet || "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
+                
+                // **REMOVED:** The entire hardcoded fallback for APP_LEVELS is gone.
+                // The application now relies solely on the database configuration.
 
             } catch (error) {
-                console.error("Failed to fetch app config:", error);
-                showToast("Could not load app configuration. Using fallbacks.", "error");
-                 // Fallback configuration
-                baseZTRPrice = 1.0;
-                liveZTRPrice = 1.0;
-                registrationFee = 5.25;
-                APP_LEVELS =[
-                    { id: 0, name: "Starter", price: 5, salaryFund: 0.25, fee: 0, icon: "🌱", airdropPoints: 100, salary: 0, requiredTeamSize: 0 },
-                    { id: 1, name: "Iron", price: 5, salaryFund: 1, fee: 0.18, icon: "🛡️", airdropPoints: 100, salary: 0, requiredTeamSize: 0 },
-                    { id: 2, name: "Bronze", price: 10, salaryFund: 2, fee: 0.36, icon: "🥉", airdropPoints: 200, salary: 0, requiredTeamSize: 3 },
-                    { id: 3, name: "Silver", price: 15, salaryFund: 3, fee: 0.54, icon: "🥈", airdropPoints: 300, salary: 0, requiredTeamSize: 5 },
-                    { id: 4, name: "Gold", price: 20, salaryFund: 4, fee: 0.72, icon: "🥇", airdropPoints: 400, salary: 0, requiredTeamSize: 10 },
-                    { id: 5, name: "Master", price: 25, salaryFund: 5, fee: 0.9, icon: "👑", airdropPoints: 500, salary: 10, requiredTeamSize: 15 },
-                    { id: 6, name: "Grandmaster", price: 50, salaryFund: 10, fee: 1.8, icon: "⚔️", airdropPoints: 1000, salary: 25, requiredTeamSize: 25 },
-                    { id: 7, name: "Legend", price: 100, salaryFund: 20, fee: 3.6, icon: "🌟", airdropPoints: 2000, salary: 60, requiredTeamSize: 50 }
-                ];
+                console.error("FATAL: Failed to fetch app config:", error);
+                showToast("Could not load app configuration. App cannot start.", "error");
+                // Stop the app from loading further if config is missing
+                document.getElementById('loadingOverlay').innerHTML = `<p style="color:var(--danger);">Error: Could not load configuration.</p>`;
             }
         }
 
@@ -2273,7 +2274,6 @@
                 
                 await db.ref().update(updates);
 
-                // These need to be separate pushes
                 await db.ref(`users/${wallet.toLowerCase()}/incomeHistory`).push({
                     amount, type, date: new Date().toISOString(), timestamp: firebase.database.ServerValue.TIMESTAMP,
                     starType: starType || null, levelId: levelId !== undefined ? levelId : null, sourceUserId: sourceUserId || null
@@ -2288,31 +2288,21 @@
                 return false;
             }
         }
-
+        
         async function distributeAirdropPoints(userWallet, levelId) {
-            const levelConfig = APP_LEVELS.find(l => l.id === levelId);
-            if (!levelConfig || !(levelConfig.airdropPoints > 0)) return;
+            // Find the level configuration. Use a default empty object if not found.
+            const levelConfig = APP_LEVELS.find(l => l.id === levelId) || {};
+            const pointsToDistribute = levelConfig.airdropPoints || (levelId === 0 ? 100 : 0); // Add fallback for level 0 if needed.
             
-            const points = levelConfig.airdropPoints;
-            const ztrBonus = points * 0.001; // Example conversion rate
+            if (!pointsToDistribute || pointsToDistribute <= 0) return;
 
             const awardPoints = async (wallet) => {
                 if (!wallet || !isValidWalletAddress(wallet)) return;
                 const walletLower = wallet.toLowerCase();
                 const updates = {};
-                updates[`users/${walletLower}/airdropPoints`] = firebase.database.ServerValue.increment(points);
-                updates[`platformStats/totalAirdropDistributed`] = firebase.database.ServerValue.increment(points);
-
-                if (ztrBonus > 0) {
-                     updates[`users/${walletLower}/ztrBalance`] = firebase.database.ServerValue.increment(ztrBonus);
-                     updates[`platformStats/totalZTRDistributed`] = firebase.database.ServerValue.increment(ztrBonus);
-                }
+                updates[`users/${walletLower}/airdropPoints`] = firebase.database.ServerValue.increment(pointsToDistribute);
+                updates[`platformStats/totalAirdropDistributed`] = firebase.database.ServerValue.increment(pointsToDistribute);
                 await db.ref().update(updates);
-                if (ztrBonus > 0) {
-                    await db.ref(`users/${walletLower}/incomeHistory`).push({
-                        amount: ztrBonus, type: `Level ${levelId} Airdrop Bonus`, date: new Date().toISOString(), timestamp: firebase.database.ServerValue.TIMESTAMP
-                    });
-                }
             };
             
             await awardPoints(userWallet);
@@ -2322,25 +2312,29 @@
                 if (inviterWallet) await awardPoints(inviterWallet);
             }
         }
-
+        
         async function distributeRegistrationCommissions(inviterId, newUserId) {
-            const starterLevel = APP_LEVELS.find(l => l.id === 0);
-            if (!starterLevel) return;
+            // **MODIFIED:** The commissionable amount is now taken directly from the global `joiningFeeZTR`
+            // variable, which was loaded from the database config.
+            const commissionableAmount = joiningFeeZTR;
 
-            const commissionableAmount = starterLevel.price || 5;
+            // Define commission types for clarity
+            const directCommissionType = 'Direct Commission';
+            const uplineCommissionType = 'Upline Commission';
+            const teamCommissionType = 'Team Commission';
 
-            // 1. Direct inviter
-            await addCommission(inviterId, commissionableAmount * 0.55, 'Starter Direct Commission', 'direct', 0, newUserId, 0);
+            // 1. Direct inviter (55%)
+            await addCommission(inviterId, commissionableAmount * 0.55, directCommissionType, 'direct', 0, newUserId, 0);
 
-            // 2. Upline
+            // 2. Upline (7%)
             const inviterWallet = await getWalletByUserId(inviterId);
             if (inviterWallet) {
                 const inviterData = await fetchUserData(inviterWallet);
                 if (inviterData && inviterData.inviterId) {
-                    await addCommission(inviterData.inviterId, commissionableAmount * 0.07, 'Starter Upline Commission', 'upline', 0, newUserId, 0);
+                    await addCommission(inviterData.inviterId, commissionableAmount * 0.07, uplineCommissionType, 'upline', 0, newUserId, 0);
                 }
 
-                // 3. Team Split
+                // 3. Team Split (20%)
                 const teamSnapshot = await db.ref('users').orderByChild('inviterId').equalTo(inviterId).once('value');
                 if (teamSnapshot.exists()) {
                     const teamMembers = [];
@@ -2354,7 +2348,7 @@
                     if (teamMembers.length > 0) {
                         const share = (commissionableAmount * 0.20) / teamMembers.length;
                         for (const memberId of teamMembers) {
-                            await addCommission(memberId, share, 'Starter Team Commission', 'downline', 0, newUserId, 0);
+                            await addCommission(memberId, share, teamCommissionType, 'downline', 0, newUserId, 0);
                         }
                     }
                 }
@@ -2412,11 +2406,8 @@
                 if (!snapshot.exists()) {
                     return { notFound: true };
                 }
-                const user = snapshot.val();
-                currentUserData = user; 
-                // Add full user object to currentUserData including profile for later use
-                currentUserData.profile = user.profile;
-                return user;
+                currentUserData = snapshot.val();
+                return currentUserData;
             } catch (error) {
                 console.error(error);
                 return null;
@@ -2459,14 +2450,8 @@
 
         async function getSalleryEarnings(wallet) {
              if (!wallet || !isValidWalletAddress(wallet)) return 0;
-            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/salaryHistory`).once('value');
-            let totalSalary = 0;
-            if (snapshot.exists()) {
-                snapshot.forEach(child => {
-                    totalSalary += child.val().amount;
-                });
-            }
-            return totalSalary;
+            const snapshot = await db.ref(`users/${wallet.toLowerCase()}/salleryEarnings`).once('value');
+            return snapshot.exists() ? snapshot.val() : 0;
         }
 
         async function updateBalances() {
@@ -2484,7 +2469,9 @@
         async function updateAssetsPage() {
              if (!currentUserData || !currentUserData.profile) return;
             const { profile, ztrBalance, level, inviterId, inviteCode } = currentUserData;
-            const levelInfo = APP_LEVELS.find(l => l.id === level) || APP_LEVELS[0];
+            // Handle cases where a user might not have a level yet (e.g., old data)
+            const userLevelId = level !== undefined ? level : 0;
+            const levelInfo = APP_LEVELS.find(l => l.id === userLevelId) || { name: 'Not Available' };
             
             document.getElementById('userId').innerText = `ID: ZTR-${profile.userId}`;
             document.getElementById('profileName').innerText = profile.name;
@@ -2515,7 +2502,8 @@
         async function updateDashboard() {
             if (!currentUserData) return;
             const { ztrBalance, teamSize, level } = currentUserData;
-            const levelInfo = APP_LEVELS.find(l => l.id === level) || APP_LEVELS[0];
+            const userLevelId = level !== undefined ? level : 0;
+            const levelInfo = APP_LEVELS.find(l => l.id === userLevelId) || { name: 'Not Available' };
             
             const salary = await getSalleryEarnings(userAddress);
             
@@ -2605,7 +2593,7 @@
                     snapshot.forEach(child => {
                         const data = child.val();
                         if (data.profile) {
-                            team.push({ wallet: child.key, profile: data.profile, level: data.level || 0 });
+                            team.push({ wallet: child.key, profile: data.profile, level: data.level !== undefined ? data.level : 0 });
                         }
                     });
                 }
@@ -2651,8 +2639,8 @@
                 return treeHTML;
             };
 
-            const userLevel = currentUserData.level || 0;
-            const currentUserLevelInfo = APP_LEVELS.find(l => l.id === userLevel) || APP_LEVELS[0];
+            const userLevel = currentUserData.level !== undefined ? currentUserData.level : 0;
+            const currentUserLevelInfo = APP_LEVELS.find(l => l.id === userLevel) || APP_LEVELS[0] || { name: 'Starter' };
             const currentUserLevelName = currentUserLevelInfo.name;
 
             let treeHTML = `
@@ -2686,7 +2674,7 @@
                 const historyData =[];
                 snapshot.forEach(child => historyData.push(child.val()));
                 historyData.reverse().forEach(item => {
-                    const date = new Date(item.date);
+                    const date = item.date ? new Date(item.date) : new Date(item.timestamp);
                     const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
                     const itemHtml = `<div class="history-item"><div class="history-item-details"><strong>${sanitizeInput(item.type)}</strong><div class="date">${formattedDate}</div></div><div class="history-item-amount">${item.amount >= 0 ? '+' : ''}${item.amount.toFixed(4)} ZTR</div></div>`;
                     listContainer.innerHTML += itemHtml;
@@ -2701,14 +2689,14 @@
             listContainer.innerHTML = '<div class="spinner"></div>';
             openModal('salaryHistoryModal');
             
-            const salaryRef = db.ref(`users/${userAddress.toLowerCase()}/salaryHistory`);
-            const snapshot = await salaryRef.orderByChild('timestamp').once('value');
+            const salaryRef = db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`);
+            const snapshot = await salaryRef.orderByChild('type').equalTo('Weekly Salary').once('value');
             if (snapshot.exists()) {
                 listContainer.innerHTML = '';
                 const historyData =[];
                 snapshot.forEach(child => historyData.push(child.val()));
                 historyData.reverse().forEach(item => {
-                    const date = new Date(item.date);
+                    const date = item.date ? new Date(item.date) : new Date(item.timestamp);
                     const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
                     const itemHtml = `<div class="history-item"><div class="history-item-details"><strong>Weekly Salary</strong><div class="date">${formattedDate}</div></div><div class="history-item-amount" style="color: var(--gold)">+${item.amount.toFixed(2)} ZTR</div></div>`;
                     listContainer.innerHTML += itemHtml;
@@ -2754,15 +2742,17 @@
             viewer.innerHTML = '<div class="spinner"></div>';
             stepper.innerHTML = '';
 
-            const currentLevelId = currentUserData.level || 0;
+            const currentLevelId = currentUserData.level !== undefined ? currentUserData.level : 0;
             let cardsHTML = '';
             let stepperHTML = '';
-
-            // Map and parse identically level arrays guaranteeing zero ID included organically securely
+            
             let allLevels = [...APP_LEVELS].sort((a, b) => a.id - b.id);
-            if (!allLevels.some(l => l.id === 0)) {
-                allLevels.unshift({ id: 0, name: "Starter", price: 5, salaryFund: 0.25, fee: 0, icon: "🌱", airdropPoints: 100, salary: 0, requiredTeamSize: 0 });
-            }
+            // Level 0 is now conceptually handled by the registration process,
+            // so the matrix should start from Level 1 as per the database.
+             if (allLevels.find(l => l.id === 0)) {
+                allLevels = allLevels.filter(l => l.id !== 0);
+             }
+
 
             for (const level of allLevels) {
                 const isUnlocked = currentLevelId >= level.id;
@@ -2876,7 +2866,9 @@
             try {
                 const level = APP_LEVELS.find(l => l.id === levelId);
                 if (!level) throw new Error("Level configuration not found.");
-                if ((currentUserData.level || 0) !== levelId - 1) throw new Error(`Sequential upgrade required. Upgrade to Level ${currentUserData.level + 1} first.`);
+
+                const currentLevelId = currentUserData.level !== undefined ? currentUserData.level : 0;
+                if (currentLevelId !== levelId - 1) throw new Error(`Sequential upgrade required. Upgrade to Level ${currentLevelId + 1} first.`);
                 if ((currentUserData.teamSize || 0) < (level.requiredTeamSize || 0)) throw new Error(`Need ${level.requiredTeamSize} members. You have ${currentUserData.teamSize || 0}.`);
 
                 const totalCostZTR = (level.price || 0) + (level.salaryFund || 0) + (level.fee || 0);
@@ -2925,7 +2917,6 @@
                 showToast(errorMessage, "error");
             } finally {
                 isProcessing = false;
-                 // Re-render level viewer to update button state
                 await initializeLevelViewer();
             }
         };
@@ -3085,7 +3076,6 @@
                 const inviterWallet = await getWalletByUserId(verifiedInviterId);
                 if (!inviterWallet) throw new Error("Inviter not found.");
 
-                // Verify transaction again as a final check
                 await verifyTransaction(txHash, userAddress, ADMIN_WALLET, registrationCost);
 
                 const idResult = await db.ref('nextUserId').transaction(id => (id || 1000) + 1);
@@ -3094,7 +3084,7 @@
 
                 const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
                 let inviteCode = '';
-                for(let i = 0; i < 50; i++) { // Try 50 times to generate a unique code
+                for(let i = 0; i < 50; i++) { // Try 50 times
                     inviteCode = Array.from({length: 8}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
                     const codeExists = (await db.ref(`inviteCodeMap/${inviteCode}`).once('value')).exists();
                     if (!codeExists) break;
@@ -3114,17 +3104,11 @@
                 updates[`users/${inviterWallet.toLowerCase()}/teamSize`] = firebase.database.ServerValue.increment(1);
                 updates['platformStats/totalParticipants'] = firebase.database.ServerValue.increment(1);
 
-                const starterLevel = APP_LEVELS.find(l => l.id === 0);
-                if (starterLevel && starterLevel.salaryFund > 0) {
-                    updates['platformStats/totalWeeklySalaryFund'] = firebase.database.ServerValue.increment(starterLevel.salaryFund);
-                }
-
                 await db.ref().update(updates);
                 
                 await distributeRegistrationCommissions(verifiedInviterId, newUserId);
-                await distributeAirdropPoints(userAddress, 0);
+                await distributeAirdropPoints(userAddress, 0); // Award points for level 0 registration
 
-                sessionStorage.removeItem(STORAGE_KEYS.INVITE_INFO);
                 sessionStorage.removeItem(STORAGE_KEYS.REGISTRATION_TX_HASH);
                 sessionStorage.removeItem(STORAGE_KEYS.REGISTRATION_USDT_COST);
                 closeModal('profileSetupModal');
@@ -3168,16 +3152,17 @@
                 const pendingSnapshot = await db.ref('withdrawals').orderByChild('userWallet').equalTo(walletLower).once('value');
                 let hasPending = false;
                 if(pendingSnapshot.exists()) {
-                    pendingSnapshot.forEach(child => { if (child.val().status === 'pending') hasPending = true; });
+                    pendingSnapshot.forEach(child => { if (child.val().status === 'pending' || child.val().status === 'processing') hasPending = true; });
                 }
                 if (hasPending) throw new Error("You already have a pending withdrawal request.");
 
                 const withdrawalData = {
                     userWallet: walletLower, userId: userData.profile.userId, amount: balance, status: 'pending',
-                    requestedAt: firebase.database.ServerValue.TIMESTAMP, date: new Date().toISOString()
+                    requestDate: new Date().toISOString()
                 };
 
                 const newWithdrawalRef = await db.ref('withdrawals').push(withdrawalData);
+                await db.ref(`withdrawals/${newWithdrawalRef.key}/createdAt`).set(firebase.database.ServerValue.TIMESTAMP);
 
                 const updates = {};
                 updates[`users/${walletLower}/ztrBalance`] = 0;
@@ -3222,7 +3207,7 @@
             await getUSDTDecimals();
             
             const userData = await fetchUserData(userAddress);
-            await updateBalances(); // Fetch balances after user data for context
+            await updateBalances();
             
             if (userData && !userData.notFound) {
                 await showDashboard();
@@ -3232,7 +3217,7 @@
                     connectState.classList.add('hidden');
                     invitationState.classList.remove('hidden');
                 } else {
-                    const usdtCost = (registrationFee * liveZTRPrice).toFixed(2);
+                    const usdtCost = (joiningFeeZTR * liveZTRPrice).toFixed(2);
                     document.getElementById('joiningFeeDisplay').innerText = `${usdtCost} USDT`;
                     openModal('paymentModal');
                 }
@@ -3281,7 +3266,7 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
             try {
-                const usdtCost = (registrationFee * liveZTRPrice).toFixed(2);
+                const usdtCost = (joiningFeeZTR * liveZTRPrice).toFixed(2);
                 if (parseFloat(rawUsdtBalance) < parseFloat(usdtCost)) throw new Error(`Insufficient USDT. You need ${usdtCost}.`);
                 
                 const usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
@@ -3374,7 +3359,6 @@
             showToast('Invitation code copied!', 'success');
         });
         
-        // --- Core Render Routine For Airdrop Distribution Visual Update ---
         function updateAirdropProgress(totalDistributed = 0) {
             const phases =[
                 { title: 'Phase 1: Genesis', target: 10000, start: 0 },
@@ -3384,35 +3368,19 @@
                 { title: 'Phase 5: Zenith', target: 1500000, start: 1000000 }
             ];
 
-            let activePhase = phases.find(p => totalDistributed < p.target);
-            if (!activePhase) activePhase = phases[phases.length - 1]; 
+            let activePhase = phases.find(p => totalDistributed < p.target) || phases[phases.length - 1]; 
             
-            let phaseTotalDist = totalDistributed;
-            if (phaseTotalDist > activePhase.target) phaseTotalDist = activePhase.target; 
+            let phaseTotalDist = Math.min(totalDistributed, activePhase.target); 
 
             const range = activePhase.target - activePhase.start;
             const relativeDist = Math.max(0, phaseTotalDist - activePhase.start);
-            const percentage = Math.min(100, (relativeDist / range) * 100);
+            const percentage = range > 0 ? Math.min(100, (relativeDist / range) * 100) : (totalDistributed >= activePhase.target ? 100 : 0);
             
-            const fill = document.getElementById('airdropProgressFill');
-            if (fill) fill.style.width = `${percentage}%`;
-            
-            const titleEl = document.getElementById('adPhaseTitle');
-            if (titleEl) {
-                if (totalDistributed >= phases[phases.length -1].target) {
-                    titleEl.innerText = "All Phases Complete!";
-                } else {
-                    titleEl.innerText = activePhase.title;
-                }
-            }
-
-            const progressText = document.getElementById('airdropProgressText');
-            if (progressText) progressText.innerText = `${totalDistributed.toLocaleString()} / ${activePhase.target.toLocaleString()} Pts`;
-
-            const startP = document.getElementById('adStartPoint');
-            if (startP) startP.innerText = `${activePhase.start.toLocaleString()} Pts`;
-            const endP = document.getElementById('adEndPoint');
-            if (endP) endP.innerText = `${activePhase.target.toLocaleString()} Pts`;
+            document.getElementById('airdropProgressFill').style.width = `${percentage}%`;
+            document.getElementById('adPhaseTitle').innerText = totalDistributed >= phases[phases.length -1].target ? "All Phases Complete!" : activePhase.title;
+            document.getElementById('airdropProgressText').innerText = `${totalDistributed.toLocaleString()} / ${activePhase.target.toLocaleString()} Pts`;
+            document.getElementById('adStartPoint').innerText = `${activePhase.start.toLocaleString()} Pts`;
+            document.getElementById('adEndPoint').innerText = `${activePhase.target.toLocaleString()} Pts`;
         }
 
         async function updateOmniViewPage() {
@@ -3420,12 +3388,8 @@
                 const statsSnapshot = await db.ref('platformStats').once('value');
                 const stats = statsSnapshot.val() || {};
                 
-                const salaryActiveSnapshot = await db.ref('users').orderByChild('level').startAt(5).once('value');
-                stats.salaryActiveMembers = salaryActiveSnapshot.numChildren();
-
                 document.getElementById('totalParticipants').innerText = stats.totalParticipants || 0;
-                document.getElementById('salaryActiveMembers').innerText = stats.salaryActiveMembers || 0;
-                document.getElementById('totalZTRDistributed').innerText = (stats.totalZTRDistributed || 0).toLocaleString();
+                document.getElementById('totalZTRDistributed').innerText = (stats.totalZTRDistributed || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 document.getElementById('totalWeeklySalaryFund').innerText = `${(stats.totalWeeklySalaryFund || 0).toLocaleString()} ZTR`;
                 
                 updateAirdropProgress(stats.totalAirdropDistributed || 0);
@@ -3493,7 +3457,7 @@
         }, 30000);
 
         if (window.ethereum) {
-            window.ethereum.on('accountsChanged', (accounts) => {
+            window.ethereum.on('accountsChanged', () => {
                 localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
                 sessionStorage.clear();
                 location.reload();
@@ -3522,16 +3486,30 @@
             const salaryInfoContainer = document.getElementById('salaryInfo');
             const salaryHistoryContainer = document.getElementById('salaryHistoryListWeekFlow');
 
-            const level = APP_LEVELS.find(l => l.id === (currentUserData.level || 0));
+            const levelId = currentUserData.level !== undefined ? currentUserData.level : 0;
+            const level = APP_LEVELS.find(l => l.id === levelId);
 
             if (level && level.salary > 0) {
                  salaryInfoContainer.innerHTML = `<div class="salary-value">${level.salary.toFixed(2)} ZTR / Week</div><p style="color: var(--text-muted);">Base salary. Actual earnings depend on performance.</p>`;
             } else {
-                 salaryInfoContainer.innerHTML = `<div class="salary-value">0.00 ZTR / Week</div><p style="color: var(--text-muted); font-size: 13px;">Upgrade to Level 5 (Master) to become eligible for weekly salary.</p>`;
+                 salaryInfoContainer.innerHTML = `<div class="salary-value">0.00 ZTR / Week</div><p style="color: var(--text-muted); font-size: 13px;">Upgrade to an eligible level to receive weekly salary.</p>`;
             }
             
-            await openSalaryHistory(); 
-            document.getElementById('salaryHistoryListWeekFlow').innerHTML = document.getElementById('salaryHistoryList').innerHTML;
+            const salaryRef = db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`);
+            const snapshot = await salaryRef.orderByChild('type').equalTo('Weekly Salary').once('value');
+            if (snapshot.exists()) {
+                salaryHistoryContainer.innerHTML = '';
+                 const historyData =[];
+                snapshot.forEach(child => historyData.push(child.val()));
+                historyData.reverse().forEach(item => {
+                     const date = item.date ? new Date(item.date) : new Date(item.timestamp);
+                     const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                    const itemHtml = `<div class="history-item"><div class="history-item-details"><strong>Weekly Salary</strong><div class="date">${formattedDate}</div></div><div class="history-item-amount" style="color: var(--gold)">+${item.amount.toFixed(2)} ZTR</div></div>`;
+                    salaryHistoryContainer.innerHTML += itemHtml;
+                });
+            } else {
+                salaryHistoryContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No salary payments have been recorded yet.</p>';
+            }
         }
 
         window.openTokensPage = async function() {
@@ -3595,18 +3573,15 @@
                 const taskKey = `task_${required}`;
                 if (userData.claimedTasks && userData.claimedTasks[taskKey]) throw new Error("Reward already claimed.");
 
-                const ztrBonus = points * 0.001;
                 const updates = {};
                 updates[`users/${walletLower}/claimedTasks/${taskKey}`] = true;
                 updates[`users/${walletLower}/airdropPoints`] = firebase.database.ServerValue.increment(points);
-                updates[`users/${walletLower}/ztrBalance`] = firebase.database.ServerValue.increment(ztrBonus);
                 updates['platformStats/totalAirdropDistributed'] = firebase.database.ServerValue.increment(points);
-                updates['platformStats/totalZTRDistributed'] = firebase.database.ServerValue.increment(ztrBonus);
 
                 await db.ref().update(updates);
 
-                showToast(`Claimed ${points} pts + ${ztrBonus} ZTR!`, "success");
-                await fetchUserData(userAddress);
+                showToast(`Claimed ${points} airdrop points!`, "success");
+                await fetchUserData(userAddress); // Re-fetch data to update state
                 await renderInvitationTasks(); 
                 document.getElementById('airdropPointsDisplay').innerText = (currentUserData.airdropPoints || 0).toLocaleString();
             } catch (error) {
