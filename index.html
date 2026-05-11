@@ -2133,6 +2133,11 @@
 
         let currentSlide = 0;
         let slideInterval;
+        
+        // <<< FIX START >>>
+        // Real-time listener ke liye global variable
+        let incomeHistoryListener = null;
+        // <<< FIX END >>>
 
         const connectState = document.getElementById('connectState');
         const invitationState = document.getElementById('invitationState');
@@ -2597,33 +2602,58 @@
                  treeContainer.innerHTML = treeHTML;
             }
         }
-
-        window.openIncomeHistory = async function() {
+        
+        // <<< FIX START >>>
+        // Puraana `openIncomeHistory` function is naye function se replace kiya gaya hai.
+        window.openIncomeHistory = function() {
             const listContainer = document.getElementById('incomeHistoryList');
-            listContainer.innerHTML = '<div class="spinner"></div>';
             openModal('incomeHistoryModal');
+            listContainer.innerHTML = '<div class="spinner"></div>';
 
             const incomeRef = db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`);
-            // **MODIFIED:** Removed .orderByChild('timestamp') to fetch all records
-            const snapshot = await incomeRef.once('value'); 
 
-            if (snapshot.exists()) {
-                listContainer.innerHTML = '';
-                const historyData =[];
-                snapshot.forEach(child => historyData.push(child.val()));
-                // Sort manually in code to handle records with or without timestamp
-                historyData.sort((a, b) => (b.timestamp || new Date(b.date).getTime()) - (a.timestamp || new Date(a.date).getTime()));
-
-                historyData.forEach(item => {
-                    const date = item.timestamp ? new Date(item.timestamp) : new Date(item.date);
-                    const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-                    const itemHtml = `<div class="history-item"><div class="history-item-details"><strong>${sanitizeInput(item.type)}</strong><div class="date">${formattedDate}</div></div><div class="history-item-amount">${item.amount >= 0 ? '+' : ''}${item.amount.toFixed(4)} ZTR</div></div>`;
-                    listContainer.innerHTML += itemHtml;
-                });
-            } else {
-                listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No income history found.</p>';
+            // Agar pehle se koi listener active hai to usay band karein
+            if (incomeHistoryListener) {
+                incomeRef.off('value', incomeHistoryListener);
             }
+
+            // Naya real-time listener banayein jo data ko timestamp ke hisab se sort karega
+            incomeHistoryListener = incomeRef.orderByChild('timestamp').on('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    listContainer.innerHTML = '';
+                    const historyData = [];
+                    snapshot.forEach(child => {
+                        historyData.push(child.val());
+                    });
+                    
+                    // Array ko ulta karein taake sab se naya item sab se upar aaye
+                    historyData.reverse(); 
+
+                    historyData.forEach(item => {
+                        const date = item.timestamp ? new Date(item.timestamp) : new Date(item.date);
+                        const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                        
+                        const itemHtml = `
+                        <div class="history-item">
+                            <div class="history-item-details">
+                                <strong>${sanitizeInput(item.type)}</strong>
+                                <div class="date">${formattedDate}</div>
+                            </div>
+                            <div class="history-item-amount ${item.amount >= 0 ? 'status-success' : 'status-error'}">
+                                ${item.amount >= 0 ? '+' : ''}${item.amount.toFixed(4)} ZTR
+                            </div>
+                        </div>`;
+                        listContainer.innerHTML += itemHtml;
+                    });
+                } else {
+                    listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No income history found.</p>';
+                }
+            }, (error) => { // Error handling agar data fetch na ho
+                console.error("Firebase real-time listener error:", error);
+                listContainer.innerHTML = '<p style="text-align:center; color: var(--danger); padding: 20px;">Failed to load history. Check connection.</p>';
+            });
         }
+        // <<< FIX END >>>
 
         window.openSalaryHistory = async function() {
             const listContainer = document.getElementById('salaryHistoryList');
@@ -2828,8 +2858,25 @@
         };
 
         const openModal = (modalId) => document.getElementById(modalId).classList.add('active');
-        const closeModal = (modalId) => document.getElementById(modalId).classList.remove('active');
+        
+        // <<< FIX START >>>
+        // `closeModal` function ko modify kiya gaya hai taake real-time listener band ho jaye.
+        const originalCloseModal = (modalId) => document.getElementById(modalId).classList.remove('active');
+        
+        const closeModal = (modalId) => {
+            if (modalId === 'incomeHistoryModal') {
+                const incomeRef = db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`);
+                if (incomeHistoryListener) {
+                    incomeRef.off('value', incomeHistoryListener);
+                    incomeHistoryListener = null; // Listener ko memory se saaf karein
+                }
+            }
+            originalCloseModal(modalId); // Modal ko band karne ka asal kaam karein
+        };
+        
         window.closeModal = closeModal;
+        // <<< FIX END >>>
+        
         window.openModal = openModal;
 
         async function getUSDTDecimals() {
@@ -3100,7 +3147,6 @@
                     connectState.classList.add('hidden');
                     invitationState.classList.remove('hidden');
                     
-                    // EDITED: Also set it here for the reconnect scenario
                     const storedInviteCode = sessionStorage.getItem('urlInviteCode');
                     if (storedInviteCode) {
                         document.getElementById('verifyInviteCodeInput').value = storedInviteCode;
@@ -3167,7 +3213,6 @@
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
 
-                // EDITED: Explicitly set the invite code from sessionStorage after payment
                 const storedInviteCode = sessionStorage.getItem('urlInviteCode');
                 if (storedInviteCode) {
                     document.getElementById('verifyInviteCodeInput').value = storedInviteCode;
@@ -3323,7 +3368,6 @@
             await fetchAppConfig();
             const inviteCodeFromUrl = new URLSearchParams(window.location.search).get('invite');
             if(inviteCodeFromUrl) {
-                // EDITED: Store in session storage for robustness and set value directly.
                 sessionStorage.setItem('urlInviteCode', inviteCodeFromUrl.toUpperCase());
                 document.getElementById('verifyInviteCodeInput').value = inviteCodeFromUrl.toUpperCase();
                 window.history.replaceState({}, document.title, window.location.pathname);
