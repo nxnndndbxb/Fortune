@@ -3099,6 +3099,12 @@
                 if (sessionStorage.getItem(STORAGE_KEYS.REGISTRATION_TX_HASH)) {
                     connectState.classList.add('hidden');
                     invitationState.classList.remove('hidden');
+                    
+                    // EDITED: Also set it here for the reconnect scenario
+                    const storedInviteCode = sessionStorage.getItem('urlInviteCode');
+                    if (storedInviteCode) {
+                        document.getElementById('verifyInviteCodeInput').value = storedInviteCode;
+                    }
                 } else {
                     const usdtCost = (joiningFeeZTR * liveZTRPrice).toFixed(2);
                     document.getElementById('joiningFeeDisplay').innerText = `${usdtCost} USDT`;
@@ -3160,6 +3166,13 @@
                 closeModal('paymentModal');
                 connectState.classList.add('hidden');
                 invitationState.classList.remove('hidden');
+
+                // EDITED: Explicitly set the invite code from sessionStorage after payment
+                const storedInviteCode = sessionStorage.getItem('urlInviteCode');
+                if (storedInviteCode) {
+                    document.getElementById('verifyInviteCodeInput').value = storedInviteCode;
+                }
+
             } catch (e) {
                 let errorMessage = e.message || "Transaction failed. Please try again.";
                 if (e.code === 'INSUFFICIENT_FUNDS') errorMessage = "Insufficient BNB for gas fees.";
@@ -3310,6 +3323,8 @@
             await fetchAppConfig();
             const inviteCodeFromUrl = new URLSearchParams(window.location.search).get('invite');
             if(inviteCodeFromUrl) {
+                // EDITED: Store in session storage for robustness and set value directly.
+                sessionStorage.setItem('urlInviteCode', inviteCodeFromUrl.toUpperCase());
                 document.getElementById('verifyInviteCodeInput').value = inviteCodeFromUrl.toUpperCase();
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
