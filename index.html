@@ -378,6 +378,10 @@
             font-weight: bold;
             color: var(--success);
         }
+        
+        .history-item-amount.points {
+            color: var(--gold);
+        }
 
         .balance-stat {
             background: rgba(0,0,0,0.4);
@@ -1619,6 +1623,16 @@
                 </div>
             </div>
         </div>
+
+        <!-- CHANGE START: Airdrop History List -->
+        <div class="main-card">
+            <h3>Points History</h3>
+            <div class="history-list" id="airdropHistoryList" style="max-height: 400px;">
+                <p style="text-align:center; color: var(--text-muted); padding: 20px;">No points history yet.</p>
+            </div>
+        </div>
+        <!-- CHANGE END: Airdrop History List -->
+
     </div>
 </div>
 
@@ -1943,7 +1957,9 @@
                     <h3 class="omni-view-title"><i class="fa-solid fa-parachute-box"></i> Active Airdrop Phase</h3>
                     <div class="active-airdrop-card">
                         <div class="phase-title" id="adPhaseTitle">Loading Phase...</div>
-                        <div class="phase-description">Ratio: 10 ZTR distributed per 10,000 Points</div>
+                        <!-- CHANGE START: Airdrop Ratio Text -->
+                        <div class="phase-description">Conversion Ratio: 1 ZTR per 1,000 Points</div>
+                        <!-- CHANGE END: Airdrop Ratio Text -->
                         
                         <div class="airdrop-progress-wrap">
                             <div class="progress-bar-bg">
@@ -2134,10 +2150,7 @@
         let currentSlide = 0;
         let slideInterval;
         
-        // <<< FIX START >>>
-        // Real-time listener ke liye global variable
         let incomeHistoryListener = null;
-        // <<< FIX END >>>
 
         const connectState = document.getElementById('connectState');
         const invitationState = document.getElementById('invitationState');
@@ -2276,36 +2289,67 @@
                     starType: starType || null, levelId: levelId !== undefined ? levelId : null, sourceUserId: sourceUserId || null
                 });
                 
-                if (starType && levelId !== undefined && sourceUserId && starLevelId !== undefined) {
+                // CHANGE START: Ensure starLevelId is correctly passed for star filling
+                if (starType && starLevelId !== undefined && sourceUserId) {
                     await addStarToLevel(wallet, starLevelId, starType, sourceUserId);
                 }
+                // CHANGE END
                 return true;
             } catch (e) {
                 console.error(`Failed to add commission for user ${userId}:`, e);
                 return false;
             }
         }
+
+        // CHANGE START: New function to log airdrop history
+        async function logAirdropPoints(wallet, points, reason, details = {}) {
+            if (!wallet || !isValidWalletAddress(wallet) || points <= 0) return;
+            const walletLower = wallet.toLowerCase();
+            try {
+                await db.ref(`users/${walletLower}/airdropHistory`).push({
+                    points,
+                    reason,
+                    details,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+            } catch (e) {
+                console.error(`Failed to log airdrop points for ${walletLower}:`, e);
+            }
+        }
+        // CHANGE END
         
-        async function distributeAirdropPoints(userWallet, levelId) {
+        async function distributeAirdropPoints(userWallet, levelId, source = 'self_upgrade') {
             const levelConfig = APP_LEVELS.find(l => l.id === levelId) || {};
             const pointsToDistribute = levelConfig.airdropPoints || (levelId === 0 ? 100 : 0);
             
             if (!pointsToDistribute || pointsToDistribute <= 0) return;
 
-            const awardPoints = async (wallet) => {
+            const awardPoints = async (wallet, reason, details) => {
                 if (!wallet || !isValidWalletAddress(wallet)) return;
                 const walletLower = wallet.toLowerCase();
                 const updates = {};
                 updates[`users/${walletLower}/airdropPoints`] = firebase.database.ServerValue.increment(pointsToDistribute);
                 updates[`platformStats/totalAirdropDistributed`] = firebase.database.ServerValue.increment(pointsToDistribute);
                 await db.ref().update(updates);
+                // CHANGE START: Logging points
+                await logAirdropPoints(wallet, pointsToDistribute, reason, details);
+                // CHANGE END
             };
             
-            await awardPoints(userWallet);
             const userData = await fetchUserData(userWallet);
+            if (!userData) return;
+            
+            if (source === 'self_upgrade') {
+                const reason = levelId === 0 ? 'Registration Bonus' : `Level ${levelId + 1} Upgrade`;
+                await awardPoints(userWallet, reason, { levelId });
+            }
+            
             if (userData && userData.inviterId) {
                 const inviterWallet = await getWalletByUserId(userData.inviterId);
-                if (inviterWallet) await awardPoints(inviterWallet);
+                if (inviterWallet) {
+                    const reason = `Downline Level ${levelId + 1} Upgrade`;
+                    await awardPoints(inviterWallet, reason, { fromUserId: userData.profile.userId, levelId });
+                }
             }
         }
         
@@ -2316,7 +2360,9 @@
             const uplineCommissionType = 'Upline Commission';
             const teamCommissionType = 'Team Commission';
 
+            // CHANGE START: Ensure starLevelId is 0 for registration
             await addCommission(inviterId, commissionableAmount * 0.55, directCommissionType, 'direct', 0, newUserId, 0);
+            // CHANGE END
 
             const inviterWallet = await getWalletByUserId(inviterId);
             if (inviterWallet) {
@@ -2352,13 +2398,28 @@
             const inviterId = userData.inviterId;
             const sourceUserId = userData.profile.userId;
 
-            await addCommission(inviterId, levelPrice * 0.55, `Level ${levelId} Direct Commission`, 'direct', levelId, sourceUserId, levelId);
-            
             const inviterWallet = await getWalletByUserId(inviterId);
             if(inviterWallet) {
                  const inviterData = await fetchUserData(inviterWallet);
+                 const inviterLevel = inviterData.level !== undefined ? inviterData.level : 0;
+
+                 // CHANGE START: Conditional Earning Logic
+                 if (inviterLevel >= levelId) {
+                    await addCommission(inviterId, levelPrice * 0.55, `Level ${levelId + 1} Direct Commission`, 'direct', levelId, sourceUserId, levelId);
+                 }
+                 // CHANGE END
+
                  if (inviterData && inviterData.inviterId) {
-                    await addCommission(inviterData.inviterId, levelPrice * 0.07, `Level ${levelId} Upline Commission`, 'upline', levelId, sourceUserId, levelId);
+                    const uplineWallet = await getWalletByUserId(inviterData.inviterId);
+                     if (uplineWallet) {
+                        const uplineData = await fetchUserData(uplineWallet);
+                        const uplineLevel = uplineData.level !== undefined ? uplineData.level : 0;
+                        // CHANGE START: Conditional Earning Logic for Upline
+                        if (uplineLevel >= levelId) {
+                            await addCommission(inviterData.inviterId, levelPrice * 0.07, `Level ${levelId + 1} Upline Commission`, 'upline', levelId, sourceUserId, levelId);
+                        }
+                        // CHANGE END
+                    }
                  }
             }
 
@@ -2375,7 +2436,7 @@
                 if (teamMembers.length > 0) {
                     const share = (levelPrice * 0.20) / teamMembers.length;
                     for (const memberId of teamMembers) {
-                        await addCommission(memberId, share, `Level ${levelId} Team Commission`, 'downline', levelId, sourceUserId, levelId);
+                        await addCommission(memberId, share, `Level ${levelId + 1} Team Commission`, 'downline', levelId, sourceUserId, levelId);
                     }
                 }
             }
@@ -2603,8 +2664,6 @@
             }
         }
         
-        // <<< FIX START >>>
-        // Puraana `openIncomeHistory` function is naye function se replace kiya gaya hai.
         window.openIncomeHistory = function() {
             const listContainer = document.getElementById('incomeHistoryList');
             openModal('incomeHistoryModal');
@@ -2612,12 +2671,10 @@
 
             const incomeRef = db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`);
 
-            // Agar pehle se koi listener active hai to usay band karein
             if (incomeHistoryListener) {
                 incomeRef.off('value', incomeHistoryListener);
             }
 
-            // Naya real-time listener banayein jo data ko timestamp ke hisab se sort karega
             incomeHistoryListener = incomeRef.orderByChild('timestamp').on('value', (snapshot) => {
                 if (snapshot.exists()) {
                     listContainer.innerHTML = '';
@@ -2626,7 +2683,6 @@
                         historyData.push(child.val());
                     });
                     
-                    // Array ko ulta karein taake sab se naya item sab se upar aaye
                     historyData.reverse(); 
 
                     historyData.forEach(item => {
@@ -2648,12 +2704,11 @@
                 } else {
                     listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No income history found.</p>';
                 }
-            }, (error) => { // Error handling agar data fetch na ho
+            }, (error) => {
                 console.error("Firebase real-time listener error:", error);
                 listContainer.innerHTML = '<p style="text-align:center; color: var(--danger); padding: 20px;">Failed to load history. Check connection.</p>';
             });
         }
-        // <<< FIX END >>>
 
         window.openSalaryHistory = async function() {
             const listContainer = document.getElementById('salaryHistoryList');
@@ -2713,7 +2768,9 @@
             let cardsHTML = '';
             let stepperHTML = '';
             
-            let allLevels = [...APP_LEVELS].sort((a, b) => a.id - b.id).filter(l => l.id !== 0);
+            // CHANGE START: Removed filter to show all levels including starter level 0
+            let allLevels = [...APP_LEVELS].sort((a, b) => a.id - b.id);
+            // CHANGE END
 
             for (const level of allLevels) {
                 const isUnlocked = currentLevelId >= level.id;
@@ -2721,7 +2778,9 @@
                 const isCurrentLevel = currentLevelId === level.id;
                 const teamSizeOk = (currentUserData.teamSize || 0) >= (level.requiredTeamSize || 0);
 
-                stepperHTML += `<div class="level-stepper-item" data-level-id="${level.id}"><span>${level.id}</span><div class="dot"></div></div>`;
+                // CHANGE START: Display level number as id + 1
+                stepperHTML += `<div class="level-stepper-item" data-level-id="${level.id}"><span>${level.id + 1}</span><div class="dot"></div></div>`;
+                // CHANGE END
                 
                 const starsHTML = await renderStarsForLevel(level.id);
                 const totalCost = (level.price || 0) + (level.salaryFund || 0) + (level.fee || 0);
@@ -2740,7 +2799,9 @@
                      buttonHTML = `<button class="btn" disabled><i class="fa-solid fa-lock"></i> LOCKED</button>`;
                 }
 
-                cardsHTML += `<div class="level-card ${isUnlocked ? 'unlocked' : ''}" id="level-card-${level.id}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} Level</h2>${isCurrentLevel ? '<span class="rank-badge">CURRENTLY ACTIVE</span>' : ''}</div><div class="level-stars-container">${starsHTML}</div><div><div class="price-breakdown-container"><p>Plan Price: <span>${(level.price || 0).toFixed(2)} ZTR</span></p><p>Salary Fund: <span>${(level.salaryFund || 0).toFixed(2)} ZTR</span></p><p>System Fee: <span>${(level.fee || 0).toFixed(2)} ZTR</span></p></div><h3 class="level-price" style="margin-top: 15px;">Total: ${totalCost.toFixed(2)} ZTR</h3><p class="level-info">≈ ${usdtPrice} USDT</p>${(level.salary && level.salary > 0) ? `<p class="level-info" style="color: var(--gold); margin-top: 10px; font-weight: bold;">Unlocks ${level.salary} ZTR Weekly Salary</p>`: ''}${(level.requiredTeamSize && level.requiredTeamSize > 0) ? `<p class="level-info" style="color: var(--primary); margin-top: 5px;">Requires ${level.requiredTeamSize} team members</p>`: ''}</div>${buttonHTML}</div>`;
+                // CHANGE START: Level card title shows Level number (id+1)
+                cardsHTML += `<div class="level-card ${isUnlocked ? 'unlocked' : ''}" id="level-card-${level.id}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} (Level ${level.id + 1})</h2>${isCurrentLevel ? '<span class="rank-badge">CURRENTLY ACTIVE</span>' : ''}</div><div class="level-stars-container">${starsHTML}</div><div><div class="price-breakdown-container"><p>Plan Price: <span>${(level.price || 0).toFixed(2)} ZTR</span></p><p>Salary Fund: <span>${(level.salaryFund || 0).toFixed(2)} ZTR</span></p><p>System Fee: <span>${(level.fee || 0).toFixed(2)} ZTR</span></p></div><h3 class="level-price" style="margin-top: 15px;">Total: ${totalCost.toFixed(2)} ZTR</h3><p class="level-info">≈ ${usdtPrice} USDT</p>${(level.salary && level.salary > 0) ? `<p class="level-info" style="color: var(--gold); margin-top: 10px; font-weight: bold;">Unlocks ${level.salary} ZTR Weekly Salary</p>`: ''}${(level.requiredTeamSize && level.requiredTeamSize > 0) ? `<p class="level-info" style="color: var(--primary); margin-top: 5px;">Requires ${level.requiredTeamSize} team members</p>`: ''}</div>${buttonHTML}</div>`;
+                // CHANGE END
             }
             viewer.innerHTML = cardsHTML;
             stepper.innerHTML = stepperHTML;
@@ -2770,7 +2831,7 @@
                 });
             });
 
-            const initialCardId = currentLevelId > 0 ? currentLevelId : 1;
+            const initialCardId = currentLevelId; // Show current level
             const initialActiveCard = document.getElementById(`level-card-${initialCardId}`);
             if (initialActiveCard) {
                 setTimeout(() => {
@@ -2809,7 +2870,7 @@
                 if (!level) throw new Error("Level configuration not found.");
 
                 const currentLevelId = currentUserData.level !== undefined ? currentUserData.level : 0;
-                if (currentLevelId !== levelId - 1) throw new Error(`Sequential upgrade required. Upgrade to Level ${currentLevelId + 1} first.`);
+                if (currentLevelId !== levelId - 1) throw new Error(`Sequential upgrade required. Upgrade to Level ${currentLevelId + 2} first.`);
                 if ((currentUserData.teamSize || 0) < (level.requiredTeamSize || 0)) throw new Error(`Need ${level.requiredTeamSize} members. You have ${currentUserData.teamSize || 0}.`);
 
                 const totalCostZTR = (level.price || 0) + (level.salaryFund || 0) + (level.fee || 0);
@@ -2837,10 +2898,10 @@
                     await db.ref('platformStats/totalWeeklySalaryFund').transaction(p => (p || 0) + level.salaryFund);
                 }
 
-                await distributeAirdropPoints(userAddress, levelId);
+                await distributeAirdropPoints(userAddress, levelId, 'self_upgrade');
                 await distributeUpgradeCommissions(userAddress, levelId, level.price || 0);
 
-                showToast(`Level ${level.name} Activated!`, "success");
+                showToast(`${level.name} (Level ${levelId+1}) Activated!`, "success");
                 
                 await fetchUserData(userAddress); 
                 await Promise.all([updateBalances(), initializeLevelViewer(), updateDashboard(), updateAssetsPage()]);
@@ -2859,8 +2920,6 @@
 
         const openModal = (modalId) => document.getElementById(modalId).classList.add('active');
         
-        // <<< FIX START >>>
-        // `closeModal` function ko modify kiya gaya hai taake real-time listener band ho jaye.
         const originalCloseModal = (modalId) => document.getElementById(modalId).classList.remove('active');
         
         const closeModal = (modalId) => {
@@ -2868,15 +2927,13 @@
                 const incomeRef = db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`);
                 if (incomeHistoryListener) {
                     incomeRef.off('value', incomeHistoryListener);
-                    incomeHistoryListener = null; // Listener ko memory se saaf karein
+                    incomeHistoryListener = null;
                 }
             }
-            originalCloseModal(modalId); // Modal ko band karne ka asal kaam karein
+            originalCloseModal(modalId);
         };
         
         window.closeModal = closeModal;
-        // <<< FIX END >>>
-        
         window.openModal = openModal;
 
         async function getUSDTDecimals() {
@@ -3048,7 +3105,7 @@
                 await db.ref().update(updates);
                 
                 await distributeRegistrationCommissions(verifiedInviterId, newUserId);
-                await distributeAirdropPoints(userAddress, 0);
+                await distributeAirdropPoints(userAddress, 0, 'self_upgrade');
 
                 sessionStorage.removeItem(STORAGE_KEYS.REGISTRATION_TX_HASH);
                 sessionStorage.removeItem(STORAGE_KEYS.REGISTRATION_USDT_COST);
@@ -3292,13 +3349,16 @@
         });
         
         function updateAirdropProgress(totalDistributed = 0) {
+            // CHANGE START: New airdrop phase values
             const phases =[
-                { title: 'Phase 1: Genesis', target: 10000, start: 0 },
-                { title: 'Phase 2: Discovery', target: 100000, start: 10000 },
-                { title: 'Phase 3: Expansion', target: 450000, start: 100000 },
-                { title: 'Phase 4: Apex', target: 1000000, start: 450000 },
-                { title: 'Phase 5: Zenith', target: 1500000, start: 1000000 }
+                { title: 'Phase 1: Genesis', target: 200000, start: 0 },
+                { title: 'Phase 2: Discovery', target: 500000, start: 200000 },
+                { title: 'Phase 3: Expansion', target: 850000, start: 500000 },
+                { title: 'Phase 4: Apex', target: 1500000, start: 850000 },
+                { title: 'Phase 5: Zenith', target: 2000000, start: 1500000 },
+                { title: 'Phase 6: Infinity', target: 3000000, start: 2000000 }
             ];
+            // CHANGE END
 
             let activePhase = phases.find(p => totalDistributed < p.target) || phases[phases.length - 1]; 
             const range = activePhase.target - activePhase.start;
@@ -3406,12 +3466,45 @@
             }
         }
 
-        window.openTokensPage = () => {
+        // CHANGE START: Updated function to open tokens page and render history
+        window.openTokensPage = async () => {
             document.body.style.overflow = 'hidden';
             tokensPage.classList.add('active');
             closeModal('dropsModal');
             document.getElementById('airdropPointsDisplay').innerText = (currentUserData.airdropPoints || 0).toLocaleString();
+
+            const listContainer = document.getElementById('airdropHistoryList');
+            listContainer.innerHTML = '<div class="spinner"></div>';
+            
+            const historyRef = db.ref(`users/${userAddress.toLowerCase()}/airdropHistory`).orderByChild('timestamp');
+            const snapshot = await historyRef.once('value');
+
+            if (snapshot.exists()) {
+                listContainer.innerHTML = '';
+                const historyData = [];
+                snapshot.forEach(child => historyData.push(child.val()));
+                historyData.reverse(); // Show newest first
+
+                historyData.forEach(item => {
+                    const date = new Date(item.timestamp);
+                    const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                    const itemHtml = `
+                    <div class="history-item">
+                        <div class="history-item-details">
+                            <strong>${sanitizeInput(item.reason)}</strong>
+                            <div class="date">${formattedDate}</div>
+                        </div>
+                        <div class="history-item-amount points">
+                            +${item.points.toLocaleString()} Pts
+                        </div>
+                    </div>`;
+                    listContainer.innerHTML += itemHtml;
+                });
+            } else {
+                listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No points history yet.</p>';
+            }
         }
+        // CHANGE END
 
         window.openTasksPage = async () => {
             document.body.style.overflow = 'hidden';
@@ -3453,7 +3546,11 @@
                 updates['platformStats/totalAirdropDistributed'] = firebase.database.ServerValue.increment(points);
                 await db.ref().update(updates);
 
-                showToast(`Claimed ${points} airdrop points!`, "success");
+                // CHANGE START: Log airdrop points from tasks
+                await logAirdropPoints(walletLower, points, 'Invitation Task Reward', { requiredInvites: required });
+                // CHANGE END
+
+                showToast(`Claimed ${points.toLocaleString()} airdrop points!`, "success");
                 await fetchUserData(userAddress);
                 await renderInvitationTasks(); 
                 document.getElementById('airdropPointsDisplay').innerText = (currentUserData.airdropPoints || 0).toLocaleString();
