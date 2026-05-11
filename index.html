@@ -662,47 +662,53 @@
             padding: 20px 0;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             background: rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .level-stepper-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-        .level-stepper-container::-webkit-scrollbar {
-             display: none;
+        .level-stepper-nav::-webkit-scrollbar { display: none; }
+        
+        .level-stepper-nav::before, .level-stepper-nav::after {
+            content: '';
+            flex-shrink: 0;
+            width: calc(50% - 40px);
         }
 
-        .level-stepper-nav {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 20px;
-            padding: 0 20px;
-            width: max-content;
-        }
         .level-stepper-item {
-            display: flex;
+            scroll-snap-align: center;
             flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.5);
-            border: 2px solid rgba(255,255,255,0.2);
+            width: 80px;
+            height: 80px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.2);
             color: var(--text-muted);
-            font-size: 20px;
-            font-weight: bold;
+            border-radius: 20px;
             cursor: pointer;
-            transition: all 0.3s;
-            scroll-snap-align: center;
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
         }
         
         .level-stepper-item.active {
-            color: var(--primary);
+            transform: scale(1.2);
+            background: rgba(0, 242, 255, 0.8);
             border-color: var(--primary);
-            transform: scale(1.1);
-            box-shadow: 0 0 15px var(--primary-glow);
+            color: black;
+            font-weight: bold;
+            box-shadow: 0 0 25px var(--primary-glow);
         }
+
+        .level-stepper-item .level-text { font-size: 12px; }
+        .level-stepper-item .level-number { font-size: 28px; font-weight: 900; line-height: 1; }
         
         .level-viewer-container {
             flex-grow: 1;
@@ -1557,8 +1563,6 @@
             </p>
             <div id="salaryInfo">
                 <!-- Salary details will be injected here -->
-                 <div class="salary-value">Performance Based</div>
-                 <p style="color: var(--text-muted); font-size: 13px;">Upgrade to an eligible level to activate your salary earnings.</p>
             </div>
         </div>
 
@@ -1575,9 +1579,9 @@
                 <div class="task-item">
                     <div class="task-details" style="display: flex; align-items: center; gap: 15px;">
                         <i class="fa-solid fa-check-circle" style="color: var(--success); font-size: 20px;"></i>
-                        <strong>Performance-Based Salary</strong>
+                        <strong>Performance-Based Salary (Levels 5+)</strong>
                     </div>
-                    <div id="userWeeklySalaryShare" class="task-reward" style="color: white; font-family: monospace;">Share from Pool</div>
+                    <div id="userWeeklySalaryShare" class="task-reward" style="color: white; font-family: monospace;">Performance Based</div>
                 </div>
             </div>
             <p style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 15px;">Calculated amounts are preliminary. Amounts available for claiming will be shown in the claim button on the last day of the period.</p>
@@ -1673,7 +1677,7 @@
         <div style="width:40px;"></div> <!-- Placeholder for balance -->
     </div>
     
-    <div class="level-stepper-container" id="levelStepperContainer">
+    <div class="level-stepper-container">
         <div class="level-stepper-nav" id="levelStepperNav">
             <!-- Stepper items will be injected here by JavaScript -->
         </div>
@@ -2199,12 +2203,15 @@
                 const adminConfig = adminConfigSnapshot.val();
 
                 baseZTRPrice = config.baseZTRPrice || 0.1;
-                joiningFeeZTR = config.joiningFeeZTR || 0.1;
                 liveZTRPrice = baseZTRPrice;
                 APP_LEVELS = config.levels || [];
                 
-                // IMPORTANT: Ensure APP_LEVELS is sorted by ID.
-                APP_LEVELS.sort((a, b) => a.id - b.id);
+                // Ensure level 0 (Starter) configuration exists for pricing display
+                if (APP_LEVELS[0] && APP_LEVELS[0].id === 0) {
+                     joiningFeeZTR = (APP_LEVELS[0].price || 0) + (APP_LEVELS[0].salaryFund || 0) + (APP_LEVELS[0].fee || 0);
+                } else {
+                    joiningFeeZTR = config.joiningFeeZTR || 0.1; // Fallback
+                }
                 
                 ADMIN_WALLET = adminConfig.adminWallet || "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
 
@@ -2360,7 +2367,8 @@
         }
         
         async function distributeRegistrationCommissions(inviterId, newUserId) {
-            const commissionableAmount = joiningFeeZTR;
+            const levelZeroPrice = APP_LEVELS.find(l => l.id === 0)?.price || joiningFeeZTR; // Use configured price for level 0
+            const commissionableAmount = levelZeroPrice;
             const directCommissionType = 'Direct Commission';
             const uplineCommissionType = 'Upline Commission';
             const teamCommissionType = 'Team Commission';
@@ -2407,7 +2415,7 @@
                  const inviterLevel = inviterData.level !== undefined ? inviterData.level : 0;
 
                  if (inviterLevel >= levelId) {
-                    await addCommission(inviterId, levelPrice * 0.55, `Level Direct Commission`, 'direct', levelId, sourceUserId, levelId);
+                    await addCommission(inviterId, levelPrice * 0.55, `Level ${levelId + 1} Direct Commission`, 'direct', levelId, sourceUserId, levelId);
                  }
 
                  if (inviterData && inviterData.inviterId) {
@@ -2416,7 +2424,7 @@
                         const uplineData = await fetchUserData(uplineWallet);
                         const uplineLevel = uplineData.level !== undefined ? uplineData.level : 0;
                         if (uplineLevel >= levelId) {
-                            await addCommission(inviterData.inviterId, levelPrice * 0.07, `Level Upline Commission`, 'upline', levelId, sourceUserId, levelId);
+                            await addCommission(inviterData.inviterId, levelPrice * 0.07, `Level ${levelId + 1} Upline Commission`, 'upline', levelId, sourceUserId, levelId);
                         }
                     }
                  }
@@ -2436,7 +2444,7 @@
                 if (teamMembers.length > 0) {
                     const share = (levelPrice * 0.20) / teamMembers.length;
                     for (const memberId of teamMembers) {
-                        await addCommission(memberId, share, `Level Team Commission`, 'downline', levelId, sourceUserId, levelId);
+                        await addCommission(memberId, share, `Level ${levelId + 1} Team Commission`, 'downline', levelId, sourceUserId, levelId);
                     }
                 }
             }
@@ -2767,21 +2775,23 @@
             const currentLevelId = currentUserData.level !== undefined ? currentUserData.level : 0;
             let cardsHTML = '';
             let stepperHTML = '';
+            
+            const allLevels = [...APP_LEVELS].sort((a, b) => a.id - b.id);
 
-            for (const level of APP_LEVELS) {
+            for (const level of allLevels) {
                 const isUnlocked = currentLevelId >= level.id;
                 const canUpgrade = currentLevelId === level.id - 1;
                 const isCurrentLevel = currentLevelId === level.id;
                 const teamSizeOk = (currentUserData.teamSize || 0) >= (level.requiredTeamSize || 0);
 
-                stepperHTML += `<div class="level-stepper-item" id="level-stepper-item-${level.id}" data-level-id="${level.id}">${level.id + 1}</div>`;
+                stepperHTML += `<div class="level-stepper-item" data-level-id="${level.id}"><span class="level-text">Level</span><span class="level-number">${level.id + 1}</span></div>`;
                 
                 const starsHTML = await renderStarsForLevel(level.id);
                 const totalCost = (level.price || 0) + (level.salaryFund || 0) + (level.fee || 0);
                 const usdtPrice = (totalCost * liveZTRPrice).toFixed(2);
                 
                 let buttonHTML;
-                if(isUnlocked) {
+                if (isUnlocked) {
                      buttonHTML = `<button class="btn" disabled><i class="fa-solid fa-check-double"></i> UNLOCKED</button>`;
                 } else if (canUpgrade) {
                      if (teamSizeOk) {
@@ -2793,7 +2803,7 @@
                      buttonHTML = `<button class="btn" disabled><i class="fa-solid fa-lock"></i> LOCKED</button>`;
                 }
                 
-                const priceDisplayHTML =
+                const priceDisplayHTML = 
                     `<div class="price-breakdown-container">
                         <p>Plan Price: <span>${(level.price || 0).toFixed(2)} ZTR</span></p>
                         <p>Salary Fund: <span>${(level.salaryFund || 0).toFixed(2)} ZTR</span></p>
@@ -2826,47 +2836,35 @@
 
         function setupLevelPageInteractivity(currentLevelId) {
             const viewer = document.getElementById('levelViewer');
-            const stepperContainer = document.getElementById('levelStepperContainer');
-            const stepperNav = document.getElementById('levelStepperNav');
-            const stepperItems = stepperNav.querySelectorAll('.level-stepper-item');
+            const stepper = document.getElementById('levelStepperNav');
+            const stepperItems = stepper.querySelectorAll('.level-stepper-item');
+            const cards = viewer.querySelectorAll('.level-card');
+            
+            if (!cards.length) return;
+            const cardWidth = cards[0].offsetWidth;
+            const gap = 20;
 
-            let isScrolling = false;
-
-            const updateActiveItems = (activeIndex) => {
+            const updateActiveStep = () => {
+                const activeIndex = Math.round(viewer.scrollLeft / (cardWidth + gap));
                 stepperItems.forEach((item, index) => {
                     item.classList.toggle('active', index === activeIndex);
                 });
+                 stepperItems[activeIndex]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             };
-
-            viewer.addEventListener('scroll', () => {
-                if(isScrolling) return;
-                const cardWidth = 280;
-                const gap = 20;
-                const activeIndex = Math.round(viewer.scrollLeft / (cardWidth + gap));
-                updateActiveItems(activeIndex);
-                const activeStepperItem = document.getElementById(`level-stepper-item-${activeIndex}`);
-                if (activeStepperItem) {
-                    activeStepperItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                }
-            });
+            
+            viewer.addEventListener('scroll', updateActiveStep, { passive: true });
 
             stepperItems.forEach(item => {
                 item.addEventListener('click', () => {
-                    const levelId = item.dataset.levelId;
-                    isScrolling = true;
-                    document.getElementById(`level-card-${levelId}`).scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                    updateActiveItems(parseInt(levelId));
-                    setTimeout(() => { isScrolling = false; }, 500);
+                    document.getElementById(`level-card-${item.dataset.levelId}`).scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                 });
             });
 
             const initialActiveCard = document.getElementById(`level-card-${currentLevelId}`);
             if (initialActiveCard) {
-                 setTimeout(() => {
+                setTimeout(() => {
                     initialActiveCard.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
-                    updateActiveItems(currentLevelId);
-                    const activeStepperItem = document.getElementById(`level-stepper-item-${currentLevelId}`);
-                    if(activeStepperItem) activeStepperItem.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
+                    updateActiveStep();
                 }, 100);
             }
         }
@@ -3118,6 +3116,8 @@
                     if (!(await db.ref(`inviteCodeMap/${inviteCode}`).once('value')).exists()) break;
                     if (i === 49) throw new Error("Could not generate a unique invite code.");
                 }
+                
+                const levelZeroConfig = APP_LEVELS.find(l => l.id === 0) || {};
 
                 const userData = {
                     profile: { name: sanitizeInput(username), userId: newUserId, joinDate: new Date().toLocaleDateString(), profilePicUrl: setupProfilePicData || null },
@@ -3131,6 +3131,9 @@
                 updates[`inviteCodeMap/${inviteCode}`] = walletLower;
                 updates[`users/${inviterWallet.toLowerCase()}/teamSize`] = firebase.database.ServerValue.increment(1);
                 updates['platformStats/totalParticipants'] = firebase.database.ServerValue.increment(1);
+                if (levelZeroConfig.salaryFund && levelZeroConfig.salaryFund > 0) {
+                     updates['platformStats/totalWeeklySalaryFund'] = firebase.database.ServerValue.increment(levelZeroConfig.salaryFund);
+                }
 
                 await db.ref().update(updates);
                 
@@ -3406,6 +3409,7 @@
                 const stats = statsSnapshot.val() || {};
                 
                 document.getElementById('totalParticipants').innerText = stats.totalParticipants || 0;
+                document.getElementById('salaryActiveMembers').innerText = stats.salaryActiveMembers || 0;
                 document.getElementById('totalZTRDistributed').innerText = (stats.totalZTRDistributed || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 document.getElementById('totalWeeklySalaryFund').innerText = `${(stats.totalWeeklySalaryFund || 0).toLocaleString()} ZTR`;
                 updateAirdropProgress(stats.totalAirdropDistributed || 0);
@@ -3470,8 +3474,14 @@
             weekFlowPage.classList.add('active');
             closeModal('dropsModal');
             
+            const salaryInfoContainer = document.getElementById('salaryInfo');
             const salaryHistoryContainer = document.getElementById('salaryHistoryListWeekFlow');
 
+            const levelId = currentUserData.level !== undefined ? currentUserData.level : 0;
+            const isEligible = levelId >= 4; // Eligibility starts from level 5 (ID 4)
+
+            salaryInfoContainer.innerHTML = isEligible ? `<div class="salary-value">Performance Based</div><p style="color: var(--text-muted);">Your share is calculated from the weekly pool based on your activity and team performance.</p>` : `<div class="salary-value">Not Eligible</div><p style="color: var(--text-muted); font-size: 13px;">Upgrade to Level 5 or higher to become eligible for weekly salary.</p>`;
+            
             const salaryRef = db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`);
             const snapshot = await salaryRef.orderByChild('type').equalTo('Weekly Salary').once('value');
             if (snapshot.exists()) {
