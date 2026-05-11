@@ -1281,8 +1281,20 @@
             justify-content: space-between;
             align-items: center;
             font-size: 12px;
+            font-family: monospace;
             position: relative;
             margin-top: 5px;
+        }
+        #airdropProgressText {
+            font-weight: bold;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.5);
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            white-space: nowrap;
         }
         /* Ends Omni View Drop Style */
 
@@ -1624,14 +1636,12 @@
             </div>
         </div>
 
-        <!-- Airdrop History List -->
         <div class="main-card">
             <h3>Points History</h3>
             <div class="history-list" id="airdropHistoryList" style="max-height: 400px;">
                 <p style="text-align:center; color: var(--text-muted); padding: 20px;">No points history yet.</p>
             </div>
         </div>
-        <!-- END: Airdrop History List -->
 
     </div>
 </div>
@@ -1952,23 +1962,20 @@
         <div id="pageOmniView" class="page">
             <div class="main-card">
                 
-                <!-- NEW Phase Style Airdrop Track Widget -->
                 <div class="omni-view-section">
                     <h3 class="omni-view-title"><i class="fa-solid fa-parachute-box"></i> Active Airdrop Phase</h3>
                     <div class="active-airdrop-card">
                         <div class="phase-title" id="adPhaseTitle">Loading Phase...</div>
-                        <!-- CHANGE START: Airdrop Ratio Text -->
                         <div class="phase-description">Conversion Ratio: 1 ZTR per 1,000 Points</div>
-                        <!-- CHANGE END: Airdrop Ratio Text -->
                         
                         <div class="airdrop-progress-wrap">
                             <div class="progress-bar-bg">
                                 <div class="progress-bar-fill" id="airdropProgressFill"></div>
                             </div>
                             <div class="progress-labels">
-                                <span id="adStartPoint" style="color:var(--text-muted); font-family:monospace;">0 Pts</span>
-                                <span id="airdropProgressText" style="color:var(--primary); font-weight:bold; position:absolute; left:50%; transform:translateX(-50%);">0 Pts</span>
-                                <span id="adEndPoint" style="color:var(--gold); font-family:monospace; font-weight:bold;">0 Pts</span>
+                                <span id="adStartPoint">0 Pts</span>
+                                <span id="airdropProgressText">0 / 0 Pts</span>
+                                <span id="adEndPoint">0 Pts</span>
                             </div>
                         </div>
                         
@@ -2194,6 +2201,18 @@
                 joiningFeeZTR = config.joiningFeeZTR || 0.1;
                 liveZTRPrice = baseZTRPrice;
                 APP_LEVELS = config.levels || [];
+                // **FIX**: Ensure APP_LEVELS has a starter level if it's missing from DB config for some reason
+                if (!APP_LEVELS.find(l => l.id === 0)) {
+                    APP_LEVELS.unshift({
+                        id: 0,
+                        name: "Starter",
+                        price: 0,
+                        salaryFund: 0,
+                        fee: 0,
+                        icon: "S",
+                        airdropPoints: 100
+                    });
+                }
                 ADMIN_WALLET = adminConfig.adminWallet || "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
 
             } catch (error) {
@@ -2315,8 +2334,8 @@
         }
         
         async function distributeAirdropPoints(userWallet, levelId, source = 'self_upgrade') {
-            const levelConfig = APP_LEVELS.find(l => l.id === levelId) || {};
-            const pointsToDistribute = levelConfig.airdropPoints || (levelId === 0 ? 100 : 0);
+            const levelConfig = APP_LEVELS.find(l => l.id === levelId);
+            const pointsToDistribute = levelConfig?.airdropPoints || 0;
             
             if (!pointsToDistribute || pointsToDistribute <= 0) return;
 
@@ -2338,7 +2357,7 @@
                 await awardPoints(userWallet, reason, { levelId });
             }
             
-            if (userData && userData.inviterId) {
+            if (userData.inviterId) {
                 const inviterWallet = await getWalletByUserId(userData.inviterId);
                 if (inviterWallet) {
                     const reason = `Downline Level ${levelId + 1} Upgrade`;
@@ -2349,11 +2368,11 @@
         
         async function distributeRegistrationCommissions(inviterId, newUserId) {
             const commissionableAmount = joiningFeeZTR;
-
             const directCommissionType = 'Direct Commission';
             const uplineCommissionType = 'Upline Commission';
             const teamCommissionType = 'Team Commission';
 
+            // **FIX**: Ensure starLevelId is 0 for registration, which correctly targets the Starter Level.
             await addCommission(inviterId, commissionableAmount * 0.55, directCommissionType, 'direct', 0, newUserId, 0);
 
             const inviterWallet = await getWalletByUserId(inviterId);
@@ -2395,6 +2414,7 @@
                  const inviterData = await fetchUserData(inviterWallet);
                  const inviterLevel = inviterData.level !== undefined ? inviterData.level : 0;
 
+                 // **FIX**: Conditional Earning Logic. User only earns if their level is sufficient.
                  if (inviterLevel >= levelId) {
                     await addCommission(inviterId, levelPrice * 0.55, `Level ${levelId + 1} Direct Commission`, 'direct', levelId, sourceUserId, levelId);
                  }
@@ -2416,7 +2436,9 @@
                 const teamMembers = [];
                 teamSnapshot.forEach(child => {
                     const memberData = child.val();
-                    if (child.key !== wallet.toLowerCase() && memberData.profile) {
+                    // **FIX**: Ensure team members also meet level requirement to earn team commission
+                    const memberLevel = memberData.level !== undefined ? memberData.level : 0;
+                    if (child.key !== wallet.toLowerCase() && memberData.profile && memberLevel >= levelId) {
                          teamMembers.push(memberData.profile.userId);
                     }
                 });
@@ -2424,6 +2446,7 @@
                 if (teamMembers.length > 0) {
                     const share = (levelPrice * 0.20) / teamMembers.length;
                     for (const memberId of teamMembers) {
+                        // **FIX**: Correctly passing levelId for star filling for team commission
                         await addCommission(memberId, share, `Level ${levelId + 1} Team Commission`, 'downline', levelId, sourceUserId, levelId);
                     }
                 }
@@ -2501,7 +2524,7 @@
              if (!currentUserData || !currentUserData.profile) return;
             const { profile, ztrBalance, level, inviterId, inviteCode } = currentUserData;
             const userLevelId = level !== undefined ? level : 0;
-            const levelInfo = APP_LEVELS.find(l => l.id === userLevelId) || { name: 'Not Available' };
+            const levelInfo = APP_LEVELS.find(l => l.id === userLevelId);
             
             document.getElementById('userId').innerText = `ID: ZTR-${profile.userId}`;
             document.getElementById('profileName').innerText = profile.name;
@@ -2532,7 +2555,7 @@
             if (!currentUserData) return;
             const { ztrBalance, teamSize, level } = currentUserData;
             const userLevelId = level !== undefined ? level : 0;
-            const levelInfo = APP_LEVELS.find(l => l.id === userLevelId) || { name: 'Not Available' };
+            const levelInfo = APP_LEVELS.find(l => l.id === userLevelId);
             
             const salary = await getSalleryEarnings(userAddress);
             
@@ -2640,7 +2663,7 @@
             };
 
             const userLevel = currentUserData.level !== undefined ? currentUserData.level : 0;
-            const currentUserLevelInfo = APP_LEVELS.find(l => l.id === userLevel) || APP_LEVELS[0] || { name: 'Starter' };
+            const currentUserLevelInfo = APP_LEVELS.find(l => l.id === userLevel);
             const currentUserLevelName = currentUserLevelInfo.name;
 
             let treeHTML = `<div class="tree"><ul><li>${buildNodeHTML(currentUserData.profile, currentUserLevelName, true)}${await buildTree(currentUserData.profile.userId)}</li></ul></div>`;
@@ -2756,7 +2779,8 @@
             let cardsHTML = '';
             let stepperHTML = '';
             
-            let allLevels = [...APP_LEVELS].sort((a, b) => a.id - b.id);
+            // **FIX**: Ensure levels are sorted by ID and ALWAYS includes Level 0.
+            const allLevels = [...APP_LEVELS].sort((a, b) => a.id - b.id);
 
             for (const level of allLevels) {
                 const isUnlocked = currentLevelId >= level.id;
@@ -2764,6 +2788,7 @@
                 const isCurrentLevel = currentLevelId === level.id;
                 const teamSizeOk = (currentUserData.teamSize || 0) >= (level.requiredTeamSize || 0);
 
+                // **FIX**: Display level number as id + 1 for user-friendliness
                 stepperHTML += `<div class="level-stepper-item" data-level-id="${level.id}"><span>${level.id + 1}</span><div class="dot"></div></div>`;
                 
                 const starsHTML = await renderStarsForLevel(level.id);
@@ -2771,7 +2796,10 @@
                 const usdtPrice = (totalCost * liveZTRPrice).toFixed(2);
                 
                 let buttonHTML;
-                if(isUnlocked) {
+                // **FIX**: The starter level (id 0) doesn't need an upgrade button.
+                if (level.id === 0) {
+                     buttonHTML = `<button class="btn" disabled><i class="fa-solid fa-check-double"></i> UNLOCKED</button>`;
+                } else if(isUnlocked) {
                      buttonHTML = `<button class="btn" disabled><i class="fa-solid fa-check-double"></i> ACHIEVED</button>`;
                 } else if (canUpgrade) {
                      if (teamSizeOk) {
@@ -2782,8 +2810,32 @@
                 } else {
                      buttonHTML = `<button class="btn" disabled><i class="fa-solid fa-lock"></i> LOCKED</button>`;
                 }
+                
+                const priceDisplayHTML = level.id > 0 ?
+                    `<div class="price-breakdown-container">
+                        <p>Plan Price: <span>${(level.price || 0).toFixed(2)} ZTR</span></p>
+                        <p>Salary Fund: <span>${(level.salaryFund || 0).toFixed(2)} ZTR</span></p>
+                        <p>System Fee: <span>${(level.fee || 0).toFixed(2)} ZTR</span></p>
+                    </div>
+                    <h3 class="level-price" style="margin-top: 15px;">Total: ${totalCost.toFixed(2)} ZTR</h3>
+                    <p class="level-info">≈ ${usdtPrice} USDT</p>` :
+                    `<h3 class="level-price" style="margin-top: 15px;">Registration</h3><p class="level-info">Included with node activation</p>`;
 
-                cardsHTML += `<div class="level-card ${isUnlocked ? 'unlocked' : ''}" id="level-card-${level.id}"><div><div class="level-icon">${level.icon}</div><h2>${level.name} (Level ${level.id + 1})</h2>${isCurrentLevel ? '<span class="rank-badge">CURRENTLY ACTIVE</span>' : ''}</div><div class="level-stars-container">${starsHTML}</div><div><div class="price-breakdown-container"><p>Plan Price: <span>${(level.price || 0).toFixed(2)} ZTR</span></p><p>Salary Fund: <span>${(level.salaryFund || 0).toFixed(2)} ZTR</span></p><p>System Fee: <span>${(level.fee || 0).toFixed(2)} ZTR</span></p></div><h3 class="level-price" style="margin-top: 15px;">Total: ${totalCost.toFixed(2)} ZTR</h3><p class="level-info">≈ ${usdtPrice} USDT</p>${(level.salary && level.salary > 0) ? `<p class="level-info" style="color: var(--gold); margin-top: 10px; font-weight: bold;">Unlocks ${level.salary} ZTR Weekly Salary</p>`: ''}${(level.requiredTeamSize && level.requiredTeamSize > 0) ? `<p class="level-info" style="color: var(--primary); margin-top: 5px;">Requires ${level.requiredTeamSize} team members</p>`: ''}</div>${buttonHTML}</div>`;
+                cardsHTML += `
+                    <div class="level-card ${isUnlocked ? 'unlocked' : ''}" id="level-card-${level.id}">
+                        <div>
+                            <div class="level-icon">${level.icon}</div>
+                            <h2>${level.name} (Level ${level.id + 1})</h2>
+                            ${isCurrentLevel ? '<span class="rank-badge">CURRENTLY ACTIVE</span>' : ''}
+                        </div>
+                        <div class="level-stars-container">${starsHTML}</div>
+                        <div>
+                            ${priceDisplayHTML}
+                            ${(level.salary && level.salary > 0) ? `<p class="level-info" style="color: var(--gold); margin-top: 10px; font-weight: bold;">Unlocks ${level.salary} ZTR Weekly Salary</p>`: ''}
+                            ${(level.requiredTeamSize && level.requiredTeamSize > 0) ? `<p class="level-info" style="color: var(--primary); margin-top: 5px;">Requires ${level.requiredTeamSize} team members</p>`: ''}
+                        </div>
+                        ${buttonHTML}
+                    </div>`;
             }
             viewer.innerHTML = cardsHTML;
             stepper.innerHTML = stepperHTML;
@@ -2813,7 +2865,7 @@
                 });
             });
 
-            const initialCardId = currentLevelId; // Show current level
+            const initialCardId = currentLevelId; 
             const initialActiveCard = document.getElementById(`level-card-${initialCardId}`);
             if (initialActiveCard) {
                 setTimeout(() => {
@@ -3331,6 +3383,7 @@
         });
         
         function updateAirdropProgress(totalDistributed = 0) {
+            // **FIX**: Hardcoded Airdrop Phases as per your requirement
             const phases =[
                 { title: 'Phase 1: Genesis', target: 200000, start: 0 },
                 { title: 'Phase 2: Discovery', target: 500000, start: 200000 },
@@ -3347,7 +3400,7 @@
             
             document.getElementById('airdropProgressFill').style.width = `${percentage}%`;
             document.getElementById('adPhaseTitle').innerText = totalDistributed >= phases[phases.length -1].target ? "All Phases Complete!" : activePhase.title;
-            document.getElementById('airdropProgressText').innerText = `${totalDistributed.toLocaleString()} / ${activePhase.target.toLocaleString()} Pts`;
+            document.getElementById('airdropProgressText').innerText = `${totalDistributed.toLocaleString()} / ${activePhase.target.toLocaleString()}`;
             document.getElementById('adStartPoint').innerText = `${activePhase.start.toLocaleString()} Pts`;
             document.getElementById('adEndPoint').innerText = `${activePhase.target.toLocaleString()} Pts`;
         }
@@ -3462,7 +3515,7 @@
                 listContainer.innerHTML = '';
                 const historyData = [];
                 snapshot.forEach(child => historyData.push(child.val()));
-                historyData.reverse(); // Show newest first
+                historyData.reverse();
 
                 historyData.forEach(item => {
                     const date = new Date(item.timestamp);
@@ -3527,7 +3580,7 @@
                 await logAirdropPoints(walletLower, points, 'Invitation Task Reward', { requiredInvites: required });
 
                 showToast(`Claimed ${points.toLocaleString()} airdrop points!`, "success");
-                await fetchUserData(userAddress);
+                await fetchUserData(walletLower);
                 await renderInvitationTasks(); 
                 document.getElementById('airdropPointsDisplay').innerText = (currentUserData.airdropPoints || 0).toLocaleString();
             } catch (error) {
