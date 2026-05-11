@@ -659,42 +659,49 @@
         }
         
         .level-stepper-container {
-            padding: 15px 0;
+            padding: 20px 0;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             background: rgba(0,0,0,0.3);
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
+        .level-stepper-container::-webkit-scrollbar {
+             display: none;
+        }
+
         .level-stepper-nav {
             display: flex;
             align-items: center;
-            justify-content: space-around;
-            max-width: 480px;
-            margin: 0 auto;
+            justify-content: flex-start;
+            gap: 20px;
+            padding: 0 20px;
+            width: max-content;
         }
         .level-stepper-item {
             display: flex;
-            flex-direction: column;
+            flex-shrink: 0;
             align-items: center;
-            gap: 8px;
-            color: var(--text-muted);
-            font-size: 14px;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        .level-stepper-item .dot {
-            width: 8px;
-            height: 8px;
-            background: var(--text-muted);
+            justify-content: center;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            transition: background 0.3s, transform 0.3s;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,255,255,0.2);
+            color: var(--text-muted);
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            scroll-snap-align: center;
         }
+        
         .level-stepper-item.active {
             color: var(--primary);
-            font-weight: bold;
-        }
-        .level-stepper-item.active .dot {
-            background: var(--primary);
-            transform: scale(1.5);
-            box-shadow: 0 0 10px var(--primary-glow);
+            border-color: var(--primary);
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--primary-glow);
         }
         
         .level-viewer-container {
@@ -704,26 +711,26 @@
             display: flex;
             align-items: center;
             gap: 20px;
-            scroll-snap-type: x mandatory; /* Makes scrolling snap */
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
+            scroll-snap-type: x mandatory;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         .level-viewer-container::-webkit-scrollbar {
-             display: none; /* Chrome, Safari, Opera */
+             display: none;
         }
         .level-viewer-container::before, .level-viewer-container::after {
             content: '';
             display: block;
             flex-shrink: 0;
-            width: calc( (100% - 280px) / 2 - 10px ); /* Centering calculation */
+            width: calc( (100% - 280px) / 2 - 10px );
         }
         
         .level-card {
             flex-shrink: 0;
-            scroll-snap-align: center; /* Aligns card to center on snap */
+            scroll-snap-align: center;
             width: 280px;
             height: auto;
-            min-height: 520px; /* Increased min-height */
+            min-height: 520px;
             padding: 30px;
             text-align: center;
             display: flex;
@@ -743,7 +750,6 @@
             box-shadow: 0 0 35px var(--primary-glow);
         }
         
-        /* NEW STAR GRID STYLE */
         .level-stars-container {
             margin: 20px 0;
             display: grid;
@@ -755,16 +761,16 @@
             padding: 0 10px;
         }
         .star-node {
-            font-size: 32px; /* Larger stars */
+            font-size: 32px;
             color: rgba(255,255,255,0.2);
             position: relative;
             transition: color 0.3s, transform 0.3s;
             transform: scale(0.9);
         }
         .star-node.filled {
-            color: white; /* Base color for the icon inside */
+            color: white;
             transform: scale(1);
-            text-shadow: 0 0 15px currentColor; /* Glow effect based on star color */
+            text-shadow: 0 0 15px currentColor;
             cursor: pointer;
         }
         .star-node.filled.direct { color: var(--star-direct); }
@@ -786,7 +792,7 @@
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s, visibility 0.3s;
-            pointer-events: none; /* Important for hover */
+            pointer-events: none;
         }
         .star-node:hover .tooltip {
             opacity: 1;
@@ -864,7 +870,6 @@
             margin-bottom: 15px;
         }
 
-        /* New Loading System Style */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -930,7 +935,6 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.6; }
         }
-        /* End of New Loading System Style */
 
         .profile-setup-modal {
             max-width: 400px;
@@ -1092,9 +1096,7 @@
         .candle.red { color: var(--danger); }
         .candle.green .body { background-color: var(--success); }
         .candle.red .body { background-color: var(--danger); }
-        /* End Trading Chart Style */
 
-        /* New Airdrop Card Style */
         .airdrop-card {
             padding: 30px;
             text-align: center;
@@ -1106,7 +1108,7 @@
             box-shadow: 0 0 30px var(--primary-glow);
             position: relative;
             overflow: hidden;
-            cursor: pointer; /* Make it clickable */
+            cursor: pointer;
         }
         .airdrop-card::before {
             content: '';
@@ -1143,7 +1145,7 @@
             margin-bottom: 20px;
             background: rgba(0,0,0,0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.4); /* Added inner shadow for depth */
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.4);
         }
 
         .slider-container .slide {
@@ -1210,7 +1212,6 @@
             vertical-align: middle;
         }
 
-        /* NEW Omni View Dynamic Airdrop Style Widget Starts */
         .omni-view-section {
             margin-bottom: 30px;
         }
@@ -1264,7 +1265,7 @@
             height: 100%;
             background: linear-gradient(90deg, var(--secondary), var(--primary));
             box-shadow: 0 0 15px var(--primary-glow);
-            width: 0%; /* Dynamic Via JS */
+            width: 0%;
             transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
         }
@@ -1296,7 +1297,6 @@
             font-size: 12px;
             white-space: nowrap;
         }
-        /* Ends Omni View Drop Style */
 
         .omni-view-stats {
             display: grid;
@@ -1382,7 +1382,6 @@
             color: var(--success);
         }
         
-        /* New WeekFlow and Tokens Page Styles */
         .full-page-overlay {
             position: fixed;
             inset: 0;
@@ -1455,7 +1454,7 @@
 
         .salary-progress-bar-fill {
             height: 100%;
-            width: 0%; /* Will be set by JS */
+            width: 0%;
             background: linear-gradient(90deg, var(--gold), #ffda75);
             border-radius: 4px;
             transition: width 0.5s ease;
@@ -1558,6 +1557,8 @@
             </p>
             <div id="salaryInfo">
                 <!-- Salary details will be injected here -->
+                 <div class="salary-value">Performance Based</div>
+                 <p style="color: var(--text-muted); font-size: 13px;">Upgrade to an eligible level to activate your salary earnings.</p>
             </div>
         </div>
 
@@ -1574,9 +1575,9 @@
                 <div class="task-item">
                     <div class="task-details" style="display: flex; align-items: center; gap: 15px;">
                         <i class="fa-solid fa-check-circle" style="color: var(--success); font-size: 20px;"></i>
-                        <strong>Performance-Based Salary (Levels 5+)</strong>
+                        <strong>Performance-Based Salary</strong>
                     </div>
-                    <div id="userWeeklySalaryShare" class="task-reward" style="color: white; font-family: monospace;">Performance Based</div>
+                    <div id="userWeeklySalaryShare" class="task-reward" style="color: white; font-family: monospace;">Share from Pool</div>
                 </div>
             </div>
             <p style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 15px;">Calculated amounts are preliminary. Amounts available for claiming will be shown in the claim button on the last day of the period.</p>
@@ -1672,7 +1673,7 @@
         <div style="width:40px;"></div> <!-- Placeholder for balance -->
     </div>
     
-    <div class="level-stepper-container">
+    <div class="level-stepper-container" id="levelStepperContainer">
         <div class="level-stepper-nav" id="levelStepperNav">
             <!-- Stepper items will be injected here by JavaScript -->
         </div>
@@ -2201,18 +2202,10 @@
                 joiningFeeZTR = config.joiningFeeZTR || 0.1;
                 liveZTRPrice = baseZTRPrice;
                 APP_LEVELS = config.levels || [];
-                // **FIX**: Ensure APP_LEVELS has a starter level if it's missing from DB config for some reason
-                if (!APP_LEVELS.find(l => l.id === 0)) {
-                    APP_LEVELS.unshift({
-                        id: 0,
-                        name: "Starter",
-                        price: 0,
-                        salaryFund: 0,
-                        fee: 0,
-                        icon: "S",
-                        airdropPoints: 100
-                    });
-                }
+                
+                // IMPORTANT: Ensure APP_LEVELS is sorted by ID.
+                APP_LEVELS.sort((a, b) => a.id - b.id);
+                
                 ADMIN_WALLET = adminConfig.adminWallet || "0xfb27A7Df0B464C034c284779E9Ea4d595F9bF399";
 
             } catch (error) {
@@ -2372,7 +2365,6 @@
             const uplineCommissionType = 'Upline Commission';
             const teamCommissionType = 'Team Commission';
 
-            // **FIX**: Ensure starLevelId is 0 for registration, which correctly targets the Starter Level.
             await addCommission(inviterId, commissionableAmount * 0.55, directCommissionType, 'direct', 0, newUserId, 0);
 
             const inviterWallet = await getWalletByUserId(inviterId);
@@ -2414,9 +2406,8 @@
                  const inviterData = await fetchUserData(inviterWallet);
                  const inviterLevel = inviterData.level !== undefined ? inviterData.level : 0;
 
-                 // **FIX**: Conditional Earning Logic. User only earns if their level is sufficient.
                  if (inviterLevel >= levelId) {
-                    await addCommission(inviterId, levelPrice * 0.55, `Level ${levelId + 1} Direct Commission`, 'direct', levelId, sourceUserId, levelId);
+                    await addCommission(inviterId, levelPrice * 0.55, `Level Direct Commission`, 'direct', levelId, sourceUserId, levelId);
                  }
 
                  if (inviterData && inviterData.inviterId) {
@@ -2425,7 +2416,7 @@
                         const uplineData = await fetchUserData(uplineWallet);
                         const uplineLevel = uplineData.level !== undefined ? uplineData.level : 0;
                         if (uplineLevel >= levelId) {
-                            await addCommission(inviterData.inviterId, levelPrice * 0.07, `Level ${levelId + 1} Upline Commission`, 'upline', levelId, sourceUserId, levelId);
+                            await addCommission(inviterData.inviterId, levelPrice * 0.07, `Level Upline Commission`, 'upline', levelId, sourceUserId, levelId);
                         }
                     }
                  }
@@ -2436,7 +2427,6 @@
                 const teamMembers = [];
                 teamSnapshot.forEach(child => {
                     const memberData = child.val();
-                    // **FIX**: Ensure team members also meet level requirement to earn team commission
                     const memberLevel = memberData.level !== undefined ? memberData.level : 0;
                     if (child.key !== wallet.toLowerCase() && memberData.profile && memberLevel >= levelId) {
                          teamMembers.push(memberData.profile.userId);
@@ -2446,8 +2436,7 @@
                 if (teamMembers.length > 0) {
                     const share = (levelPrice * 0.20) / teamMembers.length;
                     for (const memberId of teamMembers) {
-                        // **FIX**: Correctly passing levelId for star filling for team commission
-                        await addCommission(memberId, share, `Level ${levelId + 1} Team Commission`, 'downline', levelId, sourceUserId, levelId);
+                        await addCommission(memberId, share, `Level Team Commission`, 'downline', levelId, sourceUserId, levelId);
                     }
                 }
             }
@@ -2778,29 +2767,22 @@
             const currentLevelId = currentUserData.level !== undefined ? currentUserData.level : 0;
             let cardsHTML = '';
             let stepperHTML = '';
-            
-            // **FIX**: Ensure levels are sorted by ID and ALWAYS includes Level 0.
-            const allLevels = [...APP_LEVELS].sort((a, b) => a.id - b.id);
 
-            for (const level of allLevels) {
+            for (const level of APP_LEVELS) {
                 const isUnlocked = currentLevelId >= level.id;
                 const canUpgrade = currentLevelId === level.id - 1;
                 const isCurrentLevel = currentLevelId === level.id;
                 const teamSizeOk = (currentUserData.teamSize || 0) >= (level.requiredTeamSize || 0);
 
-                // **FIX**: Display level number as id + 1 for user-friendliness
-                stepperHTML += `<div class="level-stepper-item" data-level-id="${level.id}"><span>${level.id + 1}</span><div class="dot"></div></div>`;
+                stepperHTML += `<div class="level-stepper-item" id="level-stepper-item-${level.id}" data-level-id="${level.id}">${level.id + 1}</div>`;
                 
                 const starsHTML = await renderStarsForLevel(level.id);
                 const totalCost = (level.price || 0) + (level.salaryFund || 0) + (level.fee || 0);
                 const usdtPrice = (totalCost * liveZTRPrice).toFixed(2);
                 
                 let buttonHTML;
-                // **FIX**: The starter level (id 0) doesn't need an upgrade button.
-                if (level.id === 0) {
+                if(isUnlocked) {
                      buttonHTML = `<button class="btn" disabled><i class="fa-solid fa-check-double"></i> UNLOCKED</button>`;
-                } else if(isUnlocked) {
-                     buttonHTML = `<button class="btn" disabled><i class="fa-solid fa-check-double"></i> ACHIEVED</button>`;
                 } else if (canUpgrade) {
                      if (teamSizeOk) {
                         buttonHTML = `<button class="btn" id="upgradeBtn-${level.id}" onclick="initiateLevelUpgrade(${level.id})"><i class="fa-solid fa-bolt"></i> ACTIVATE</button>`;
@@ -2811,27 +2793,26 @@
                      buttonHTML = `<button class="btn" disabled><i class="fa-solid fa-lock"></i> LOCKED</button>`;
                 }
                 
-                const priceDisplayHTML = level.id > 0 ?
+                const priceDisplayHTML =
                     `<div class="price-breakdown-container">
                         <p>Plan Price: <span>${(level.price || 0).toFixed(2)} ZTR</span></p>
                         <p>Salary Fund: <span>${(level.salaryFund || 0).toFixed(2)} ZTR</span></p>
                         <p>System Fee: <span>${(level.fee || 0).toFixed(2)} ZTR</span></p>
                     </div>
                     <h3 class="level-price" style="margin-top: 15px;">Total: ${totalCost.toFixed(2)} ZTR</h3>
-                    <p class="level-info">≈ ${usdtPrice} USDT</p>` :
-                    `<h3 class="level-price" style="margin-top: 15px;">Registration</h3><p class="level-info">Included with node activation</p>`;
+                    <p class="level-info">≈ ${usdtPrice} USDT</p>`;
 
                 cardsHTML += `
                     <div class="level-card ${isUnlocked ? 'unlocked' : ''}" id="level-card-${level.id}">
                         <div>
                             <div class="level-icon">${level.icon}</div>
-                            <h2>${level.name} (Level ${level.id + 1})</h2>
+                            <h2>${level.name}</h2>
                             ${isCurrentLevel ? '<span class="rank-badge">CURRENTLY ACTIVE</span>' : ''}
                         </div>
                         <div class="level-stars-container">${starsHTML}</div>
                         <div>
                             ${priceDisplayHTML}
-                            ${(level.salary && level.salary > 0) ? `<p class="level-info" style="color: var(--gold); margin-top: 10px; font-weight: bold;">Unlocks ${level.salary} ZTR Weekly Salary</p>`: ''}
+                            ${(level.salaryFund && level.salaryFund > 0) ? `<p class="level-info" style="color: var(--gold); margin-top: 10px; font-weight: bold;">Contributes to Weekly Salary Pool</p>`: ''}
                             ${(level.requiredTeamSize && level.requiredTeamSize > 0) ? `<p class="level-info" style="color: var(--primary); margin-top: 5px;">Requires ${level.requiredTeamSize} team members</p>`: ''}
                         </div>
                         ${buttonHTML}
@@ -2845,32 +2826,47 @@
 
         function setupLevelPageInteractivity(currentLevelId) {
             const viewer = document.getElementById('levelViewer');
-            const stepper = document.getElementById('levelStepperNav');
-            const stepperItems = stepper.querySelectorAll('.level-stepper-item');
+            const stepperContainer = document.getElementById('levelStepperContainer');
+            const stepperNav = document.getElementById('levelStepperNav');
+            const stepperItems = stepperNav.querySelectorAll('.level-stepper-item');
 
-            const updateActiveStep = () => {
-                const cardWidth = 280;
-                const gap = 20;
-                const activeIndex = Math.round(viewer.scrollLeft / (cardWidth + gap));
+            let isScrolling = false;
+
+            const updateActiveItems = (activeIndex) => {
                 stepperItems.forEach((item, index) => {
                     item.classList.toggle('active', index === activeIndex);
                 });
             };
-            
-            viewer.addEventListener('scroll', updateActiveStep);
+
+            viewer.addEventListener('scroll', () => {
+                if(isScrolling) return;
+                const cardWidth = 280;
+                const gap = 20;
+                const activeIndex = Math.round(viewer.scrollLeft / (cardWidth + gap));
+                updateActiveItems(activeIndex);
+                const activeStepperItem = document.getElementById(`level-stepper-item-${activeIndex}`);
+                if (activeStepperItem) {
+                    activeStepperItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            });
 
             stepperItems.forEach(item => {
                 item.addEventListener('click', () => {
-                    document.getElementById(`level-card-${item.dataset.levelId}`).scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    const levelId = item.dataset.levelId;
+                    isScrolling = true;
+                    document.getElementById(`level-card-${levelId}`).scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    updateActiveItems(parseInt(levelId));
+                    setTimeout(() => { isScrolling = false; }, 500);
                 });
             });
 
-            const initialCardId = currentLevelId; 
-            const initialActiveCard = document.getElementById(`level-card-${initialCardId}`);
+            const initialActiveCard = document.getElementById(`level-card-${currentLevelId}`);
             if (initialActiveCard) {
-                setTimeout(() => {
+                 setTimeout(() => {
                     initialActiveCard.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
-                    updateActiveStep();
+                    updateActiveItems(currentLevelId);
+                    const activeStepperItem = document.getElementById(`level-stepper-item-${currentLevelId}`);
+                    if(activeStepperItem) activeStepperItem.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
                 }, 100);
             }
         }
@@ -2935,7 +2931,7 @@
                 await distributeAirdropPoints(userAddress, levelId, 'self_upgrade');
                 await distributeUpgradeCommissions(userAddress, levelId, level.price || 0);
 
-                showToast(`${level.name} (Level ${levelId+1}) Activated!`, "success");
+                showToast(`${level.name} Activated!`, "success");
                 
                 await fetchUserData(userAddress); 
                 await Promise.all([updateBalances(), initializeLevelViewer(), updateDashboard(), updateAssetsPage()]);
@@ -3383,7 +3379,6 @@
         });
         
         function updateAirdropProgress(totalDistributed = 0) {
-            // **FIX**: Hardcoded Airdrop Phases as per your requirement
             const phases =[
                 { title: 'Phase 1: Genesis', target: 200000, start: 0 },
                 { title: 'Phase 2: Discovery', target: 500000, start: 200000 },
@@ -3475,14 +3470,8 @@
             weekFlowPage.classList.add('active');
             closeModal('dropsModal');
             
-            const salaryInfoContainer = document.getElementById('salaryInfo');
             const salaryHistoryContainer = document.getElementById('salaryHistoryListWeekFlow');
 
-            const levelId = currentUserData.level !== undefined ? currentUserData.level : 0;
-            const level = APP_LEVELS.find(l => l.id === levelId);
-
-            salaryInfoContainer.innerHTML = (level && level.salary > 0) ? `<div class="salary-value">${level.salary.toFixed(2)} ZTR / Week</div><p style="color: var(--text-muted);">Base salary. Actual earnings depend on performance.</p>` : `<div class="salary-value">0.00 ZTR / Week</div><p style="color: var(--text-muted); font-size: 13px;">Upgrade to an eligible level to receive weekly salary.</p>`;
-            
             const salaryRef = db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`);
             const snapshot = await salaryRef.orderByChild('type').equalTo('Weekly Salary').once('value');
             if (snapshot.exists()) {
