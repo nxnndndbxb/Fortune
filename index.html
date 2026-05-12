@@ -91,34 +91,6 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .income-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .income-card {
-            padding: 20px 15px;
-            text-align: center;
-            border-radius: 20px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: 0.3s;
-        }
-
-        .income-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-3px);
-            cursor: pointer;
-        }
-
-        .income-card h3 {
-            font-size: 22px;
-            color: var(--primary);
-            text-shadow: 0 0 10px var(--primary-glow);
-        }
-
         .node-button-container {
             display: flex;
             justify-content: center;
@@ -997,7 +969,7 @@
             color: #ef4444;
         }
         
-        /* NEW TRADING CHART STYLES */
+        /* === NEW TRADING CHART STYLES START === */
         .trading-chart-container {
             height: 200px;
             border-radius: 20px;
@@ -1043,44 +1015,21 @@
 
         .chart-area {
             flex-grow: 1;
-            display: flex;
-            align-items: flex-end;
-            gap: 3px;
-            overflow: hidden;
-            border-radius: 10px;
-            padding: 5px;
             position: relative;
             z-index: 1;
         }
-        .candle-container {
-            flex: 1;
-            height: 100%;
-            position: relative;
-            display: flex;
-            justify-content: center;
-        }
-        .candle {
-            position: absolute;
-            width: 70%;
-            transition: all 0.3s ease;
-        }
-        .candle .wick {
-            width: 2px;
-            background-color: currentColor;
-            margin: 0 auto;
-            position: absolute;
-            left: 0; right: 0;
-            box-shadow: 0 0 5px currentColor;
-        }
-        .candle .body {
-            position: absolute;
+        
+        .line-chart-svg {
             width: 100%;
-            border: 1px solid rgba(0,0,0,0.3);
+            height: 100%;
         }
-        .candle.green { color: var(--success); }
-        .candle.red { color: var(--danger); }
-        .candle.green .body { background-color: var(--success); }
-        .candle.red .body { background-color: var(--danger); }
+
+        .line-chart-path {
+            stroke-width: 2.5;
+            fill: url(#line-chart-gradient);
+            filter: drop-shadow(0 0 8px var(--primary-glow));
+        }
+        /* === NEW TRADING CHART STYLES END === */
 
 
         .airdrop-card {
@@ -1497,76 +1446,44 @@
             margin: 20px auto;
         }
 
-        /* === NEW BOTTOM STATS PANEL STYLES === */
-        .bottom-stats-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 999;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 15px;
+        /* === NEW HOME STATS STYLES START === */
+        .home-stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            border-radius: 25px 25px 0 0;
-            transform: translateY(100%);
-            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
-            padding-bottom: calc(15px + env(safe-area-inset-bottom));
+            margin-top: 25px;
         }
-
-        .bottom-stats-container.visible {
-            transform: translateY(0);
-        }
-
-        .stat-chart-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-        }
-
-        .stat-chart-card h4 {
-            font-size: 12px;
-            font-weight: normal;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-        }
-
-        .chart-wrapper {
-            height: 60px;
-            width: 100%;
-        }
-
-        .chart-wrapper svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        .chart-wrapper .line {
-            stroke-width: 2.5;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .chart-wrapper .area {
-            opacity: 0.2;
-        }
-
-        .chart-wrapper .no-data {
-            font-size: 12px;
-            color: var(--text-muted);
-            height: 100%;
+        .stat-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            text-align: center;
+            transition: all 0.3s ease;
         }
-
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(0, 242, 255, 0.1);
+        }
+        .stat-card-icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+        .stat-card-value {
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .stat-card-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        /* === NEW HOME STATS STYLES END === */
     </style>
 </head>
 <body>
@@ -1917,7 +1834,7 @@
                 </div>
                 <!-- SLIDER END -->
 
-                <!-- ZTR/USDT TRADING CHART START -->
+                <!-- TRADING CHART START -->
                 <div class="trading-chart-container">
                     <div class="chart-header">
                         <div class="coin-info">
@@ -1933,55 +1850,35 @@
                         </div>
                     </div>
                     <div class="chart-area" id="tradingChart">
-                        <!-- Candles will be generated by JavaScript -->
+                        <!-- Line chart will be generated by JavaScript -->
                     </div>
                 </div>
-                <!-- ZTR/USDT TRADING CHART END -->
-                
-                <!-- USDT/USD TRADING CHART START -->
-                <div class="trading-chart-container" style="margin-top: 15px;">
-                    <div class="chart-header">
-                        <div class="coin-info">
-                            <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT Logo" class="coin-logo">
-                            <div>
-                                <span class="coin-symbol">USDT/USD</span>
-                                <span class="coin-name">Tether</span>
-                            </div>
-                        </div>
-                        <div class="price-info">
-                            <span class="live-price" id="liveUSDTPrice">1.0000</span>
-                            <span class="price-change up" id="usdtPriceChange">+0.0000 (0.00%)</span>
-                        </div>
-                    </div>
-                    <div class="chart-area" id="usdtTradingChart">
-                        <!-- SVG Line chart will be generated here by JS -->
-                    </div>
-                </div>
-                <!-- USDT/USD TRADING CHART END -->
+                <!-- TRADING CHART END -->
 
-
-                <div class="income-grid">
-                    <div class="income-card" onclick="openIncomeHistory()">
-                        <p style="font-size:11px; color:rgba(255,255,255,0.7);">Core Profit</p>
-                        <h3 id="profitIncome">0.00 ZTR</h3>
-                        <small style="color:var(--success);">≈ $<span id="profitUSD">0</span></small>
+                <!-- NEW HOME STATS START -->
+                <div class="home-stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-icon" style="color: var(--success);"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="stat-card-value" id="profitIncome">0.00 ZTR</div>
+                        <div class="stat-card-label">Total Earnings</div>
                     </div>
-                    <div class="income-card" style="cursor:default;">
-                        <p style="font-size:11px; color:rgba(255,255,255,0.7);">Direct Team</p>
-                        <h3 id="teamIncome" style="color:var(--text-main);">0</h3>
-                        <small id="teamCount">Members</small>
+                    <div class="stat-card">
+                        <div class="stat-card-icon" style="color: var(--gold);"><i class="fa-solid fa-sack-dollar"></i></div>
+                        <div class="stat-card-value" id="salleryIncome">0.00 ZTR</div>
+                        <div class="stat-card-label">Weekly Salary</div>
                     </div>
-                    <div class="income-card" onclick="openSalaryHistory()">
-                        <p style="font-size:11px; color:rgba(255,255,255,0.7);">Weekly Salary</p>
-                        <h3 id="salleryIncome" style="color:var(--gold);">0.00 ZTR</h3>
-                        <small>From System</small>
+                    <div class="stat-card">
+                        <div class="stat-card-icon" style="color: var(--primary);"><i class="fa-solid fa-parachute-box"></i></div>
+                        <div class="stat-card-value" id="airdropPointsStat">0</div>
+                        <div class="stat-card-label">Airdrop Points</div>
                     </div>
-                     <div class="income-card" style="cursor:default;">
-                        <p style="font-size:11px; color:rgba(255,255,255,0.7);">Current Node</p>
-                        <h3 id="levelIncome" style="font-size: 18px; color: var(--text-main);">Starter</h3>
-                        <small id="levelNameDisplay" style="visibility: hidden;">Phase 1</small>
+                    <div class="stat-card">
+                        <div class="stat-card-icon" style="color: #ff70fd;"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-card-value" id="teamIncome">0</div>
+                        <div class="stat-card-label">Team Members</div>
                     </div>
                 </div>
+                <!-- NEW HOME STATS END -->
 
                 <div class="node-button-container">
                     <div class="node-button" onclick="openLevelPage()">
@@ -2162,27 +2059,6 @@
     <div class="nav-item" data-page="assets"><i class="fa-solid fa-wallet"></i><span>Vault</span></div>
 </div>
 
-<!-- Bottom Stats Panel -->
-<div class="bottom-stats-container" id="bottomStatsContainer">
-    <div class="stat-chart-card">
-        <h4>Total Earnings (ZTR)</h4>
-        <div class="chart-wrapper" id="earningsChart"></div>
-    </div>
-    <div class="stat-chart-card">
-        <h4>Weekly Salary (ZTR)</h4>
-        <div class="chart-wrapper" id="salaryChart"></div>
-    </div>
-    <div class="stat-chart-card">
-        <h4>Airdrop Points</h4>
-        <div class="chart-wrapper" id="airdropChart"></div>
-    </div>
-    <div class="stat-chart-card">
-        <h4>Team Growth</h4>
-        <div class="chart-wrapper" id="teamChart"></div>
-    </div>
-</div>
-
-
 <script>
     (function() {
         // ===================================================================
@@ -2250,7 +2126,6 @@
 
         let liveZTRPrice = 1.0;
         let chartInterval = null;
-        let usdtChartInterval = null; // <-- NEW: Interval for USDT chart
 
         let currentSlide = 0;
         let slideInterval;
@@ -2646,18 +2521,14 @@
 
         async function updateDashboard() {
             if (!currentUserData) return;
-            const { ztrBalance, teamSize, level } = currentUserData;
-            const userLevelId = level !== undefined ? level : 0;
-            const levelInfo = APP_LEVELS.find(l => l.id === userLevelId);
+            const { ztrBalance, teamSize, airdropPoints } = currentUserData;
             
             const salary = await getSalleryEarnings(userAddress);
             
             document.getElementById('profitIncome').innerText = `${(ztrBalance || 0).toFixed(2)} ZTR`;
-            document.getElementById('profitUSD').innerText = ((ztrBalance || 0) * liveZTRPrice).toFixed(2);
             document.getElementById('teamIncome').innerText = teamSize || 0;
-            document.getElementById('teamCount').innerText = `Direct Member${(teamSize || 0) === 1 ? '' : 's'}`;
             document.getElementById('salleryIncome').innerText = `${salary.toFixed(2)} ZTR`;
-            document.getElementById('levelIncome').innerText = levelInfo?.name || 'Starter';
+            document.getElementById('airdropPointsStat').innerText = (airdropPoints || 0).toLocaleString();
         }
 
         function updateInviteInfo() {
@@ -2703,8 +2574,6 @@
             bottomNav.style.display = 'flex';
             initSlider();
             initTradingChart();
-            initUsdtLineChart(); // <-- NEW: Initialize USDT chart
-            initializeBottomStats(); // <-- NEW: Initialize bottom stats panel and charts
             await updateDashboard();
             await updateAssetsPage();
             await renderTeamPage();
@@ -2725,8 +2594,7 @@
                                 wallet: child.key, 
                                 profile: data.profile, 
                                 level: data.level !== undefined ? data.level : 0,
-                                ztrBalance: data.ztrBalance || 0,
-                                registeredAt: data.registeredAt || 0
+                                ztrBalance: data.ztrBalance || 0
                             });
                         }
                     });
@@ -3104,15 +2972,15 @@
         function initTradingChart() {
             if (chartInterval) clearInterval(chartInterval);
             let currentPrice = baseZTRPrice;
-            let chartData = Array.from({ length: 50 }, () => {
-                const open = currentPrice;
+            // Generate more realistic starting data
+            let chartData = [];
+            for(let i=0; i<50; i++) {
                 const fluctuation = (Math.random() - 0.5) * (currentPrice * 0.005);
-                const close = open + fluctuation;
-                const high = Math.max(open, close) + Math.random() * (currentPrice * 0.002);
-                const low = Math.min(open, close) - Math.random() * (currentPrice * 0.002);
+                const close = currentPrice + fluctuation;
+                chartData.push({ close: close });
                 currentPrice = close;
-                return { open, high, low, close };
-            });
+            }
+
             liveZTRPrice = chartData[chartData.length - 1].close;
             renderChart(chartData);
             chartInterval = setInterval(() => {
@@ -3126,7 +2994,7 @@
             const tendency = (baseZTRPrice - lastClose) * 0.1;
             const fluctuation = (Math.random() - 0.49) * (baseZTRPrice * 0.002);
             const newPrice = lastClose + tendency + fluctuation;
-            data.push({ open: lastClose, close: newPrice, high: Math.max(lastClose, newPrice) + Math.random() * (baseZTRPrice * 0.001), low: Math.min(lastClose, newPrice) - Math.random() * (baseZTRPrice * 0.001) });
+            data.push({ close: newPrice });
             if (data.length > 50) data.shift();
             liveZTRPrice = newPrice;
             updatePriceDisplay(data);
@@ -3136,9 +3004,9 @@
         function updatePriceDisplay(data) {
             const priceElement = document.getElementById('liveZTRPrice');
             const changeElement = document.getElementById('priceChange');
-            const firstOpen = data[0].open;
-            const change = liveZTRPrice - firstOpen;
-            const percentChange = (change / firstOpen) * 100;
+            const firstPrice = data[0].close;
+            const change = liveZTRPrice - firstPrice;
+            const percentChange = (change / firstPrice) * 100;
             priceElement.innerText = liveZTRPrice.toFixed(4);
             changeElement.innerText = `${change >= 0 ? '+' : ''}${change.toFixed(4)} (${change >= 0 ? '+' : ''}${percentChange.toFixed(2)}%)`;
             priceElement.style.color = change >= 0 ? 'var(--success)' : 'var(--danger)';
@@ -3147,181 +3015,50 @@
 
         function renderChart(chartData) {
             const chartArea = document.getElementById('tradingChart');
-            if(!chartArea) return;
+            if (!chartArea) return;
             chartArea.innerHTML = '';
-            const prices = chartData.flatMap(d =>[d.high, d.low]);
+            
+            const prices = chartData.map(d => d.close);
             const minPrice = Math.min(...prices);
             const maxPrice = Math.max(...prices);
             const priceRange = maxPrice - minPrice;
+
             if(priceRange <= 0) return;
-            chartData.forEach(data => {
-                const container = document.createElement('div');
-                container.className = 'candle-container';
-                const candle = document.createElement('div');
-                candle.className = data.close >= data.open ? 'candle green' : 'candle red';
-                const wick = document.createElement('div');
-                wick.className = 'wick';
-                wick.style.top = `${((maxPrice - data.high) / priceRange) * 100}%`;
-                wick.style.height = `${((data.high - data.low) / priceRange) * 100}%`;
-                const body = document.createElement('div');
-                body.className = 'body';
-                body.style.top = `${((maxPrice - Math.max(data.open, data.close)) / priceRange) * 100}%`;
-                body.style.height = `${(Math.abs(data.open - data.close) / priceRange) * 100}%`;
-                candle.append(wick, body);
-                container.appendChild(candle);
-                chartArea.appendChild(container);
-            });
-        }
-        
-        // ===================================================================
-        // ======================= NEW CHART LOGIC ===========================
-        // ===================================================================
 
-        function renderLineChart(containerId, data, color) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-            
-            // Normalize data to have at least 2 points for a line
-            if (data.length === 0) {
-                 container.innerHTML = `<div class="no-data">No data available</div>`;
-                 return;
-            }
-            if (data.length === 1) {
-                data = [data[0], data[0]];
-            }
+            const width = chartArea.clientWidth;
+            const height = chartArea.clientHeight;
 
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-            svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-            
-            const maxVal = Math.max(...data);
-            const minVal = Math.min(...data);
-            const range = maxVal - minVal === 0 ? 1 : maxVal - minVal;
-
-            const points = data.map((d, i) => {
-                const x = (i / (data.length - 1)) * width;
-                const y = height - ((d - minVal) / range) * height;
+            const points = chartData.map((d, i) => {
+                const x = (i / (chartData.length - 1)) * width;
+                const y = height - ((d.close - minPrice) / priceRange) * height;
                 return `${x},${y}`;
             }).join(' ');
-            
-            const areaPoints = `${points} ${width},${height} 0,${height}`;
 
-            const area = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-            area.setAttribute('class', 'area');
-            area.setAttribute("points", areaPoints);
-            area.setAttribute("fill", color);
+            const isUp = chartData[chartData.length - 1].close >= chartData[0].close;
+            const strokeColor = isUp ? 'var(--success)' : 'var(--danger)';
 
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-            line.setAttribute('class', 'line');
-            line.setAttribute("points", points);
-            line.setAttribute("stroke", color);
-            
-            const gradientId = `gradient-${containerId}`;
-            const defs = `<defs><linearGradient id="${gradientId}" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:${color};stop-opacity:0.4"/><stop offset="100%" style="stop-color:${color};stop-opacity:0"/></linearGradient></defs>`;
-            area.setAttribute('fill', `url(#${gradientId})`);
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, 'svg');
+            svg.setAttribute('class', 'line-chart-svg');
+            svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+            svg.setAttribute('preserveAspectRatio', 'none');
 
-            svg.innerHTML = defs;
-            svg.appendChild(area);
-            svg.appendChild(line);
+            svg.innerHTML = `
+                <defs>
+                    <linearGradient id="line-chart-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:${strokeColor};stop-opacity:0.3"/>
+                        <stop offset="100%" style="stop-color:${strokeColor};stop-opacity:0"/>
+                    </linearGradient>
+                </defs>
+                <polyline
+                    class="line-chart-path"
+                    points="0,${height} ${points} ${width},${height}"
+                    style="stroke: ${strokeColor};"
+                />
+            `;
             
-            container.innerHTML = '';
-            container.appendChild(svg);
+            chartArea.appendChild(svg);
         }
-
-        function initUsdtLineChart() {
-            if (usdtChartInterval) clearInterval(usdtChartInterval);
-            let priceData = Array.from({ length: 30 }, () => 1.00 + (Math.random() - 0.5) * 0.002);
-            
-            const update = () => {
-                const lastPrice = priceData[priceData.length - 1];
-                const newPrice = lastPrice + (Math.random() - 0.5) * 0.0005;
-                priceData.push(newPrice);
-                if(priceData.length > 30) priceData.shift();
-
-                const priceElement = document.getElementById('liveUSDTPrice');
-                const changeElement = document.getElementById('usdtPriceChange');
-                const change = newPrice - 1.00;
-                const percentChange = change * 100;
-                
-                priceElement.innerText = newPrice.toFixed(4);
-                changeElement.innerText = `${change >= 0 ? '+' : ''}${change.toFixed(4)} (${change >= 0 ? '+' : ''}${percentChange.toFixed(2)}%)`;
-                changeElement.className = `price-change ${change >= 0 ? 'up' : 'down'}`;
-
-                renderLineChart('usdtTradingChart', priceData, 'var(--success)');
-            }
-            update();
-            usdtChartInterval = setInterval(update, 2500);
-        }
-
-        function initializeBottomStats() {
-            const container = document.getElementById('bottomStatsContainer');
-            if(!container) return;
-
-            const handleScroll = () => {
-                if (window.scrollY > 200) {
-                    container.classList.add('visible');
-                } else {
-                    container.classList.remove('visible');
-                }
-            };
-            
-            window.addEventListener('scroll', handleScroll, { passive: true });
-            
-            // Initial render
-            renderAllStatsCharts();
-        }
-        
-        async function renderAllStatsCharts() {
-            // 1. Earnings Chart
-            const incomeRef = db.ref(`users/${userAddress.toLowerCase()}/incomeHistory`).orderByChild('timestamp');
-            const incomeSnapshot = await incomeRef.once('value');
-            let earningsData = [0];
-            let salaryData = [0];
-            if (incomeSnapshot.exists()) {
-                let cumulativeEarnings = 0;
-                let cumulativeSalary = 0;
-                incomeSnapshot.forEach(child => {
-                    const item = child.val();
-                    if(item.amount > 0) {
-                        cumulativeEarnings += item.amount;
-                        earningsData.push(cumulativeEarnings);
-                        if (item.type === 'Weekly Salary') {
-                             cumulativeSalary += item.amount;
-                             salaryData.push(cumulativeSalary);
-                        }
-                    }
-                });
-            }
-            renderLineChart('earningsChart', earningsData, 'var(--success)');
-            renderLineChart('salaryChart', salaryData, 'var(--gold)');
-
-            // 2. Airdrop Points Chart
-            const airdropRef = db.ref(`users/${userAddress.toLowerCase()}/airdropHistory`).orderByChild('timestamp');
-            const airdropSnapshot = await airdropRef.once('value');
-            let airdropData = [0];
-             if (airdropSnapshot.exists()) {
-                let cumulativePoints = 0;
-                airdropSnapshot.forEach(child => {
-                    cumulativePoints += child.val().points;
-                    airdropData.push(cumulativePoints);
-                });
-            }
-            renderLineChart('airdropChart', airdropData, 'var(--primary)');
-
-            // 3. Team Growth Chart
-            const team = await getChildrenFromDB(currentUserData.profile.userId);
-            let teamData = [0];
-            if(team.length > 0) {
-                team.sort((a,b) => a.registeredAt - b.registeredAt);
-                team.forEach((member, index) => {
-                    teamData.push(index + 1);
-                });
-            }
-            renderLineChart('teamChart', teamData, 'var(--secondary)');
-        }
-        
-        // ===================================================================
 
         let setupProfilePicData = null;
         async function handleImageUpload(file) {
