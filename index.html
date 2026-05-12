@@ -2297,6 +2297,30 @@
                 const wallet = await getWalletByUserId(userId);
                 if (!wallet) return false;
 
+                // ===================================================================
+                // ================== NEW INCOME LOCK LOGIC ==========================
+                // ===================================================================
+                // This logic checks if a user's current level is full. If it is,
+                // it blocks ALL further income until the user upgrades to the next level.
+                const recipientSnapshot = await db.ref(`users/${wallet.toLowerCase()}`).once('value');
+                if (!recipientSnapshot.exists()) return false;
+
+                const recipientData = recipientSnapshot.val();
+                const recipientLevelId = recipientData.level !== undefined ? recipientData.level : 0;
+
+                const starsRef = db.ref(`users/${wallet.toLowerCase()}/levelStars/level_${recipientLevelId}`);
+                const starsSnapshot = await starsRef.once('value');
+                
+                // If the user's CURRENT level has 10 or more stars, block all further income.
+                if (starsSnapshot.exists() && starsSnapshot.numChildren() >= 10) {
+                    console.log(`Commission for User ID ${userId} blocked. Their current level (${recipientLevelId + 1}) is full. User must upgrade to continue earning.`);
+                    // NOTE: This blocks ALL income until the user upgrades.
+                    return false; 
+                }
+                // ===================================================================
+                // ================= END OF NEW INCOME LOCK LOGIC ====================
+                // ===================================================================
+
                 const updates = {};
                 updates[`users/${wallet.toLowerCase()}/ztrBalance`] = firebase.database.ServerValue.increment(amount);
                 updates[`platformStats/totalZTRDistributed`] = firebase.database.ServerValue.increment(amount);
@@ -2309,6 +2333,7 @@
                 });
                 
                 if (starType && starLevelId !== undefined && sourceUserId) {
+                    // The star is still added to the correct level where the income originated.
                     await addStarToLevel(wallet, starLevelId, starType, sourceUserId);
                 }
                 return true;
@@ -2317,6 +2342,7 @@
                 return false;
             }
         }
+
 
         async function logAirdropPoints(wallet, points, reason, details = {}) {
             if (!wallet || !isValidWalletAddress(wallet) || points <= 0) return;
