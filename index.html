@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+Of <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -820,11 +820,12 @@
             margin-bottom: 15px;
         }
 
-        /* NEW LOADING OVERLAY STYLES */
+        /* === BEAUTIFUL NEW LOADING OVERLAY STYLES === */
         .loading-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #000;
+            background-color: #010409;
+            background-image: radial-gradient(circle at center, rgba(112, 0, 255, 0.1), transparent 60%);
             z-index: 10000;
             display: flex;
             align-items: center;
@@ -837,43 +838,75 @@
             pointer-events: none;
         }
         .loading-animation {
-            width: 150px;
-            height: 150px;
+            width: 200px;
+            height: 200px;
             position: relative;
         }
         .loading-logo {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             position: absolute;
             top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            animation: logo-pulse 2s infinite ease-in-out;
+            /* transform is now part of the animation */
+            animation: logo-pulse-new 2.5s infinite ease-in-out;
+            filter: drop-shadow(0 0 15px var(--primary-glow));
         }
         .loading-shape {
             position: absolute;
             width: 100%; height: 100%;
             border-radius: 50%;
-            border: 2px solid transparent;
+            border: 2px solid;
+            mix-blend-mode: screen;
         }
-        .loading-shape.s1 { border-color: var(--primary); animation: rotate-loader 4s linear infinite; }
-        .loading-shape.s2 { border-color: var(--secondary); animation: rotate-loader 6s linear infinite reverse; transform: scale(0.8); }
+        .loading-shape.s1 {
+            border-color: var(--primary);
+            animation: rotate-loader 4s linear infinite;
+            box-shadow: 0 0 20px var(--primary-glow), inset 0 0 20px var(--primary-glow);
+        }
+        .loading-shape.s2 {
+            border-color: var(--secondary);
+            animation: rotate-loader 5s linear infinite reverse;
+            transform: scale(0.8);
+            box-shadow: 0 0 20px var(--secondary-glow), inset 0 0 20px var(--secondary-glow);
+        }
         .loading-shape.s3 {
-            border-top-color: var(--primary-glow);
-            border-bottom-color: var(--primary-glow);
-            animation: rotate-loader 2s linear infinite;
+            border-style: dashed;
+            border-color: var(--primary-glow);
+            animation: rotate-loader 3s linear infinite;
             transform: scale(0.6);
         }
         .loading-text {
-            margin-top: 25px;
-            font-family: monospace;
-            color: var(--primary);
-            text-shadow: 0 0 10px var(--primary-glow);
-            letter-spacing: 2px;
-            animation: text-flicker 3s infinite;
+            margin-top: 40px;
+            font-size: 16px;
+            color: var(--text-main);
+            letter-spacing: 1px;
+            animation: text-glow 2.5s infinite ease-in-out;
         }
-        @keyframes rotate-loader { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes logo-pulse { 0%, 100% { transform: scale(0.95); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
-        @keyframes text-flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        @keyframes rotate-loader {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes logo-pulse-new {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(0.95);
+                opacity: 0.9;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
+                opacity: 1;
+            }
+        }
+        @keyframes text-glow {
+            0%, 100% {
+                opacity: 0.7;
+                text-shadow: 0 0 8px var(--primary-glow);
+            }
+            50% {
+                opacity: 1;
+                text-shadow: 0 0 15px var(--primary-glow);
+            }
+        }
 
         .profile-setup-modal {
             max-width: 400px;
