@@ -602,7 +602,7 @@
             margin: 0;
         }
         
-        /* === NEW EDITED MATRIX STYLES START === */
+        /* === EDITED: NEW MATRIX STYLES START === */
         .level-stepper-container {
             padding: 20px 0;
             border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -623,8 +623,8 @@
         .level-stepper-nav::before, .level-stepper-nav::after {
             content: '';
             flex-shrink: 0;
-            /* Calculate width to center a 70px item */
-            width: calc(50% - 35px);
+            /* Calculate width to center a 65px item */
+            width: calc(50% - 32.5px);
         }
 
         .level-stepper-item {
@@ -634,18 +634,18 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 70px; /* EDITED: Smaller size */
-            height: 70px; /* EDITED: Smaller size */
+            width: 65px; /* EDITED: Smaller size */
+            height: 65px; /* EDITED: Smaller size */
             background: rgba(0,0,0,0.4);
             border: 1px solid rgba(255,255,255,0.2);
             color: var(--text-muted);
-            border-radius: 18px; /* EDITED: Softer corners */
+            border-radius: 16px; /* EDITED: Softer corners */
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
         }
         
         .level-stepper-item.active {
-            transform: scale(1.15); /* EDITED: Adjusted scale */
+            transform: scale(1.1); /* EDITED: Adjusted scale */
             background: linear-gradient(135deg, var(--primary), var(--secondary)); /* EDITED: More vibrant */
             border-color: var(--primary);
             color: white; /* EDITED: Better contrast */
@@ -653,8 +653,8 @@
             box-shadow: 0 0 25px var(--primary-glow), 0 0 10px var(--secondary-glow); /* EDITED: Dual shadow effect */
         }
 
-        .level-stepper-item .level-text { font-size: 11px; } /* EDITED: Adjusted font size */
-        .level-stepper-item .level-number { font-size: 26px; font-weight: 900; line-height: 1; } /* EDITED: Adjusted font size */
+        .level-stepper-item .level-text { font-size: 10px; } /* EDITED: Adjusted font size */
+        .level-stepper-item .level-number { font-size: 24px; font-weight: 900; line-height: 1; } /* EDITED: Adjusted font size */
         
         .level-viewer-container {
             flex-grow: 1;
@@ -662,7 +662,7 @@
             overflow-x: auto;
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px; /* EDITED: Reduced gap */
             scroll-snap-type: x mandatory;
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -674,17 +674,17 @@
             content: '';
             display: block;
             flex-shrink: 0;
-            /* This calculation ensures the 280px card is centered */
-            width: calc( (100% - 280px) / 2 - 10px );
+            /* This calculation ensures the 260px card is centered */
+            width: calc( (100% - 260px) / 2 - 7.5px );
         }
         
         .level-card {
             flex-shrink: 0;
             scroll-snap-align: center;
-            width: 280px; /* Kept original size to ensure content fits */
+            width: 260px; /* EDITED: Smaller width */
             height: auto;
-            min-height: 520px;
-            padding: 30px;
+            min-height: 490px; /* EDITED: Smaller height */
+            padding: 25px; /* EDITED: Adjusted padding */
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -693,11 +693,11 @@
             background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://iili.io/BWRY50v.jpg');
             background-size: cover;
             background-position: center;
-            border-radius: 30px;
+            border-radius: 25px; /* EDITED: Adjusted border-radius */
             border: 1px solid rgba(255,255,255,0.2);
             transition: 0.4s;
         }
-        /* === NEW EDITED MATRIX STYLES END === */
+        /* === EDITED: NEW MATRIX STYLES END === */
 
 
         .level-card.unlocked {
@@ -706,17 +706,17 @@
         }
         
         .level-stars-container {
-            margin: 20px 0;
+            margin: 15px 0; /* EDITED: Adjusted margin */
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             grid-template-rows: repeat(2, 1fr);
-            gap: 12px;
+            gap: 10px; /* EDITED: Reduced gap */
             align-items: center;
             justify-items: center;
             padding: 0 10px;
         }
         .star-node {
-            font-size: 32px;
+            font-size: 28px; /* EDITED: Smaller stars */
             color: rgba(255,255,255,0.2);
             position: relative;
             transition: color 0.3s, transform 0.3s;
@@ -755,18 +755,18 @@
         }
         
         .level-card .level-icon {
-            font-size: 80px;
+            font-size: 70px; /* EDITED: Smaller icon */
             line-height: 1;
         }
 
         .level-card .level-price {
-            font-size: 28px;
+            font-size: 26px; /* EDITED: Smaller font */
             font-weight: 800;
             color: var(--primary);
         }
 
         .level-card .level-info {
-            font-size: 13px;
+            font-size: 12px; /* EDITED: Smaller font */
             color: rgba(255,255,255,0.7);
         }
 
@@ -2825,7 +2825,7 @@
             
             if (!cards.length) return;
             const cardWidth = cards[0].offsetWidth;
-            const gap = 20;
+            const gap = 15; // Must match the gap in .level-viewer-container
 
             const updateActiveStep = () => {
                 const activeIndex = Math.round(viewer.scrollLeft / (cardWidth + gap));
