@@ -2114,6 +2114,9 @@
         let slideInterval;
         
         let incomeHistoryListener = null;
+        
+        // Listener attach karne ka check variable
+        let isOmniViewListenerAttached = false;
 
         const connectState = document.getElementById('connectState');
         const invitationState = document.getElementById('invitationState');
@@ -3424,26 +3427,51 @@
 
         async function updateOmniViewPage() {
             try {
-                const statsSnapshot = await db.ref('platformStats').once('value');
-                const stats = statsSnapshot.val() || {};
-                
-                document.getElementById('totalParticipants').innerText = stats.totalParticipants || 0;
-                document.getElementById('salaryActiveMembers').innerText = stats.salaryActiveMembers || 0;
-                document.getElementById('totalZTRDistributed').innerText = (stats.totalZTRDistributed || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                document.getElementById('totalWeeklySalaryFund').innerText = `${(stats.totalWeeklySalaryFund || 0).toLocaleString()} ZTR`;
-                updateAirdropProgress(stats.totalAirdropDistributed || 0);
+                // 1. Real-time Listeners (Fund & Active Members automatically update honge)
+                if (!isOmniViewListenerAttached) {
+                    
+                    // Platform Stats Live Listener
+                    db.ref('platformStats').on('value', (statsSnapshot) => {
+                        const stats = statsSnapshot.val() || {};
+                        
+                        document.getElementById('totalParticipants').innerText = stats.totalParticipants || 0;
+                        document.getElementById('totalZTRDistributed').innerText = (stats.totalZTRDistributed || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        
+                        // Jese hi admin distribute karega, yeh fund usi waqt automatically zero (0) ho jayega
+                        const salaryFund = stats.totalWeeklySalaryFund || 0;
+                        document.getElementById('totalWeeklySalaryFund').innerText = `${salaryFund.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ZTR`;
+                        
+                        updateAirdropProgress(stats.totalAirdropDistributed || 0);
+                    });
 
+                    // Live Salary Active Members (Jin ka level 5+ yaani ID >= 4 hai unko count karega)
+                    db.ref('users').orderByChild('level').startAt(4).on('value', (snap) => {
+                        document.getElementById('salaryActiveMembers').innerText = snap.numChildren();
+                    });
+
+                    isOmniViewListenerAttached = true;
+                }
+
+                // 2. Leaderboard ko load karna (Same purana code)
                 const leaderboardSnapshot = await db.ref('users').orderByChild('ztrBalance').limitToLast(100).once('value');
                 let leaderboard = [];
                 if (leaderboardSnapshot.exists()) {
                     leaderboardSnapshot.forEach(child => {
                         const user = child.val();
-                        if (user.profile && (user.ztrBalance || 0) > 0) leaderboard.push({ name: user.profile.name, userId: user.profile.userId, profilePicUrl: user.profile.profilePicUrl || null, earnings: user.ztrBalance || 0 });
+                        if (user.profile && (user.ztrBalance || 0) > 0) leaderboard.push({ 
+                            name: user.profile.name, 
+                            userId: user.profile.userId, 
+                            profilePicUrl: user.profile.profilePicUrl || null, 
+                            earnings: user.ztrBalance || 0 
+                        });
                     });
                 }
                 leaderboard.sort((a, b) => b.earnings - a.earnings);
                 renderLeaderboard(leaderboard);
-            } catch (error) { console.error("Error updating OmniView:", error); }
+                
+            } catch (error) { 
+                console.error("Error updating OmniView:", error); 
+            }
         }
         
         function renderLeaderboard(users) {
