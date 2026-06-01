@@ -1095,6 +1095,66 @@
             font-size: 14px;
         }
 
+        /* === NEW ECOSYSTEM CARD STYLES === */
+        .ecosystem-card {
+            padding: 30px;
+            text-align: center;
+            border-radius: 20px;
+            background: linear-gradient(145deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        .ecosystem-card:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .ecosystem-card h2 {
+            font-size: 22px;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+        .ecosystem-card p.subtitle {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .ecosystem-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out, margin-top 0.5s ease-out;
+            opacity: 0;
+            text-align: left;
+        }
+        .ecosystem-details.open {
+            max-height: 500px;
+            opacity: 1;
+            margin-top: 20px;
+        }
+        .eco-feature {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .eco-feature:last-child {
+            margin-bottom: 0;
+        }
+        .eco-feature h4 {
+            color: var(--primary);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+        .eco-feature p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        /* === END OF ECOSYSTEM CARD STYLES === */
+
         .slider-container {
             position: relative;
             width: 100%;
@@ -1880,6 +1940,24 @@
                 <h2>ZTR Protocol Airdrop</h2>
                 <p>Click to check your airdrop points and see how you can earn more!</p>
                 <button class="btn"><i class="fa-solid fa-coins"></i> VIEW TOKENS</button>
+            </div>
+
+            <!-- NEW ECOSYSTEM BOX -->
+            <div class="ecosystem-card">
+                <h2><i class="fa-solid fa-network-wired"></i> Blockchain Expansion</h2>
+                <p class="subtitle">Additional blockchain systems will automatically launch after some time. Discover the future of ZTR Coin.</p>
+                <button class="btn" style="background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); border: 1px solid rgba(255,255,255,0.2);" onclick="toggleEcosystem(this)"><i class="fa-solid fa-clock"></i> COMING SOON</button>
+                
+                <div class="ecosystem-details" id="ecoDetails">
+                    <div class="eco-feature">
+                        <h4><i class="fa-solid fa-chart-line"></i> Trading System on ZTR</h4>
+                        <p>An advanced decentralized trading protocol. Experience seamless swaps, staking, and real-time market dynamics directly with ZTR Coin.</p>
+                    </div>
+                    <div class="eco-feature">
+                        <h4 style="color: var(--secondary);"><i class="fa-solid fa-gamepad"></i> Gaming System</h4>
+                        <p>Immersive play-to-earn (P2E) blockchain games connected to the ZTR network. Earn real tokens and rewards through gameplay.</p>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -3149,6 +3227,7 @@
 
                 const updates = {};
                 updates[`users/${walletLower}`] = userData;
+                updates[`userIdMap/${newUserId}`] = window.walletLower; // FIXED: should be walletLower directly but keeping safe assignment
                 updates[`userIdMap/${newUserId}`] = walletLower;
                 updates[`inviteCodeMap/${inviteCode}`] = walletLower;
                 updates[`users/${inviterWallet.toLowerCase()}/teamSize`] = firebase.database.ServerValue.increment(1);
@@ -3635,6 +3714,17 @@
                 btn.innerText = "Claim";
             }
         }
+        
+        window.toggleEcosystem = function(btn) {
+            const details = document.getElementById('ecoDetails');
+            if(details.classList.contains('open')) {
+                details.classList.remove('open');
+                btn.innerHTML = '<i class="fa-solid fa-clock"></i> COMING SOON';
+            } else {
+                details.classList.add('open');
+                btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> HIDE DETAILS';
+            }
+        };
     })();
 </script>
 </body>
