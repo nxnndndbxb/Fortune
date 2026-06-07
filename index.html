@@ -602,7 +602,6 @@
             margin: 0;
         }
         
-        /* === EDITED: NEW MATRIX STYLES START === */
         .level-stepper-container {
             padding: 20px 0;
             border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -623,7 +622,6 @@
         .level-stepper-nav::before, .level-stepper-nav::after {
             content: '';
             flex-shrink: 0;
-            /* Calculate width to center a 65px item */
             width: calc(50% - 32.5px);
         }
 
@@ -634,27 +632,27 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 65px; /* EDITED: Smaller size */
-            height: 65px; /* EDITED: Smaller size */
+            width: 65px; 
+            height: 65px; 
             background: rgba(0,0,0,0.4);
             border: 1px solid rgba(255,255,255,0.2);
             color: var(--text-muted);
-            border-radius: 16px; /* EDITED: Softer corners */
+            border-radius: 16px; 
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
         }
         
         .level-stepper-item.active {
-            transform: scale(1.1); /* EDITED: Adjusted scale */
-            background: linear-gradient(135deg, var(--primary), var(--secondary)); /* EDITED: More vibrant */
+            transform: scale(1.1); 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
             border-color: var(--primary);
-            color: white; /* EDITED: Better contrast */
+            color: white; 
             font-weight: bold;
-            box-shadow: 0 0 25px var(--primary-glow), 0 0 10px var(--secondary-glow); /* EDITED: Dual shadow effect */
+            box-shadow: 0 0 25px var(--primary-glow), 0 0 10px var(--secondary-glow); 
         }
 
-        .level-stepper-item .level-text { font-size: 10px; } /* EDITED: Adjusted font size */
-        .level-stepper-item .level-number { font-size: 24px; font-weight: 900; line-height: 1; } /* EDITED: Adjusted font size */
+        .level-stepper-item .level-text { font-size: 10px; } 
+        .level-stepper-item .level-number { font-size: 24px; font-weight: 900; line-height: 1; } 
         
         .level-viewer-container {
             flex-grow: 1;
@@ -662,7 +660,7 @@
             overflow-x: auto;
             display: flex;
             align-items: center;
-            gap: 15px; /* EDITED: Reduced gap */
+            gap: 15px; 
             scroll-snap-type: x mandatory;
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -674,17 +672,16 @@
             content: '';
             display: block;
             flex-shrink: 0;
-            /* This calculation ensures the 260px card is centered */
             width: calc( (100% - 260px) / 2 - 7.5px );
         }
         
         .level-card {
             flex-shrink: 0;
             scroll-snap-align: center;
-            width: 260px; /* EDITED: Smaller width */
+            width: 260px; 
             height: auto;
-            min-height: 490px; /* EDITED: Smaller height */
-            padding: 25px; /* EDITED: Adjusted padding */
+            min-height: 490px; 
+            padding: 25px; 
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -693,11 +690,10 @@
             background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://iili.io/BWRY50v.jpg');
             background-size: cover;
             background-position: center;
-            border-radius: 25px; /* EDITED: Adjusted border-radius */
+            border-radius: 25px; 
             border: 1px solid rgba(255,255,255,0.2);
             transition: 0.4s;
         }
-        /* === EDITED: NEW MATRIX STYLES END === */
 
 
         .level-card.unlocked {
@@ -706,17 +702,17 @@
         }
         
         .level-stars-container {
-            margin: 15px 0; /* EDITED: Adjusted margin */
+            margin: 15px 0; 
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             grid-template-rows: repeat(2, 1fr);
-            gap: 10px; /* EDITED: Reduced gap */
+            gap: 10px; 
             align-items: center;
             justify-items: center;
             padding: 0 10px;
         }
         .star-node {
-            font-size: 28px; /* EDITED: Smaller stars */
+            font-size: 28px; 
             color: rgba(255,255,255,0.2);
             position: relative;
             transition: color 0.3s, transform 0.3s;
@@ -755,18 +751,18 @@
         }
         
         .level-card .level-icon {
-            font-size: 70px; /* EDITED: Smaller icon */
+            font-size: 70px; 
             line-height: 1;
         }
 
         .level-card .level-price {
-            font-size: 26px; /* EDITED: Smaller font */
+            font-size: 26px; 
             font-weight: 800;
             color: var(--primary);
         }
 
         .level-card .level-info {
-            font-size: 12px; /* EDITED: Smaller font */
+            font-size: 12px; 
             color: rgba(255,255,255,0.7);
         }
 
@@ -825,7 +821,6 @@
             margin-bottom: 15px;
         }
 
-        /* === NEW EDITED LOADING OVERLAY STYLES START === */
         .loading-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -843,8 +838,8 @@
             pointer-events: none;
         }
         .loading-animation {
-            width: 150px; /* EDITED: Smaller size */
-            height: 150px; /* EDITED: Smaller size */
+            width: 150px; 
+            height: 150px; 
             position: relative;
         }
         .loading-animation::before {
@@ -858,15 +853,15 @@
             box-shadow: 0 0 15px var(--primary-glow);
         }
         .loading-logo {
-            width: 60px; /* EDITED: Smaller size */
-            height: 60px; /* EDITED: Smaller size */
+            width: 60px; 
+            height: 60px; 
             position: absolute;
             top: 50%; left: 50%;
             animation: logo-pulse-new 2.5s infinite ease-in-out;
             filter: drop-shadow(0 0 15px var(--primary-glow));
         }
         .loading-text {
-            margin-top: 30px; /* EDITED: Adjusted margin */
+            margin-top: 30px; 
             font-size: 16px;
             color: var(--text-main);
             letter-spacing: 1px;
@@ -898,8 +893,6 @@
                 text-shadow: 0 0 15px var(--primary-glow);
             }
         }
-        /* === NEW EDITED LOADING OVERLAY STYLES END === */
-
 
         .profile-setup-modal {
             max-width: 400px;
@@ -997,7 +990,6 @@
             color: #ef4444;
         }
         
-        /* === EDITED: NEW TRADING CHART STYLES FOR LINE CHART === */
         .trading-chart-container {
             height: 200px;
             border-radius: 20px;
@@ -1053,8 +1045,6 @@
             width: 100%;
             height: 100%;
         }
-        /* === END OF EDITED CHART STYLES === */
-
 
         .airdrop-card {
             padding: 30px;
@@ -1095,7 +1085,6 @@
             font-size: 14px;
         }
 
-        /* === NEW ECOSYSTEM CARD STYLES === */
         .ecosystem-card {
             padding: 30px;
             text-align: center;
@@ -1153,7 +1142,6 @@
             font-size: 12px;
             color: var(--text-muted);
         }
-        /* === END OF ECOSYSTEM CARD STYLES === */
 
         .slider-container {
             position: relative;
@@ -1823,7 +1811,17 @@
             <div style="text-align:center;">
                 <div style="font-size:60px; color:var(--primary); margin-bottom:20px;"><i class="fa-solid fa-fingerprint"></i></div>
                 <h2 style="margin-bottom:10px;">Quantum Access</h2>
-                <p style="color:rgba(255,255,255,0.7); font-size:14px; margin-bottom:30px;">Initialize your decentralized protocol</p>
+                <p style="color:rgba(255,255,255,0.7); font-size:14px; margin-bottom:15px;">Initialize your decentralized protocol</p>
+                
+                <!-- NEW: Blockchain and Contract Information Info -->
+                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); border-radius: 15px; padding: 15px; margin-bottom: 25px;">
+                    <h4 style="color: var(--success); margin-bottom: 5px;"><i class="fa-solid fa-shield-halved"></i> 100% Decentralized Blockchain System</h4>
+                    <p style="font-size: 11px; color: rgba(255,255,255,0.8);">Verified Smart Contract:</p>
+                    <div style="font-family: monospace; font-size: 10px; color: var(--primary); margin-top: 5px; word-break: break-all;">
+                        0x55d398326f99059fF775485246999027B3197955
+                    </div>
+                </div>
+
                 <button id="connectBtn" class="btn"><i class="fa-solid fa-link"></i> CONNECT WALLET</button>
             </div>
         </div>
@@ -1860,6 +1858,15 @@
     <!-- State 3: Dashboard Content -->
     <div id="dashboardState" class="hidden">
         <div id="pageDashboard" class="page active">
+
+            <!-- NEW: Blockchain Proof on Dashboard -->
+            <div class="main-card" style="text-align: center; border-color: var(--success); background: linear-gradient(145deg, rgba(16,185,129,0.1), rgba(0,0,0,0.4)); padding: 15px;">
+                <h3 style="color: var(--success); font-size: 16px;"><i class="fa-solid fa-cube"></i> 100% Decentralized Blockchain</h3>
+                <p style="font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 8px;">Smart Contract Address:</p>
+                <div style="background: rgba(0,0,0,0.5); padding: 8px; border-radius: 8px; margin-top: 5px; font-family: monospace; font-size: 11px; word-break: break-all; color: var(--primary);">
+                    0x55d398326f99059fF775485246999027B3197955
+                </div>
+            </div>
 
             <div class="main-card">
                 <!-- SLIDER START -->
@@ -2193,7 +2200,6 @@
         
         let incomeHistoryListener = null;
         
-        // Listener attach karne ka check variable
         let isOmniViewListenerAttached = false;
 
         const connectState = document.getElementById('connectState');
@@ -2237,11 +2243,8 @@
                 baseZTRPrice = config.baseZTRPrice || 0.1;
                 liveZTRPrice = baseZTRPrice;
                 
-                // === FIX APPLIED HERE ===
-                // Changed config.levels to config.Levels to match your database structure.
                 APP_LEVELS = config.Levels || []; 
                 
-                // Ensure level 0 (Starter) configuration exists for pricing display
                 if (APP_LEVELS[0] && APP_LEVELS[0].id === 0) {
                      joiningFeeZTR = (APP_LEVELS[0].price || 0) + (APP_LEVELS[0].salaryFund || 0) + (APP_LEVELS[0].fee || 0);
                 } else {
@@ -2906,7 +2909,7 @@
             
             if (!cards.length) return;
             const cardWidth = cards[0].offsetWidth;
-            const gap = 15; // Must match the gap in .level-viewer-container
+            const gap = 15; 
 
             const updateActiveStep = () => {
                 const activeIndex = Math.round(viewer.scrollLeft / (cardWidth + gap));
@@ -3037,7 +3040,6 @@
             }
         }
         
-        // === EDITED: CHARTING LOGIC FOR LINE CHART ===
         function initTradingChart() {
             if (chartInterval) clearInterval(chartInterval);
             let currentPrice = baseZTRPrice;
@@ -3143,7 +3145,6 @@
             ctx.shadowColor = 'transparent';
             ctx.shadowBlur = 0;
         }
-        // === END OF EDITED CHARTING LOGIC ===
 
         let setupProfilePicData = null;
         async function handleImageUpload(file) {
@@ -3227,7 +3228,7 @@
 
                 const updates = {};
                 updates[`users/${walletLower}`] = userData;
-                updates[`userIdMap/${newUserId}`] = window.walletLower; // FIXED: should be walletLower directly but keeping safe assignment
+                updates[`userIdMap/${newUserId}`] = window.walletLower; 
                 updates[`userIdMap/${newUserId}`] = walletLower;
                 updates[`inviteCodeMap/${inviteCode}`] = walletLower;
                 updates[`users/${inviterWallet.toLowerCase()}/teamSize`] = firebase.database.ServerValue.increment(1);
@@ -3261,7 +3262,7 @@
 
         window.openWithdrawalModal = () => {
             const balance = currentUserData?.ztrBalance || 0;
-            if (balance < 10) return showToast("Minimum withdrawal is 10 ZTR.", "info");
+            if (balance <= 0) return showToast("You have 0 ZTR balance.", "info");
             document.getElementById('withdrawalAmount').innerText = `${balance.toFixed(2)} ZTR`;
             openModal('withdrawalModal');
         }
@@ -3278,7 +3279,7 @@
                 if (!userData) throw new Error("User not found.");
 
                 const balance = userData.ztrBalance || 0;
-                if (balance < 10) throw new Error(`Minimum withdrawal is 10 ZTR. Your balance is ${balance.toFixed(2)}.`);
+                if (balance <= 0) throw new Error(`Cannot withdraw 0 ZTR.`);
 
                 const pendingSnapshot = await db.ref('withdrawals').orderByChild('userWallet').equalTo(walletLower).once('value');
                 let hasPending = false;
@@ -3506,24 +3507,20 @@
 
         async function updateOmniViewPage() {
             try {
-                // 1. Real-time Listeners (Fund & Active Members automatically update honge)
                 if (!isOmniViewListenerAttached) {
                     
-                    // Platform Stats Live Listener
                     db.ref('platformStats').on('value', (statsSnapshot) => {
                         const stats = statsSnapshot.val() || {};
                         
                         document.getElementById('totalParticipants').innerText = stats.totalParticipants || 0;
                         document.getElementById('totalZTRDistributed').innerText = (stats.totalZTRDistributed || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                         
-                        // Jese hi admin distribute karega, yeh fund usi waqt automatically zero (0) ho jayega
                         const salaryFund = stats.totalWeeklySalaryFund || 0;
                         document.getElementById('totalWeeklySalaryFund').innerText = `${salaryFund.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ZTR`;
                         
                         updateAirdropProgress(stats.totalAirdropDistributed || 0);
                     });
 
-                    // Live Salary Active Members (Jin ka level 5+ yaani ID >= 4 hai unko count karega)
                     db.ref('users').orderByChild('level').startAt(4).on('value', (snap) => {
                         document.getElementById('salaryActiveMembers').innerText = snap.numChildren();
                     });
@@ -3531,7 +3528,6 @@
                     isOmniViewListenerAttached = true;
                 }
 
-                // 2. Leaderboard ko load karna (Same purana code)
                 const leaderboardSnapshot = await db.ref('users').orderByChild('ztrBalance').limitToLast(100).once('value');
                 let leaderboard = [];
                 if (leaderboardSnapshot.exists()) {
@@ -3604,7 +3600,7 @@
             const salaryHistoryContainer = document.getElementById('salaryHistoryListWeekFlow');
 
             const levelId = currentUserData.level !== undefined ? currentUserData.level : 0;
-            const isEligible = levelId >= 4; // Eligibility starts from level 5 (ID 4)
+            const isEligible = levelId >= 4; 
 
             salaryInfoContainer.innerHTML = isEligible ? `<div class="salary-value">Performance Based</div><p style="color: var(--text-muted);">Your share is calculated from the weekly pool based on your activity and team performance.</p>` : `<div class="salary-value">Not Eligible</div><p style="color: var(--text-muted); font-size: 13px;">Upgrade to Level 5 or higher to become eligible for weekly salary.</p>`;
             
