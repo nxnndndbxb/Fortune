@@ -465,7 +465,6 @@
             color: var(--gold);
         }
 
-        /* NEW TEAM VIEW STYLES */
         .team-view-container {
             display: flex;
             flex-direction: column;
@@ -598,7 +597,6 @@
             margin: 0;
         }
         
-        /* === EDITED: NEW MATRIX STYLES START === */
         .level-stepper-container {
             padding: 20px 0;
             border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -619,7 +617,6 @@
         .level-stepper-nav::before, .level-stepper-nav::after {
             content: '';
             flex-shrink: 0;
-            /* Calculate width to center a 65px item */
             width: calc(50% - 32.5px);
         }
 
@@ -630,27 +627,27 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 65px; /* EDITED: Smaller size */
-            height: 65px; /* EDITED: Smaller size */
+            width: 65px; 
+            height: 65px; 
             background: rgba(0,0,0,0.4);
             border: 1px solid rgba(255,255,255,0.2);
             color: var(--text-muted);
-            border-radius: 16px; /* EDITED: Softer corners */
+            border-radius: 16px; 
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
         }
         
         .level-stepper-item.active {
-            transform: scale(1.1); /* EDITED: Adjusted scale */
-            background: linear-gradient(135deg, var(--primary), var(--secondary)); /* EDITED: More vibrant */
+            transform: scale(1.1); 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
             border-color: var(--primary);
-            color: white; /* EDITED: Better contrast */
+            color: white; 
             font-weight: bold;
-            box-shadow: 0 0 25px var(--primary-glow), 0 0 10px var(--secondary-glow); /* EDITED: Dual shadow effect */
+            box-shadow: 0 0 25px var(--primary-glow), 0 0 10px var(--secondary-glow); 
         }
 
-        .level-stepper-item .level-text { font-size: 10px; } /* EDITED: Adjusted font size */
-        .level-stepper-item .level-number { font-size: 24px; font-weight: 900; line-height: 1; } /* EDITED: Adjusted font size */
+        .level-stepper-item .level-text { font-size: 10px; } 
+        .level-stepper-item .level-number { font-size: 24px; font-weight: 900; line-height: 1; } 
         
         .level-viewer-container {
             flex-grow: 1;
@@ -658,7 +655,7 @@
             overflow-x: auto;
             display: flex;
             align-items: center;
-            gap: 15px; /* EDITED: Reduced gap */
+            gap: 15px; 
             scroll-snap-type: x mandatory;
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -670,17 +667,16 @@
             content: '';
             display: block;
             flex-shrink: 0;
-            /* This calculation ensures the 260px card is centered */
             width: calc( (100% - 260px) / 2 - 7.5px );
         }
         
         .level-card {
             flex-shrink: 0;
             scroll-snap-align: center;
-            width: 260px; /* EDITED: Smaller width */
+            width: 260px; 
             height: auto;
-            min-height: 490px; /* EDITED: Smaller height */
-            padding: 25px; /* EDITED: Adjusted padding */
+            min-height: 490px; 
+            padding: 25px; 
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -689,12 +685,10 @@
             background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://iili.io/BWRY50v.jpg');
             background-size: cover;
             background-position: center;
-            border-radius: 25px; /* EDITED: Adjusted border-radius */
+            border-radius: 25px; 
             border: 1px solid rgba(255,255,255,0.2);
             transition: 0.4s;
         }
-        /* === EDITED: NEW MATRIX STYLES END === */
-
 
         .level-card.unlocked {
             border: 2px solid var(--primary);
@@ -702,17 +696,17 @@
         }
         
         .level-stars-container {
-            margin: 15px 0; /* EDITED: Adjusted margin */
+            margin: 15px 0; 
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             grid-template-rows: repeat(2, 1fr);
-            gap: 10px; /* EDITED: Reduced gap */
+            gap: 10px; 
             align-items: center;
             justify-items: center;
             padding: 0 10px;
         }
         .star-node {
-            font-size: 28px; /* EDITED: Smaller stars */
+            font-size: 28px; 
             color: rgba(255,255,255,0.2);
             position: relative;
             transition: color 0.3s, transform 0.3s;
@@ -751,18 +745,18 @@
         }
         
         .level-card .level-icon {
-            font-size: 70px; /* EDITED: Smaller icon */
+            font-size: 70px; 
             line-height: 1;
         }
 
         .level-card .level-price {
-            font-size: 26px; /* EDITED: Smaller font */
+            font-size: 26px; 
             font-weight: 800;
             color: var(--primary);
         }
 
         .level-card .level-info {
-            font-size: 12px; /* EDITED: Smaller font */
+            font-size: 12px; 
             color: rgba(255,255,255,0.7);
         }
 
@@ -821,7 +815,6 @@
             margin-bottom: 15px;
         }
 
-        /* === NEW EDITED LOADING OVERLAY STYLES START === */
         .loading-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -839,8 +832,8 @@
             pointer-events: none;
         }
         .loading-animation {
-            width: 150px; /* EDITED: Smaller size */
-            height: 150px; /* EDITED: Smaller size */
+            width: 150px; 
+            height: 150px; 
             position: relative;
         }
         .loading-animation::before {
@@ -854,15 +847,15 @@
             box-shadow: 0 0 15px var(--primary-glow);
         }
         .loading-logo {
-            width: 60px; /* EDITED: Smaller size */
-            height: 60px; /* EDITED: Smaller size */
+            width: 60px; 
+            height: 60px; 
             position: absolute;
             top: 50%; left: 50%;
             animation: logo-pulse-new 2.5s infinite ease-in-out;
             filter: drop-shadow(0 0 15px var(--primary-glow));
         }
         .loading-text {
-            margin-top: 30px; /* EDITED: Adjusted margin */
+            margin-top: 30px; 
             font-size: 16px;
             color: var(--text-main);
             letter-spacing: 1px;
@@ -894,8 +887,6 @@
                 text-shadow: 0 0 15px var(--primary-glow);
             }
         }
-        /* === NEW EDITED LOADING OVERLAY STYLES END === */
-
 
         .profile-setup-modal {
             max-width: 400px;
@@ -992,7 +983,6 @@
             color: #ef4444;
         }
         
-        /* === EDITED: NEW TRADING CHART STYLES FOR LINE CHART === */
         .trading-chart-container {
             height: 200px;
             border-radius: 20px;
@@ -1048,8 +1038,6 @@
             width: 100%;
             height: 100%;
         }
-        /* === END OF EDITED CHART STYLES === */
-
 
         .airdrop-card {
             padding: 30px;
@@ -1090,7 +1078,6 @@
             font-size: 14px;
         }
 
-        /* === NEW ECOSYSTEM CARD STYLES === */
         .ecosystem-card {
             padding: 30px;
             text-align: center;
@@ -1148,7 +1135,6 @@
             font-size: 12px;
             color: var(--text-muted);
         }
-        /* === END OF ECOSYSTEM CARD STYLES === */
 
         .slider-container {
             position: relative;
@@ -1973,6 +1959,26 @@
 
         <div id="pageOmniView" class="page">
             <div class="main-card">
+
+                <!-- NEW TRANSPARENCY & BLOCKCHAIN AUDIT SECTION -->
+                <div class="omni-view-section">
+                    <h3 class="omni-view-title"><i class="fa-solid fa-file-contract"></i> Smart Contract Audit</h3>
+                    <div class="active-airdrop-card" style="text-align: left; background: rgba(16, 185, 129, 0.1); border-color: var(--success);">
+                        <p style="color: var(--success); font-weight: bold; margin-bottom: 10px; font-size: 16px;">
+                            <i class="fa-solid fa-shield-halved"></i> 100% Decentralized & Verified
+                        </p>
+                        <p style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 15px; line-height: 1.5;">
+                            Zentron operates entirely on the Binance Smart Chain (BSC). There is no admin control, no manual withdrawals, and all commissions are instantly paid peer-to-peer via our immutable Smart Contract.
+                        </p>
+                        <p style="font-size: 11px; color: var(--gold); margin-bottom: 5px;"><strong>Official Smart Contract Address:</strong></p>
+                        <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 11px; word-wrap: break-word; margin-bottom: 15px; border: 1px solid var(--primary); text-align: center;">
+                            0x04940E5FEaE59A348FC103F07ACD715635d2262A
+                        </div>
+                        <a href="https://bscscan.com/address/0x04940E5FEaE59A348FC103F07ACD715635d2262A" target="_blank" class="btn btn-success" style="font-size: 13px; padding: 12px; display: block; text-decoration: none; text-align: center;">
+                            <i class="fa-solid fa-magnifying-glass"></i> View Live on BscScan
+                        </a>
+                    </div>
+                </div>
                 
                 <div class="omni-view-section">
                     <h3 class="omni-view-title"><i class="fa-solid fa-parachute-box"></i> Active Airdrop Phase</h3>
@@ -2008,13 +2014,13 @@
                             <div class="omni-view-stat-value" id="salaryActiveMembers">0</div>
                             <div class="omni-view-stat-label">Salary Active</div>
                         </div>
-                        <div class="omni-view-stat">
-                            <div class="omni-view-stat-value" id="totalZTRDistributed">0</div>
-                            <div class="omni-view-stat-label">Total ZTR Distributed</div>
+                        <div class="omni-view-stat" style="grid-column: span 2;">
+                            <div class="omni-view-stat-value" id="totalZTRDistributed">0.00 ZTR</div>
+                            <div class="omni-view-stat-label">Total Earnings Distributed To Wallets</div>
                         </div>
-                        <div class="omni-view-stat">
+                        <div class="omni-view-stat" style="grid-column: span 2;">
                             <div class="omni-view-stat-value" id="totalWeeklySalaryFund">0</div>
-                            <div class="omni-view-stat-label">Weekly Salary Fund</div>
+                            <div class="omni-view-stat-label">Weekly Salary Fund Pool</div>
                         </div>
                     </div>
                 </div>
@@ -2419,6 +2425,7 @@
             teamViewContainer.innerHTML = currentUserCardHTML + teamListHTML;
         }
 
+        // HISTORY FIX: Safely fetch from last 5000 blocks to avoid RPC errors
         window.openIncomeHistory = async function() {
             const listContainer = document.getElementById('incomeHistoryList');
             openModal('incomeHistoryModal');
@@ -2970,7 +2977,7 @@
             showToast('Invitation ID copied!', 'success');
         });
 
-        // LEADERBOARD, AIRDROP PROGRESS AND STATS FETCHING (FIXED)
+        // LEADERBOARD, AIRDROP PROGRESS AND STATS FETCHING
         function updateAirdropProgress(totalDistributed) {
             const phases = [
                 { title: 'Phase 1: Genesis', target: 200000, start: 0 },
@@ -3044,7 +3051,6 @@
                 }
 
                 document.getElementById('salaryActiveMembers').innerText = salaryActiveCount.toString();
-                // AB "AUTO-PAID" KI JAGAH TOTAL EARNING SHOW HOGI
                 document.getElementById('totalZTRDistributed').innerText = `${globalTotalEarnedZTR.toFixed(2)} ZTR`;
 
                 updateAirdropProgress(totalAirdropPoints);
