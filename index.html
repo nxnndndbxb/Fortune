@@ -1718,6 +1718,69 @@
     </div>
 </div>
 
+<!-- ABOUT US PAGE -->
+<div class="full-page-overlay" id="aboutUsPage">
+    <div class="full-page-header">
+        <button class="full-page-back-btn" onclick="closeFullPage('aboutUsPage')"><i class="fa-solid fa-arrow-left"></i></button>
+        <h2>About Us</h2>
+        <div style="width:20px;"></div>
+    </div>
+    <div class="full-page-content">
+        <!-- Decentralized System Info -->
+        <div class="main-card" style="text-align: center;">
+            <i class="fa-solid fa-globe" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i>
+            <h3 style="color: var(--text-main); margin-bottom: 10px;">Decentralized Blockchain System</h3>
+            <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+                Zentron is a 100% decentralized ecosystem built entirely on Web3 technology and the Blockchain. It operates through immutable Smart Contracts. This means there is no central authority, no company, no admin control, and no human intervention possible. All earnings and commissions are distributed purely peer-to-peer, ensuring ultimate transparency, security, and instant automated payouts directly to your personal wallet.
+            </p>
+        </div>
+
+        <!-- SOCIAL LINKS SECTION -->
+        <div class="omni-view-section">
+            <h3 class="omni-view-title" style="text-align: center;"><i class="fa-solid fa-users"></i> Official Community</h3>
+            <div class="social-links-container">
+                <a href="https://t.me/zentronofficial009" target="_blank" class="social-btn telegram"><i class="fa-brands fa-telegram"></i></a>
+                <a href="https://x.com/MHaseeb87604" target="_blank" class="social-btn twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="https://www.linkedin.com/in/zentron-blockchain-b73b823a3?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" class="social-btn linkedin"><i class="fa-brands fa-linkedin-in"></i></a>
+            </div>
+        </div>
+
+        <!-- PDF DOWNLOAD SECTION -->
+        <div class="omni-view-section">
+            <h3 class="omni-view-title"><i class="fa-solid fa-file-pdf"></i> System Presentation</h3>
+            <div class="pdf-download-card">
+                <div style="text-align: left;">
+                    <h4 style="color: var(--primary); margin-bottom: 5px; font-size: 16px;">Zentron Business Plan</h4>
+                    <p style="font-size: 11px; color: rgba(255,255,255,0.8); line-height: 1.4;">Download the complete PDF presentation to understand the Zentron Ecosystem.</p>
+                </div>
+                <a href="Zentron_Presentation.pdf" download="Zentron_Presentation.pdf" class="btn" style="width: auto; padding: 12px 20px; font-size: 14px; border-radius: 12px; flex-shrink: 0; background: linear-gradient(135deg, var(--primary), var(--secondary)); text-decoration: none;">
+                    <i class="fa-solid fa-download"></i> Download
+                </a>
+            </div>
+        </div>
+
+        <!-- TRANSPARENCY & BLOCKCHAIN AUDIT SECTION -->
+        <div class="omni-view-section">
+            <h3 class="omni-view-title"><i class="fa-solid fa-file-contract"></i> Smart Contract Audit</h3>
+            <div class="active-airdrop-card" style="text-align: left; background: rgba(16, 185, 129, 0.1); border-color: var(--success);">
+                <p style="color: var(--success); font-weight: bold; margin-bottom: 10px; font-size: 16px;">
+                    <i class="fa-solid fa-shield-halved"></i> 100% Decentralized & Verified
+                </p>
+                <p style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 15px; line-height: 1.5;">
+                    Zentron operates entirely on the Binance Smart Chain (BSC). There is no admin control, no manual withdrawals, and all commissions are instantly paid peer-to-peer via our immutable Smart Contract.
+                </p>
+                <p style="font-size: 11px; color: var(--gold); margin-bottom: 5px;"><strong>Official Smart Contract Address:</strong></p>
+                <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 11px; word-wrap: break-word; margin-bottom: 15px; border: 1px solid var(--primary); text-align: center;">
+                    0x04940E5FEaE59A348FC103F07ACD715635d2262A
+                </div>
+                <a href="https://bscscan.com/address/0x04940E5FEaE59A348FC103F07ACD715635d2262A" target="_blank" class="btn btn-success" style="font-size: 13px; padding: 12px; display: block; text-decoration: none; text-align: center;">
+                    <i class="fa-solid fa-magnifying-glass"></i> View Live on BscScan
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- LEVEL PAGE -->
 <div class="level-page-overlay" id="levelPageOverlay">
     <div class="level-page-header">
@@ -1974,6 +2037,11 @@
                 <button class="btn"><i class="fa-solid fa-coins"></i> VIEW TOKENS</button>
             </div>
 
+            <!-- NEW ABOUT US BUTTON -->
+            <button class="btn" style="margin-top: 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border: 1px solid rgba(255,255,255,0.2);" onclick="openAboutUsPage()">
+                <i class="fa-solid fa-circle-info"></i> ABOUT US & SYSTEM INFO
+            </button>
+
             <!-- NEW ECOSYSTEM BOX -->
             <div class="ecosystem-card">
                 <h2><i class="fa-solid fa-network-wired"></i> Blockchain Expansion</h2>
@@ -2025,50 +2093,6 @@
         <div id="pageOmniView" class="page">
             <div class="main-card">
 
-                <!-- SOCIAL LINKS SECTION -->
-                <div class="omni-view-section">
-                    <h3 class="omni-view-title" style="text-align: center;"><i class="fa-solid fa-users"></i> Official Community</h3>
-                    <div class="social-links-container">
-                        <a href="https://t.me/zentronofficial009" target="_blank" class="social-btn telegram"><i class="fa-brands fa-telegram"></i></a>
-                        <a href="https://x.com/MHaseeb87604" target="_blank" class="social-btn twitter"><i class="fa-brands fa-x-twitter"></i></a>
-                        <a href="https://www.linkedin.com/in/zentron-blockchain-b73b823a3?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" class="social-btn linkedin"><i class="fa-brands fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-
-                <!-- PDF DOWNLOAD SECTION -->
-                <div class="omni-view-section">
-                    <h3 class="omni-view-title"><i class="fa-solid fa-file-pdf"></i> System Presentation</h3>
-                    <div class="pdf-download-card">
-                        <div style="text-align: left;">
-                            <h4 style="color: var(--primary); margin-bottom: 5px; font-size: 16px;">Zentron Business Plan</h4>
-                            <p style="font-size: 11px; color: rgba(255,255,255,0.8); line-height: 1.4;">Download the complete PDF presentation to understand the Zentron Ecosystem.</p>
-                        </div>
-                        <a href="Zentron_Presentation.pdf" download="Zentron_Presentation.pdf" class="btn" style="width: auto; padding: 12px 20px; font-size: 14px; border-radius: 12px; flex-shrink: 0; background: linear-gradient(135deg, var(--primary), var(--secondary)); text-decoration: none;">
-                            <i class="fa-solid fa-download"></i> Download
-                        </a>
-                    </div>
-                </div>
-
-                <!-- NEW TRANSPARENCY & BLOCKCHAIN AUDIT SECTION -->
-                <div class="omni-view-section">
-                    <h3 class="omni-view-title"><i class="fa-solid fa-file-contract"></i> Smart Contract Audit</h3>
-                    <div class="active-airdrop-card" style="text-align: left; background: rgba(16, 185, 129, 0.1); border-color: var(--success);">
-                        <p style="color: var(--success); font-weight: bold; margin-bottom: 10px; font-size: 16px;">
-                            <i class="fa-solid fa-shield-halved"></i> 100% Decentralized & Verified
-                        </p>
-                        <p style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 15px; line-height: 1.5;">
-                            Zentron operates entirely on the Binance Smart Chain (BSC). There is no admin control, no manual withdrawals, and all commissions are instantly paid peer-to-peer via our immutable Smart Contract.
-                        </p>
-                        <p style="font-size: 11px; color: var(--gold); margin-bottom: 5px;"><strong>Official Smart Contract Address:</strong></p>
-                        <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 11px; word-wrap: break-word; margin-bottom: 15px; border: 1px solid var(--primary); text-align: center;">
-                            0x04940E5FEaE59A348FC103F07ACD715635d2262A
-                        </div>
-                        <a href="https://bscscan.com/address/0x04940E5FEaE59A348FC103F07ACD715635d2262A" target="_blank" class="btn btn-success" style="font-size: 13px; padding: 12px; display: block; text-decoration: none; text-align: center;">
-                            <i class="fa-solid fa-magnifying-glass"></i> View Live on BscScan
-                        </a>
-                    </div>
-                </div>
-                
                 <div class="omni-view-section">
                     <h3 class="omni-view-title"><i class="fa-solid fa-parachute-box"></i> Active Airdrop Phase</h3>
                     <div class="active-airdrop-card">
@@ -2272,6 +2296,7 @@
         const weekFlowPage = document.getElementById('weekFlowPage');
         const tokensPage = document.getElementById('tokensPage');
         const tasksPage = document.getElementById('tasksPage');
+        const aboutUsPage = document.getElementById('aboutUsPage');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const profileSetupModal = document.getElementById('profileSetupModal');
 
@@ -3232,6 +3257,11 @@
             closeModal('dropsModal');
             await renderInvitationTasks();
         }
+        
+        window.openAboutUsPage = () => {
+            document.body.style.overflow = 'hidden';
+            aboutUsPage.classList.add('active');
+        }
 
         async function renderInvitationTasks() {
             const taskListContainer = document.getElementById('invitationTasksList');
@@ -3265,5 +3295,3 @@
 </script>
 </body>
 </html>
-
-Note: 
