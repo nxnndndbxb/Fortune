@@ -21,9 +21,9 @@
             --success: #10b981;
             --danger: #ef4444;
             --gold: #ffb800;
-            --star-direct: #007bff; /* Blue */
-            --star-upline: #28a745; /* Green */
-            --star-downline: #dc3545; /* Red */
+            --star-direct: #007bff;
+            --star-upline: #28a745;
+            --star-downline: #dc3545;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
@@ -1101,40 +1101,6 @@
             font-size: 13px;
             margin-bottom: 20px;
         }
-        .ecosystem-details {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-out, opacity 0.5s ease-out, margin-top 0.5s ease-out;
-            opacity: 0;
-            text-align: left;
-        }
-        .ecosystem-details.open {
-            max-height: 500px;
-            opacity: 1;
-            margin-top: 20px;
-        }
-        .eco-feature {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 10px;
-        }
-        .eco-feature:last-child {
-            margin-bottom: 0;
-        }
-        .eco-feature h4 {
-            color: var(--primary);
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 15px;
-        }
-        .eco-feature p {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
 
         .slider-container {
             position: relative;
@@ -1223,7 +1189,6 @@
             text-shadow: 0 0 10px var(--primary-glow);
         }
 
-        /* SOCIAL AND PDF DOWNLOAD */
         .social-links-container {
             display: flex;
             justify-content: center;
@@ -1576,7 +1541,6 @@
             margin: 20px auto;
         }
 
-        /* NEW TRADING SYSTEM SPECIFIC CSS */
         .trading-subnav {
             position: absolute;
             bottom: 15px;
@@ -1703,7 +1667,6 @@
     <p class="loading-text">Connecting to Blockchain...</p>
 </div>
 
-<!-- TRADING SYSTEM LOADER -->
 <div id="tradingLoaderOverlay" class="loading-overlay hidden" style="z-index: 12000;">
     <div class="coin-spin-animation">
         <img src="https://iili.io/BOSY86Q.png" alt="Coin" style="width: 50px; height: 50px;">
@@ -1713,7 +1676,6 @@
 
 <div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
 
-<!-- DROPS MODAL -->
 <div class="modal-overlay" id="dropsModal">
     <div class="modal-content drops-modal-content">
         <button class="btn" onclick="openWeekFlowPage()">
@@ -1729,7 +1691,6 @@
     </div>
 </div>
 
-<!-- WEEKFLOW PAGE (DISBURSEMENT DISPLAY FOR CONTRACT B) -->
 <div class="full-page-overlay" id="weekFlowPage">
     <div class="full-page-header">
         <button class="full-page-back-btn" onclick="closeFullPage('weekFlowPage')"><i class="fa-solid fa-arrow-left"></i></button>
@@ -1755,7 +1716,6 @@
     </div>
 </div>
 
-<!-- TOKENS PAGE -->
 <div class="full-page-overlay" id="tokensPage">
     <div class="full-page-header">
         <button class="full-page-back-btn" onclick="closeFullPage('tokensPage')"><i class="fa-solid fa-arrow-left"></i></button>
@@ -1802,7 +1762,6 @@
     </div>
 </div>
 
-<!-- TASKS PAGE -->
 <div class="full-page-overlay" id="tasksPage">
     <div class="full-page-header">
         <button class="full-page-back-btn" onclick="closeFullPage('tasksPage')"><i class="fa-solid fa-arrow-left"></i></button>
@@ -1818,7 +1777,6 @@
     </div>
 </div>
 
-<!-- ABOUT US PAGE (DUAL CONTRACT BSC SCAN AUDIT DISPLAY) -->
 <div class="full-page-overlay" id="aboutUsPage">
     <div class="full-page-header">
         <button class="full-page-back-btn" onclick="closeFullPage('aboutUsPage')"><i class="fa-solid fa-arrow-left"></i></button>
@@ -1856,7 +1814,6 @@
             </div>
         </div>
 
-        <!-- CONTRACT A CARD -->
         <div class="omni-view-section">
             <h3 class="omni-view-title"><i class="fa-solid fa-file-contract"></i> Contract A: Main Protocol</h3>
             <div class="active-airdrop-card" style="text-align: left; background: rgba(16, 185, 129, 0.1); border-color: var(--success);">
@@ -1875,7 +1832,6 @@
             </div>
         </div>
 
-        <!-- CONTRACT B CARD -->
         <div class="omni-view-section">
             <h3 class="omni-view-title"><i class="fa-solid fa-clock-rotate-left"></i> Contract B: Sunday Salary Protocol</h3>
             <div class="active-airdrop-card" style="text-align: left; background: rgba(112, 0, 255, 0.1); border-color: var(--secondary);">
@@ -1896,7 +1852,6 @@
     </div>
 </div>
 
-<!-- LEVEL PAGE -->
 <div class="level-page-overlay" id="levelPageOverlay">
     <div class="level-page-header">
         <button class="level-page-back-btn" onclick="closeLevelPage()"><i class="fa-solid fa-arrow-left"></i></button>
@@ -1926,7 +1881,6 @@
     </div>
 </div>
 
-<!-- Profile Setup Modal -->
 <div class="modal-overlay" id="profileSetupModal">
     <div class="modal-content glass profile-setup-modal">
         <i class="fa-solid fa-user-astronaut" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
@@ -1947,7 +1901,6 @@
     </div>
 </div>
 
-<!-- Withdrawal Modal -->
 <div class="modal-overlay" id="withdrawalModal">
     <div class="modal-content">
         <i class="fa-solid fa-paper-plane" style="font-size: 50px; color: var(--primary);"></i>
@@ -1978,7 +1931,6 @@
     </div>
 </div>
 
-<!-- History Modals -->
 <div class="modal-overlay" id="incomeHistoryModal">
     <div class="modal-content history-modal-content">
         <h3><i class="fa-solid fa-chart-line" style="color:var(--success)"></i> Income History</h3>
@@ -2019,7 +1971,6 @@
 </div>
 
 <div class="container">
-    <!-- State 1: Connect -->
     <div id="connectState">
         <div class="main-card">
             <div style="text-align:center;">
@@ -2031,7 +1982,6 @@
         </div>
     </div>
 
-    <!-- State 2: Invitation Code Verification -->
     <div id="invitationState" class="hidden">
         <div class="main-card">
             <div style="text-align:center;">
@@ -2059,21 +2009,17 @@
         </div>
     </div>
 
-    <!-- State 3: Dashboard Content -->
     <div id="dashboardState" class="hidden">
         <div id="pageDashboard" class="page active">
 
             <div class="main-card">
-                <!-- SLIDER START -->
                 <div class="slider-container" id="homeSlider">
                     <div class="slide"><img src="https://iili.io/BgnsA11.png" alt="Slide 1"></div>
                     <div class="slide"><img src="https://iili.io/BgnsMBI.png" alt="Slide 2"></div>
                     <div class="slide"><img src="https://iili.io/Bgnsj7s.png" alt="Slide 3"></div>
                     <div class="slider-dots" id="sliderDots"></div>
                 </div>
-                <!-- SLIDER END -->
 
-                <!-- TRADING CHART START -->
                 <div class="trading-chart-container" onclick="openTradingSystemPage()" style="cursor: pointer;">
                     <div class="chart-header">
                         <div class="coin-info">
@@ -2092,7 +2038,6 @@
                         <canvas id="tradingChart"></canvas>
                     </div>
                 </div>
-                <!-- TRADING CHART END -->
 
                 <div class="income-grid">
                     <div class="income-card" onclick="openIncomeHistory()">
@@ -2140,7 +2085,6 @@
                 <i class="fa-solid fa-circle-info"></i> ABOUT US & SYSTEM INFO
             </button>
 
-            <!-- ECOSYSTEM CARD -->
             <div class="ecosystem-card">
                 <h2><i class="fa-solid fa-network-wired"></i> Blockchain Expansion</h2>
                 <p class="subtitle">Additional blockchain systems will automatically launch after some time. Discover the future of ZTR Coin.</p>
@@ -2303,7 +2247,6 @@
     </div>
 </div>
 
-<!-- TRADING SYSTEM FULL PAGE OVERLAY -->
 <div class="full-page-overlay" id="tradingSystemPage">
     <div class="full-page-header">
         <button class="full-page-back-btn" onclick="closeTradingSystemPage()"><i class="fa-solid fa-arrow-left"></i></button>
@@ -2312,7 +2255,6 @@
     </div>
 
     <div class="full-page-content">
-        <!-- 1. LIVE TRADE TAB -->
         <div class="trading-tab-view active" id="tradingTabLive">
             <div class="trading-chart-container" style="height: 220px; margin-bottom: 20px;">
                 <div class="chart-header">
@@ -2384,7 +2326,6 @@
             </div>
         </div>
 
-        <!-- 2. STAKING TAB -->
         <div class="trading-tab-view" id="tradingTabStaking">
             <div class="main-card" style="text-align: center;">
                 <i class="fa-solid fa-vault" style="font-size: 45px; color: var(--gold); margin-bottom: 10px;"></i>
@@ -2430,7 +2371,6 @@
             </div>
         </div>
 
-        <!-- 3. P2P MARKET TAB -->
         <div class="trading-tab-view" id="tradingTabP2P">
             <div class="main-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -2463,7 +2403,6 @@
         </div>
     </div>
 
-    <!-- SUB NAVIGATION FOR TRADING SYSTEM -->
     <div class="trading-subnav">
         <button class="trading-subnav-btn active" id="btnTabLive" onclick="switchTradingTab('Live')">
             <i class="fa-solid fa-chart-line"></i>
@@ -2490,12 +2429,18 @@
 
 <script>
     (function() {
-        const CONTRACT_ADDRESS = "0x04940E5FEaE59A348FC103F07ACD715635d2262A"; // Contract A
-        const SALARY_CONTRACT_ADDRESS = "0xBcc89CdfB795AF6883d44D29b02d975b4Bf4C7Ce"; // Contract B
-        const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; 
-        const CHAIN_ID = "0x38"; // BSC Mainnet
-        const CHAIN_ID_DECIMAL = 56; 
-        
+        // ============================================================
+        // CONSTANTS
+        // ============================================================
+        const CONTRACT_ADDRESS = "0x04940E5FEaE59A348FC103F07ACD715635d2262A";
+        const SALARY_CONTRACT_ADDRESS = "0xBcc89CdfB795AF6883d44D29b02d975b4Bf4C7Ce";
+        const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
+        const CHAIN_ID = "0x38";
+        const CHAIN_ID_DECIMAL = 56;
+
+        // ============================================================
+        // ABIs
+        // ============================================================
         const ZTR_ABI = [
             "function users(address) view returns (uint256 id, address inviter, uint256 currentLevel, uint256 teamSize, uint8 cycleState, uint256 cycleIndex, uint256 airdropPoints, uint256 totalEarningsUSDT, uint256 salaryScore, uint256 salaryDebt, uint256 registeredAt, bool exists)",
             "function getLevel(uint256 _index) view returns (uint256 planPriceZTR, uint256 salaryFundZTR, uint256 systemFeeZTR, uint256 airdropPoints)",
@@ -2548,12 +2493,14 @@
 
         const STORAGE_KEYS = { CONNECTED_WALLET: 'ztr_connected_wallet' };
 
+        // ============================================================
+        // STATE
+        // ============================================================
         let provider, signer, userAddress, ztrContract, salaryContract, usdtContract;
         let rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false;
         let verifiedInviterId = null;
         let currentUserData = null;
         let globalAccumulatedSalary = 0n;
-
         let liveZTRPrice = 1.5;
         let baseZTRPrice = 1.5;
         let chartInterval = null;
@@ -2563,6 +2510,9 @@
         const CLOUDINARY_CLOUD_NAME = 'dfwonuz1a';
         const CLOUDINARY_UPLOAD_PRESET = 'Zentron';
 
+        // ============================================================
+        // DOM REFERENCES
+        // ============================================================
         const connectState = document.getElementById('connectState');
         const invitationState = document.getElementById('invitationState');
         const dashboardState = document.getElementById('dashboardState');
@@ -2575,12 +2525,15 @@
         const loadingOverlay = document.getElementById('loadingOverlay');
         const profileSetupModal = document.getElementById('profileSetupModal');
 
+        // ============================================================
+        // UTILITY FUNCTIONS
+        // ============================================================
         function sanitizeInput(input) {
             if (!input) return '';
-            const div = document.createElement('div'); div.textContent = input; return div.innerHTML;
+            const div = document.createElement('div'); 
+            div.textContent = input; 
+            return div.innerHTML;
         }
-
-        function isValidInviteCode(code) { return /^\d+$/.test(code); }
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
@@ -2591,8 +2544,25 @@
             setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
         }
 
+        const openModal = (modalId) => document.getElementById(modalId).classList.add('active');
+        const closeModal = (modalId) => document.getElementById(modalId).classList.remove('active');
+        window.closeModal = closeModal;
+        window.openModal = openModal;
+
+        // ============================================================
+        // BLOCKCHAIN FUNCTIONS
+        // ============================================================
+        async function getUSDTDecimals() {
+            try {
+                const usdtContractLocal = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
+                usdtDecimals = Number(await usdtContractLocal.decimals());
+            } catch {
+                usdtDecimals = 18;
+            }
+        }
+
         async function fetchUserData(wallet) {
-            if (!wallet) return null;
+            if (!wallet || !ztrContract) return null;
             try {
                 const scUser = await ztrContract.users(wallet);
                 globalAccumulatedSalary = await ztrContract.accumulatedUSDTPerScore();
@@ -2615,7 +2585,7 @@
                             profilePicUrl: localPic 
                         },
                         inviteCode: Number(scUser.id).toString(),
-                        inviterId: scUser.inviter === "0x0000000000000000000000000000000000000000" ? null : 1000, 
+                        inviterId: null,
                         level: Number(scUser.currentLevel),
                         airdropPoints: Number(scUser.airdropPoints),
                         ztrBalance: parseFloat(ethers.formatUnits(scUser.totalEarningsUSDT, 18)) / 1.5,
@@ -2626,15 +2596,23 @@
                     };
 
                     if (scUser.inviter !== "0x0000000000000000000000000000000000000000") {
-                        const invUser = await ztrContract.users(scUser.inviter);
-                        currentUserData.inviterId = Number(invUser.id);
+                        try {
+                            const invUser = await ztrContract.users(scUser.inviter);
+                            currentUserData.inviterId = Number(invUser.id);
+                        } catch(e) {}
                     }
                     return currentUserData;
                 }
                 return { notFound: true };
-            } catch (error) { console.error(error); return null; }
+            } catch (error) { 
+                console.error("fetchUserData error:", error); 
+                return null; 
+            }
         }
 
+        // ============================================================
+        // UI UPDATE FUNCTIONS
+        // ============================================================
         function updateAllWalletAddressDisplays() {
             if (!userAddress) return;
             const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
@@ -2663,11 +2641,6 @@
             } catch (e) { console.error("Balance update failed:", e); }
         }
 
-        async function getSalleryEarnings() {
-             if (!currentUserData) return 0;
-             return currentUserData.salaryRecorded || 0;
-        }
-
         async function updateAssetsPage() {
             if (!currentUserData || !currentUserData.profile) return;
             const { profile, ztrBalance, level, inviterId, inviteCode } = currentUserData;
@@ -2686,7 +2659,7 @@
                 avatarImg.classList.remove('hidden');
                 avatarIcon.classList.add('hidden');
             } else {
-                avatarIcon.className = `fa-solid fa-user-astronaut`;
+                avatarIcon.className = 'fa-solid fa-user-astronaut';
                 avatarIcon.classList.remove('hidden');
                 avatarImg.classList.add('hidden');
             }
@@ -2718,7 +2691,7 @@
             document.getElementById('inviteLink').value = `${baseUrl}?invite=${inviteCode}`;
             document.getElementById('inviteCodeInput').value = inviteCode;
         }
-        
+
         function initSlider() {
             const slides = document.querySelectorAll('#homeSlider .slide');
             const dotsContainer = document.getElementById('sliderDots');
@@ -2742,6 +2715,9 @@
             slideInterval = setInterval(nextSlide, 5000);
         }
 
+        // ============================================================
+        // DASHBOARD SETUP
+        // ============================================================
         async function showDashboard() {
             connectState.classList.add('hidden');
             invitationState.classList.add('hidden');
@@ -2757,6 +2733,9 @@
             await updateOmniViewPage();
         }
 
+        // ============================================================
+        // TEAM PAGE
+        // ============================================================
         async function renderTeamPage() {
             if (!currentUserData || !currentUserData.profile) return;
 
@@ -2819,6 +2798,9 @@
             teamViewContainer.innerHTML = currentUserCardHTML + teamListHTML;
         }
 
+        // ============================================================
+        // INCOME HISTORY
+        // ============================================================
         window.openIncomeHistory = async function() {
             const listContainer = document.getElementById('incomeHistoryList');
             openModal('incomeHistoryModal');
@@ -2833,7 +2815,8 @@
                 
                 if (events.length > 0) {
                     listContainer.innerHTML = '';
-                    [...events].reverse().forEach(async ev => {
+                    const reversedEvents = [...events].reverse();
+                    for (const ev of reversedEvents) {
                         const amt = parseFloat(ethers.formatUnits(ev.args[2], 18)) / 1.5;
                         const block = await ev.getBlock();
                         const date = new Date(block.timestamp * 1000);
@@ -2846,15 +2829,19 @@
                             </div>
                             <div class="history-item-amount status-success">+${amt.toFixed(2)} ZTR</div>
                         </div>`;
-                    });
-                } else { listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No new income history found in recent blocks.</p>'; }
+                    }
+                } else { 
+                    listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No new income history found in recent blocks.</p>'; 
+                }
             } catch (e) { 
                 console.error(e);
                 listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">Fetching from Smart Contract. Please wait a moment.</p>'; 
             }
         }
 
-        /* FETCH SALARY HISTORY FROM CONTRACT B */
+        // ============================================================
+        // SALARY HISTORY
+        // ============================================================
         window.openSalaryHistory = async function() {
             const listContainer = document.getElementById('salaryHistoryList');
             openModal('salaryHistoryModal');
@@ -2890,6 +2877,9 @@
             }
         }
 
+        // ============================================================
+        // LEVEL SYSTEM
+        // ============================================================
         async function initializeLevelViewer() {
             const viewer = document.getElementById('levelViewer');
             const stepper = document.getElementById('levelStepperNav');
@@ -2966,7 +2956,9 @@
                 stepperItems.forEach((item, index) => {
                     item.classList.toggle('active', index === activeIndex);
                 });
-                 stepperItems[activeIndex]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                if (stepperItems[activeIndex]) {
+                    stepperItems[activeIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
             };
             
             viewer.addEventListener('scroll', updateActiveStep, { passive: true });
@@ -2996,19 +2988,19 @@
             levelPageOverlay.classList.remove('active');
             document.body.style.overflow = 'auto';
         }
-        
-        window.closeFullPage = (pageId) => {
-            document.getElementById(pageId).classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
 
+        // ============================================================
+        // LEVEL UPGRADE
+        // ============================================================
         window.initiateLevelUpgrade = async (levelId, usdtCost) => {
             if (isProcessing) return;
             isProcessing = true;
             
             const btn = document.getElementById(`upgradeBtn-${levelId}`);
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing...';
+            }
 
             try {
                 const amount = ethers.parseUnits(usdtCost.toString(), usdtDecimals);
@@ -3021,9 +3013,10 @@
                 const txUpg = await ztrContract.upgradeLevel();
                 await txUpg.wait();
                 
-                showToast(`Level Activated!`, "success");
+                showToast("Level Activated Successfully!", "success");
                 
-                await fetchUserData(userAddress); 
+                // Refresh user data
+                await fetchUserData(userAddress);
                 await Promise.all([updateBalances(), initializeLevelViewer(), updateDashboard(), updateAssetsPage()]);
 
             } catch (e) {
@@ -3036,21 +3029,372 @@
             }
         };
 
-        const openModal = (modalId) => document.getElementById(modalId).classList.add('active');
-        const closeModal = (modalId) => document.getElementById(modalId).classList.remove('active');
-        window.closeModal = closeModal;
-        window.openModal = openModal;
+        // ============================================================
+        // WITHDRAWAL / CLAIM
+        // ============================================================
+        window.openWithdrawalModal = () => {
+            const accumulatedWei = globalAccumulatedSalary || 0n;
+            const salaryScore = currentUserData ? BigInt(currentUserData.salaryScore || 0) : 0n;
+            const salaryDebt = currentUserData ? BigInt(currentUserData.salaryDebt || 0) : 0n;
+            const MULTIPLIER = 1000000000000n;
+            const pendingSalaryWei = ((salaryScore * accumulatedWei) / MULTIPLIER) - salaryDebt;
+            const pendingSalaryZTR = parseFloat(ethers.formatUnits(pendingSalaryWei, 18)) / 1.5;
+            
+            const points = currentUserData ? (currentUserData.airdropPoints || 0) : 0;
+            
+            window.claimType = "none";
+            if (pendingSalaryZTR > 0) {
+                document.getElementById('withdrawalAmount').innerText = `${pendingSalaryZTR.toFixed(2)} ZTR (Salary)`;
+                window.claimType = "salary";
+            } else if (points >= 5000) {
+                const ztrs = Math.floor(points / 5000);
+                document.getElementById('withdrawalAmount').innerText = `${ztrs} ZTR (Airdrop)`;
+                window.claimType = "airdrop";
+            } else {
+                showToast("Matrix earnings are Auto-Paid! No pending Salary or Airdrop to claim.", "info");
+                return;
+            }
+            openModal('withdrawalModal');
+        }
 
-        async function getUSDTDecimals() {
+        document.getElementById('confirmWithdrawalBtn').addEventListener('click', async () => {
+            if (isProcessing) return;
+            isProcessing = true;
+            const btn = document.getElementById('confirmWithdrawalBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Submitting...';
             try {
-                const usdtContractLocal = new ethers.Contract(USDT_CONTRACT, USDT_ABI, provider);
-                usdtDecimals = Number(await usdtContractLocal.decimals());
-            } catch {
-                usdtDecimals = 18;
+                let tx;
+                if(window.claimType === "salary") tx = await ztrContract.claimWeeklySalary();
+                if(window.claimType === "airdrop") tx = await ztrContract.claimAirdropTokens();
+                
+                showToast("Claiming from Blockchain...", "info");
+                await tx.wait();
+
+                showToast("Claim Successful!", "success");
+                await fetchUserData(userAddress);
+                await Promise.all([updateDashboard(), updateAssetsPage()]);
+                closeModal('withdrawalModal');
+            } catch (e) {
+                console.error("Withdrawal error:", e);
+                showToast(e.reason || "Claim failed", "error");
+            } finally {
+                isProcessing = false;
+                btn.disabled = false;
+                btn.innerHTML = 'Claim Now';
+            }
+        });
+
+        // ============================================================
+        // PROFILE SETUP
+        // ============================================================
+        let setupProfilePicData = null;
+
+        async function handleImageUpload(file) {
+            if (!file) return null;
+            if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+                showToast("Image hosting is not configured.", "error"); 
+                return null;
+            }
+            showToast("Uploading profile picture...", "info");
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            try {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                const result = await response.json();
+                if (result.secure_url) {
+                    showToast("Upload successful!", "success");
+                    return result.secure_url;
+                }
+                throw new Error(result.error?.message || "Unknown Cloudinary error");
+            } catch (error) {
+                showToast(`Upload failed: ${error.message}`, "error");
+                return null;
             }
         }
 
-        /* TRADING SYSTEM LOGIC & CHARTS */
+        document.getElementById('setupProfilePic').addEventListener('change', async (e) => {
+            if (e.target.files && e.target.files[0]) {
+                const imageUrl = await handleImageUpload(e.target.files[0]);
+                if (imageUrl) {
+                    setupProfilePicData = imageUrl;
+                    document.getElementById('avatarPreviewImg').src = imageUrl;
+                    document.getElementById('avatarPreviewImg').style.display = 'block';
+                    document.getElementById('avatarPreviewIcon').style.display = 'none';
+                }
+            }
+        });
+
+        // ============================================================
+        // COMPLETE REGISTRATION (FIXED)
+        // ============================================================
+        document.getElementById('completeProfileBtn').addEventListener('click', async () => {
+            const username = document.getElementById('setupUsername').value.trim();
+            if (!username || username.length < 3) {
+                showToast("Username must be at least 3 characters", "error");
+                return;
+            }
+            
+            if (!verifiedInviterId) {
+                showToast("No valid inviter ID found. Please verify your invitation code.", "error");
+                return;
+            }
+            
+            isProcessing = true;
+            const btn = document.getElementById('completeProfileBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing Payment...';
+
+            try {
+                const usdtCost = (2.1 * 1.5).toFixed(2);
+                const amountWei = ethers.parseUnits(usdtCost, usdtDecimals);
+                
+                showToast(`Approving ${usdtCost} USDT...`, "info");
+                const approveTx = await usdtContract.approve(CONTRACT_ADDRESS, amountWei);
+                await approveTx.wait();
+
+                showToast("Registering Node on Blockchain...", "info");
+                
+                // FIX: Convert to Number before passing to contract
+                const inviterIdNumber = Number(verifiedInviterId);
+                console.log("Registering with inviter ID:", inviterIdNumber);
+                
+                const regTx = await ztrContract.register(inviterIdNumber);
+                await regTx.wait();
+
+                localStorage.setItem('ztr_name_' + userAddress.toLowerCase(), sanitizeInput(username));
+                if (setupProfilePicData) {
+                    localStorage.setItem('ztr_pic_' + userAddress.toLowerCase(), setupProfilePicData);
+                }
+                
+                closeModal('profileSetupModal');
+                showToast("Registration Successful! Welcome!", "success");
+                
+                // Force refresh user data
+                const freshData = await fetchUserData(userAddress);
+                currentUserData = freshData;
+                await showDashboard();
+
+            } catch (error) {
+                console.error('Registration failed:', error);
+                showToast(error.reason || error.message, 'error');
+            } finally {
+                isProcessing = false;
+                btn.disabled = false;
+                btn.innerText = 'Pay & Complete Setup';
+            }
+        });
+
+        // ============================================================
+        // VERIFY INVITATION CODE (FIXED)
+        // ============================================================
+        document.getElementById('verifyInviteCodeBtn').addEventListener('click', async () => {
+            const inputValue = document.getElementById('verifyInviteCodeInput').value.trim();
+            const statusDiv = document.getElementById('inviterVerifyStatus');
+            const proceedBtn = document.getElementById('proceedToProfileBtn');
+            
+            // FIX: Convert to number and validate
+            const inviteCode = Number(inputValue);
+            
+            if (isNaN(inviteCode) || inviteCode < 1000) {
+                statusDiv.innerHTML = '<span class="status-error">❌ Invalid ID format. Use numbers only (minimum 1000).</span>';
+                verifiedInviterId = null;
+                proceedBtn.disabled = true;
+                return;
+            }
+
+            try {
+                // FIX: Pass number to contract
+                const inviterAddr = await ztrContract.idToAddress(inviteCode);
+                if (inviterAddr && inviterAddr !== "0x0000000000000000000000000000000000000000") {
+                    // FIX: Store as number
+                    verifiedInviterId = inviteCode;
+                    statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by ID: ZTR-${verifiedInviterId}</span>`;
+                    proceedBtn.disabled = false;
+                } else {
+                    statusDiv.innerHTML = '<span class="status-error">❌ Invitation ID not found on blockchain.</span>';
+                    verifiedInviterId = null;
+                    proceedBtn.disabled = true;
+                }
+            } catch(e) {
+                console.error("Verification error:", e);
+                statusDiv.innerHTML = '<span class="status-error">❌ Error verifying ID. Please try again.</span>';
+                verifiedInviterId = null;
+                proceedBtn.disabled = true;
+            }
+        });
+
+        document.getElementById('proceedToProfileBtn').addEventListener('click', () => {
+            if (!verifiedInviterId) {
+                showToast("You must verify an invitation ID first.", "error");
+                return;
+            }
+            invitationState.classList.add('hidden');
+            openModal('profileSetupModal');
+        });
+
+        // ============================================================
+        // PROFILE EDIT
+        // ============================================================
+        document.getElementById('profilePicInput').addEventListener('change', async (event) => {
+            if(event.target.files && event.target.files[0]) {
+                const imageUrl = await handleImageUpload(event.target.files[0]);
+                if (imageUrl) {
+                    localStorage.setItem('ztr_pic_' + userAddress.toLowerCase(), imageUrl);
+                    await fetchUserData(userAddress);
+                    await updateAssetsPage();
+                    showToast("Profile picture updated successfully!", "success");
+                }
+            }
+        });
+
+        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+            const name = document.getElementById('profileNameInput').value;
+            if (name && userAddress) {
+                localStorage.setItem('ztr_name_' + userAddress.toLowerCase(), sanitizeInput(name));
+                await fetchUserData(userAddress);
+                await updateAssetsPage();
+                closeModal('editProfileModal');
+                showToast("Profile updated!", "success");
+            }
+        });
+
+        // ============================================================
+        // COPY FUNCTIONS
+        // ============================================================
+        document.getElementById('copyInviteLinkBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText(document.getElementById('inviteLink').value);
+            showToast('Invitation link copied!', 'success');
+        });
+        
+        document.getElementById('copyInviteCodeBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText(document.getElementById('inviteCodeInput').value);
+            showToast('Invitation ID copied!', 'success');
+        });
+
+        // ============================================================
+        // OMNI VIEW
+        // ============================================================
+        function updateAirdropProgress(totalDistributed) {
+            const phases = [
+                { title: 'Phase 1: Genesis', target: 200000, start: 0 },
+                { title: 'Phase 2: Discovery', target: 500000, start: 200000 },
+                { title: 'Phase 3: Expansion', target: 850000, start: 500000 },
+                { title: 'Phase 4: Apex', target: 1500000, start: 850000 },
+                { title: 'Phase 5: Zenith', target: 2000000, start: 1500000 },
+                { title: 'Phase 6: Infinity', target: 3000000, start: 2000000 }
+            ];
+
+            let activePhase = phases.find(p => totalDistributed < p.target) || phases[phases.length - 1];
+            const range = activePhase.target - activePhase.start;
+            const relativeDist = Math.max(0, Math.min(totalDistributed, activePhase.target) - activePhase.start);
+            const percentage = range > 0 ? (relativeDist / range) * 100 : (totalDistributed >= activePhase.target ? 100 : 0);
+
+            document.getElementById('airdropProgressFill').style.width = `${percentage}%`;
+            document.getElementById('adPhaseTitle').innerText = totalDistributed >= phases[phases.length -1].target ? "All Phases Complete!" : activePhase.title;
+            document.getElementById('airdropProgressText').innerText = `${totalDistributed.toLocaleString()} / ${activePhase.target.toLocaleString()}`;
+            document.getElementById('adStartPoint').innerText = `${activePhase.start.toLocaleString()} Pts`;
+            document.getElementById('adEndPoint').innerText = `${activePhase.target.toLocaleString()} Pts`;
+        }
+
+        function renderLeaderboard(users) {
+            const listContainer = document.getElementById('topUsersList');
+            if (!users || users.length === 0) {
+                return listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">Leaderboard is empty.</p>';
+            }
+            listContainer.innerHTML = users.slice(0, 100).map((user, index) => `
+                <div class="top-user-item">
+                    <div class="top-user-rank">#${index + 1}</div>
+                    ${user.profilePicUrl ? `<div class="top-user-avatar" style="background-image: url(${user.profilePicUrl});"></div>` : `<div class="top-user-avatar"><i class="fa-solid fa-user-astronaut"></i></div>`}
+                    <div class="top-user-info">
+                        <div class="top-user-name">${sanitizeInput(user.name)}</div>
+                        <div class="top-user-id">ID: ZTR-${user.userId}</div>
+                    </div>
+                    <div class="top-user-earnings">${user.earnings.toFixed(2)} ZTR</div>
+                </div>
+            `).join('');
+        }
+
+        async function updateOmniViewPage() {
+            try {
+                document.getElementById('topUsersList').innerHTML = '<div class="spinner"></div>';
+
+                const totalUsersNum = Number(await ztrContract.nextUserId());
+                const totalPool = await ztrContract.totalSalaryPoolUSDT();
+
+                document.getElementById('totalParticipants').innerText = (totalUsersNum - 1000).toString();
+                document.getElementById('totalWeeklySalaryFund').innerText = `${(parseFloat(ethers.formatUnits(totalPool, 18))/1.5).toFixed(2)} ZTR`;
+
+                let salaryActiveCount = 0;
+                let totalAirdropPoints = 0;
+                let leaderboardData = [];
+                let globalTotalEarnedZTR = 0;
+
+                const startId = 1000;
+                const endId = Math.min(totalUsersNum, 2000); // Limit for performance
+
+                for (let i = startId; i < endId; i++) {
+                    try {
+                        const addr = await ztrContract.idToAddress(i);
+                        if (addr && addr !== "0x0000000000000000000000000000000000000000") {
+                            const u = await ztrContract.users(addr);
+                            if (u.exists) {
+                                if (Number(u.currentLevel) >= 4) salaryActiveCount++;
+                                totalAirdropPoints += Number(u.airdropPoints);
+
+                                const earnedZTR = parseFloat(ethers.formatUnits(u.totalEarningsUSDT, 18)) / 1.5;
+                                globalTotalEarnedZTR += earnedZTR;
+
+                                if (earnedZTR > 0) {
+                                    let localName = localStorage.getItem('ztr_name_' + addr.toLowerCase()) || "User " + u.id;
+                                    let localPic = localStorage.getItem('ztr_pic_' + addr.toLowerCase()) || null;
+                                    leaderboardData.push({
+                                        name: localName,
+                                        userId: Number(u.id),
+                                        profilePicUrl: localPic,
+                                        earnings: earnedZTR
+                                    });
+                                }
+                            }
+                        }
+                    } catch(e) {}
+                }
+
+                document.getElementById('salaryActiveMembers').innerText = salaryActiveCount.toString();
+                document.getElementById('totalZTRDistributed').innerText = `${globalTotalEarnedZTR.toFixed(2)} ZTR`;
+
+                updateAirdropProgress(totalAirdropPoints);
+
+                leaderboardData.sort((a, b) => b.earnings - a.earnings);
+                renderLeaderboard(leaderboardData);
+
+            } catch (error) { 
+                console.error("Error updating OmniView:", error); 
+                document.getElementById('topUsersList').innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">Failed to load leaderboard.</p>';
+            }
+        }
+
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const pageId = 'page' + btn.dataset.page.charAt(0).toUpperCase() + btn.dataset.page.slice(1);
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(pageId).classList.add('active');
+                
+                if (pageId === 'pageTeam') await renderTeamPage();
+                else if (pageId === 'pageAssets') await updateAssetsPage();
+                else if (pageId === 'pageOmniView') await updateOmniViewPage();
+            });
+        });
+
+        // ============================================================
+        // TRADING SYSTEM
+        // ============================================================
         window.openTradingSystemPage = () => {
             const loader = document.getElementById('tradingLoaderOverlay');
             loader.classList.remove('hidden');
@@ -3174,421 +3518,61 @@
             const ctx = canvas.getContext('2d');
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+            canvas.width = rect.width * dpr; 
+            canvas.height = rect.height * dpr;
             ctx.scale(dpr, dpr);
             const prices = chartData.map(d => d.close);
-            const minPrice = Math.min(...prices); const maxPrice = Math.max(...prices);
+            const minPrice = Math.min(...prices); 
+            const maxPrice = Math.max(...prices);
             const priceRange = maxPrice - minPrice || 1;
-            const firstPrice = chartData[0].close; const lastPrice = prices[prices.length - 1];
+            const firstPrice = chartData[0].close; 
+            const lastPrice = prices[prices.length - 1];
             const isUp = lastPrice >= firstPrice;
             const lineColor = isUp ? '#10b981' : '#ef4444';
             ctx.clearRect(0, 0, rect.width, rect.height);
             const gradient = ctx.createLinearGradient(0, 0, 0, rect.height);
-            gradient.addColorStop(0, `${lineColor}40`); gradient.addColorStop(1, `${lineColor}00`);
-            ctx.beginPath(); ctx.moveTo(0, rect.height);
+            gradient.addColorStop(0, `${lineColor}40`); 
+            gradient.addColorStop(1, `${lineColor}00`);
+            ctx.beginPath(); 
+            ctx.moveTo(0, rect.height);
             chartData.forEach((data, index) => {
                 const x = (index / (chartData.length - 1)) * rect.width;
                 const y = rect.height - ((data.close - minPrice) / priceRange) * rect.height * 0.9 + rect.height * 0.05;
                 ctx.lineTo(x, y);
             });
-            ctx.lineTo(rect.width, rect.height); ctx.closePath(); ctx.fillStyle = gradient; ctx.fill();
+            ctx.lineTo(rect.width, rect.height); 
+            ctx.closePath(); 
+            ctx.fillStyle = gradient; 
+            ctx.fill();
             ctx.beginPath();
             chartData.forEach((data, index) => {
                 const x = (index / (chartData.length - 1)) * rect.width;
                 const y = rect.height - ((data.close - minPrice) / priceRange) * rect.height * 0.9 + rect.height * 0.05;
-                if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                if (index === 0) ctx.moveTo(x, y); 
+                else ctx.lineTo(x, y);
             });
-            ctx.lineWidth = 2; ctx.strokeStyle = lineColor; ctx.shadowColor = lineColor; ctx.shadowBlur = 10; ctx.stroke();
-            const lastX = rect.width; const lastY = rect.height - ((lastPrice - minPrice) / priceRange) * rect.height * 0.9 + rect.height * 0.05;
-            ctx.beginPath(); ctx.arc(lastX, lastY, 4, 0, 2 * Math.PI); ctx.fillStyle = lineColor; ctx.fill();
-            ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+            ctx.lineWidth = 2; 
+            ctx.strokeStyle = lineColor; 
+            ctx.shadowColor = lineColor; 
+            ctx.shadowBlur = 10; 
+            ctx.stroke();
+            const lastX = rect.width; 
+            const lastY = rect.height - ((lastPrice - minPrice) / priceRange) * rect.height * 0.9 + rect.height * 0.05;
+            ctx.beginPath(); 
+            ctx.arc(lastX, lastY, 4, 0, 2 * Math.PI); 
+            ctx.fillStyle = lineColor; 
+            ctx.fill();
+            ctx.shadowColor = 'transparent'; 
+            ctx.shadowBlur = 0;
         }
 
-        let setupProfilePicData = null;
-        async function handleImageUpload(file) {
-            if (!file) return null;
-            if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
-                showToast("Image hosting is not configured.", "error"); return null;
-            }
-            showToast("Uploading profile picture...", "info");
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            try {
-                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
-                const result = await response.json();
-                if (result.secure_url) {
-                    showToast("Upload successful!", "success");
-                    return result.secure_url;
-                }
-                throw new Error(result.error.message || "Unknown Cloudinary error");
-            } catch (error) {
-                showToast(`Upload failed: ${error.message}`, "error");
-                return null;
-            }
+        // ============================================================
+        // FULL PAGE OVERLAYS
+        // ============================================================
+        window.closeFullPage = (pageId) => {
+            document.getElementById(pageId).classList.remove('active');
+            document.body.style.overflow = 'auto';
         }
-
-        document.getElementById('setupProfilePic').addEventListener('change', async (e) => {
-            if (e.target.files && e.target.files[0]) {
-                const imageUrl = await handleImageUpload(e.target.files[0]);
-                if (imageUrl) {
-                    setupProfilePicData = imageUrl;
-                    document.getElementById('avatarPreviewImg').src = imageUrl;
-                    document.getElementById('avatarPreviewImg').style.display = 'block';
-                    document.getElementById('avatarPreviewIcon').style.display = 'none';
-                }
-            }
-        });
-
-        document.getElementById('completeProfileBtn').addEventListener('click', async () => {
-            const username = document.getElementById('setupUsername').value.trim();
-            if (!username || username.length < 3) return showToast("Username must be at least 3 characters", "error");
-            
-            isProcessing = true;
-            const btn = document.getElementById('completeProfileBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Processing Payment...';
-
-            try {
-                const usdtCost = (2.1 * 1.5).toFixed(2);
-                const amountWei = ethers.parseUnits(usdtCost, usdtDecimals);
-                
-                showToast(`Approve ${usdtCost} USDT in wallet...`, "info");
-                const approveTx = await usdtContract.approve(CONTRACT_ADDRESS, amountWei);
-                await approveTx.wait();
-
-                showToast("Registering Node on Blockchain...", "info");
-                const regTx = await ztrContract.register(verifiedInviterId);
-                await regTx.wait();
-
-                localStorage.setItem('ztr_name_' + userAddress.toLowerCase(), sanitizeInput(username));
-                if (setupProfilePicData) {
-                    localStorage.setItem('ztr_pic_' + userAddress.toLowerCase(), setupProfilePicData);
-                }
-                
-                closeModal('profileSetupModal');
-                showToast("Registration Successful! Welcome!", "success");
-                
-                await fetchUserData(userAddress);
-                await showDashboard();
-
-            } catch (error) {
-                console.error('Registration failed:', error);
-                showToast(error.reason || error.message, 'error');
-            } finally {
-                 isProcessing = false;
-                 btn.disabled = false;
-                 btn.innerText = 'Pay & Complete Setup';
-            }
-        });
-
-        window.openWithdrawalModal = () => {
-            const accumulatedWei = globalAccumulatedSalary || 0n;
-            const salaryScore = currentUserData ? BigInt(currentUserData.salaryScore || 0) : 0n;
-            const salaryDebt = currentUserData ? BigInt(currentUserData.salaryDebt || 0) : 0n;
-            const MULTIPLIER = 1000000000000n;
-            const pendingSalaryWei = ((salaryScore * accumulatedWei) / MULTIPLIER) - salaryDebt;
-            const pendingSalaryZTR = parseFloat(ethers.formatUnits(pendingSalaryWei, 18)) / 1.5;
-            
-            const points = currentUserData ? (currentUserData.airdropPoints || 0) : 0;
-            
-            window.claimType = "none";
-            if (pendingSalaryZTR > 0) {
-                document.getElementById('withdrawalAmount').innerText = `${pendingSalaryZTR.toFixed(2)} ZTR (Salary)`;
-                window.claimType = "salary";
-            } else if (points >= 5000) {
-                const ztrs = Math.floor(points / 5000);
-                document.getElementById('withdrawalAmount').innerText = `${ztrs} ZTR (Airdrop)`;
-                window.claimType = "airdrop";
-            } else {
-                showToast("Matrix earnings are Auto-Paid! No pending Salary or Airdrop to claim.", "info");
-                return;
-            }
-            openModal('withdrawalModal');
-        }
-
-        document.getElementById('confirmWithdrawalBtn').addEventListener('click', async () => {
-             if (isProcessing) return;
-            isProcessing = true;
-            const btn = document.getElementById('confirmWithdrawalBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Submitting...';
-            try {
-                let tx;
-                if(window.claimType === "salary") tx = await ztrContract.claimWeeklySalary();
-                if(window.claimType === "airdrop") tx = await ztrContract.claimAirdropTokens();
-                
-                showToast("Claiming from Blockchain...", "info");
-                await tx.wait();
-
-                showToast("Claim Successful!", "success");
-                await fetchUserData(userAddress);
-                await Promise.all([updateDashboard(), updateAssetsPage()]);
-                closeModal('withdrawalModal');
-            } catch (e) {
-                console.error("Withdrawal error:", e);
-                showToast(e.reason || "Claim failed", "error");
-            } finally {
-                isProcessing = false;
-                btn.disabled = false;
-                btn.innerHTML = 'Withdraw';
-            }
-        });
-        
-        async function initConnection(accounts) {
-            try {
-                userAddress = accounts[0];
-                localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, userAddress);
-
-                provider = new ethers.BrowserProvider(window.ethereum);
-                signer = await provider.getSigner();
-                
-                try {
-                    const network = await provider.getNetwork();
-                    if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
-                        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params:[{ chainId: CHAIN_ID }] });
-                    }
-                } catch(e) { console.error(e); }
-                
-                ztrContract = new ethers.Contract(CONTRACT_ADDRESS, ZTR_ABI, signer);
-                salaryContract = new ethers.Contract(SALARY_CONTRACT_ADDRESS, SALARY_CONTRACT_ABI, signer);
-                usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
-                await getUSDTDecimals();
-                
-                updateAllWalletAddressDisplays();
-                
-                const uData = await fetchUserData(userAddress);
-                await updateBalances();
-                
-                if (uData && !uData.notFound) {
-                    await showDashboard();
-                } else {
-                    connectState.classList.add('hidden');
-                    invitationState.classList.remove('hidden');
-
-                    const storedInviteCode = sessionStorage.getItem('urlInviteCode');
-                    if (storedInviteCode) {
-                        document.getElementById('verifyInviteCodeInput').value = storedInviteCode;
-                    }
-                }
-            } catch (error) {
-                console.error("Connection Error:", error);
-                showToast("Connection to blockchain failed.", "error");
-            } finally {
-                document.getElementById('loadingOverlay').classList.add('hidden');
-            }
-        }
-
-        document.getElementById('connectBtn').addEventListener('click', async () => {
-            if (!window.ethereum) return showToast("Use Trust Wallet/Metamask", "error");
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                await initConnection(accounts);
-            } catch (err) {
-                showToast("Connection rejected", "error");
-                document.getElementById('loadingOverlay').classList.add('hidden');
-            }
-        });
-
-        document.getElementById('verifyInviteCodeBtn').addEventListener('click', async () => {
-            const inviteCode = document.getElementById('verifyInviteCodeInput').value.trim();
-            const statusDiv = document.getElementById('inviterVerifyStatus');
-            const proceedBtn = document.getElementById('proceedToProfileBtn');
-            
-            if (!isValidInviteCode(inviteCode)) return statusDiv.innerHTML = '<span class="status-error">❌ Invalid ID format. Use numbers only.</span>';
-
-            try {
-                const inviterAddr = await ztrContract.idToAddress(inviteCode);
-                if (inviterAddr && inviterAddr !== "0x0000000000000000000000000000000000000000") {
-                    verifiedInviterId = inviteCode;
-                    statusDiv.innerHTML = `<span class="status-success">✅ Verified! Invited by ID: ZTR-${verifiedInviterId}</span>`;
-                    proceedBtn.disabled = false;
-                } else {
-                    statusDiv.innerHTML = '<span class="status-error">❌ Invitation ID not found.</span>';
-                    verifiedInviterId = null;
-                    proceedBtn.disabled = true;
-                }
-            } catch(e) {
-                statusDiv.innerHTML = '<span class="status-error">❌ Error verifying ID.</span>';
-            }
-        });
-
-        document.getElementById('proceedToProfileBtn').addEventListener('click', () => {
-            if (!verifiedInviterId) return showToast("You must verify an invitation ID first.", "error");
-            invitationState.classList.add('hidden');
-            openModal('profileSetupModal');
-        });
-
-        document.getElementById('profilePicInput').addEventListener('change', async (event) => {
-            if(event.target.files && event.target.files[0]) {
-                const imageUrl = await handleImageUpload(event.target.files[0]);
-                if (imageUrl) {
-                    localStorage.setItem('ztr_pic_' + userAddress.toLowerCase(), imageUrl);
-                    await fetchUserData(userAddress);
-                    await updateAssetsPage();
-                    showToast("Profile picture updated successfully!", "success");
-                }
-            }
-        });
-
-        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
-            const name = document.getElementById('profileNameInput').value;
-            if (name && userAddress) {
-                localStorage.setItem('ztr_name_' + userAddress.toLowerCase(), sanitizeInput(name));
-                await fetchUserData(userAddress);
-                await updateAssetsPage();
-                closeModal('editProfileModal');
-                showToast("Profile updated!", "success");
-            }
-        });
-
-        document.getElementById('copyInviteLinkBtn').addEventListener('click', () => {
-            navigator.clipboard.writeText(document.getElementById('inviteLink').value);
-            showToast('Invitation link copied!', 'success');
-        });
-        
-        document.getElementById('copyInviteCodeBtn').addEventListener('click', () => {
-            navigator.clipboard.writeText(document.getElementById('inviteCodeInput').value);
-            showToast('Invitation ID copied!', 'success');
-        });
-
-        function updateAirdropProgress(totalDistributed) {
-            const phases = [
-                { title: 'Phase 1: Genesis', target: 200000, start: 0 },
-                { title: 'Phase 2: Discovery', target: 500000, start: 200000 },
-                { title: 'Phase 3: Expansion', target: 850000, start: 500000 },
-                { title: 'Phase 4: Apex', target: 1500000, start: 850000 },
-                { title: 'Phase 5: Zenith', target: 2000000, start: 1500000 },
-                { title: 'Phase 6: Infinity', target: 3000000, start: 2000000 }
-            ];
-
-            let activePhase = phases.find(p => totalDistributed < p.target) || phases[phases.length - 1];
-            const range = activePhase.target - activePhase.start;
-            const relativeDist = Math.max(0, Math.min(totalDistributed, activePhase.target) - activePhase.start);
-            const percentage = range > 0 ? (relativeDist / range) * 100 : (totalDistributed >= activePhase.target ? 100 : 0);
-
-            document.getElementById('airdropProgressFill').style.width = `${percentage}%`;
-            document.getElementById('adPhaseTitle').innerText = totalDistributed >= phases[phases.length -1].target ? "All Phases Complete!" : activePhase.title;
-            document.getElementById('airdropProgressText').innerText = `${totalDistributed.toLocaleString()} / ${activePhase.target.toLocaleString()}`;
-            document.getElementById('adStartPoint').innerText = `${activePhase.start.toLocaleString()} Pts`;
-            document.getElementById('adEndPoint').innerText = `${activePhase.target.toLocaleString()} Pts`;
-        }
-
-        function renderLeaderboard(users) {
-            const listContainer = document.getElementById('topUsersList');
-            if (!users || users.length === 0) {
-                return listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">Leaderboard is empty.</p>';
-            }
-            listContainer.innerHTML = users.slice(0, 100).map((user, index) => `<div class="top-user-item"><div class="top-user-rank">#${index + 1}</div>${user.profilePicUrl ? `<div class="top-user-avatar" style="background-image: url(${user.profilePicUrl});"></div>` : `<div class="top-user-avatar"><i class="fa-solid fa-user-astronaut"></i></div>`}<div class="top-user-info"><div class="top-user-name">${sanitizeInput(user.name)}</div><div class="top-user-id">ID: ZTR-${user.userId}</div></div><div class="top-user-earnings">${user.earnings.toFixed(2)} ZTR</div></div>`).join('');
-        }
-
-        async function updateOmniViewPage() {
-            try {
-                document.getElementById('topUsersList').innerHTML = '<div class="spinner"></div>';
-
-                const totalUsersNum = Number(await ztrContract.nextUserId());
-                const totalPool = await ztrContract.totalSalaryPoolUSDT();
-
-                document.getElementById('totalParticipants').innerText = (totalUsersNum - 1000).toString();
-                document.getElementById('totalWeeklySalaryFund').innerText = `${(parseFloat(ethers.formatUnits(totalPool, 18))/1.5).toFixed(2)} ZTR`;
-
-                let salaryActiveCount = 0;
-                let totalAirdropPoints = 0;
-                let leaderboardData = [];
-                let globalTotalEarnedZTR = 0;
-
-                for (let i = 1000; i < totalUsersNum; i++) {
-                    try {
-                        const addr = await ztrContract.idToAddress(i);
-                        if (addr && addr !== "0x0000000000000000000000000000000000000000") {
-                            const u = await ztrContract.users(addr);
-                            if (u.exists) {
-                                if (Number(u.currentLevel) >= 4) salaryActiveCount++;
-                                totalAirdropPoints += Number(u.airdropPoints);
-
-                                const earnedZTR = parseFloat(ethers.formatUnits(u.totalEarningsUSDT, 18)) / 1.5;
-                                globalTotalEarnedZTR += earnedZTR;
-
-                                if (earnedZTR > 0) {
-                                    let localName = localStorage.getItem('ztr_name_' + addr.toLowerCase()) || "User " + u.id;
-                                    let localPic = localStorage.getItem('ztr_pic_' + addr.toLowerCase()) || null;
-                                    leaderboardData.push({
-                                        name: localName,
-                                        userId: Number(u.id),
-                                        profilePicUrl: localPic,
-                                        earnings: earnedZTR
-                                    });
-                                }
-                            }
-                        }
-                    } catch(e) {}
-                }
-
-                document.getElementById('salaryActiveMembers').innerText = salaryActiveCount.toString();
-                document.getElementById('totalZTRDistributed').innerText = `${globalTotalEarnedZTR.toFixed(2)} ZTR`;
-
-                updateAirdropProgress(totalAirdropPoints);
-
-                leaderboardData.sort((a, b) => b.earnings - a.earnings);
-                renderLeaderboard(leaderboardData);
-
-            } catch (error) { 
-                console.error("Error updating OmniView:", error); 
-                document.getElementById('topUsersList').innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">Failed to load leaderboard.</p>';
-            }
-        }
-        
-        document.querySelectorAll('.nav-item').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const pageId = 'page' + btn.dataset.page.charAt(0).toUpperCase() + btn.dataset.page.slice(1);
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.getElementById(pageId).classList.add('active');
-                
-                if (pageId === 'pageTeam') await renderTeamPage();
-                else if (pageId === 'pageAssets') await updateAssetsPage();
-                else if (pageId === 'pageOmniView') await updateOmniViewPage();
-            });
-        });
-
-        setInterval(() => { if (currentUserData) { updateBalances(); updateDashboard(); } }, 30000);
-
-        if (window.ethereum) {
-            window.ethereum.on('accountsChanged', () => { localStorage.clear(); sessionStorage.clear(); location.reload(); });
-            window.ethereum.on('chainChanged', () => location.reload());
-        }
-
-        window.addEventListener('load', async () => {
-            const inviteCodeFromUrl = new URLSearchParams(window.location.search).get('invite');
-            if(inviteCodeFromUrl) {
-                sessionStorage.setItem('urlInviteCode', inviteCodeFromUrl);
-                document.getElementById('verifyInviteCodeInput').value = inviteCodeFromUrl;
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-            
-            if (window.ethereum) {
-                const savedWallet = localStorage.getItem(STORAGE_KEYS.CONNECTED_WALLET);
-                if (savedWallet) {
-                    try {
-                        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                        if (accounts.length > 0) {
-                            document.getElementById('loadingOverlay').classList.remove('hidden');
-                            await initConnection(accounts);
-                        } else {
-                            document.getElementById('loadingOverlay').classList.add('hidden');
-                        }
-                    } catch (e) {
-                        document.getElementById('loadingOverlay').classList.add('hidden');
-                    }
-                } else {
-                    document.getElementById('loadingOverlay').classList.add('hidden');
-                }
-            } else {
-                document.getElementById('loadingOverlay').classList.add('hidden');
-            }
-        });
 
         window.openDropsModal = () => openModal('dropsModal');
 
@@ -3640,7 +3624,7 @@
             document.body.style.overflow = 'hidden';
             tokensPage.classList.add('active');
             closeModal('dropsModal');
-            document.getElementById('airdropPointsDisplay').innerText = (currentUserData.airdropPoints || 0).toLocaleString();
+            document.getElementById('airdropPointsDisplay').innerText = (currentUserData?.airdropPoints || 0).toLocaleString();
         }
 
         window.openTasksPage = async () => {
@@ -3655,14 +3639,28 @@
             aboutUsPage.classList.add('active');
         }
 
+        // ============================================================
+        // TASKS
+        // ============================================================
         async function renderInvitationTasks() {
             const taskListContainer = document.getElementById('invitationTasksList');
-            const directTeamCount = currentUserData.teamSize || 0;
-            const tasks = [ { required: 3, points: 500 }, { required: 6, points: 1500 }, { required: 10, points: 3000 }, { required: 15, points: 5000 }, { required: 25, points: 10000 }, { required: 50, points: 25000 }];
+            const directTeamCount = currentUserData?.teamSize || 0;
+            const tasks = [ 
+                { required: 3, points: 500 }, 
+                { required: 6, points: 1500 }, 
+                { required: 10, points: 3000 }, 
+                { required: 15, points: 5000 }, 
+                { required: 25, points: 10000 }, 
+                { required: 50, points: 25000 }
+            ];
 
             taskListContainer.innerHTML = tasks.map(task => {
                 const isClaimed = localStorage.getItem(`task_${task.required}_${userAddress}`) === "true";
-                const buttonHTML = isClaimed ? `<button class="btn btn-success" disabled><i class="fa-solid fa-check"></i> Claimed</button>` : (directTeamCount >= task.required ? `<button class="btn btn-success" onclick="claimTaskReward(event, ${task.required}, ${task.points})">Claim</button>` : `<button class="btn" disabled>${directTeamCount} / ${task.required}</button>`);
+                const buttonHTML = isClaimed ? 
+                    `<button class="btn btn-success" disabled><i class="fa-solid fa-check"></i> Claimed</button>` : 
+                    (directTeamCount >= task.required ? 
+                        `<button class="btn btn-success" onclick="claimTaskReward(event, ${task.required}, ${task.points})">Claim</button>` : 
+                        `<button class="btn" disabled>${directTeamCount} / ${task.required}</button>`);
                 return `<div class="task-item" style="flex-direction: column; align-items: stretch; gap: 10px;"><div style="display: flex; justify-content: space-between; align-items: center;"><div class="task-details"><strong>Invite ${task.required} Members</strong><p style="font-size: 12px; color: var(--text-muted);">Activate ${task.required} users.</p></div><div class="task-reward" style="font-size:16px;">+${task.points.toLocaleString()} Pts</div></div>${buttonHTML}</div>`;
             }).join('');
         }
@@ -3672,17 +3670,169 @@
             showToast("Rewards logic is now handled automatically on-chain during upgrades.", "info");
             renderInvitationTasks();
         }
-        
-        window.toggleEcosystem = function(btn) {
-            const details = document.getElementById('ecoDetails');
-            if(details.classList.contains('open')) {
-                details.classList.remove('open');
-                btn.innerHTML = '<i class="fa-solid fa-clock"></i> COMING SOON';
-            } else {
-                details.classList.add('open');
-                btn.innerHTML = '<i class="fa-solid fa-chevron-up"></i> HIDE DETAILS';
+
+        // ============================================================
+        // CONNECT WALLET
+        // ============================================================
+        document.getElementById('connectBtn').addEventListener('click', async () => {
+            if (!window.ethereum) {
+                showToast("Use Trust Wallet/Metamask", "error");
+                return;
             }
-        };
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                await initConnection(accounts);
+            } catch (err) {
+                showToast("Connection rejected", "error");
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
+        });
+
+        // ============================================================
+        // INIT CONNECTION
+        // ============================================================
+        async function initConnection(accounts) {
+            try {
+                userAddress = accounts[0];
+                localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, userAddress);
+
+                provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
+                
+                try {
+                    const network = await provider.getNetwork();
+                    if (Number(network.chainId) !== CHAIN_ID_DECIMAL) {
+                        await window.ethereum.request({ 
+                            method: 'wallet_switchEthereumChain', 
+                            params: [{ chainId: CHAIN_ID }] 
+                        });
+                    }
+                } catch(e) { 
+                    console.error("Network switch error:", e); 
+                }
+                
+                ztrContract = new ethers.Contract(CONTRACT_ADDRESS, ZTR_ABI, signer);
+                salaryContract = new ethers.Contract(SALARY_CONTRACT_ADDRESS, SALARY_CONTRACT_ABI, signer);
+                usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
+                await getUSDTDecimals();
+                
+                updateAllWalletAddressDisplays();
+                
+                const uData = await fetchUserData(userAddress);
+                await updateBalances();
+                
+                if (uData && !uData.notFound) {
+                    await showDashboard();
+                } else {
+                    connectState.classList.add('hidden');
+                    invitationState.classList.remove('hidden');
+
+                    const storedInviteCode = sessionStorage.getItem('urlInviteCode');
+                    if (storedInviteCode) {
+                        document.getElementById('verifyInviteCodeInput').value = storedInviteCode;
+                        // Auto-verify the invite code
+                        document.getElementById('verifyInviteCodeBtn').click();
+                    }
+                }
+            } catch (error) {
+                console.error("Connection Error:", error);
+                showToast("Connection to blockchain failed.", "error");
+            } finally {
+                loadingOverlay.classList.add('hidden');
+            }
+        }
+
+        // ============================================================
+        // PERIODIC UPDATES
+        // ============================================================
+        setInterval(() => { 
+            if (currentUserData) { 
+                updateBalances(); 
+                updateDashboard(); 
+            } 
+        }, 30000);
+
+        // ============================================================
+        // WALLET EVENTS
+        // ============================================================
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', () => { 
+                localStorage.clear(); 
+                sessionStorage.clear(); 
+                location.reload(); 
+            });
+            window.ethereum.on('chainChanged', () => location.reload());
+        }
+
+        // ============================================================
+        // LOAD HANDLER
+        // ============================================================
+        window.addEventListener('load', async () => {
+            const inviteCodeFromUrl = new URLSearchParams(window.location.search).get('invite');
+            if(inviteCodeFromUrl) {
+                sessionStorage.setItem('urlInviteCode', inviteCodeFromUrl);
+                document.getElementById('verifyInviteCodeInput').value = inviteCodeFromUrl;
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
+            if (window.ethereum) {
+                const savedWallet = localStorage.getItem(STORAGE_KEYS.CONNECTED_WALLET);
+                if (savedWallet) {
+                    try {
+                        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                        if (accounts.length > 0) {
+                            loadingOverlay.classList.remove('hidden');
+                            await initConnection(accounts);
+                        } else {
+                            loadingOverlay.classList.add('hidden');
+                        }
+                    } catch (e) {
+                        console.error("Auto-connect error:", e);
+                        loadingOverlay.classList.add('hidden');
+                    }
+                } else {
+                    loadingOverlay.classList.add('hidden');
+                }
+            } else {
+                loadingOverlay.classList.add('hidden');
+            }
+        });
+
+        // ============================================================
+        // STYLE FIX FOR ECO-FEATURE
+        // ============================================================
+        const styleFix = document.createElement('style');
+        styleFix.textContent = `
+            .eco-feature {
+                background: rgba(0,0,0,0.4);
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 15px;
+                padding: 15px;
+                margin-bottom: 10px;
+            }
+            .eco-feature:last-child {
+                margin-bottom: 0;
+            }
+            .eco-feature h4 {
+                color: var(--primary);
+                margin-bottom: 5px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 15px;
+            }
+            .eco-feature p {
+                font-size: 12px;
+                color: var(--text-muted);
+            }
+        `;
+        document.head.appendChild(styleFix);
+
+        console.log("✅ ZTR Coin System Initialized Successfully!");
+        console.log("📋 Contract A Address:", CONTRACT_ADDRESS);
+        console.log("📋 Contract B Address:", SALARY_CONTRACT_ADDRESS);
+
     })();
 </script>
 </body>
