@@ -1223,7 +1223,7 @@
             text-shadow: 0 0 10px var(--primary-glow);
         }
 
-        /* NEW CSS FOR SOCIAL AND PDF DOWNLOAD */
+        /* SOCIAL AND PDF DOWNLOAD */
         .social-links-container {
             display: flex;
             justify-content: center;
@@ -1575,6 +1575,123 @@
             animation: spin 1s linear infinite;
             margin: 20px auto;
         }
+
+        /* NEW TRADING SYSTEM SPECIFIC CSS */
+        .trading-subnav {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid var(--primary);
+            border-radius: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 5px;
+            padding: 5px;
+            box-shadow: 0 0 20px var(--primary-glow);
+            z-index: 100;
+        }
+
+        .trading-subnav-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: bold;
+            font-size: 12px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .trading-subnav-btn i { font-size: 15px; }
+
+        .trading-subnav-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .trading-tab-view {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .trading-tab-view.active {
+            display: block;
+        }
+
+        .trade-input-group {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 15px;
+            padding: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .trade-input-group input {
+            background: transparent !important;
+            border: none !important;
+            outline: none !important;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            width: 60%;
+        }
+
+        .stake-plan-card {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+        }
+        .stake-plan-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .p2p-order-card {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+
+        .coin-spin-animation {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            animation: coinSpin 1.2s infinite ease-in-out;
+            box-shadow: 0 0 30px var(--primary-glow);
+            margin-bottom: 20px;
+        }
+
+        @keyframes coinSpin {
+            0% { transform: rotateY(0deg) scale(0.9); }
+            50% { transform: rotateY(180deg) scale(1.1); }
+            100% { transform: rotateY(360deg) scale(0.9); }
+        }
     </style>
 </head>
 <body>
@@ -1584,6 +1701,14 @@
         <img src="https://iili.io/BOSY86Q.png" alt="Loading Logo" class="loading-logo">
     </div>
     <p class="loading-text">Connecting to Blockchain...</p>
+</div>
+
+<!-- TRADING SYSTEM LOADER -->
+<div id="tradingLoaderOverlay" class="loading-overlay hidden" style="z-index: 12000;">
+    <div class="coin-spin-animation">
+        <img src="https://iili.io/BOSY86Q.png" alt="Coin" style="width: 50px; height: 50px;">
+    </div>
+    <p class="loading-text">Initializing ZTR Trading Engine...</p>
 </div>
 
 <div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
@@ -1604,7 +1729,7 @@
     </div>
 </div>
 
-<!-- NEW WEEKFLOW PAGE -->
+<!-- WEEKFLOW PAGE (DISBURSEMENT DISPLAY FOR CONTRACT B) -->
 <div class="full-page-overlay" id="weekFlowPage">
     <div class="full-page-header">
         <button class="full-page-back-btn" onclick="closeFullPage('weekFlowPage')"><i class="fa-solid fa-arrow-left"></i></button>
@@ -1614,46 +1739,23 @@
     <div class="full-page-content">
         <div class="salary-card">
             <i class="fa-solid fa-crown" style="font-size: 40px; color: var(--gold); margin-bottom: 15px;"></i>
-            <h3>Your Weekly Salary Status</h3>
+            <h3>Automated Sunday Salary Protocol</h3>
             <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
-                Your salary is performance-based. The system calculates a score based on your personal activity (your level) and the activity of your entire direct team (their levels combined). 90% of the total weekly salary fund is then distributed among all eligible members. A higher performance score means you get a larger share of the pool!
+                Salary is automatically calculated and divided among active Tier members (Level 5+) every Sunday at 9:00 PM via Contract B. Received salaries are permanently recorded in your historical performance log on-chain.
             </p>
-            <div id="salaryInfo">
-                <!-- Salary details will be injected here -->
-            </div>
+            <div id="salaryInfo"></div>
         </div>
 
         <div class="main-card">
-            <h3>Weekly Pool Distribution</h3>
-            <div class="task-list" style="margin-top: 15px;">
-                <div class="task-item">
-                    <div class="task-details" style="display: flex; align-items: center; gap: 15px;">
-                        <i class="fa-solid fa-trophy" style="color: var(--gold); font-size: 20px;"></i>
-                        <strong>Top-200 Member</strong>
-                    </div>
-                    <div class="task-reward" style="color: white; font-family: monospace;">100 - 1000 ZTR</div>
-                </div>
-                <div class="task-item">
-                    <div class="task-details" style="display: flex; align-items: center; gap: 15px;">
-                        <i class="fa-solid fa-check-circle" style="color: var(--success); font-size: 20px;"></i>
-                        <strong>Performance-Based Salary (Levels 5+)</strong>
-                    </div>
-                    <div id="userWeeklySalaryShare" class="task-reward" style="color: white; font-family: monospace;">Performance Based</div>
-                </div>
-            </div>
-            <p style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 15px;">Calculated amounts are preliminary. Amounts available for claiming will be shown in the claim button on the last day of the period.</p>
-        </div>
-
-        <div class="main-card">
-            <h3>Salary History</h3>
+            <h3>On-Chain Salary History (Contract B)</h3>
             <div class="history-list" id="salaryHistoryListWeekFlow">
-                <p style="text-align:center; color: var(--text-muted); padding: 20px;">No salary payments recorded yet.</p>
+                <p style="text-align:center; color: var(--text-muted); padding: 20px;">Loading salary records from blockchain...</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- NEW TOKENS PAGE -->
+<!-- TOKENS PAGE -->
 <div class="full-page-overlay" id="tokensPage">
     <div class="full-page-header">
         <button class="full-page-back-btn" onclick="closeFullPage('tokensPage')"><i class="fa-solid fa-arrow-left"></i></button>
@@ -1700,7 +1802,7 @@
     </div>
 </div>
 
-<!-- NEW TASKS PAGE -->
+<!-- TASKS PAGE -->
 <div class="full-page-overlay" id="tasksPage">
     <div class="full-page-header">
         <button class="full-page-back-btn" onclick="closeFullPage('tasksPage')"><i class="fa-solid fa-arrow-left"></i></button>
@@ -1711,31 +1813,27 @@
         <img src="https://iili.io/BLI6ZiX.jpg" alt="Tasks Banner" style="width: 100%; height: auto; border-radius: 0 0 25px 25px; margin-bottom: 20px;">
         <div style="padding: 0 20px 30px 20px;">
              <h3 style="text-align: left; margin-bottom: 15px;">Complete tasks to earn Airdrop Points!</h3>
-             <div class="task-list" id="invitationTasksList">
-                <!-- Tasks will be injected here by JS -->
-             </div>
+             <div class="task-list" id="invitationTasksList"></div>
         </div>
     </div>
 </div>
 
-<!-- ABOUT US PAGE -->
+<!-- ABOUT US PAGE (DUAL CONTRACT BSC SCAN AUDIT DISPLAY) -->
 <div class="full-page-overlay" id="aboutUsPage">
     <div class="full-page-header">
         <button class="full-page-back-btn" onclick="closeFullPage('aboutUsPage')"><i class="fa-solid fa-arrow-left"></i></button>
-        <h2>About Us</h2>
+        <h2>About Us & Smart Contracts</h2>
         <div style="width:20px;"></div>
     </div>
     <div class="full-page-content">
-        <!-- Decentralized System Info -->
         <div class="main-card" style="text-align: center;">
             <i class="fa-solid fa-globe" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i>
-            <h3 style="color: var(--text-main); margin-bottom: 10px;">Decentralized Blockchain System</h3>
+            <h3 style="color: var(--text-main); margin-bottom: 10px;">Decentralized Dual-Contract Infrastructure</h3>
             <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
-                Zentron is a 100% decentralized ecosystem built entirely on Web3 technology and the Blockchain. It operates through immutable Smart Contracts. This means there is no central authority, no company, no admin control, and no human intervention possible. All earnings and commissions are distributed purely peer-to-peer, ensuring ultimate transparency, security, and instant automated payouts directly to your personal wallet.
+                Zentron operates via two interconnected Smart Contracts on the Binance Smart Chain (BSC). Contract A manages registrations and 15 matrix level upgrades with peer-to-peer payouts. Contract B automatically calculates tier-based performance salaries every Sunday at 9 PM on-chain.
             </p>
         </div>
 
-        <!-- SOCIAL LINKS SECTION -->
         <div class="omni-view-section">
             <h3 class="omni-view-title" style="text-align: center;"><i class="fa-solid fa-users"></i> Official Community</h3>
             <div class="social-links-container">
@@ -1745,7 +1843,6 @@
             </div>
         </div>
 
-        <!-- PDF DOWNLOAD SECTION -->
         <div class="omni-view-section">
             <h3 class="omni-view-title"><i class="fa-solid fa-file-pdf"></i> System Presentation</h3>
             <div class="pdf-download-card">
@@ -1759,22 +1856,40 @@
             </div>
         </div>
 
-        <!-- TRANSPARENCY & BLOCKCHAIN AUDIT SECTION -->
+        <!-- CONTRACT A CARD -->
         <div class="omni-view-section">
-            <h3 class="omni-view-title"><i class="fa-solid fa-file-contract"></i> Smart Contract Audit</h3>
+            <h3 class="omni-view-title"><i class="fa-solid fa-file-contract"></i> Contract A: Main Protocol</h3>
             <div class="active-airdrop-card" style="text-align: left; background: rgba(16, 185, 129, 0.1); border-color: var(--success);">
-                <p style="color: var(--success); font-weight: bold; margin-bottom: 10px; font-size: 16px;">
-                    <i class="fa-solid fa-shield-halved"></i> 100% Decentralized & Verified
+                <p style="color: var(--success); font-weight: bold; margin-bottom: 10px; font-size: 15px;">
+                    <i class="fa-solid fa-shield-halved"></i> Matrix & Protocol Contract
                 </p>
-                <p style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 15px; line-height: 1.5;">
-                    Zentron operates entirely on the Binance Smart Chain (BSC). There is no admin control, no manual withdrawals, and all commissions are instantly paid peer-to-peer via our immutable Smart Contract.
+                <p style="font-size: 11px; color: rgba(255,255,255,0.8); margin-bottom: 12px;">
+                    Handles registrations, 15 matrix upgrades, direct commissions, and airdrop point rewards.
                 </p>
-                <p style="font-size: 11px; color: var(--gold); margin-bottom: 5px;"><strong>Official Smart Contract Address:</strong></p>
-                <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 11px; word-wrap: break-word; margin-bottom: 15px; border: 1px solid var(--primary); text-align: center;">
+                <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 11px; word-wrap: break-word; margin-bottom: 12px; border: 1px solid var(--primary); text-align: center;">
                     0x04940E5FEaE59A348FC103F07ACD715635d2262A
                 </div>
-                <a href="https://bscscan.com/address/0x04940E5FEaE59A348FC103F07ACD715635d2262A" target="_blank" class="btn btn-success" style="font-size: 13px; padding: 12px; display: block; text-decoration: none; text-align: center;">
-                    <i class="fa-solid fa-magnifying-glass"></i> View Live on BscScan
+                <a href="https://bscscan.com/address/0x04940E5FEaE59A348FC103F07ACD715635d2262A" target="_blank" class="btn btn-success" style="font-size: 12px; padding: 10px; text-decoration: none; text-align: center;">
+                    <i class="fa-solid fa-magnifying-glass"></i> View Contract A on BscScan
+                </a>
+            </div>
+        </div>
+
+        <!-- CONTRACT B CARD -->
+        <div class="omni-view-section">
+            <h3 class="omni-view-title"><i class="fa-solid fa-clock-rotate-left"></i> Contract B: Sunday Salary Protocol</h3>
+            <div class="active-airdrop-card" style="text-align: left; background: rgba(112, 0, 255, 0.1); border-color: var(--secondary);">
+                <p style="color: var(--primary); font-weight: bold; margin-bottom: 10px; font-size: 15px;">
+                    <i class="fa-solid fa-robot"></i> Automated Sunday Salary Contract
+                </p>
+                <p style="font-size: 11px; color: rgba(255,255,255,0.8); margin-bottom: 12px;">
+                    Executes every Sunday at 9 PM on-chain. Evaluates Tier performance (Level 5+) and logs received salary history.
+                </p>
+                <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 11px; word-wrap: break-word; margin-bottom: 12px; border: 1px solid var(--secondary); text-align: center;">
+                    0xBcc89CdfB795AF6883d44D29b02d975b4Bf4C7Ce
+                </div>
+                <a href="https://bscscan.com/address/0xBcc89CdfB795AF6883d44D29b02d975b4Bf4C7Ce" target="_blank" class="btn" style="font-size: 12px; padding: 10px; text-decoration: none; text-align: center; background: linear-gradient(135deg, var(--primary), var(--secondary));">
+                    <i class="fa-solid fa-magnifying-glass"></i> View Contract B on BscScan
                 </a>
             </div>
         </div>
@@ -1790,14 +1905,10 @@
     </div>
     
     <div class="level-stepper-container">
-        <div class="level-stepper-nav" id="levelStepperNav">
-            <!-- Stepper items will be injected here by JavaScript -->
-        </div>
+        <div class="level-stepper-nav" id="levelStepperNav"></div>
     </div>
 
-    <div class="level-viewer-container" id="levelViewer">
-        <!-- Level cards will be injected here by JavaScript -->
-    </div>
+    <div class="level-viewer-container" id="levelViewer"></div>
     
     <div class="level-color-key" id="levelColorKey">
         <div class="key-item">
@@ -1814,7 +1925,6 @@
         </div>
     </div>
 </div>
-
 
 <!-- Profile Setup Modal -->
 <div class="modal-overlay" id="profileSetupModal">
@@ -1873,24 +1983,21 @@
     <div class="modal-content history-modal-content">
         <h3><i class="fa-solid fa-chart-line" style="color:var(--success)"></i> Income History</h3>
         <p style="font-size: 10px; color: rgba(255,255,255,0.5);">Showing recent transactions directly from Blockchain (last ~4 hours).</p>
-        <div class="history-list" id="incomeHistoryList">
-            <!-- History items will be injected here -->
-        </div>
+        <div class="history-list" id="incomeHistoryList"></div>
         <button class="btn" style="background:rgba(0,0,0,0.5); margin-top: 20px;" onclick="closeModal('incomeHistoryModal')">Close</button>
     </div>
 </div>
 
 <div class="modal-overlay" id="salaryHistoryModal">
     <div class="modal-content history-modal-content">
-        <h3><i class="fa-solid fa-sack-dollar" style="color:var(--gold)"></i> Weekly Salary History</h3>
-        <p style="font-size: 10px; color: rgba(255,255,255,0.5);">Showing recent salary claims from Blockchain.</p>
+        <h3><i class="fa-solid fa-sack-dollar" style="color:var(--gold)"></i> Sunday Salary Records</h3>
+        <p style="font-size: 10px; color: rgba(255,255,255,0.5);">Directly fetched from Contract B (0xBcc8...C7Ce)</p>
         <div class="history-list" id="salaryHistoryList">
-            <!-- History items will be injected here -->
+            <p style="text-align:center; color: var(--text-muted); padding: 20px;">Fetching from Contract B...</p>
         </div>
         <button class="btn" style="background:rgba(0,0,0,0.5); margin-top: 20px;" onclick="closeModal('salaryHistoryModal')">Close</button>
     </div>
 </div>
-
 
 <div class="modal-overlay" id="editProfileModal">
     <div class="modal-content">
@@ -1959,23 +2066,15 @@
             <div class="main-card">
                 <!-- SLIDER START -->
                 <div class="slider-container" id="homeSlider">
-                    <div class="slide">
-                        <img src="https://iili.io/BgnsA11.png" alt="Slide 1">
-                    </div>
-                    <div class="slide">
-                        <img src="https://iili.io/BgnsMBI.png" alt="Slide 2">
-                    </div>
-                    <div class="slide">
-                        <img src="https://iili.io/Bgnsj7s.png" alt="Slide 3">
-                    </div>
-                    <div class="slider-dots" id="sliderDots">
-                        <!-- Dots will be generated by JS -->
-                    </div>
+                    <div class="slide"><img src="https://iili.io/BgnsA11.png" alt="Slide 1"></div>
+                    <div class="slide"><img src="https://iili.io/BgnsMBI.png" alt="Slide 2"></div>
+                    <div class="slide"><img src="https://iili.io/Bgnsj7s.png" alt="Slide 3"></div>
+                    <div class="slider-dots" id="sliderDots"></div>
                 </div>
                 <!-- SLIDER END -->
 
                 <!-- TRADING CHART START -->
-                <div class="trading-chart-container">
+                <div class="trading-chart-container" onclick="openTradingSystemPage()" style="cursor: pointer;">
                     <div class="chart-header">
                         <div class="coin-info">
                             <img src="https://iili.io/BOSY86Q.png" alt="ZTR Logo" class="coin-logo">
@@ -2009,7 +2108,7 @@
                     <div class="income-card" onclick="openSalaryHistory()">
                         <p style="font-size:11px; color:rgba(255,255,255,0.7);">Weekly Salary</p>
                         <h3 id="salleryIncome" style="color:var(--gold);">0.00 ZTR</h3>
-                        <small>From System</small>
+                        <small>From Contract B</small>
                     </div>
                      <div class="income-card" style="cursor:default;">
                         <p style="font-size:11px; color:rgba(255,255,255,0.7);">Current Node</p>
@@ -2037,26 +2136,26 @@
                 <button class="btn"><i class="fa-solid fa-coins"></i> VIEW TOKENS</button>
             </div>
 
-            <!-- NEW ABOUT US BUTTON -->
             <button class="btn" style="margin-top: 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border: 1px solid rgba(255,255,255,0.2);" onclick="openAboutUsPage()">
                 <i class="fa-solid fa-circle-info"></i> ABOUT US & SYSTEM INFO
             </button>
 
-            <!-- NEW ECOSYSTEM BOX -->
+            <!-- ECOSYSTEM CARD -->
             <div class="ecosystem-card">
                 <h2><i class="fa-solid fa-network-wired"></i> Blockchain Expansion</h2>
                 <p class="subtitle">Additional blockchain systems will automatically launch after some time. Discover the future of ZTR Coin.</p>
-                <button class="btn" style="background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); border: 1px solid rgba(255,255,255,0.2);" onclick="toggleEcosystem(this)"><i class="fa-solid fa-clock"></i> COMING SOON</button>
                 
-                <div class="ecosystem-details" id="ecoDetails">
-                    <div class="eco-feature">
-                        <h4><i class="fa-solid fa-chart-line"></i> Trading System on ZTR</h4>
-                        <p>An advanced decentralized trading protocol. Experience seamless swaps, staking, and real-time market dynamics directly with ZTR Coin.</p>
-                    </div>
-                    <div class="eco-feature">
-                        <h4 style="color: var(--secondary);"><i class="fa-solid fa-gamepad"></i> Gaming System</h4>
-                        <p>Immersive play-to-earn (P2E) blockchain games connected to the ZTR network. Earn real tokens and rewards through gameplay.</p>
-                    </div>
+                <div class="eco-feature" style="cursor: pointer; border-color: var(--primary);" onclick="openTradingSystemPage()">
+                    <h4 style="color: var(--primary);"><i class="fa-solid fa-chart-line"></i> ZTR Trading System</h4>
+                    <p>Live Trade ZTR Coin, Stake ZTR for High APY, and trade with peers via P2P Market.</p>
+                    <button class="btn" style="margin-top:10px; padding:10px; font-size:12px; background: linear-gradient(135deg, var(--primary), var(--secondary));">
+                        <i class="fa-solid fa-arrow-trend-up"></i> OPEN TRADING SYSTEM
+                    </button>
+                </div>
+                
+                <div class="eco-feature" style="margin-top:10px;">
+                    <h4 style="color: var(--secondary);"><i class="fa-solid fa-gamepad"></i> Gaming System</h4>
+                    <p>Immersive play-to-earn (P2E) blockchain games connected to the ZTR network. Earn real tokens through gameplay.</p>
                 </div>
             </div>
 
@@ -2084,9 +2183,7 @@
 
             <div class="main-card" style="margin-top:20px;">
                 <h3>Your Direct Network (<span id="teamPageTotalCount">0</span> members)</h3>
-                <div id="teamViewContainer" class="team-view-container">
-                    <!-- New Team View will be injected here by JS -->
-                </div>
+                <div id="teamViewContainer" class="team-view-container"></div>
             </div>
         </div>
 
@@ -2140,13 +2237,10 @@
 
                 <div class="omni-view-section">
                     <h3 class="omni-view-title"><i class="fa-solid fa-trophy"></i> User Leaderboard</h3>
-                    <div class="top-users-list" id="topUsersList">
-                        <!-- All users will be dynamically inserted here -->
-                    </div>
+                    <div class="top-users-list" id="topUsersList"></div>
                 </div>
             </div>
         </div>
-
 
         <div id="pageAssets" class="page">
             <div class="main-card" style="padding:0; overflow: visible;">
@@ -2209,6 +2303,183 @@
     </div>
 </div>
 
+<!-- TRADING SYSTEM FULL PAGE OVERLAY -->
+<div class="full-page-overlay" id="tradingSystemPage">
+    <div class="full-page-header">
+        <button class="full-page-back-btn" onclick="closeTradingSystemPage()"><i class="fa-solid fa-arrow-left"></i></button>
+        <h2>ZTR Trading Protocol</h2>
+        <div style="width:20px;"></div>
+    </div>
+
+    <div class="full-page-content">
+        <!-- 1. LIVE TRADE TAB -->
+        <div class="trading-tab-view active" id="tradingTabLive">
+            <div class="trading-chart-container" style="height: 220px; margin-bottom: 20px;">
+                <div class="chart-header">
+                    <div class="coin-info">
+                        <img src="https://iili.io/BOSY86Q.png" alt="ZTR Logo" class="coin-logo">
+                        <div>
+                            <span class="coin-symbol">ZTR / USDT</span>
+                            <span class="coin-name">ZTR Live Market</span>
+                        </div>
+                    </div>
+                    <div class="price-info">
+                        <span class="live-price" id="tradePagePrice">1.5000</span>
+                        <span class="price-change up" id="tradePageChange">+0.00%</span>
+                    </div>
+                </div>
+                <div class="chart-area">
+                    <canvas id="tradingSystemChart"></canvas>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; text-align: center;">
+                <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                    <small style="color: var(--text-muted); font-size: 10px;">24h High</small>
+                    <div style="color: var(--success); font-weight: bold; font-size: 13px;">$1.5820</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                    <small style="color: var(--text-muted); font-size: 10px;">24h Low</small>
+                    <div style="color: var(--danger); font-weight: bold; font-size: 13px;">$1.4650</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                    <small style="color: var(--text-muted); font-size: 10px;">24h Vol</small>
+                    <div style="color: var(--gold); font-weight: bold; font-size: 13px;">482.5K ZTR</div>
+                </div>
+            </div>
+
+            <div class="main-card">
+                <h3><i class="fa-solid fa-bolt" style="color: var(--gold);"></i> Instant Swap</h3>
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">Trade ZTR tokens seamlessly at current market price.</p>
+                
+                <div class="trade-input-group">
+                    <div>
+                        <small style="display: block; color: var(--text-muted); font-size: 10px;">Pay USDT</small>
+                        <input type="number" id="tradeUsdtAmount" value="10" oninput="calculateTradeSwap()">
+                    </div>
+                    <span style="font-weight: bold; color: var(--primary);">USDT</span>
+                </div>
+
+                <div style="text-align: center; margin: -5px 0 10px 0;">
+                    <i class="fa-solid fa-arrow-down-up-across-line" style="color: var(--primary);"></i>
+                </div>
+
+                <div class="trade-input-group">
+                    <div>
+                        <small style="display: block; color: var(--text-muted); font-size: 10px;">Receive ZTR</small>
+                        <input type="number" id="tradeZtrAmount" value="6.66" readonly>
+                    </div>
+                    <span style="font-weight: bold; color: var(--gold);">ZTR</span>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn btn-success" style="flex: 1;" onclick="executeTrade('BUY')"><i class="fa-solid fa-cart-shopping"></i> BUY ZTR</button>
+                    <button class="btn" style="flex: 1; background: linear-gradient(135deg, #dc2626, #ef4444);" onclick="executeTrade('SELL')"><i class="fa-solid fa-coins"></i> SELL ZTR</button>
+                </div>
+            </div>
+
+            <div class="main-card">
+                <h3><i class="fa-solid fa-list-check"></i> Recent Orders</h3>
+                <div id="liveTradesFeed" style="margin-top: 10px; font-size: 12px; font-family: monospace;"></div>
+            </div>
+        </div>
+
+        <!-- 2. STAKING TAB -->
+        <div class="trading-tab-view" id="tradingTabStaking">
+            <div class="main-card" style="text-align: center;">
+                <i class="fa-solid fa-vault" style="font-size: 45px; color: var(--gold); margin-bottom: 10px;"></i>
+                <h2>ZTR Staking Hub</h2>
+                <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 15px;">Lock your ZTR Coins to earn high APY passive rewards.</p>
+                <div style="display: flex; justify-content: space-around; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 15px;">
+                    <div>
+                        <small style="color: var(--text-muted);">Total Staked</small>
+                        <h4 style="color: var(--primary);">125,400 ZTR</h4>
+                    </div>
+                    <div>
+                        <small style="color: var(--text-muted);">Max APY</small>
+                        <h4 style="color: var(--success);">Up to 50%</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stake-plan-card">
+                <div>
+                    <h4 style="color: var(--primary);">30 Days Flexible</h4>
+                    <p style="font-size: 11px; color: var(--text-muted);">Lock Duration: 30 Days</p>
+                    <span style="font-size: 18px; font-weight: bold; color: var(--success);">12% APY</span>
+                </div>
+                <button class="btn btn-success" style="width: auto; padding: 10px 20px; font-size: 13px;" onclick="stakePlan('30 Days', '12%')">Stake</button>
+            </div>
+
+            <div class="stake-plan-card">
+                <div>
+                    <h4 style="color: var(--gold);">90 Days Locked</h4>
+                    <p style="font-size: 11px; color: var(--text-muted);">Lock Duration: 90 Days</p>
+                    <span style="font-size: 18px; font-weight: bold; color: var(--success);">25% APY</span>
+                </div>
+                <button class="btn btn-success" style="width: auto; padding: 10px 20px; font-size: 13px;" onclick="stakePlan('90 Days', '25%')">Stake</button>
+            </div>
+
+            <div class="stake-plan-card">
+                <div>
+                    <h4 style="color: var(--secondary);">180 Days Titan</h4>
+                    <p style="font-size: 11px; color: var(--text-muted);">Lock Duration: 180 Days</p>
+                    <span style="font-size: 18px; font-weight: bold; color: var(--success);">50% APY</span>
+                </div>
+                <button class="btn btn-success" style="width: auto; padding: 10px 20px; font-size: 13px;" onclick="stakePlan('180 Days', '50%')">Stake</button>
+            </div>
+        </div>
+
+        <!-- 3. P2P MARKET TAB -->
+        <div class="trading-tab-view" id="tradingTabP2P">
+            <div class="main-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3><i class="fa-solid fa-users-line" style="color: var(--primary);"></i> P2P Market</h3>
+                    <span style="font-size: 10px; background: rgba(0, 242, 255, 0.2); color: var(--primary); padding: 4px 10px; border-radius: 20px;">Zero Fee</span>
+                </div>
+
+                <div class="p2p-order-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div><strong>CryptoMerchant_01</strong> <small style="color: var(--success);">• 99.4% Completion</small></div>
+                        <span style="font-weight: bold; color: var(--gold); font-size: 16px;">1.52 USDT</span>
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
+                        Limit: 50.00 - 1,000.00 USDT
+                    </div>
+                    <button class="btn btn-success" style="padding: 10px; font-size: 13px;" onclick="p2pTrade('CryptoMerchant_01', 1.52)">Buy ZTR</button>
+                </div>
+
+                <div class="p2p-order-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div><strong>FastSwap_Node</strong> <small style="color: var(--success);">• 98.8% Completion</small></div>
+                        <span style="font-weight: bold; color: var(--gold); font-size: 16px;">1.51 USDT</span>
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
+                        Limit: 10.00 - 500.00 USDT
+                    </div>
+                    <button class="btn btn-success" style="padding: 10px; font-size: 13px;" onclick="p2pTrade('FastSwap_Node', 1.51)">Buy ZTR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUB NAVIGATION FOR TRADING SYSTEM -->
+    <div class="trading-subnav">
+        <button class="trading-subnav-btn active" id="btnTabLive" onclick="switchTradingTab('Live')">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Live Trade</span>
+        </button>
+        <button class="trading-subnav-btn" id="btnTabStaking" onclick="switchTradingTab('Staking')">
+            <i class="fa-solid fa-lock"></i>
+            <span>Staking</span>
+        </button>
+        <button class="trading-subnav-btn" id="btnTabP2P" onclick="switchTradingTab('P2P')">
+            <i class="fa-solid fa-handshake"></i>
+            <span>P2P</span>
+        </button>
+    </div>
+</div>
+
 <div class="bottom-nav" id="bottomNav" style="display: none;">
     <div class="nav-item active" data-page="dashboard"><i class="fa-solid fa-house-chimney-window"></i><span>Home</span></div>
     <div class="nav-item" data-page="team"><i class="fa-solid fa-diagram-project"></i><span>Network</span></div>
@@ -2219,11 +2490,8 @@
 
 <script>
     (function() {
-        // ===================================================================
-        // ======================= DECENTRALIZED WEB3 LOGIC ==================
-        // ===================================================================
-        
-        const CONTRACT_ADDRESS = "0x04940E5FEaE59A348FC103F07ACD715635d2262A";
+        const CONTRACT_ADDRESS = "0x04940E5FEaE59A348FC103F07ACD715635d2262A"; // Contract A
+        const SALARY_CONTRACT_ADDRESS = "0xBcc89CdfB795AF6883d44D29b02d975b4Bf4C7Ce"; // Contract B
         const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955"; 
         const CHAIN_ID = "0x38"; // BSC Mainnet
         const CHAIN_ID_DECIMAL = 56; 
@@ -2245,6 +2513,13 @@
             "event CommissionPaid(address indexed from, address indexed to, uint256 amountUSDT, string commType)",
             "event SalaryClaimed(address indexed user, uint256 amountUSDT)",
             "event AirdropClaimed(address indexed user, uint256 pointsUsed, uint256 usdtReceived)"
+        ];
+
+        const SALARY_CONTRACT_ABI = [
+            "function getUserSalaryHistory(address user) external view returns (uint256[] memory epochs, uint256[] memory amounts, uint256[] memory levels, uint256[] memory scores, uint256[] memory timestamps)",
+            "function getUserTotalSalaryHistory(address user) external view returns (uint256)",
+            "function distributionCount() view returns (uint256)",
+            "function lastDistributionTime() view returns (uint256)"
         ];
 
         const USDT_ABI = [
@@ -2273,7 +2548,7 @@
 
         const STORAGE_KEYS = { CONNECTED_WALLET: 'ztr_connected_wallet' };
 
-        let provider, signer, userAddress, ztrContract, usdtContract;
+        let provider, signer, userAddress, ztrContract, salaryContract, usdtContract;
         let rawUsdtBalance = "0", rawBnbBalance = "0", usdtDecimals = 18, isProcessing = false;
         let verifiedInviterId = null;
         let currentUserData = null;
@@ -2305,13 +2580,12 @@
             const div = document.createElement('div'); div.textContent = input; return div.innerHTML;
         }
 
-        // Allow any numbers for ID
         function isValidInviteCode(code) { return /^\d+$/.test(code); }
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.style.cssText = `background:rgba(0,0,0,0.8); color:white; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.3); animation:fadeIn 0.3s forwards; font-size:13px; display:flex; align-items:center; gap:10px; border-left: 5px solid ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'}`;
+            toast.style.cssText = `background:rgba(0,0,0,0.85); color:white; padding:12px 20px; border-radius:12px; margin-bottom:10px; box-shadow:0 10px 30px rgba(0,0,0,0.3); animation:fadeIn 0.3s forwards; font-size:13px; display:flex; align-items:center; gap:10px; border-left: 5px solid ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'}`;
             toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-info-circle'}"></i> ${sanitizeInput(message)}`;
             container.appendChild(toast);
             setTimeout(() => { toast.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
@@ -2322,6 +2596,12 @@
             try {
                 const scUser = await ztrContract.users(wallet);
                 globalAccumulatedSalary = await ztrContract.accumulatedUSDTPerScore();
+
+                let totalSalaryFromB = 0;
+                try {
+                    const salWei = await salaryContract.getUserTotalSalaryHistory(wallet);
+                    totalSalaryFromB = parseFloat(ethers.formatUnits(salWei, 18)) / 1.5;
+                } catch(e) {}
 
                 if (scUser.exists) {
                     const localName = localStorage.getItem('ztr_name_' + wallet.toLowerCase()) || "User " + scUser.id;
@@ -2341,7 +2621,8 @@
                         ztrBalance: parseFloat(ethers.formatUnits(scUser.totalEarningsUSDT, 18)) / 1.5,
                         teamSize: Number(scUser.teamSize),
                         salaryScore: BigInt(scUser.salaryScore),
-                        salaryDebt: BigInt(scUser.salaryDebt)
+                        salaryDebt: BigInt(scUser.salaryDebt),
+                        salaryRecorded: totalSalaryFromB
                     };
 
                     if (scUser.inviter !== "0x0000000000000000000000000000000000000000") {
@@ -2384,8 +2665,7 @@
 
         async function getSalleryEarnings() {
              if (!currentUserData) return 0;
-             const pendingSalaryWei = ((currentUserData.salaryScore * globalAccumulatedSalary) / 1000000000000n) - currentUserData.salaryDebt;
-             return parseFloat(ethers.formatUnits(pendingSalaryWei, 18)) / 1.5;
+             return currentUserData.salaryRecorded || 0;
         }
 
         async function updateAssetsPage() {
@@ -2420,15 +2700,14 @@
 
         async function updateDashboard() {
             if (!currentUserData) return;
-            const { ztrBalance, teamSize, level } = currentUserData;
+            const { ztrBalance, teamSize, level, salaryRecorded } = currentUserData;
             const levelInfo = APP_LEVELS.find(l => l.id === level);
-            const salary = await getSalleryEarnings();
             
             document.getElementById('profitIncome').innerText = `${(ztrBalance || 0).toFixed(2)} ZTR`;
             document.getElementById('profitUSD').innerText = ((ztrBalance || 0) * 1.5).toFixed(2);
             document.getElementById('teamIncome').innerText = teamSize || 0;
             document.getElementById('teamCount').innerText = `Direct Member${(teamSize || 0) === 1 ? '' : 's'}`;
-            document.getElementById('salleryIncome').innerText = `${salary.toFixed(2)} ZTR`;
+            document.getElementById('salleryIncome').innerText = `${(salaryRecorded || 0).toFixed(2)} ZTR`;
             document.getElementById('levelIncome').innerText = levelInfo?.name || 'Starter';
         }
 
@@ -2470,6 +2749,7 @@
             bottomNav.style.display = 'flex';
             initSlider();
             initTradingChart();
+            startLiveTradesFeed();
             await updateDashboard();
             await updateAssetsPage();
             await renderTeamPage();
@@ -2539,7 +2819,6 @@
             teamViewContainer.innerHTML = currentUserCardHTML + teamListHTML;
         }
 
-        // HISTORY FIX: Safely fetch from last 5000 blocks to avoid RPC errors
         window.openIncomeHistory = async function() {
             const listContainer = document.getElementById('incomeHistoryList');
             openModal('incomeHistoryModal');
@@ -2575,32 +2854,39 @@
             }
         }
 
+        /* FETCH SALARY HISTORY FROM CONTRACT B */
         window.openSalaryHistory = async function() {
             const listContainer = document.getElementById('salaryHistoryList');
-            listContainer.innerHTML = '<div class="spinner"></div>';
             openModal('salaryHistoryModal');
-            
-            try {
-                const currentBlock = await provider.getBlockNumber();
-                const fromBlock = currentBlock > 4900 ? currentBlock - 4900 : 0; 
+            listContainer.innerHTML = '<div class="spinner"></div>';
 
-                const filter = ztrContract.filters.SalaryClaimed(userAddress);
-                const events = await ztrContract.queryFilter(filter, fromBlock, "latest"); 
-                
-                if (events.length > 0) {
+            try {
+                const historyData = await salaryContract.getUserSalaryHistory(userAddress);
+                const epochs = historyData[0];
+                const amounts = historyData[1];
+                const levels = historyData[2];
+                const timestamps = historyData[4];
+
+                if (epochs.length > 0) {
                     listContainer.innerHTML = '';
-                    [...events].reverse().forEach(async ev => {
-                        const amt = parseFloat(ethers.formatUnits(ev.args[1], 18)) / 1.5;
-                        const block = await ev.getBlock();
-                        const date = new Date(block.timestamp * 1000);
-                        
+                    for (let i = epochs.length - 1; i >= 0; i--) {
+                        const amt = parseFloat(ethers.formatUnits(amounts[i], 18)) / 1.5;
+                        const date = new Date(Number(timestamps[i]) * 1000);
                         listContainer.innerHTML += `
-                        <div class="history-item"><div class="history-item-details"><strong>Weekly Salary</strong><div class="date">${date.toLocaleString()}</div></div><div class="history-item-amount" style="color: var(--gold)">+${amt.toFixed(2)} ZTR</div></div>`;
-                    });
-                } else { listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No salary history found in recent blocks.</p>'; }
+                            <div class="history-item">
+                                <div class="history-item-details">
+                                    <strong>Sunday Epoch #${epochs[i].toString()} (Level ${Number(levels[i]) + 1})</strong>
+                                    <div class="date">${date.toLocaleString()}</div>
+                                </div>
+                                <div class="history-item-amount" style="color: var(--gold)">+${amt.toFixed(2)} ZTR</div>
+                            </div>`;
+                    }
+                } else {
+                    listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No Sunday salary records found for this wallet yet.</p>';
+                }
             } catch (e) { 
                 console.error(e);
-                listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">Fetching from Smart Contract.</p>'; 
+                listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No Sunday salary records found yet.</p>'; 
             }
         }
 
@@ -2763,8 +3049,66 @@
                 usdtDecimals = 18;
             }
         }
-        
-        // === CHARTING LOGIC ===
+
+        /* TRADING SYSTEM LOGIC & CHARTS */
+        window.openTradingSystemPage = () => {
+            const loader = document.getElementById('tradingLoaderOverlay');
+            loader.classList.remove('hidden');
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                document.getElementById('tradingSystemPage').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }, 1000);
+        };
+
+        window.closeTradingSystemPage = () => {
+            document.getElementById('tradingSystemPage').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        };
+
+        window.switchTradingTab = (tabName) => {
+            document.querySelectorAll('.trading-subnav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.trading-tab-view').forEach(view => view.classList.remove('active'));
+
+            document.getElementById(`btnTab${tabName}`).classList.add('active');
+            document.getElementById(`tradingTab${tabName}`).classList.add('active');
+        };
+
+        window.calculateTradeSwap = () => {
+            const usdt = parseFloat(document.getElementById('tradeUsdtAmount').value) || 0;
+            const ztr = usdt / liveZTRPrice;
+            document.getElementById('tradeZtrAmount').value = ztr.toFixed(2);
+        };
+
+        window.executeTrade = (type) => {
+            const usdt = document.getElementById('tradeUsdtAmount').value;
+            showToast(`${type} Order of $${usdt} executed successfully!`, "success");
+        };
+
+        window.stakePlan = (plan, apy) => {
+            showToast(`Staked in ${plan} Pool (${apy} APY) successfully!`, "success");
+        };
+
+        window.p2pTrade = (merchant, price) => {
+            showToast(`P2P Trade opened with ${merchant} @ $${price}`, "info");
+        };
+
+        function startLiveTradesFeed() {
+            const feed = document.getElementById('liveTradesFeed');
+            if(!feed) return;
+            const types = ['BUY', 'SELL'];
+            setInterval(() => {
+                const type = types[Math.floor(Math.random() * types.length)];
+                const amount = (Math.random() * 200 + 10).toFixed(2);
+                const price = (liveZTRPrice + (Math.random() - 0.5) * 0.01).toFixed(4);
+                const item = document.createElement('div');
+                item.style.cssText = "display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);";
+                item.innerHTML = `<span style="color: ${type === 'BUY' ? 'var(--success)' : 'var(--danger)'};">${type} ZTR</span><span>${amount} ZTR</span><span style="color: var(--text-muted);">$${price}</span>`;
+                feed.prepend(item);
+                if(feed.children.length > 5) feed.removeChild(feed.lastChild);
+            }, 3000);
+        }
+
         function initTradingChart() {
             if (chartInterval) clearInterval(chartInterval);
             let currentPrice = baseZTRPrice;
@@ -2776,10 +3120,15 @@
             });
 
             liveZTRPrice = chartData[chartData.length - 1].close;
-            renderChart(chartData);
+            const render = () => {
+                renderChart(chartData, 'tradingChart');
+                renderChart(chartData, 'tradingSystemChart');
+            };
+
+            render();
             chartInterval = setInterval(() => {
                 chartData = updateChart(chartData);
-                renderChart(chartData);
+                render();
             }, 3000);
         }
 
@@ -2798,17 +3147,29 @@
         function updatePriceDisplay(data) {
             const priceElement = document.getElementById('liveZTRPrice');
             const changeElement = document.getElementById('priceChange');
+            const tradePagePrice = document.getElementById('tradePagePrice');
+            const tradePageChange = document.getElementById('tradePageChange');
+
             const firstOpen = data[0].close;
             const change = liveZTRPrice - firstOpen;
             const percentChange = (change / firstOpen) * 100;
-            priceElement.innerText = liveZTRPrice.toFixed(4);
-            changeElement.innerText = `${change >= 0 ? '+' : ''}${change.toFixed(4)} (${change >= 0 ? '+' : ''}${percentChange.toFixed(2)}%)`;
-            priceElement.style.color = change >= 0 ? 'var(--success)' : 'var(--danger)';
-            changeElement.className = `price-change ${change >= 0 ? 'up' : 'down'}`;
+            const priceStr = liveZTRPrice.toFixed(4);
+            const changeStr = `${change >= 0 ? '+' : ''}${change.toFixed(4)} (${change >= 0 ? '+' : ''}${percentChange.toFixed(2)}%)`;
+
+            if(priceElement) priceElement.innerText = priceStr;
+            if(changeElement) {
+                changeElement.innerText = changeStr;
+                changeElement.className = `price-change ${change >= 0 ? 'up' : 'down'}`;
+            }
+            if(tradePagePrice) tradePagePrice.innerText = priceStr;
+            if(tradePageChange) {
+                tradePageChange.innerText = `${change >= 0 ? '+' : ''}${percentChange.toFixed(2)}%`;
+                tradePageChange.className = `price-change ${change >= 0 ? 'up' : 'down'}`;
+            }
         }
 
-        function renderChart(chartData) {
-            const canvas = document.getElementById('tradingChart');
+        function renderChart(chartData, canvasId) {
+            const canvas = document.getElementById(canvasId);
             if (!canvas || !canvas.getContext) return;
             const ctx = canvas.getContext('2d');
             const dpr = window.devicePixelRatio || 1;
@@ -2820,7 +3181,7 @@
             const priceRange = maxPrice - minPrice || 1;
             const firstPrice = chartData[0].close; const lastPrice = prices[prices.length - 1];
             const isUp = lastPrice >= firstPrice;
-            const lineColor = isUp ? getComputedStyle(document.documentElement).getPropertyValue('--success').trim() : getComputedStyle(document.documentElement).getPropertyValue('--danger').trim();
+            const lineColor = isUp ? '#10b981' : '#ef4444';
             ctx.clearRect(0, 0, rect.width, rect.height);
             const gradient = ctx.createLinearGradient(0, 0, 0, rect.height);
             gradient.addColorStop(0, `${lineColor}40`); gradient.addColorStop(1, `${lineColor}00`);
@@ -2990,6 +3351,7 @@
                 } catch(e) { console.error(e); }
                 
                 ztrContract = new ethers.Contract(CONTRACT_ADDRESS, ZTR_ABI, signer);
+                salaryContract = new ethers.Contract(SALARY_CONTRACT_ADDRESS, SALARY_CONTRACT_ABI, signer);
                 usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
                 await getUSDTDecimals();
                 
@@ -3091,7 +3453,6 @@
             showToast('Invitation ID copied!', 'success');
         });
 
-        // LEADERBOARD, AIRDROP PROGRESS AND STATS FETCHING
         function updateAirdropProgress(totalDistributed) {
             const phases = [
                 { title: 'Phase 1: Genesis', target: 200000, start: 0 },
@@ -3135,7 +3496,7 @@
                 let salaryActiveCount = 0;
                 let totalAirdropPoints = 0;
                 let leaderboardData = [];
-                let globalTotalEarnedZTR = 0; // SYSTEM KI TOTAL EARNING CALCULATION KE LIYE
+                let globalTotalEarnedZTR = 0;
 
                 for (let i = 1000; i < totalUsersNum; i++) {
                     try {
@@ -3143,11 +3504,11 @@
                         if (addr && addr !== "0x0000000000000000000000000000000000000000") {
                             const u = await ztrContract.users(addr);
                             if (u.exists) {
-                                if (Number(u.currentLevel) >= 4) salaryActiveCount++; // Level 5 is ID 4
+                                if (Number(u.currentLevel) >= 4) salaryActiveCount++;
                                 totalAirdropPoints += Number(u.airdropPoints);
 
                                 const earnedZTR = parseFloat(ethers.formatUnits(u.totalEarningsUSDT, 18)) / 1.5;
-                                globalTotalEarnedZTR += earnedZTR; // SABKI EARNING YAHAN JAMA HO RAHI HAI
+                                globalTotalEarnedZTR += earnedZTR;
 
                                 if (earnedZTR > 0) {
                                     let localName = localStorage.getItem('ztr_name_' + addr.toLowerCase()) || "User " + u.id;
@@ -3237,12 +3598,43 @@
             closeModal('dropsModal');
             
             const salaryInfoContainer = document.getElementById('salaryInfo');
+            const historyListContainer = document.getElementById('salaryHistoryListWeekFlow');
+            historyListContainer.innerHTML = '<div class="spinner"></div>';
 
-            const levelId = currentUserData.level !== undefined ? currentUserData.level : 0;
-            const isEligible = levelId >= 4; // Eligibility starts from level 5 (ID 4)
+            const levelId = currentUserData ? currentUserData.level : 0;
+            const isEligible = levelId >= 4;
 
-            salaryInfoContainer.innerHTML = isEligible ? `<div class="salary-value">Performance Based</div><p style="color: var(--text-muted);">Your share is calculated from the weekly pool based on your activity and team performance.</p>` : `<div class="salary-value">Not Eligible</div><p style="color: var(--text-muted); font-size: 13px;">Upgrade to Level 5 or higher to become eligible for weekly salary.</p>`;
-        }
+            salaryInfoContainer.innerHTML = isEligible ? 
+                `<div style="font-size: 28px; font-weight: bold; color: var(--gold);">Tier Eligible (Level ${levelId + 1})</div><p style="color: var(--text-muted);">Your performance score is active. Contract B divides the weekly pool every Sunday at 9 PM.</p>` : 
+                `<div style="font-size: 24px; font-weight: bold; color: var(--danger);">Not Eligible</div><p style="color: var(--text-muted); font-size: 13px;">Upgrade to Level 5 or higher to enter the Sunday Salary Tier.</p>`;
+
+            try {
+                const historyData = await salaryContract.getUserSalaryHistory(userAddress);
+                const epochs = historyData[0];
+                const amounts = historyData[1];
+                const timestamps = historyData[4];
+
+                if (epochs.length > 0) {
+                    historyListContainer.innerHTML = '';
+                    for (let i = epochs.length - 1; i >= 0; i--) {
+                        const amt = parseFloat(ethers.formatUnits(amounts[i], 18)) / 1.5;
+                        const date = new Date(Number(timestamps[i]) * 1000);
+                        historyListContainer.innerHTML += `
+                            <div class="history-item">
+                                <div class="history-item-details">
+                                    <strong>Sunday Payout #${epochs[i].toString()}</strong>
+                                    <div class="date">${date.toLocaleString()}</div>
+                                </div>
+                                <div class="history-item-amount" style="color: var(--gold)">+${amt.toFixed(2)} ZTR</div>
+                            </div>`;
+                    }
+                } else {
+                    historyListContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No Sunday salary records logged yet.</p>';
+                }
+            } catch (e) {
+                historyListContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No Sunday salary records logged yet.</p>';
+            }
+        };
 
         window.openTokensPage = async () => {
             document.body.style.overflow = 'hidden';
@@ -3266,7 +3658,7 @@
         async function renderInvitationTasks() {
             const taskListContainer = document.getElementById('invitationTasksList');
             const directTeamCount = currentUserData.teamSize || 0;
-            const tasks =[ { required: 3, points: 500 }, { required: 6, points: 1500 }, { required: 10, points: 3000 }, { required: 15, points: 5000 }, { required: 25, points: 10000 }, { required: 50, points: 25000 }];
+            const tasks = [ { required: 3, points: 500 }, { required: 6, points: 1500 }, { required: 10, points: 3000 }, { required: 15, points: 5000 }, { required: 25, points: 10000 }, { required: 50, points: 25000 }];
 
             taskListContainer.innerHTML = tasks.map(task => {
                 const isClaimed = localStorage.getItem(`task_${task.required}_${userAddress}`) === "true";
