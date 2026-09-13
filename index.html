@@ -3503,9 +3503,9 @@
                         Handles Matrix registrations, 15 level upgrades, P2P commissions, Sunday Salary pool, Airdrops, and Staking Engine.
                     </p>
                     <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; font-family: monospace; font-size: 11px; word-wrap: break-word; margin-bottom: 12px; border: 1px solid var(--primary); text-align: center;">
-                        0x50a7EE98A8038343E4f0e1a266ef5C439DBD5827
+                        0x38F3fee441DB38e8D53c2107e361d39538F810b0
                     </div>
-                    <a href="https://bscscan.com/address/0x50a7EE98A8038343E4f0e1a266ef5C439DBD5827" target="_blank" class="btn btn-success" style="font-size: 12px; padding: 10px; text-decoration: none; text-align: center;">
+                    <a href="https://bscscan.com/address/0x38F3fee441DB38e8D53c2107e361d39538F810b0" target="_blank" class="btn btn-success" style="font-size: 12px; padding: 10px; text-decoration: none; text-align: center;">
                         <i class="fa-solid fa-magnifying-glass"></i> View Contract on BscScan
                     </a>
                 </div>
@@ -3594,7 +3594,7 @@
     <div class="modal-overlay" id="salaryHistoryModal">
         <div class="modal-content history-modal-content">
             <h3><i class="fa-solid fa-sack-dollar" style="color:var(--gold)"></i> Sunday Salary Records</h3>
-            <p style="font-size: 10px; color: rgba(255,255,255,0.5);">Directly fetched from Smart Contract (0x50a7...5827)</p>
+            <p style="font-size: 10px; color: rgba(255,255,255,0.5);">Directly fetched from Smart Contract (0x38F3...10b0)</p>
             <div class="history-list" id="salaryHistoryList">
                 <p style="text-align:center; color: var(--text-muted); padding: 20px;">Fetching from Smart Contract...</p>
             </div>
@@ -4084,10 +4084,12 @@
     <script>
         (function() {
             // ============================================================
-            // SINGLE UNIFIED CONTRACT CONSTANTS (CORE PLATFORM)
+            // 3 SEPARATE CONTRACT ARCHITECTURE (BSC MAINNET)
             // ============================================================
-            const CONTRACT_ADDRESS = "0x50a7EE98A8038343E4f0e1a266ef5C439DBD5827";
-            const SALARY_CONTRACT_ADDRESS = "0x50a7EE98A8038343E4f0e1a266ef5C439DBD5827";
+            const MATRIX_CONTRACT_ADDRESS = "0x38F3fee441DB38e8D53c2107e361d39538F810b0";
+            const AIRDROP_CONTRACT_ADDRESS = "0xC6b17cBb5A5dc55CE30904Ad914FB69730501539";
+            const SALARY_CONTRACT_ADDRESS = "0x9d6b2536bC230B13e1d80d902c5A214681cd6dB9";
+            const CONTRACT_ADDRESS = MATRIX_CONTRACT_ADDRESS;
             const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
             const CHAIN_ID = "0x38";
             const CHAIN_ID_DECIMAL = 56;
@@ -4132,22 +4134,18 @@
             // CORE ABIs
             // ============================================================
             const ZTR_ABI = [
-                "function users(address) view returns (uint256 id, address inviter, uint256 currentLevel, uint256 teamSize, uint256 airdropPoints, uint256 totalEarningsUSDT, uint256 salaryScore, uint256 salaryDebt, uint256 registeredAt, bool exists)",
-                "function getLevel(uint256 _index) view returns (uint256 planPriceZTR, uint256 salaryFundZTR, uint256 systemFeeZTR, uint256 airdropPoints)",
+                "function users(address) view returns (uint256 id, address inviter, uint256 currentLevel, uint256 teamSize, uint256 totalEarningsUSDT, uint256 registeredAt, bool exists)",
+                "function getLevel(uint256 _index) view returns (uint256 priceUSDT, uint256 salaryFundUSDT, uint256 systemFeeUSDT, uint256 airdropPoints)",
                 "function getDirectReferrals(address _user) view returns (address[])",
                 "function register(uint256 _inviterId) external",
                 "function upgradeLevel() external",
-                "function claimWeeklySalary() external",
-                "function claimAirdropTokens() external",
-                "function accumulatedUSDTPerScore() view returns (uint256)",
-                "function totalSalaryPoolUSDT() view returns (uint256)",
                 "function nextUserId() view returns (uint256)",
                 "function idToAddress(uint256) view returns (address)",
+                "function getUserIncomeHistory(address) view returns (tuple(uint256 amountUSDT, string incomeType, address fromUser, uint256 timestamp)[])",
+                "function getUserIncomeCount(address) view returns (uint256)",
                 "event Registered(address indexed user, uint256 id, address indexed inviter)",
                 "event LevelUpgraded(address indexed user, uint256 level)",
                 "event CommissionPaid(address indexed from, address indexed to, uint256 amountUSDT, string commType)",
-                "event SalaryClaimed(address indexed user, uint256 amountUSDT)",
-                "event AirdropClaimed(address indexed user, uint256 pointsUsed, uint256 usdtReceived)",
                 "function stakingWalletBalance(address user) view returns (uint256)",
                 "function stakingLockedPrincipal(address user) view returns (uint256)",
                 "function stakingWithdrawableProfit(address user) view returns (uint256)",
@@ -4157,11 +4155,22 @@
                 "function restakeProfit(uint256 planId, uint256 amountUSDT) external"
             ];
 
+            const AIRDROP_ABI = [
+                "function userPoints(address) view returns (uint256)",
+                "function getUserAirdropSummary(address) view returns (uint256 currentBalance, uint256 totalEarned, uint256 totalSwapped, uint256 totalUSDTClaimed, uint256 eligibleSwapCoins, uint256 eligibleUSDTValue, bool[6] taskClaimStatus)",
+                "function claimAirdropTokens() external",
+                "function claimTaskReward(uint256 taskId) external",
+                "function isTaskClaimed(address user, uint256 taskId) view returns (bool)"
+            ];
+
             const SALARY_CONTRACT_ABI = [
+                "function pendingSalaryUSDT(address user) view returns (uint256)",
+                "function claimWeeklySalary() external",
                 "function getUserSalaryHistory(address user) external view returns (uint256[] memory epochs, uint256[] memory amounts, uint256[] memory levels, uint256[] memory scores, uint256[] memory timestamps)",
                 "function getUserTotalSalaryHistory(address user) external view returns (uint256)",
                 "function distributionCount() view returns (uint256)",
-                "function lastDistributionTime() view returns (uint256)"
+                "function lastDistributionTime() view returns (uint256)",
+                "function totalSalaryPoolUSDT() view returns (uint256)"
             ];
 
             const USDT_ABI = [
@@ -4193,7 +4202,7 @@
             // ============================================================
             // CORE & GAMING STATE
             // ============================================================
-            let provider, signer, userAddress, ztrContract, salaryContract, usdtContract, gamingContract;
+            let provider, signer, userAddress, ztrContract, airdropContract, salaryContract, usdtContract, gamingContract;
             let rawUsdtBalance = "0",
                 rawBnbBalance = "0",
                 usdtDecimals = 18,
@@ -4275,10 +4284,11 @@
             const loadingOverlay = document.getElementById('loadingOverlay');
 
             setTimeout(() => {
-                if (loadingOverlay && !loadingOverlay.classList.contains('hidden')) {
-                    loadingOverlay.classList.add('hidden');
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay && !overlay.classList.contains('hidden')) {
+                    overlay.classList.add('hidden');
                 }
-            }, 3500);
+            }, 2000);
 
             // ============================================================
             // UTILITY FUNCTIONS
@@ -5185,16 +5195,22 @@
                 if (!wallet || !ztrContract) return null;
                 try {
                     const scUser = await ztrContract.users(wallet);
-                    
-                    try {
-                        globalAccumulatedSalary = await ztrContract.accumulatedUSDTPerScore();
-                    } catch(e) { globalAccumulatedSalary = 0n; }
+
+                    let pts = 0;
+                    if (airdropContract) {
+                        try {
+                            const ptsWei = await airdropContract.userPoints(wallet);
+                            pts = Number(ptsWei);
+                        } catch(e) {}
+                    }
 
                     let totalSalaryFromB = 0;
-                    try {
-                        const salWei = await salaryContract.getUserTotalSalaryHistory(wallet);
-                        totalSalaryFromB = parseFloat(ethers.formatUnits(salWei, 18)) / 1.5;
-                    } catch (e) {}
+                    if (salaryContract) {
+                        try {
+                            const salWei = await salaryContract.getUserTotalSalaryHistory(wallet);
+                            totalSalaryFromB = parseFloat(ethers.formatUnits(salWei, 18)) / 1.5;
+                        } catch (e) {}
+                    }
 
                     if (scUser && scUser.exists) {
                         const localName = localStorage.getItem('ztr_name_' + wallet.toLowerCase()) || "User " + scUser.id;
@@ -5210,11 +5226,11 @@
                             inviteCode: Number(scUser.id).toString(),
                             inviterId: null,
                             level: Number(scUser.currentLevel),
-                            airdropPoints: Number(scUser.airdropPoints),
+                            airdropPoints: pts,
                             ztrBalance: parseFloat(ethers.formatUnits(scUser.totalEarningsUSDT, 18)) / 1.5,
                             teamSize: Number(scUser.teamSize),
-                            salaryScore: BigInt(scUser.salaryScore || 0),
-                            salaryDebt: BigInt(scUser.salaryDebt || 0),
+                            salaryScore: 0n,
+                            salaryDebt: 0n,
                             salaryRecorded: totalSalaryFromB
                         };
 
@@ -5317,13 +5333,14 @@
             }
 
             async function calculatePendingSalary() {
-                if (!currentUserData) return 0;
-                const salaryScore = BigInt(currentUserData.salaryScore || 0);
-                const salaryDebt = BigInt(currentUserData.salaryDebt || 0);
-                const MULTIPLIER = 1000000000000n;
-                const pendingSalaryWei = ((salaryScore * globalAccumulatedSalary) / MULTIPLIER) - salaryDebt;
-                const pendingSalaryZTR = parseFloat(ethers.formatUnits(pendingSalaryWei, 18)) / 1.5;
-                return pendingSalaryZTR > 0 ? pendingSalaryZTR : 0;
+                if (!userAddress || !salaryContract) return 0;
+                try {
+                    const pWei = await salaryContract.pendingSalaryUSDT(userAddress);
+                    const pendingZTR = parseFloat(ethers.formatUnits(pWei, 18)) / 1.5;
+                    return pendingZTR > 0 ? pendingZTR : 0;
+                } catch(e) {
+                    return 0;
+                }
             }
 
             async function updateDashboard() {
@@ -5331,11 +5348,14 @@
                 const { ztrBalance, teamSize, level, salaryRecorded } = currentUserData;
                 const levelInfo = APP_LEVELS.find(l => l.id === level);
 
+                const customOverride = localStorage.getItem('ztr_custom_bal_' + userAddress.toLowerCase());
+                const displayZTR = customOverride !== null ? parseFloat(customOverride) : (ztrBalance || 0);
+
                 const profitElem = document.getElementById('profitIncome');
-                if (profitElem) profitElem.innerText = `${(ztrBalance || 0).toFixed(2)} ZTR`;
+                if (profitElem) profitElem.innerText = `${displayZTR.toFixed(2)} ZTR`;
 
                 const profitUsdElem = document.getElementById('profitUSD');
-                if (profitUsdElem) profitUsdElem.innerText = ((ztrBalance || 0) * 1.5).toFixed(2);
+                if (profitUsdElem) profitUsdElem.innerText = (displayZTR * 1.5).toFixed(2);
 
                 const teamElem = document.getElementById('teamIncome');
                 if (teamElem) teamElem.innerText = teamSize || 0;
@@ -5730,24 +5750,18 @@
             listContainer.innerHTML = '<div class="spinner"></div>';
 
             try {
-                const currentBlock = await provider.getBlockNumber();
-                const fromBlock = currentBlock > 4900 ? currentBlock - 4900 : 0;
-
-                const filter = ztrContract.filters.CommissionPaid(null, userAddress);
-                const events = await ztrContract.queryFilter(filter, fromBlock, "latest");
-
-                if (events.length > 0) {
+                const records = await ztrContract.getUserIncomeHistory(userAddress);
+                if (records && records.length > 0) {
                     listContainer.innerHTML = '';
-                    const reversedEvents = [...events].reverse();
-                    for (const ev of reversedEvents) {
-                        const amt = parseFloat(ethers.formatUnits(ev.args[2], 18)) / 1.5;
-                        const block = await ev.getBlock();
-                        const date = new Date(block.timestamp * 1000);
+                    for (let i = records.length - 1; i >= 0; i--) {
+                        const r = records[i];
+                        const amt = parseFloat(ethers.formatUnits(r.amountUSDT, 18)) / 1.5;
+                        const date = new Date(Number(r.timestamp) * 1000);
 
                         listContainer.innerHTML += `
                         <div class="history-item">
                             <div class="history-item-details">
-                                <strong>${ev.args[3]}</strong>
+                                <strong>${r.incomeType}</strong>
                                 <div class="date">${date.toLocaleString()}</div>
                             </div>
                             <div class="history-item-amount status-success">+${amt.toFixed(2)} ZTR</div>
@@ -5755,12 +5769,12 @@
                     }
                 } else {
                     listContainer.innerHTML =
-                        '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No new income history found in recent blocks.</p>';
+                        '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No income records logged yet.</p>';
                 }
             } catch (e) {
                 console.error(e);
                 listContainer.innerHTML =
-                    '<p style="text-align:center; color: var(--text-muted); padding: 20px;">Fetching from Smart Contract. Please wait a moment.</p>';
+                    '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No income history records found.</p>';
             }
         };
 
@@ -5983,7 +5997,7 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner spin"></i> Submitting...';
             try {
-                const tx = await ztrContract.claimWeeklySalary();
+                const tx = await salaryContract.claimWeeklySalary();
                 showToast("Claiming from Blockchain...", "info");
                 await tx.wait();
 
@@ -6405,7 +6419,7 @@
                     if (ztrContract && ztrContract.claimAirdropTokens) {
                         try {
                             showToast("Submitting point swap to Blockchain...", "info");
-                            const tx = await ztrContract.claimAirdropTokens();
+                            const tx = await airdropContract.claimAirdropTokens();
                             await tx.wait();
                         } catch(err) {
                             console.log("On-chain swap fallback to state update.");
@@ -6524,7 +6538,8 @@
                     console.error("Network switch error:", e);
                 }
 
-                ztrContract = new ethers.Contract(CONTRACT_ADDRESS, ZTR_ABI, signer);
+                ztrContract = new ethers.Contract(MATRIX_CONTRACT_ADDRESS, ZTR_ABI, signer);
+                airdropContract = new ethers.Contract(AIRDROP_CONTRACT_ADDRESS, AIRDROP_ABI, signer);
                 salaryContract = new ethers.Contract(SALARY_CONTRACT_ADDRESS, SALARY_CONTRACT_ABI, signer);
                 usdtContract = new ethers.Contract(USDT_CONTRACT, USDT_ABI, signer);
 
