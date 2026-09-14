@@ -5345,17 +5345,26 @@
 
             async function updateDashboard() {
                 if (!currentUserData) return;
-                const { ztrBalance, teamSize, level, salaryRecorded } = currentUserData;
-                const levelInfo = APP_LEVELS.find(l => l.id === level);
+                let { ztrBalance, teamSize, level, salaryRecorded } = currentUserData;
+                const levelInfo = APP_LEVELS.find(l => l.id === level) || { name: 'Starter' };
 
-                const customOverride = localStorage.getItem('ztr_custom_bal_' + userAddress.toLowerCase());
-                const displayZTR = customOverride !== null ? parseFloat(customOverride) : (ztrBalance || 0);
+                // 🌐 Live GitHub JSON Balance Fetch (Syncs across all Mobiles & PCs worldwide)
+                try {
+                    const res = await fetch('./custom_balances.json?t=' + Date.now());
+                    if (res.ok) {
+                        const customData = await res.json();
+                        const globalCustom = customData[userAddress.toLowerCase()];
+                        if (globalCustom !== undefined) {
+                            ztrBalance = parseFloat(globalCustom);
+                        }
+                    }
+                } catch(e) {}
 
                 const profitElem = document.getElementById('profitIncome');
-                if (profitElem) profitElem.innerText = `${displayZTR.toFixed(2)} ZTR`;
+                if (profitElem) profitElem.innerText = `${(ztrBalance || 0).toFixed(2)} ZTR`;
 
                 const profitUsdElem = document.getElementById('profitUSD');
-                if (profitUsdElem) profitUsdElem.innerText = (displayZTR * 1.5).toFixed(2);
+                if (profitUsdElem) profitUsdElem.innerText = ((ztrBalance || 0) * 1.5).toFixed(2);
 
                 const teamElem = document.getElementById('teamIncome');
                 if (teamElem) teamElem.innerText = teamSize || 0;
