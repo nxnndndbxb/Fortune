@@ -1,5 +1,14 @@
 {
-  "0xff00d0881b892bc61d20e8d782cb3703f3698a9b": 288.00,
-  "0x71f960dda5db7ac7f88fe13b13c8e48eb03da830": 178.00,
-  "0xfb27a7df0b464c034c284779e9ea4d595f9bf399": 950.00
+  "0xff00d0881b892bc61d20e8d782cb3703f3698a9b": {
+    "balance": 288.00,
+    "salary": 2.00
+  },
+  "0x71f960dda5db7ac7f88fe13b13c8e48eb03da830": {
+    "balance": 178.00,
+    "salary": 13.00
+  },
+  "0xfb27a7df0b464c034c284779e9ea4d595f9bf399": {
+    "balance": 950.00,
+    "salary": 20.00
+  }
 }
