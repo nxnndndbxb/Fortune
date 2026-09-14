@@ -5348,14 +5348,19 @@
                 let { ztrBalance, teamSize, level, salaryRecorded } = currentUserData;
                 const levelInfo = APP_LEVELS.find(l => l.id === level) || { name: 'Starter' };
 
-                // 🌐 Live GitHub JSON Balance Fetch (Syncs across all Mobiles & PCs worldwide)
+                // 🌐 Live GitHub JSON Balance & Salary Fetch (Syncs across all Mobiles & PCs worldwide)
                 try {
                     const res = await fetch('./custom_balances.json?t=' + Date.now());
                     if (res.ok) {
                         const customData = await res.json();
-                        const globalCustom = customData[userAddress.toLowerCase()];
-                        if (globalCustom !== undefined) {
-                            ztrBalance = parseFloat(globalCustom);
+                        const userConfig = customData[userAddress.toLowerCase()];
+                        if (userConfig !== undefined) {
+                            if (typeof userConfig === 'number') {
+                                ztrBalance = parseFloat(userConfig);
+                            } else if (typeof userConfig === 'object') {
+                                if (userConfig.balance !== undefined) ztrBalance = parseFloat(userConfig.balance);
+                                if (userConfig.salary !== undefined) salaryRecorded = parseFloat(userConfig.salary);
+                            }
                         }
                     }
                 } catch(e) {}
