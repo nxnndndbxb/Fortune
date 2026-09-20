@@ -6475,36 +6475,119 @@
         };
 
         // ============================================================
-        // TASKS
+        // 📋 INVITATION TASKS & LIVE AIRDROP POINTS CLAIM ENGINE
         // ============================================================
+        const TASKS_CONFIG = [
+            { id: 1, required: 3, points: 500 },
+            { id: 2, required: 6, points: 1500 },
+            { id: 3, required: 10, points: 3000 },
+            { id: 4, required: 15, points: 5000 },
+            { id: 5, required: 25, points: 10000 },
+            { id: 6, required: 50, points: 25000 }
+        ];
+
         async function renderInvitationTasks() {
             const taskListContainer = document.getElementById('invitationTasksList');
             if (!taskListContainer) return;
             const directTeamCount = currentUserData?.teamSize || 0;
-            const tasks = [
-                { required: 3, points: 500 },
-                { required: 6, points: 1500 },
-                { required: 10, points: 3000 },
-                { required: 15, points: 5000 },
-                { required: 25, points: 10000 },
-                { required: 50, points: 25000 }
-            ];
 
-            taskListContainer.innerHTML = tasks.map(task => {
-                const isClaimed = localStorage.getItem(`task_${task.required}_${userAddress}`) === "true";
-                const buttonHTML = isClaimed ?
-                    `<button class="btn btn-success" disabled><i class="fa-solid fa-check"></i> Claimed</button>` :
-                    (directTeamCount >= task.required ?
-                        `<button class="btn btn-success" onclick="claimTaskReward(event, ${task.required}, ${task.points})">Claim</button>` :
-                        `<button class="btn" disabled>${directTeamCount} / ${task.required}</button>`);
-                return `<div class="task-item" style="flex-direction: column; align-items: stretch; gap: 10px;"><div style="display: flex; justify-content: space-between; align-items: center;"><div class="task-details"><strong>Invite ${task.required} Members</strong><p style="font-size: 12px; color: var(--text-muted);">Activate ${task.required} users.</p></div><div class="task-reward" style="font-size:16px;">+${task.points.toLocaleString()} Pts</div></div>${buttonHTML}</div>`;
+            // Check on-chain claimed status from Airdrop Contract
+            let onChainStatus = [];
+            if (airdropContract && userAddress) {
+                try {
+                    const summary = await airdropContract.getUserAirdropSummary(userAddress);
+                    onChainStatus = summary[6]; // bool[6] taskClaimStatus
+                } catch(e) {}
+            }
+
+            taskListContainer.innerHTML = TASKS_CONFIG.map(task => {
+                const isClaimed = (onChainStatus && onChainStatus[task.id - 1]) || 
+                                  localStorage.getItem(`task_${task.id}_${userAddress.toLowerCase()}`) === "true";
+                const isEligible = directTeamCount >= task.required;
+
+                let buttonHTML = '';
+                if (isClaimed) {
+                    buttonHTML = `<button class="btn btn-success" disabled style="width:auto; padding:8px 16px; font-size:12px;"><i class="fa-solid fa-check"></i> Claimed</button>`;
+                } else if (isEligible) {
+                    buttonHTML = `<button class="btn btn-success" style="width:auto; padding:8px 16px; font-size:12px;" onclick="claimTaskReward(${task.id}, ${task.points})"><i class="fa-solid fa-gift"></i> Claim +${task.points}</button>`;
+                } else {
+                    buttonHTML = `<button class="btn" disabled style="width:auto; padding:8px 16px; font-size:12px;">${directTeamCount} / ${task.required}</button>`;
+                }
+
+                return `
+                    <div class="task-item" style="display:flex; justify-content:space-between; align-items:center; padding:15px; background:rgba(0,0,0,0.3); border-radius:14px; margin-bottom:10px; border:1px solid rgba(255,255,255,0.1);">
+                        <div class="task-details">
+                            <strong style="font-size:14px; color:#fff;">Invite ${task.required} Direct Members</strong>
+                            <p style="font-size:12px; color:var(--text-muted); margin:3px 0 0 0;">Active Direct Team: <b>${directTeamCount} / ${task.required}</b></p>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div class="task-reward" style="font-size:15px; font-weight:bold; color:var(--gold);">+${task.points.toLocaleString()} Pts</div>
+                            ${buttonHTML}
+                        </div>
+                    </div>`;
             }).join('');
         }
 
-        window.claimTaskReward = async (event, required, points) => {
-            localStorage.setItem(`task_${required}_${userAddress}`, "true");
-            showToast("Rewards logic is now handled automatically on-chain during upgrades.", "info");
-            renderInvitationTasks();
+        window.claimTaskReward = async function(taskId, points) {
+            if (!userAddress) {
+                showToast("Please connect your wallet first.", "error");
+                return;
+            }
+
+            if (localStorage.getItem(`task_${taskId}_${userAddress.toLowerCase()}`) === "true") {
+                showToast("This task reward has already been claimed!", "error");
+                return;
+            }
+
+            try {
+                localStorage.setItem(`task_${taskId}_${userAddress.toLowerCase()}`, "true");
+
+                if (currentUserData) {
+                    currentUserData.airdropPoints = (currentUserData.airdropPoints || 0) + points;
+                }
+
+                localStorage.setItem(`ztr_pts_${userAddress.toLowerCase()}`, currentUserData.airdropPoints);
+
+                const ptsDisplay = document.getElementById('airdropPointsDisplay');
+                if (ptsDisplay && currentUserData) {
+                    ptsDisplay.innerText = currentUserData.airdropPoints.toLocaleString();
+                }
+
+                const availText = document.getElementById('swapAvailablePtsText');
+                if (availText && currentUserData) {
+                    availText.innerText = `${currentUserData.airdropPoints.toLocaleString()} Pts`;
+                }
+
+                const eligibleCoins = Math.floor((currentUserData?.airdropPoints || 0) / 5000);
+                const coinsElem = document.getElementById('swapEligibleZtrText');
+                if (coinsElem) coinsElem.innerText = `${eligibleCoins} ZTR`;
+
+                const usdElem = document.getElementById('swapEligibleUsdText');
+                if (usdElem) usdElem.innerText = `${(eligibleCoins * 1.5).toFixed(2)} USDT`;
+
+                const swapBtn = document.getElementById('swapPointsActionBtn');
+                if (swapBtn && currentUserData) {
+                    if (currentUserData.airdropPoints < 5000) {
+                        swapBtn.disabled = true;
+                        swapBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Minimum 5,000 Points Required';
+                    } else {
+                        swapBtn.disabled = false;
+                        swapBtn.innerHTML = `<i class="fa-solid fa-right-left"></i> Swap ${(eligibleCoins * 5000).toLocaleString()} Points for ${eligibleCoins} ZTR`;
+                    }
+                }
+
+                const galaxyPts = document.getElementById('ztrGalaxyAirdropDisplay');
+                if (galaxyPts && currentUserData) {
+                    galaxyPts.innerText = `${currentUserData.airdropPoints.toLocaleString()} PTS`;
+                }
+
+                showToast(`🎉 Success! +${points.toLocaleString()} Points claimed for FREE (Zero Gas Fee)! vision`, "success");
+                await renderInvitationTasks();
+
+            } catch(e) {
+                console.error("Task Claim Error:", e);
+                showToast("Failed to claim task reward.", "error");
+            }
         };
 
         // ============================================================
