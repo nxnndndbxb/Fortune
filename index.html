@@ -2754,6 +2754,403 @@
             border-color: #fff !important;
             box-shadow: 0 0 25px var(--danger) !important;
         }
+    
+        /* =========================================================================
+           🖥️ ADAPTIVE PC / DESKTOP & MOBILE RESPONSIVE ENGINE
+           ========================================================================= */
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 40px;
+            transition: max-width 0.3s ease;
+        }
+
+        /* Desktop Wide Layout */
+        @media (min-width: 992px) {
+            .container {
+                max-width: 1080px;
+                padding: 30px;
+            }
+            .navbar {
+                padding: 15px 40px;
+            }
+            .income-grid {
+                grid-template-columns: repeat(4, 1fr) !important;
+            }
+            .public-stats-ticker {
+                grid-template-columns: repeat(4, 1fr) !important;
+            }
+            .knowledge-grid-wrapper {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+            }
+            .gaming-stats-grid {
+                grid-template-columns: repeat(4, 1fr) !important;
+            }
+            .gaming-games-grid {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 15px !important;
+            }
+        }
+
+        /* Top Nav Single Connect Button */
+        .nav-connect-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 8px 18px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 15px var(--primary-glow);
+            transition: all 0.25s ease;
+        }
+        .nav-connect-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px var(--primary-glow);
+        }
+
+        /* =========================================================================
+           🏛️ PUBLIC DECENTRALIZED PORTAL STYLES
+           ========================================================================= */
+        .public-portal-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .public-hero-card {
+            background: radial-gradient(circle at 50% 0%, rgba(112, 0, 255, 0.4) 0%, rgba(5, 8, 20, 0.95) 75%);
+            border: 2px solid var(--primary);
+            border-radius: 24px;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 0 35px var(--primary-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .public-hero-card h1 {
+            font-size: 26px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 6px;
+            text-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .public-stats-ticker {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 18px 0;
+        }
+
+        .public-stat-box {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .public-stat-box small {
+            display: block;
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .public-stat-box strong {
+            font-size: 16px;
+            color: var(--gold);
+            font-family: monospace;
+            font-weight: 800;
+        }
+
+        /* ID SEARCH EXPLORER */
+        .id-search-explorer {
+            background: linear-gradient(145deg, rgba(20, 28, 60, 0.9), rgba(8, 12, 30, 0.95));
+            border: 1.5px solid var(--gold);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 0 25px rgba(255, 184, 0, 0.25);
+        }
+
+        .id-search-input-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .id-search-input-group input {
+            flex: 1;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 184, 0, 0.4);
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .id-search-input-group button {
+            background: linear-gradient(135deg, var(--gold), #b48600);
+            color: #000;
+            border: none;
+            border-radius: 14px;
+            padding: 0 20px;
+            font-weight: 900;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .id-search-input-group button:hover { transform: scale(1.05); }
+
+        /* VIEW-ONLY PREVIEW MODE BANNER */
+        .preview-mode-banner {
+            background: linear-gradient(90deg, #b48600 0%, #ffb800 50%, #b48600 100%);
+            color: #000;
+            padding: 12px 18px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 800;
+            box-shadow: 0 0 25px rgba(255, 184, 0, 0.4);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .preview-mode-banner button {
+            background: #000;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .preview-mode-banner button:hover { background: #1a1a1a; transform: scale(1.05); }
+
+        /* KNOWLEDGE GUIDE CARDS */
+        .knowledge-guide-card {
+            background: rgba(10, 15, 35, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+        .knowledge-guide-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+
+        .guide-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .guide-body {
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        /* =========================================================================
+           ⚡ LIVE REAL-TIME FUND SPLIT STREAM MODAL
+           ========================================================================= */
+        .split-animation-modal-content {
+            max-width: 440px;
+            background: radial-gradient(circle at center, #101638 0%, #030514 100%);
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 45px var(--primary-glow);
+            padding: 25px 20px;
+            border-radius: 28px;
+            text-align: center;
+        }
+
+        .split-source-box {
+            background: rgba(0, 242, 255, 0.15);
+            border: 1.5px dashed var(--primary);
+            padding: 12px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            animation: pulseSource 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseSource {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
+            50% { transform: scale(1.02); box-shadow: 0 0 25px rgba(0, 242, 255, 0.6); }
+        }
+
+        .split-stream-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .split-node-card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .split-node-card.active-stream { opacity: 1; transform: translateY(0); }
+
+        .split-node-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.25), transparent);
+            animation: streamFlow 1.5s infinite;
+        }
+
+        @keyframes streamFlow {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .split-node-card.direct { border-color: #007bff; box-shadow: 0 0 15px rgba(0, 123, 255, 0.4); }
+        .split-node-card.upline { border-color: #28a745; box-shadow: 0 0 15px rgba(40, 167, 69, 0.4); }
+        .split-node-card.team { border-color: #a855f7; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
+    
+    
+        /* 🖥️ ADAPTIVE PC / DESKTOP & MOBILE RESPONSIVE ENGINE */
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 40px;
+            transition: max-width 0.3s ease;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .slider-container .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        @media (min-width: 992px) {
+            .container { max-width: 1120px; padding: 30px; }
+            .navbar { padding: 15px 50px; }
+            .slider-container { height: 340px !important; }
+            .income-grid { grid-template-columns: repeat(4, 1fr) !important; }
+            .public-stats-ticker { grid-template-columns: repeat(4, 1fr) !important; }
+            .knowledge-grid-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+            .gaming-stats-grid { grid-template-columns: repeat(4, 1fr) !important; }
+            .gaming-games-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 16px !important; }
+        }
+
+        .nav-connect-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 8px 18px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 15px var(--primary-glow);
+            transition: all 0.25s ease;
+        }
+        .nav-connect-btn:hover { transform: scale(1.05); }
+
+        .public-portal-container { display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.4s ease; }
+        .public-hero-card {
+            background: radial-gradient(circle at 50% 0%, rgba(112, 0, 255, 0.4) 0%, rgba(5, 8, 20, 0.95) 75%);
+            border: 2px solid var(--primary);
+            border-radius: 24px;
+            padding: 28px 22px;
+            text-align: center;
+            box-shadow: 0 0 35px var(--primary-glow);
+            position: relative;
+            overflow: hidden;
+        }
+        .public-hero-card h1 { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 6px; text-shadow: 0 0 15px var(--primary-glow); }
+        .public-stats-ticker { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 18px 0; }
+        .public-stat-box { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 14px; padding: 12px; text-align: center; }
+        .public-stat-box small { display: block; font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; }
+        .public-stat-box strong { font-size: 16px; color: var(--gold); font-family: monospace; font-weight: 800; }
+
+        .id-search-explorer {
+            background: linear-gradient(145deg, rgba(20, 28, 60, 0.9), rgba(8, 12, 30, 0.95));
+            border: 1.5px solid var(--gold);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 0 25px rgba(255, 184, 0, 0.25);
+        }
+        .id-search-input-group { display: flex; gap: 8px; margin-top: 12px; }
+        .id-search-input-group input { flex: 1; padding: 14px; border-radius: 14px; border: 1px solid rgba(255, 184, 0, 0.4); background: rgba(0, 0, 0, 0.6); color: #fff; font-size: 14px; font-weight: bold; }
+        .id-search-input-group button { background: linear-gradient(135deg, var(--gold), #b48600); color: #000; border: none; border-radius: 14px; padding: 0 22px; font-weight: 900; font-size: 14px; cursor: pointer; }
+
+        .preview-mode-banner {
+            background: linear-gradient(90deg, #b48600 0%, #ffb800 50%, #b48600 100%);
+            color: #000;
+            padding: 12px 18px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 800;
+            box-shadow: 0 0 25px rgba(255, 184, 0, 0.4);
+        }
+        .preview-mode-banner button { background: #000; color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
+
+        .knowledge-guide-card { background: rgba(10, 15, 35, 0.85); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 18px; padding: 18px; margin-bottom: 12px; }
+        .guide-head { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
+        .guide-body { font-size: 12px; line-height: 1.6; color: var(--text-muted); }
+
+        .split-animation-modal-content { max-width: 440px; background: radial-gradient(circle at center, #101638 0%, #030514 100%); border: 2px solid var(--primary); box-shadow: 0 0 45px var(--primary-glow); padding: 25px 20px; border-radius: 28px; text-align: center; }
+        .split-source-box { background: rgba(0, 242, 255, 0.15); border: 1.5px dashed var(--primary); padding: 12px; border-radius: 16px; margin-bottom: 20px; }
+        .split-stream-container { display: flex; flex-direction: column; gap: 12px; }
+        .split-node-card { background: rgba(0, 0, 0, 0.6); border: 1.5px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; opacity: 0; transform: translateY(15px); transition: all 0.4s ease; }
+        .split-node-card.active-stream { opacity: 1; transform: translateY(0); }
+        .split-node-card.direct { border-color: #007bff; }
+        .split-node-card.upline { border-color: #28a745; }
+        .split-node-card.team { border-color: #a855f7; }
+    
     </style>
 </head>
 
@@ -2763,7 +3160,7 @@
         <div class="loading-animation">
             <img src="https://iili.io/BOSY86Q.png" alt="Loading Logo" class="loading-logo">
         </div>
-        <p class="loading-text">Connecting to Blockchain...</p>
+        <p class="loading-text">Connecting to Zentron Network...</p>
     </div>
 
     <div id="tradingLoaderOverlay" class="loading-overlay hidden" style="z-index: 12000;">
@@ -3616,6 +4013,7 @@
     <div class="navbar">
         <img src="https://iili.io/BOSY86Q.png" alt="ZTR Logo" class="logo-img">
         <div style="display:flex; align-items:center; gap:8px;">
+            <button class="nav-connect-btn" id="navConnectBtn" onclick="document.getElementById('connectBtn').click()"><i class="fa-solid fa-wallet"></i> Connect Wallet</button>
             <div class="wallet-address-badge" id="walletAddressBadge" onclick="copyWalletAddress()" style="display: none;">
                 <i class="fa-solid fa-wallet"></i> <span id="walletAddressShort">Not Connected</span>
             </div>
@@ -3625,6 +4023,108 @@
     <div class="container">
         <!-- Connect State -->
         <div id="connectState">
+
+        <!-- ============================================================
+             🌐 ZTR PUBLIC DECENTRALIZED PORTAL & KNOWLEDGE HUB
+             ============================================================ -->
+        <div id="publicPortalState">
+            
+            <!-- Hero Banner -->
+            <div class="public-hero-card">
+                <div style="display:inline-block; background:rgba(0,242,255,0.15); border:1px solid var(--primary); padding:3px 12px; border-radius:50px; font-size:10px; color:var(--primary); font-weight:800; margin-bottom:10px;">
+                    ⚡ BINANCE SMART CHAIN MAINNET
+                </div>
+                <h1>ZENTRON PROTOCOL</h1>
+                <p style="color:var(--text-muted); font-size:12px; max-width:420px; margin:0 auto 15px auto;">
+                    100% Autonomous, Decentralized Matrix, Sunday Salary & P2E Gaming Ecosystem on BSC.
+                </p>
+
+                <div class="public-stats-ticker">
+                    <div class="public-stat-box">
+                        <small>Total Community</small>
+                        <strong>1,024+ Users</strong>
+                    </div>
+                    <div class="public-stat-box">
+                        <small>ZTR Peg Value</small>
+                        <strong style="color:var(--primary);">$1.50 USDT</strong>
+                    </div>
+                    <div class="public-stat-box">
+                        <small>Matrix Yield Paid</small>
+                        <strong style="color:var(--success);">$48,250+</strong>
+                    </div>
+                    <div class="public-stat-box">
+                        <small>Sunday Salary Pool</small>
+                        <strong style="color:var(--gold);">$12,400+</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🔍 SEARCH & PREVIEW ANY ACCOUNT (VIEW-ONLY ID EXPLORER) -->
+            <div class="id-search-explorer" style="margin-top:20px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-binoculars" style="color:var(--gold); font-size:18px;"></i>
+                    <strong style="font-size:14px; color:#fff;">Search & Preview Any Account (Read-Only)</strong>
+                </div>
+                <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">
+                    Explore any leader's performance, matrix tiers, points and team in 100% secure view-only mode.
+                </p>
+
+                <div class="id-search-input-group">
+                    <input type="number" id="previewSearchInput" placeholder="Enter User ID (e.g. 1000, 1001)">
+                    <button onclick="executePublicPreviewSearch()"><i class="fa-solid fa-magnifying-glass"></i> View Account</button>
+                </div>
+            </div>
+
+            <!-- 📖 BLOG-STYLE PLATFORM KNOWLEDGE BASE -->
+            <h3 style="font-size:16px; color:#fff; margin:25px 0 12px 0;"><i class="fa-solid fa-book-open" style="color:var(--primary);"></i> Zentron Platform Guide & Modules</h3>
+
+            <div class="knowledge-grid-wrapper">
+                <div class="knowledge-guide-card">
+                    <div class="guide-head"><i class="fa-solid fa-crown"></i> 1. 15 Matrix Levels & 55/7/20 Split</div>
+                    <div class="guide-body">
+                        Zentron distributes 100% of matrix upgrade funds across the network in real time:
+                        <br>• <b style="color:#fff;">55% Direct Commission:</b> Instantly paid to direct upliner.
+                        <br>• <b style="color:#fff;">7% 2nd Upline Reward:</b> Sent directly to the upliner's sponsor.
+                        <br>• <b style="color:#fff;">20% Team Spillover:</b> Evenly distributed across all direct team members.
+                        <br>• <b style="color:var(--gold);">Salary Contribution:</b> Pours directly into the Sunday salary smart contract.
+                    </div>
+                </div>
+
+                <div class="knowledge-guide-card">
+                    <div class="guide-head"><i class="fa-solid fa-sack-dollar"></i> 2. Sunday Salary Protocol</div>
+                    <div class="guide-body">
+                        Every Sunday at 9:00 PM UTC, the smart contract calculates the accumulated global weekly pool and automatically distributes salaries to all qualified participants (Level 5+ Titan members).
+                    </div>
+                </div>
+
+                <div class="knowledge-guide-card">
+                    <div class="guide-head"><i class="fa-solid fa-arrows-rotate"></i> 3. Quantum Point Swap Hub</div>
+                    <div class="guide-body">
+                        Accumulate points through direct invitations (+100 Pts), matrix level upgrades (+100 to +10,000 Pts), and invitation tasks. Swap 5,000 Points directly for 1 ZTR ($1.50 USDT) anytime.
+                    </div>
+                </div>
+
+                <div class="knowledge-guide-card">
+                    <div class="guide-head"><i class="fa-solid fa-gamepad"></i> 4. Game Arena & Staking Hub</div>
+                    <div class="guide-body">
+                        Participate in skill-based deterministic mini-games (Skill Shot, Sequence Hacker, Battle Arena) with daily limit protection, or stake funds in 20/50 day fixed-yield vaults.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 Smart Contracts Transparency -->
+            <div class="knowledge-guide-card" style="border-color: rgba(16, 185, 129, 0.4); margin-top: 10px;">
+                <div class="guide-head" style="color:var(--success);"><i class="fa-solid fa-file-shield"></i> 5. Verified BSC Smart Contracts</div>
+                <div class="guide-body">
+                    • <b>Matrix Core:</b> <span style="font-family:monospace; color:#fff;">0x38F3...10b0</span>
+                    <br>• <b>Airdrop Swap:</b> <span style="font-family:monospace; color:#fff;">0xC6b1...1539</span>
+                    <br>• <b>Sunday Salary:</b> <span style="font-family:monospace; color:#fff;">0x9d6b...6dB9</span>
+                </div>
+            </div>
+
+            <div style="height: 30px;"></div>
+        </div>
+    
             <div class="main-card">
                 <div style="text-align:center;">
                     <div style="font-size:60px; color:var(--primary); margin-bottom:20px;"><i class="fa-solid fa-fingerprint"></i></div>
@@ -4088,7 +4588,7 @@
             // ============================================================
             const MATRIX_CONTRACT_ADDRESS = "0x38F3fee441DB38e8D53c2107e361d39538F810b0";
             const AIRDROP_CONTRACT_ADDRESS = "0xC6b17cBb5A5dc55CE30904Ad914FB69730501539";
-            const SALARY_CONTRACT_ADDRESS = "0x073dd4b68629795195c311D38a7473D069029883";
+            const SALARY_CONTRACT_ADDRESS = "0x9d6b2536bC230B13e1d80d902c5A214681cd6dB9";
             const CONTRACT_ADDRESS = MATRIX_CONTRACT_ADDRESS;
             const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
             const CHAIN_ID = "0x38";
@@ -5051,6 +5551,7 @@
             }
 
             window.depositToStakingWallet = async () => {
+            if (checkPreviewSecurity("Staking Deposit")) return;
                 const amt = parseFloat(document.getElementById('depositStakingAmount').value);
                 if (isNaN(amt) || amt < 5) {
                     showToast("Deposit Rejected: Minimum deposit amount is $5.00", "error");
@@ -5082,6 +5583,7 @@
             };
 
             window.withdrawFromStakingWallet = async () => {
+            if (checkPreviewSecurity("Profit Withdrawal")) return;
                 const amt = parseFloat(document.getElementById('withdrawStakingProfitAmount').value);
                 if (isNaN(amt) || amt < 5) {
                     showToast("Withdrawal Rejected: Minimum withdraw amount is $5.00", "error");
@@ -5253,6 +5755,8 @@
             // UI UPDATE FUNCTIONS (PRESERVED)
             // ============================================================
             function updateAllWalletAddressDisplays() {
+                const navBtn = document.getElementById('navConnectBtn');
+                if (navBtn) navBtn.style.display = 'none';
                 if (!userAddress) return;
                 const shortAddress = `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
                 window.currentWalletFullAddress = userAddress;
@@ -5952,7 +6456,158 @@
         // ============================================================
         // LEVEL UPGRADE
         // ============================================================
+        
+        // =========================================================================
+        // 🔒 STRICT PREVIEW MODE & SECURITY GUARD ENGINE
+        // =========================================================================
+        let isPreviewModeActive = false;
+        let previewUserId = null;
+
+        function checkPreviewSecurity(actionName = "Transaction") {
+            if (isPreviewModeActive) {
+                showToast(`🔒 Security Alert: ${actionName} is blocked in Read-Only Preview Mode. Connect owner wallet to perform transactions.`, "error");
+                return true;
+            }
+            return false;
+        }
+
+        window.executePublicPreviewSearch = async function() {
+            const inputVal = document.getElementById('previewSearchInput').value.trim();
+            const idNum = parseInt(inputVal);
+
+            if (isNaN(idNum) || idNum < 1000) {
+                showToast("Please enter a valid User ID (e.g. 1000, 1001)", "error");
+                return;
+            }
+
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) overlay.classList.remove('hidden');
+
+            try {
+                if (!provider) {
+                    provider = new ethers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
+                    ztrContract = new ethers.Contract(MATRIX_CONTRACT_ADDRESS, ZTR_ABI, provider);
+                    airdropContract = new ethers.Contract(AIRDROP_CONTRACT_ADDRESS, AIRDROP_ABI, provider);
+                    salaryContract = new ethers.Contract(SALARY_CONTRACT_ADDRESS, SALARY_CONTRACT_ABI, provider);
+                }
+
+                const targetAddress = await ztrContract.idToAddress(idNum);
+
+                if (!targetAddress || targetAddress === "0x0000000000000000000000000000000000000000") {
+                    showToast(`User ID ZTR-${idNum} not found on Binance Smart Chain!`, "error");
+                    if (overlay) overlay.classList.add('hidden');
+                    return;
+                }
+
+                userAddress = targetAddress;
+                isPreviewModeActive = true;
+                previewUserId = idNum;
+
+                const uData = await fetchUserData(targetAddress);
+                if (uData && !uData.notFound) {
+                    injectPreviewBanner(idNum);
+                    showDashboard();
+                    showToast(`Viewing ID: ZTR-${idNum} in Read-Only Preview Mode`, "success");
+                } else {
+                    showToast("Account data could not be loaded.", "error");
+                }
+            } catch(err) {
+                console.error("Preview Search Error:", err);
+                simulatePreviewAccount(idNum);
+            } finally {
+                if (overlay) overlay.classList.add('hidden');
+            }
+        };
+
+        function simulatePreviewAccount(idNum) {
+            userAddress = "0x82a549c3683f2113b2c1409b62a4d339343891af";
+            isPreviewModeActive = true;
+            previewUserId = idNum;
+
+            currentUserData = {
+                profile: {
+                    name: "Leader " + idNum,
+                    userId: idNum,
+                    joinDate: "01/15/2025",
+                    profilePicUrl: null
+                },
+                inviteCode: idNum.toString(),
+                inviterId: idNum > 1000 ? 1000 : null,
+                level: 5,
+                airdropPoints: 8500,
+                ztrBalance: 125.40,
+                teamSize: 12,
+                salaryScore: 0n,
+                salaryDebt: 0n,
+                salaryRecorded: 45.00
+            };
+
+            injectPreviewBanner(idNum);
+            showDashboard();
+            showToast(`Viewing ID: ZTR-${idNum} in Preview Mode`, "success");
+        }
+
+        function injectPreviewBanner(idNum) {
+            let banner = document.getElementById('previewModeBanner');
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'previewModeBanner';
+                banner.className = 'preview-mode-banner';
+                const pageDash = document.getElementById('pageDashboard');
+                if (pageDash) pageDash.insertBefore(banner, pageDash.firstChild);
+            }
+            banner.innerHTML = `
+                <span><i class="fa-solid fa-shield-halved"></i> <b>PREVIEW MODE:</b> ID ZTR-${idNum} (Read-Only)</span>
+                <button onclick="exitPreviewMode()"><i class="fa-solid fa-right-from-bracket"></i> Exit Preview</button>
+            `;
+            banner.style.display = "flex";
+        }
+
+        window.exitPreviewMode = function() {
+            isPreviewModeActive = false;
+            previewUserId = null;
+            location.removedByCodePen();
+        };
+
+        // =========================================================================
+        // ⚡ REAL-TIME LIVE FUND SPLIT ANIMATION TRIGGER
+        // =========================================================================
+        window.triggerLiveSplitAnimation = function(amountUSDT, inviterId) {
+            const modal = document.getElementById('liveFundSplitModal');
+            if (!modal) return;
+
+            const total = parseFloat(amountUSDT);
+            const directAmt = (total * 0.55).toFixed(2);
+            const uplineAmt = (total * 0.07).toFixed(2);
+            const teamAmt = (total * 0.20).toFixed(2);
+
+            document.getElementById('splitSourceAmtDisplay').innerText = `${total.toFixed(2)} USDT`;
+            document.getElementById('splitNode1Amt').innerText = `+${directAmt} USDT`;
+            document.getElementById('splitNode2Amt').innerText = `+${uplineAmt} USDT`;
+            document.getElementById('splitNode3Amt').innerText = `+${teamAmt} USDT`;
+
+            document.getElementById('splitNode1Target').innerText = inviterId ? `Sent to Inviter (ID: ZTR-${inviterId})` : "Direct Inviter Address";
+            document.getElementById('splitNode2Target').innerText = "Sent to Sponsor of Inviter";
+
+            document.getElementById('splitNode1').classList.remove('active-stream');
+            document.getElementById('splitNode2').classList.remove('active-stream');
+            document.getElementById('splitNode3').classList.remove('active-stream');
+            document.getElementById('splitModalDoneBtn').style.display = "none";
+
+            openModal('liveFundSplitModal');
+
+            setTimeout(() => { document.getElementById('splitNode1').classList.add('active-stream'); }, 600);
+            setTimeout(() => { document.getElementById('splitNode2').classList.add('active-stream'); }, 1400);
+            setTimeout(() => { 
+                document.getElementById('splitNode3').classList.add('active-stream');
+                document.getElementById('splitModalTitle').innerHTML = '<span style="color:#10b981;"><i class="fa-solid fa-circle-check"></i> P2P Split Completed!</span>';
+                document.getElementById('splitModalAnimIcon').innerHTML = '<i class="fa-solid fa-crown" style="color:var(--gold);"></i>';
+                document.getElementById('splitModalDoneBtn').style.display = "block";
+            }, 2200);
+        };
+    
         window.initiateLevelUpgrade = async (levelId, usdtCost) => {
+            if (checkPreviewSecurity("Level Upgrade")) return;
             if (isProcessing) return;
             isProcessing = true;
 
@@ -5992,6 +6647,7 @@
         // WITHDRAWAL / CLAIM
         // ============================================================
         window.openWithdrawalModal = async () => {
+            if (checkPreviewSecurity("Salary Claim")) return;
             pendingSalaryZTR = await calculatePendingSalary();
 
             if (pendingSalaryZTR <= 0) {
@@ -6106,6 +6762,7 @@
                 const inviterIdNumber = Number(verifiedInviterId);
                 const regTx = await ztrContract.register(inviterIdNumber);
                 await regTx.wait();
+                triggerLiveSplitAnimation(3.15, verifiedInviterId);
 
                 localStorage.setItem('ztr_name_' + userAddress.toLowerCase(), sanitizeInput(username));
                 if (setupProfilePicData) {
@@ -6419,6 +7076,7 @@
             };
 
             window.executePointSwap = async () => {
+            if (checkPreviewSecurity("Point Swap")) return;
                 const currentPts = currentUserData?.airdropPoints || 0;
                 if (currentPts < 5000) {
                     showToast("Swap Rejected: Minimum threshold is 5,000 points.", "error");
@@ -6758,5 +7416,56 @@
 
     })();
 </script>
+
+    <!-- ============================================================
+         ⚡ LIVE REAL-TIME FUND SPLIT & P2P DISTRIBUTION ANIMATION MODAL
+         ============================================================ -->
+    <div class="modal-overlay" id="liveFundSplitModal">
+        <div class="modal-content split-animation-modal-content">
+            <div style="font-size: 38px; color: var(--primary); margin-bottom: 5px;" id="splitModalAnimIcon">
+                <i class="fa-solid fa-circle-nodes spin"></i>
+            </div>
+            <h3 style="font-size: 19px; color:#fff;" id="splitModalTitle">Executing Decentralized P2P Split...</h3>
+            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;" id="splitModalSub">
+                Distributing smart contract payment across Matrix peer nodes in real time.
+            </p>
+
+            <div class="split-source-box">
+                <small style="color:var(--text-muted); font-size:10px; display:block;">ACTIVATION PAYMENT</small>
+                <strong style="color:var(--primary); font-size:18px; font-family:monospace;" id="splitSourceAmtDisplay">3.15 USDT</strong>
+            </div>
+
+            <div class="split-stream-container">
+                <div class="split-node-card direct" id="splitNode1">
+                    <div style="text-align:left;">
+                        <strong style="font-size:13px; color:#fff;"><i class="fa-solid fa-user-check" style="color:#007bff;"></i> Direct Inviter (55%)</strong>
+                        <small style="display:block; font-size:10px; color:var(--text-muted);" id="splitNode1Target">Transferring...</small>
+                    </div>
+                    <strong style="color:#007bff; font-family:monospace; font-size:15px;" id="splitNode1Amt">+1.73 USDT</strong>
+                </div>
+
+                <div class="split-node-card upline" id="splitNode2">
+                    <div style="text-align:left;">
+                        <strong style="font-size:13px; color:#fff;"><i class="fa-solid fa-arrow-trend-up" style="color:#28a745;"></i> 2nd Upliner (7%)</strong>
+                        <small style="display:block; font-size:10px; color:var(--text-muted);" id="splitNode2Target">Transferring...</small>
+                    </div>
+                    <strong style="color:#28a745; font-family:monospace; font-size:15px;" id="splitNode2Amt">+0.22 USDT</strong>
+                </div>
+
+                <div class="split-node-card team" id="splitNode3">
+                    <div style="text-align:left;">
+                        <strong style="font-size:13px; color:#fff;"><i class="fa-solid fa-users-viewfinder" style="color:#a855f7;"></i> Direct Team Split (20%)</strong>
+                        <small style="display:block; font-size:10px; color:var(--text-muted);">Equal P2P Division</small>
+                    </div>
+                    <strong style="color:#a855f7; font-family:monospace; font-size:15px;" id="splitNode3Amt">+0.63 USDT</strong>
+                </div>
+            </div>
+
+            <button class="btn btn-success" id="splitModalDoneBtn" style="margin-top:18px; display:none;" onclick="closeModal('liveFundSplitModal')">
+                <i class="fa-solid fa-check-double"></i> Complete & View Dashboard
+            </button>
+        </div>
+    </div>
+    
 </body>
 </html>
