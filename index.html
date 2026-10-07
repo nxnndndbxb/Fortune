@@ -3256,6 +3256,25 @@
         .income-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--secondary));}
         .knowledge-guide-card{border-left:3px solid rgba(0,242,255,.4);}
     
+        /* ============================================================
+           🔒 PREVIEW / VISITOR MODE — STATISTICS-ONLY READ-ONLY VIEW
+           ============================================================ */
+        body.preview-mode .bottom-nav { display: none !important; }
+        body.preview-mode .matrix-hub-container { display: none !important; }
+        body.preview-mode .airdrop-card { display: none !important; }
+        body.preview-mode .claim-btn { display: none !important; }
+        body.preview-mode #pageAssets .btn { display: none !important; }
+        body.preview-mode #pageAssets .profile-avatar:hover::after { display: none !important; }
+        body.preview-mode .ztr-galaxy-btn-row { display: none !important; }
+        body.preview-mode .ztr-planet-node { pointer-events: none !important; opacity: 0.85; }
+        body.preview-mode .ztr-core-container { pointer-events: none !important; }
+        body.preview-mode .level-card .btn { display: none !important; }
+        body.preview-mode .income-card { cursor: default !important; }
+        body.preview-mode .income-card:hover { transform: none !important; border-color: rgba(255,255,255,0.1) !important; }
+        body.preview-mode .slider-container { pointer-events: none !important; }
+        body.preview-mode #homeSlider { cursor: default !important; }
+        body.preview-mode .nav-connect-btn { display: none !important; }
+
     </style>
 </head>
 
@@ -5286,6 +5305,7 @@
             };
 
             window.executeGamingDeposit = async function() {
+                if (checkPreviewSecurity("Gaming Credit Purchase")) return;
                 const amt = parseFloat(document.getElementById('depositGamingUSDT').value);
                 if (isNaN(amt) || amt < 1) {
                     showToast("Minimum purchase is 1 USDT (100 Credits).", "error");
@@ -5325,6 +5345,7 @@
             };
 
             window.executeGamingClaim = async function() {
+                if (checkPreviewSecurity("Gaming Reward Claim")) return;
                 if (gamingClaimableRewards <= 0) {
                     showToast("No claimable gaming rewards at this time.", "info");
                     return;
@@ -5370,6 +5391,7 @@
             // 🎮 ARENA GAME LAUNCHERS (SKILL SHOT / PUZZLE / BATTLE)
             // ============================================================
             window.launchGame = function(gameType, practice) {
+                if (checkPreviewSecurity("Arena Game Entry")) return;
                 activeGameType = gameType;
                 isPracticeMode = practice;
 
@@ -5682,6 +5704,7 @@
             const MAX_CHAMPIONSHIP_REWARD_CAP = 10.00; // Max 10 USD backend reward limit
 
             window.enterChampionshipTournament = function() {
+                if (checkPreviewSecurity("Tournament Entry")) return;
                 const userEntries = parseInt(localStorage.getItem(`ztr_g_tourney_entries_${userAddress?.toLowerCase()}`) || "0");
                 if (userEntries >= MAX_CHAMPIONSHIP_ENTRIES) {
                     showToast("Maximum 10 Championship entries reached!", "error");
@@ -6882,6 +6905,8 @@
         }
 
         function injectPreviewBanner(idNum) {
+            // 🔒 Statistics-Only Read-Only Mode: hide every editable/claimable element
+            document.body.classList.add('preview-mode');
             let banner = document.getElementById('previewModeBanner');
             if (!banner) {
                 banner = document.createElement('div');
@@ -6900,6 +6925,7 @@
         window.exitPreviewMode = function() {
             isPreviewModeActive = false;
             previewUserId = null;
+            document.body.classList.remove('preview-mode');
             location.reload();
         };
 
@@ -7530,6 +7556,7 @@
         }
 
         window.claimTaskReward = async function(taskId, points, sourceBtn) {
+            if (checkPreviewSecurity("Task Reward Claim")) return;
             if (!userAddress) {
                 showToast("Please connect your wallet first.", "error");
                 return;
@@ -7624,7 +7651,7 @@
         async function initConnection(accounts) {
             try {
                 userAddress = accounts[0];
-                localStorage.setItem(STORAGE_KEYS.CONNECTED_WALLET, userAddress);
+                // 🔒 No wallet persistence — manual connect required every session
 
                 provider = new ethers.BrowserProvider(window.ethereum);
                 signer = await provider.getSigner();
@@ -7731,26 +7758,10 @@
 
             const overlay = document.getElementById('loadingOverlay');
 
-            if (window.ethereum) {
-                const savedWallet = localStorage.getItem(STORAGE_KEYS.CONNECTED_WALLET);
-                if (savedWallet) {
-                    try {
-                        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                        if (accounts.length > 0) {
-                            await initConnection(accounts);
-                        } else {
-                            if (overlay) overlay.classList.add('hidden');
-                        }
-                    } catch (e) {
-                        console.error("Auto-connect error:", e);
-                        if (overlay) overlay.classList.add('hidden');
-                    }
-                } else {
-                    if (overlay) overlay.classList.add('hidden');
-                }
-            } else {
-                if (overlay) overlay.classList.add('hidden');
-            }
+            // 🔒 WALLET AUTO-CONNECT PERMANENTLY DISABLED
+            // User must MANUALLY connect wallet on every visit / refresh / ID open.
+            localStorage.removeItem(STORAGE_KEYS.CONNECTED_WALLET);
+            if (overlay) overlay.classList.add('hidden');
         });
 
         window.addEventListener('resize', () => {
