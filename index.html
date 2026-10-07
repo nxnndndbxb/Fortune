@@ -3179,10 +3179,89 @@
             animation: ztrFlyPoints 1.05s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
+
+        /* ============================================================
+           ✨ PTX PREMIUM EXPERIENCE LAYER (Visual Only - No Logic Change)
+           ============================================================ */
+        #ptxStars{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55;}
+        .ptx-glow-text{background:linear-gradient(90deg,#00f2ff,#a855f7,#ffb800,#00f2ff);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:ptxShimmer 6s linear infinite;}
+        @keyframes ptxShimmer{to{background-position:300% 0;}}
+        .ptx-hero-title{font-size:clamp(30px,6vw,46px)!important;font-weight:900!important;letter-spacing:2px;line-height:1.1;}
+        .ptx-hero-tagline{font-size:clamp(11px,2.6vw,14px);font-weight:800;letter-spacing:3px;color:var(--gold);margin:0 auto 6px auto;text-shadow:0 0 15px rgba(255,184,0,.5);}
+        .ptx-reveal{opacity:0;transform:translateY(28px) scale(.98);transition:all .8s cubic-bezier(.19,1,.22,1);}
+        .ptx-reveal.visible{opacity:1;transform:none;}
+
+        .ptx-trust-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px;}
+        .ptx-trust-badge{background:rgba(0,0,0,.45);border:1px solid rgba(0,242,255,.25);border-radius:14px;padding:12px 6px;font-size:10px;font-weight:800;color:#fff;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;transition:.3s;}
+        .ptx-trust-badge:hover{border-color:var(--primary);transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,242,255,.2);}
+        .ptx-trust-badge i{font-size:19px;color:var(--primary);filter:drop-shadow(0 0 8px var(--primary-glow));}
+        @media(max-width:560px){.ptx-trust-row{grid-template-columns:repeat(2,1fr);}}
+
+        .ptx-section-title{text-align:center;font-size:22px;font-weight:900;letter-spacing:1px;margin:32px 0 6px;color:#fff;text-shadow:0 0 18px var(--primary-glow);}
+        .ptx-section-sub{text-align:center;font-size:12px;color:var(--text-muted);margin-bottom:18px;}
+
+        .ptx-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+        .ptx-step-card{background:linear-gradient(160deg,rgba(0,242,255,.08),rgba(112,0,255,.12));border:1px solid rgba(0,242,255,.25);border-radius:18px;padding:18px 12px;text-align:center;position:relative;transition:.35s;}
+        .ptx-step-card:hover{transform:translateY(-4px);border-color:var(--primary);box-shadow:0 12px 32px rgba(0,242,255,.22);}
+        .ptx-step-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-weight:900;color:#000;margin:0 auto 10px;box-shadow:0 0 18px var(--primary-glow);}
+
+        .ptx-features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+        @media(max-width:820px){.ptx-features{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:520px){.ptx-features{grid-template-columns:1fr;}.ptx-steps{grid-template-columns:1fr;}}
+        .ptx-feature-card{background:rgba(8,12,30,.75);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:20px 16px;position:relative;overflow:hidden;transition:.35s;}
+        .ptx-feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--secondary),var(--gold));}
+        .ptx-feature-card:hover{transform:translateY(-5px);border-color:rgba(0,242,255,.5);box-shadow:0 16px 40px rgba(0,0,0,.5),0 0 28px rgba(0,242,255,.15);}
+        .ptx-feature-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;background:rgba(0,242,255,.12);border:1px solid rgba(0,242,255,.3);color:var(--primary);box-shadow:0 0 15px rgba(0,242,255,.15);}
+
+        .ptx-ticker-wrap{background:rgba(0,0,0,.55);border:1px solid rgba(255,184,0,.35);border-radius:16px;overflow:hidden;margin-top:20px;box-shadow:0 0 22px rgba(255,184,0,.15);}
+        .ptx-ticker-head{display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:10px;font-weight:900;letter-spacing:1.5px;color:var(--gold);border-bottom:1px solid rgba(255,184,0,.2);}
+        .ptx-ticker-dot{width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 10px #10b981;animation:ztrGalaxyBlink 1.6s infinite;}
+        .ptx-ticker-body{overflow:hidden;height:36px;position:relative;}
+        .ptx-ticker-track{display:inline-flex;gap:34px;white-space:nowrap;position:absolute;animation:ptxTicker 30s linear infinite;font-size:11px;color:var(--text-muted);padding:10px 0;}
+        .ptx-ticker-track b{color:var(--primary);}
+        @keyframes ptxTicker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+        .ptx-roadmap{position:relative;padding-left:26px;}
+        .ptx-roadmap::before{content:'';position:absolute;left:8px;top:8px;bottom:8px;width:2px;background:linear-gradient(180deg,var(--primary),var(--secondary),var(--gold));}
+        .ptx-road-item{position:relative;margin-bottom:14px;background:rgba(10,15,35,.72);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px 14px;transition:.3s;}
+        .ptx-road-item:hover{border-color:rgba(0,242,255,.4);transform:translateX(4px);}
+        .ptx-road-item::before{content:'';position:absolute;left:-23px;top:18px;width:12px;height:12px;border-radius:50%;background:var(--primary);box-shadow:0 0 12px var(--primary);}
+        .ptx-road-item.done::before{background:var(--success);box-shadow:0 0 12px var(--success);}
+        .ptx-road-item.upcoming::before{background:var(--gold);box-shadow:0 0 12px var(--gold);}
+        .ptx-road-item h5{font-size:13px;color:var(--primary);margin-bottom:3px;}
+        .ptx-road-item p{font-size:11px;color:var(--text-muted);line-height:1.5;}
+
+        .ptx-faq-item{background:rgba(10,15,35,.72);border:1px solid rgba(255,255,255,.12);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:.3s;}
+        .ptx-faq-item:hover{border-color:rgba(0,242,255,.35);}
+        .ptx-faq-q{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;font-size:13px;font-weight:800;color:#fff;cursor:pointer;gap:10px;}
+        .ptx-faq-q i{color:var(--primary);transition:transform .3s;flex-shrink:0;}
+        .ptx-faq-item.open .ptx-faq-q i{transform:rotate(180deg);}
+        .ptx-faq-a{max-height:0;overflow:hidden;transition:max-height .45s ease;font-size:12px;color:var(--text-muted);line-height:1.65;}
+        .ptx-faq-item.open .ptx-faq-a{max-height:240px;}
+        .ptx-faq-a div{padding:0 16px 15px 16px;}
+
+        .ptx-footer{margin-top:32px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px 18px;text-align:center;}
+        .ptx-footer-contracts{font-family:monospace;font-size:10px;color:var(--text-muted);line-height:1.9;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;margin:14px 0;}
+        .ptx-footer-contracts span{color:var(--primary);}
+
+        .ptx-shine{position:relative;overflow:hidden;}
+        .ptx-shine::after{content:'';position:absolute;top:0;left:-80%;width:45%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:ptxShine 3.6s infinite;pointer-events:none;}
+        @keyframes ptxShine{0%{left:-80%;}55%,100%{left:135%;}}
+
+        @keyframes ptxPulse{0%,100%{box-shadow:0 0 18px var(--primary-glow);}50%{box-shadow:0 0 42px var(--primary-glow),0 0 65px var(--secondary-glow);}}
+        #connectBtn{position:relative;overflow:hidden;animation:ptxPulse 2.4s infinite;}
+        .airdrop-card,.public-hero-card{animation:ptxBreathe 5s ease-in-out infinite;}
+        @keyframes ptxBreathe{0%,100%{box-shadow:0 0 30px rgba(0,242,255,.22);}50%{box-shadow:0 0 55px rgba(112,0,255,.45);}}
+        .income-card{position:relative;overflow:hidden;}
+        .income-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--secondary));}
+        .knowledge-guide-card{border-left:3px solid rgba(0,242,255,.4);}
+    
     </style>
 </head>
 
 <body>
+
+    <canvas id="ptxStars"></canvas>
 
     <div id="loadingOverlay" class="loading-overlay">
         <div class="loading-animation">
@@ -4060,7 +4139,8 @@
                 <div style="display:inline-block; background:rgba(0,242,255,0.15); border:1px solid var(--primary); padding:3px 12px; border-radius:50px; font-size:10px; color:var(--primary); font-weight:800; margin-bottom:10px;">
                     ⚡ BINANCE SMART CHAIN MAINNET
                 </div>
-                <h1>ZENTRON PROTOCOL</h1>
+                <h1 class="ptx-hero-title">ZENTRON <span class="ptx-glow-text">PROTOCOL</span></h1>
+                <div class="ptx-hero-tagline">EARN &nbsp;&#10022;&nbsp; PLAY &nbsp;&#10022;&nbsp; GROW &nbsp;&mdash;&nbsp; Your Galaxy of Wealth</div>
                 <p style="color:var(--text-muted); font-size:12px; max-width:420px; margin:0 auto 15px auto;">
                     100% Autonomous, Decentralized Matrix, Sunday Salary & P2E Gaming Ecosystem on BSC.
                 </p>
@@ -4081,6 +4161,24 @@
                     <div class="public-stat-box">
                         <small>Sunday Salary Pool</small>
                         <strong style="color:var(--gold);">$12,400+</strong>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 📡 LIVE NETWORK ACTIVITY TICKER -->
+            <div class="ptx-ticker-wrap ptx-reveal">
+                <div class="ptx-ticker-head"><span class="ptx-ticker-dot"></span> LIVE NETWORK ACTIVITY &nbsp;<span style="color:rgba(255,255,255,.4);font-weight:400;letter-spacing:0;">— BSC Mainnet</span></div>
+                <div class="ptx-ticker-body">
+                    <div class="ptx-ticker-track" id="ptxTickerTrack">
+                        <span>🚀 <b>ZTR-1042</b> activated <b style="color:var(--gold);">Pioneer</b> level</span>
+                        <span>💰 <b>ZTR-0987</b> earned <b style="color:var(--success);">+14.30 ZTR</b> commission</span>
+                        <span>👥 <b>ZTR-1156</b> joined via invitation</span>
+                        <span>🎁 <b>ZTR-1033</b> claimed <b style="color:var(--gold);">Sunday Salary</b></span>
+                        <span>🔄 <b>ZTR-1078</b> swapped <b style="color:var(--success);">15,000 Pts</b> to ZTR</span>
+                        <span>🎮 <b>ZTR-1101</b> won <b style="color:var(--success);">Arena Match</b></span>
+                        <span>🔒 <b>ZTR-0964</b> staked in <b style="color:#67e8f9;">50-Day Vault</b></span>
+                        <span>⬆️ <b>ZTR-1189</b> upgraded to <b style="color:var(--gold);">Titan</b> level</span>
                     </div>
                 </div>
             </div>
@@ -4138,6 +4236,72 @@
                 </div>
             </div>
 
+
+            <!-- 🏆 TRUST BADGES -->
+            <div class="ptx-trust-row ptx-reveal">
+                <div class="ptx-trust-badge"><i class="fa-solid fa-shield-halved"></i>100% ON-CHAIN</div>
+                <div class="ptx-trust-badge"><i class="fa-solid fa-bolt"></i>INSTANT P2P PAYOUTS</div>
+                <div class="ptx-trust-badge"><i class="fa-solid fa-file-contract"></i>VERIFIED CONTRACT</div>
+                <div class="ptx-trust-badge"><i class="fa-solid fa-user-shield"></i>NO ADMIN CONTROL</div>
+            </div>
+
+            <!-- ⚡ HOW IT WORKS -->
+            <h3 class="ptx-section-title ptx-reveal"><i class="fa-solid fa-wand-magic-sparkles"></i> How It Works</h3>
+            <p class="ptx-section-sub ptx-reveal">Sirf 3 steps — aur aap Zentron Ecosystem ka hissa ban jaate hain</p>
+            <div class="ptx-steps ptx-reveal">
+                <div class="ptx-step-card">
+                    <div class="ptx-step-num">1</div>
+                    <h4 style="font-size:14px;color:#fff;margin-bottom:6px;">Connect Wallet</h4>
+                    <p style="font-size:11px;color:var(--text-muted);line-height:1.55;">Trust Wallet ya MetaMask se seconds mein connect karein — fully decentralized, Binance Smart Chain par.</p>
+                </div>
+                <div class="ptx-step-card">
+                    <div class="ptx-step-num">2</div>
+                    <h4 style="font-size:14px;color:#fff;margin-bottom:6px;">Activate Your Node</h4>
+                    <p style="font-size:11px;color:var(--text-muted);line-height:1.55;">Valid invitation ID ke saath sirf <b style="color:var(--gold);">3.15 USDT</b> mein apna node activate karein.</p>
+                </div>
+                <div class="ptx-step-card">
+                    <div class="ptx-step-num">3</div>
+                    <h4 style="font-size:14px;color:#fff;margin-bottom:6px;">Earn &amp; Grow</h4>
+                    <p style="font-size:11px;color:var(--text-muted);line-height:1.55;">Direct commissions, team spillover, Sunday Salary aur Gaming rewards — sab aap ke wallet mein.</p>
+                </div>
+            </div>
+
+            <!-- 💎 FEATURES -->
+            <h3 class="ptx-section-title ptx-reveal"><i class="fa-solid fa-gem"></i> Why Zentron?</h3>
+            <p class="ptx-section-sub ptx-reveal">6 powerful modules — aik hi unified smart contract ecosystem mein</p>
+            <div class="ptx-features ptx-reveal">
+                <div class="ptx-feature-card">
+                    <div class="ptx-feature-icon"><i class="fa-solid fa-people-arrows"></i></div>
+                    <h4>Instant P2P Commissions</h4>
+                    <p>Har upgrade ka <b style="color:#fff;">55% direct</b>, 7% upline aur 20% team spillover — 100% funds community mein, real-time on-chain.</p>
+                </div>
+                <div class="ptx-feature-card">
+                    <div class="ptx-feature-icon" style="color:var(--gold);background:rgba(255,184,0,.12);border-color:rgba(255,184,0,.3);"><i class="fa-solid fa-calendar-check"></i></div>
+                    <h4>Sunday Salary Protocol</h4>
+                    <p>Level 5+ members ko har <b style="color:#fff;">Sunday 9 PM</b> smart contract se automatic salary distribution — koi claim nahi, seedha wallet mein.</p>
+                </div>
+                <div class="ptx-feature-card">
+                    <div class="ptx-feature-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
+                    <h4>Quantum Point Swap</h4>
+                    <p>Invites aur upgrades se points kamayein, phir <b style="color:#fff;">5,000 Points = 1 ZTR ($1.50)</b> rate par kabhi bhi swap karein.</p>
+                </div>
+                <div class="ptx-feature-card">
+                    <div class="ptx-feature-icon" style="color:var(--gaming-accent);background:rgba(168,85,247,.12);border-color:rgba(168,85,247,.35);"><i class="fa-solid fa-gamepad"></i></div>
+                    <h4>Game Arena (P2E)</h4>
+                    <p>Skill Shot, Sequence Hacker aur Battle Arena — deterministic games, transparent limits, aur real reward pool.</p>
+                </div>
+                <div class="ptx-feature-card">
+                    <div class="ptx-feature-icon" style="color:#67e8f9;background:rgba(6,182,212,.12);border-color:rgba(6,182,212,.35);"><i class="fa-solid fa-vault"></i></div>
+                    <h4>Staking Vault</h4>
+                    <p>20-day (1%) aur 50-day (2%) fixed-yield plans — principal locked, profit <b style="color:#fff;">anytime withdrawable</b>.</p>
+                </div>
+                <div class="ptx-feature-card">
+                    <div class="ptx-feature-icon" style="color:var(--gold);background:rgba(255,184,0,.1);border-color:rgba(255,184,0,.3);"><i class="fa-solid fa-binoculars"></i></div>
+                    <h4>View-Only ID Explorer</h4>
+                    <p>Kisi bhi leader ki ID search kar ke us ka matrix, points aur team <b style="color:#fff;">100% secure read-only mode</b> mein dekhein.</p>
+                </div>
+            </div>
+
             <!-- 3 Smart Contracts Transparency -->
             <div class="knowledge-guide-card" style="border-color: rgba(16, 185, 129, 0.4); margin-top: 10px;">
                 <div class="guide-head" style="color:var(--success);"><i class="fa-solid fa-file-shield"></i> 5. Verified BSC Smart Contracts</div>
@@ -4148,7 +4312,78 @@
                 </div>
             </div>
 
+
+            <!-- 🗺️ ROADMAP -->
+            <h3 class="ptx-section-title ptx-reveal"><i class="fa-solid fa-route"></i> Zentron Roadmap</h3>
+            <p class="ptx-section-sub ptx-reveal">Hamara vision — step by step, on-chain</p>
+            <div class="ptx-roadmap ptx-reveal">
+                <div class="ptx-road-item done">
+                    <h5><i class="fa-solid fa-check-double"></i> Phase 1 — Core Matrix Protocol</h5>
+                    <p>15-Level Matrix, P2P split engine (55/7/20), invitation system aur BSC mainnet deployment — <b style="color:var(--success);">LIVE ✅</b></p>
+                </div>
+                <div class="ptx-road-item done">
+                    <h5><i class="fa-solid fa-check-double"></i> Phase 2 — Salary, Swap &amp; Airdrops</h5>
+                    <p>Sunday Salary Pool, Quantum Point Swap Hub aur Invitation Tasks — <b style="color:var(--success);">LIVE ✅</b></p>
+                </div>
+                <div class="ptx-road-item done">
+                    <h5><i class="fa-solid fa-check-double"></i> Phase 3 — Game Arena &amp; Staking</h5>
+                    <p>ZTR Game Arena (P2E), Staking Vault aur ZTR Galaxy experience — <b style="color:var(--success);">LIVE ✅</b></p>
+                </div>
+                <div class="ptx-road-item upcoming">
+                    <h5><i class="fa-solid fa-rocket"></i> Phase 4 — Trading Protocol</h5>
+                    <p>AMM aur Decentralized Orderbook Trading Engine — security audit ke baad launch hoga. <b style="color:var(--gold);">COMING SOON 🚀</b></p>
+                </div>
+                <div class="ptx-road-item upcoming">
+                    <h5><i class="fa-solid fa-mobile-screen"></i> Phase 5 — Mobile App &amp; CEX Listing</h5>
+                    <p>Dedicated mobile app aur centralized exchange listings ke liye expansion. <b style="color:var(--gold);">UPCOMING</b></p>
+                </div>
+            </div>
+
+            <!-- ❓ FAQ -->
+            <h3 class="ptx-section-title ptx-reveal"><i class="fa-solid fa-circle-question"></i> Frequently Asked Questions</h3>
+            <p class="ptx-section-sub ptx-reveal">Aap ke sawalon ke jawab — transparent aur seedhe</p>
+            <div class="ptx-reveal">
+                <div class="ptx-faq-item">
+                    <div class="ptx-faq-q">Registration mein kitna fee lagta hai aur kahan jata hai? <i class="fa-solid fa-chevron-down"></i></div>
+                    <div class="ptx-faq-a"><div>Sirf <b style="color:var(--gold);">3.15 USDT (2.1 ZTR)</b> — jisme se 55% aap ke direct inviter ko, 7% un ke sponsor ko, 20% team members ko equally aur baki salary pool mein jata hai. Kuch bhi admin ke paas nahi jaata.</div></div>
+                </div>
+                <div class="ptx-faq-item">
+                    <div class="ptx-faq-q">Earnings kahan se aati hain? <i class="fa-solid fa-chevron-down"></i></div>
+                    <div class="ptx-faq-a"><div>100% community-driven: direct referrals (55%), second upline (7%), team spillover (20%), Sunday Salary Pool, Point Swap, Gaming rewards aur Staking profit. Sab kuch smart contract se real-time distribute hota hai.</div></div>
+                </div>
+                <div class="ptx-faq-item">
+                    <div class="ptx-faq-q">Sunday Salary kaise milti hai? <i class="fa-solid fa-chevron-down"></i></div>
+                    <div class="ptx-faq-a"><div>Har <b style="color:#fff;">Sunday 9:00 PM UTC</b> smart contract weekly pool ko automatically eligible members (Level 5+) mein distribute karta hai. Claim ka button Vault page par available hai.</div></div>
+                </div>
+                <div class="ptx-faq-item">
+                    <div class="ptx-faq-q">Quantum Points ka kya faida hai? <i class="fa-solid fa-chevron-down"></i></div>
+                    <div class="ptx-faq-a"><div>Invites (+100 Pts), level upgrades (up to +10,000 Pts) aur tasks se points kamayein. <b style="color:#fff;">5,000 Points = 1 ZTR ($1.50 USDT)</b> — kabhi bhi Swap Hub se convert karein.</div></div>
+                </div>
+                <div class="ptx-faq-item">
+                    <div class="ptx-faq-q">Kya mera paisa safe hai? <i class="fa-solid fa-chevron-down"></i></div>
+                    <div class="ptx-faq-a"><div>Poora system Binance Smart Chain ke verified smart contracts par chalta hai — koi admin aap ke funds ko move nahi kar sakta. Contracts BscScan par publicly verify kar sakte hain.</div></div>
+                </div>
+            </div>
+
+            <!-- 🌐 FOOTER -->
+            <div class="ptx-footer ptx-reveal">
+                <h4 style="color:#fff;font-size:15px;margin-bottom:4px;"><i class="fa-solid fa-globe" style="color:var(--primary);"></i> Join The Zentron Community</h4>
+                <p style="font-size:11px;color:var(--text-muted);margin-bottom:14px;">Updates, announcements aur support ke liye official channels join karein</p>
+                <div class="social-links-container">
+                    <a href="https://t.me/zentronofficial009" target="_blank" class="social-btn telegram"><i class="fa-brands fa-telegram"></i></a>
+                    <a href="https://x.com/MHaseeb87604" target="_blank" class="social-btn twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="https://www.linkedin.com/in/zentron-blockchain-b73b823a3" target="_blank" class="social-btn linkedin"><i class="fa-brands fa-linkedin-in"></i></a>
+                </div>
+                <div class="ptx-footer-contracts">
+                    <div><i class="fa-solid fa-file-contract" style="color:var(--success);"></i> MATRIX CORE: <span>0x38F3fee441DB38e8D53c2107e361d39538F810b0</span></div>
+                    <div><i class="fa-solid fa-file-contract" style="color:var(--success);"></i> AIRDROP SWAP: <span>0xC6b17cBb5A5dc55CE30904Ad914FB69730501539</span></div>
+                    <div><i class="fa-solid fa-file-contract" style="color:var(--success);"></i> SUNDAY SALARY: <span>0x9d6b2536bC230B13e1d80d902c5A214681cd6dB9</span></div>
+                </div>
+                <p style="font-size:10px;color:rgba(255,255,255,.45);line-height:1.6;">&copy; 2026 Zentron Protocol. All rights reserved.<br>Decentralized systems involve risk. Rewards are subject to rules, eligibility &amp; pool availability. Never invest more than you can afford to lose.</p>
+            </div>
+
             <div style="height: 30px;"></div>
+
         </div>
     
             <div class="main-card">
@@ -7580,5 +7815,63 @@
         </div>
     </div>
     
+
+    <!-- ✨ PTX PREMIUM EXPERIENCE SCRIPTS (Visual Only - No System Logic Change) -->
+    <script>
+    (function() {
+        // 🌌 Animated Starfield Background
+        var c = document.getElementById('ptxStars');
+        if (c) {
+            var x = c.getContext('2d'), st = [];
+            function rs() {
+                c.width = innerWidth; c.height = innerHeight; st = [];
+                for (var i = 0; i < 90; i++) st.push({
+                    x: Math.random() * c.width, y: Math.random() * c.height,
+                    r: Math.random() * 1.6 + .3, s: Math.random() * .35 + .05, tw: Math.random() * 6.28
+                });
+            }
+            rs(); addEventListener('resize', rs);
+            (function loop() {
+                x.clearRect(0, 0, c.width, c.height);
+                for (var i = 0; i < st.length; i++) {
+                    var p = st[i]; p.y -= p.s;
+                    if (p.y < -4) { p.y = c.height + 4; p.x = Math.random() * c.width; }
+                    var a = .35 + .35 * Math.sin(Date.now() / 900 + p.tw);
+                    x.beginPath(); x.arc(p.x, p.y, p.r, 0, 6.28);
+                    x.fillStyle = 'rgba(0,242,255,' + a + ')'; x.fill();
+                }
+                requestAnimationFrame(loop);
+            })();
+        }
+
+        // 🎬 Scroll Reveal Animations
+        if ('IntersectionObserver' in window) {
+            var io = new IntersectionObserver(function(es) {
+                es.forEach(function(e) {
+                    if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+                });
+            }, { threshold: .12 });
+            document.querySelectorAll('.ptx-reveal').forEach(function(el) { io.observe(el); });
+        } else {
+            document.querySelectorAll('.ptx-reveal').forEach(function(el) { el.classList.add('visible'); });
+        }
+
+        // ❓ FAQ Accordion
+        document.querySelectorAll('.ptx-faq-q').forEach(function(q) {
+            q.addEventListener('click', function() {
+                var it = q.parentElement, was = it.classList.contains('open');
+                document.querySelectorAll('.ptx-faq-item').forEach(function(o) { o.classList.remove('open'); });
+                if (!was) it.classList.add('open');
+            });
+        });
+
+        // 📡 Seamless Ticker Loop
+        var tr = document.getElementById('ptxTickerTrack');
+        if (tr) tr.innerHTML += tr.innerHTML;
+
+        console.log('✨ PTX Premium Experience Layer Active!');
+    })();
+    </script>
+
 </body>
 </html>
